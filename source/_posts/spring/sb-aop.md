@@ -38,7 +38,7 @@ AOP工作重点：
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>1.5.9.RELEASE</version>
+    <version>2.0.4.RELEASE</version>
     <relativePath/>
 </parent>
 
@@ -86,11 +86,11 @@ server.port: 8092
 没有结果返回的示例：
 
 ``` java
-import org.springframework.web.bind.annotation.RequestMapping;  
-import org.springframework.web.bind.annotation.RestController; 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Description: 
+ * Description:
  */
 @RestController
 public class UserController {
@@ -98,7 +98,7 @@ public class UserController {
     public Object first() {
         return "first controller";
     }
-  
+
     @RequestMapping("/doError")
     public Object error() {
         return 1 / 0;
@@ -362,4 +362,6 @@ spring aop就是一个同心圆，要执行的方法为圆心，最外层的orde
 ## GitHub源码
 
 [springboot-aop](https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-aop)
+
+*更新：2018年8月升级至springboot 2*
 
