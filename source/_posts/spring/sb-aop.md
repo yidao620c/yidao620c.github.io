@@ -39,7 +39,6 @@ AOP工作重点：
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
     <version>2.0.4.RELEASE</version>
-    <relativePath/>
 </parent>
 
 <dependencies>
