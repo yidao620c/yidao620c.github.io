@@ -58,7 +58,7 @@ Spring提供4个注解来声明缓存规则，如下表所示：
 
 ## 集成Redis缓存
 
-接下来将讲解如何集成redis来实现缓存。
+接下来将讲解如何集成redis来实现缓存，现在使用的是最新的SpringBoot 2，改动还是比较大的。
 
 ### 安装redis
 
@@ -66,10 +66,16 @@ Spring提供4个注解来声明缓存规则，如下表所示：
 
 ### 添加maven依赖
 
+SpringBoot 2开始默认的Redis客户端实现是Lettuce，同时你需要添加commons-pool2的依赖。
+
 ``` xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-pool2</artifactId>
 </dependency>
 ```
 
@@ -77,23 +83,32 @@ Spring提供4个注解来声明缓存规则，如下表所示：
 
 * 指定缓存的类型
 * 配置redis的服务器信息
+* 配置lettuce连接池信息
 
 ``` yml
 spring:
   profiles: dev
   cache:
     type: REDIS
+    redis:
+      cache-null-values: false
+      time-to-live: 600000ms
+      use-key-prefix: true
+    cache-names: userCache,allUsersCache
   redis:
     host: 123.207.66.156
     port: 6379
-    timeout: 0
     database: 0
-    pool:
-      max-active: 100
-      max-wait: -1
-      max-idle: 8
-      min-idle: 0
+    lettuce:
+      shutdown-timeout: 200ms
+      pool:
+        max-active: 7
+        max-idle: 7
+        min-idle: 2
+        max-wait: -1ms
 ```
+
+这里我还指定了缓存名称列表：userCache,allUsersCache
 
 ### 缓存配置类
 
@@ -103,12 +118,35 @@ spring:
 @Configuration
 @EnableCaching
 public class RedisCacheConfig {
-    /**
-     * 重新配置RedisCacheManager
-     */
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+
     @Autowired
-    public void configRedisCacheManger(RedisCacheManager rd) {
-        rd.setDefaultExpiration(100L);
+    private Environment env;
+
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+        RedisStandaloneConfiguration redisConf = new RedisStandaloneConfiguration();
+        redisConf.setHostName(env.getProperty("spring.redis.host"));
+        redisConf.setPort(Integer.parseInt(env.getProperty("spring.redis.port")));
+        redisConf.setPassword(RedisPassword.of(env.getProperty("spring.redis.password")));
+        return new LettuceConnectionFactory(redisConf);
+    }
+
+    @Bean
+    public RedisCacheConfiguration cacheConfiguration() {
+        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofSeconds(600))
+                .disableCachingNullValues();
+        return cacheConfig;
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager() {
+        RedisCacheManager rcm = RedisCacheManager.builder(redisConnectionFactory())
+                .cacheDefaults(cacheConfiguration())
+                .transactionAware()
+                .build();
+        return rcm;
     }
 }
 ```
@@ -138,15 +176,56 @@ public KeyGenerator myKeyGenerator() {
 }
 ```
 
-经过以上配置后，redis缓存管理对象已经生成。下面简单介绍如何使用。
+经过以上配置后，redis缓存管理对象已经生成，下面简单介绍如何使用。
 
-### 使用
+## 缓存注解
+
+缓存是通过注解实现的，这里详细讲解一下这几个缓存注解，以及注解参数含义。
+
+### @Cacheable
+
+这个注解含义是方法结果会被放入缓存，并且一旦缓存后，下一次调用此方法，会通过key去查找缓存是否存在，如果存在就直接取缓存值，不再执行方法。
+
+这个注解有几个参数值，定义如下
+
+参数          | 解释
+-------------|------------------------------------------------------
+cacheNames   | 缓存名称
+value        | 缓存名称的别名
+condition    | Spring SpEL 表达式，用来确定是否缓存
+key          | SpEL 表达式，用来动态计算key
+keyGenerator | Bean 名字，用来自定义key生成算法，跟key不能同时用
+unless       | SpEL 表达式，用来否决缓存，作用跟condition相反
+sync         | 多线程同时访问时候进行同步
+
+在计算key、condition或者unless的值得时候，可以使用到以下的特有的SpEL表达式
+
+表达式                | 解释
+---------------------|-----------------------------------------------
+#result              | 表示方法的返回结果
+#root.method         | 当前方法
+#root.target         | 目标对象
+#root.caches         | 被影响到的缓存列表
+#root.methodName     | 方法名称简称
+#root.targetClass    | 目标类
+#root.args[x]        | 方法的第x个参数
+
+### @CachePut
+
+该注解在执行完方法后会触发一次缓存put操作，参数跟@Cacheable一致
+
+### @CacheEvict
+
+该注解在执行完方法后会触发一次缓存evict操作，参数除了@Cacheable里的外，还有个特殊的`allEntries`，
+表示将清空缓存中所有的值。
+
+## 使用
 
 在service中定义增删改的几个常见方法，通过注解实现缓存：
 
 ``` java
 @Service
-@CacheConfig(cacheNames="users")
+@Transactional
 public class UserService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Resource
@@ -154,109 +233,109 @@ public class UserService {
 
     /**
      * cacheNames 设置缓存的值
-     * key：指定缓存的key，这是指参数id值。 key可以使用spEl表达式
+     * key：指定缓存的key，这是指参数id值。key可以使用spEl表达式
+     *
      * @param id
      * @return
      */
-    @Cacheable(cacheNames="user1", key="#id")
+    @Cacheable(value = "userCache", key = "#id", unless="#result == null")
     public User getById(int id) {
         logger.info("获取用户start...");
         return userMapper.selectById(id);
     }
 
-    /***
-     * 如果设置sync=true，
-     * 如果缓存中没有数据，多个线程同时访问这个方法，则只有一个方法会执行到方法，其它方法需要等待
-     * 如果缓存中已经有数据，则多个线程可以同时从缓存中获取数据
-     * @param id
-     * @return
-     */
-    @Cacheable(cacheNames="user1", key="#id", sync = true)
-    public User getById2(int id) {
-        logger.info("获取用户start...");
-        return userMapper.selectById(id);
-    }
-    
-    /**
-     * 以上我们使用默认的keyGenerator，对应spring的SimpleKeyGenerator
-     * 如果你的使用很复杂，我们也可以自定义myKeyGenerator的生成key
-     * <p>
-     * key和keyGenerator是互斥，如果同时制定会出异常
-     * The key and keyGenerator parameters are mutually exclusive and an operation specifying both will result in an exception.
-     *
-     * @param id
-     * @return
-     */
-    @Cacheable(cacheNames = "user1", keyGenerator = "myKeyGenerator")
-    public User queryUserById(int id) {
-        logger.info("queryUserById,id={}", id);
-        return userMapper.selectById(id);
+    @Cacheable(value = "allUsersCache", unless = "#result.size() == 0")
+    public List<User> getAllUsers() {
+        logger.info("获取所有用户列表");
+        return userMapper.selectList(null);
     }
 
     /**
-     * 每次执行都会执行方法，同时使用新的返回值的替换缓存中的值
-     * @param user
+     * 创建用户，同时使用新的返回值的替换缓存中的值
+     * 创建用户后会将allUsersCache缓存全部清空
      */
-    @CachePut(cacheNames="user1", key="#user.id")
-    public void createUser(User user) {
-        logger.info("创建用户start...");
+    @Caching(
+            put = {@CachePut(value = "userCache", key = "#user.id")},
+            evict = {@CacheEvict(value = "allUsersCache", allEntries = true)}
+    )
+    public User createUser(User user) {
+        logger.info("创建用户start..., user.id=" + user.getId());
         userMapper.insert(user);
+        return user;
     }
 
     /**
-     * 每次执行都会执行方法，同时使用新的返回值的替换缓存中的值
-     * @param user
+     * 更新用户，同时使用新的返回值的替换缓存中的值
+     * 更新用户后会将allUsersCache缓存全部清空
      */
-    @CachePut(cacheNames="user1", key="#user.id")
-    public void updateUser(User user) {
+    @Caching(
+            put = {@CachePut(value = "userCache", key = "#user.id")},
+            evict = {@CacheEvict(value = "allUsersCache", allEntries = true)}
+    )
+    public User updateUser(User user) {
         logger.info("更新用户start...");
         userMapper.updateById(user);
+        return user;
     }
 
     /**
-     * 对符合key条件的记录从缓存中user1移除
+     * 对符合key条件的记录从缓存中移除
+     * 删除用户后会将allUsersCache缓存全部清空
      */
-    @CacheEvict(cacheNames="user1", key="#id")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "userCache", key = "#id"),
+                    @CacheEvict(value = "allUsersCache", allEntries = true)
+            }
+    )
     public void deleteById(int id) {
         logger.info("删除用户start...");
         userMapper.deleteById(id);
     }
 
-    /**
-     * allEntries = true: 清空user1里的所有缓存
-     */
-    @CacheEvict(cacheNames="user1", allEntries=true)
-    public void clearUser1All(){
-        logger.info("clearAll");
-    }
 }
 ```
-
-注意可以在类上面通过`@CacheConfig`配置全局缓存名称，方法上面如果也配置了就会覆盖。
 
 然后写个测试类：
 
 ``` java
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class)
+@Transactional
 public class UserServiceTest {
     @Autowired
     private UserService userService;
     @Test
     public void testCache() {
-        int id = new Random().nextInt(100);
+        // 创建一个用户admin
+        int id = new Random().nextInt(1000);
         User user = new User(id, "admin", "admin");
         userService.createUser(user);
-        User user1 = userService.getById(id); // 第1次访问
-        assertEquals(user1.getPassword(), "admin");
-        User user2 = userService.getById(id); // 第2次访问
-        assertEquals(user2.getPassword(), "admin");
-        User user3 = userService.queryUserById(id); // 第3次访问，使用自定义的KeyGenerator
+
+        // 再创建一个用户xiong
+        int id2 = new Random().nextInt(1000);
+        User user2 = new User(id2, "xiong", "neng");
+        userService.createUser(user2);
+
+        // 查询所有用户列表
+        List<User> list = userService.getAllUsers();
+        assertEquals(list.size(), 2);
+
+        // 两次访问看看缓存命中情况
+        User user3 = userService.getById(id); // 第1次访问
         assertEquals(user3.getPassword(), "admin");
-        user.setPassword("123456");
-        userService.updateUser(user);
-        User user4 = userService.getById(id); // 第4次访问
-        assertEquals(user4.getPassword(), "123456");
+        User user4 = userService.getById(id); // 第2次访问
+        assertEquals(user4.getPassword(), "admin");
+
+        // 更新用户密码
+        user4.setPassword("123456");
+        userService.updateUser(user4);
+
+        // 更新完成后再次访问用户
+        User user5 = userService.getById(id); // 第4次访问
+        assertEquals(user5.getPassword(), "123456");
+
+        // 删除用户admin
         userService.deleteById(id);
         assertNull(userService.getById(id));
     }
@@ -266,32 +345,44 @@ public class UserServiceTest {
 下面是测试的打印日志一部分：
 
 ```
-Started UserServiceTest in 12.919 seconds (JVM runni
-创建用户start...
-==>  Preparing: INSERT INTO t_user ( id, username, `
-==> Parameters: 14(Integer), admin(String), admin(St
+创建用户start..., user.id=444
+==>  Preparing: INSERT INTO t_user ( id, username, `password` ) VALUES ( ?, ?, ? )
+==> Parameters: 444(Integer), admin(String), admin(String)
 <==    Updates: 1
+创建用户start..., user.id=895
+==>  Preparing: INSERT INTO t_user ( id, username, `password` ) VALUES ( ?, ?, ? )
+==> Parameters: 895(Integer), xiong(String), neng(String)
+<==    Updates: 1
+Starting without optional epoll library
+Starting without optional kqueue library
+获取所有用户列表
+==>  Preparing: SELECT id AS id,username,`password` FROM t_user
+==> Parameters:
+<==      Total: 2
 获取用户start...
-==>  Preparing: SELECT id AS id,username,`password` 
-==> Parameters: 14(Integer)
+==>  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==> Parameters: 444(Integer)
 <==      Total: 1
-自定义缓存，使用第一参数作为缓存key，params = [14]
+获取用户start...
 更新用户start...
-==>  Preparing: UPDATE t_user SET username=?, `passw
-==> Parameters: admin(String), 123456(String), 14(In
+==>  Preparing: UPDATE t_user SET username=?, `password`=? WHERE id=?
+==> Parameters: admin(String), 123456(String), 444(Integer)
 <==    Updates: 1
 获取用户start...
-==>  Preparing: SELECT id AS id,username,`password` 
-==> Parameters: 14(Integer)
+==>  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==> Parameters: 444(Integer)
 <==      Total: 1
 删除用户start...
-==>  Preparing: DELETE FROM t_user WHERE id=? 
-==> Parameters: 14(Integer)
+==>  Preparing: DELETE FROM t_user WHERE id=?
+==> Parameters: 444(Integer)
 <==    Updates: 1
 获取用户start...
-==>  Preparing: SELECT id AS id,username,`password` 
-==> Parameters: 14(Integer)
+==>  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==> Parameters: 444(Integer)
 <==      Total: 0
+Rolled back transaction for test: [DefaultTestContext@44ebcd03 testClass = UserServiceTest,
+Closing org.springframework.context.annotation.AnnotationConfigApplicationContext@1a5a4e19:
+{dataSource-1} closed
 ```
 
 可以看到，第2次、第3次获取的时候并没有执行方法，说明缓存生效了。后面更新会同时更新缓存，取出来的也是更新后的数据。
@@ -373,6 +464,11 @@ SpringBoot会为我们自动配置`GuavaCacheManager`这个Bean。
 
 SpringBoot会为我们自动配置`RedisCacheManager`这个Bean，同时还会配置`RedisTemplate`这个Bean。
 后面这个Bean就是下一篇要讲解的操作Redis数据库用，这个就比单纯注解缓存强大和灵活的多了。
+
+
+## 参考文章
+
+[Spring Boot Redis Cache](https://www.concretepage.com/spring-boot/spring-boot-redis-cache)
 
 ## GitHub源码
 
