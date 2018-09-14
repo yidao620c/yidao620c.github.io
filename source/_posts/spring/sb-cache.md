@@ -96,7 +96,7 @@ spring:
       use-key-prefix: true
     cache-names: userCache,allUsersCache
   redis:
-    host: 123.207.66.156
+    host: 127.0.0.1
     port: 6379
     database: 0
     lettuce:
