@@ -135,50 +135,163 @@ public class RestClientConfig {
 
 ## 配置类
 
-创建`RestClientConfig`类，设置连接池大小、超时时间、重试机制等。配置如下：
+创建`HttpClientConfig`类，设置连接池大小、超时时间、重试机制等。配置如下：
 
 ``` java
+/**
+ * - Supports both HTTP and HTTPS
+ * - Uses a connection pool to re-use connections and save overhead of creating connections.
+ * - Has a custom connection keep-alive strategy (to apply a default keep-alive if one isn't specified)
+ * - Starts an idle connection monitor to continuously clean up stale connections.
+ *
+ * @author XiongNeng
+ * @version 1.0
+ * @since 2018/7/5
+ */
 @Configuration
-public class RestClientConfig {
+@EnableScheduling
+public class HttpClientConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientConfig.class);
+
+    @Resource
+    private HttpClientProperties p;
+
     @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setRequestFactory(clientHttpRequestFactory());
-        restTemplate.setErrorHandler(new DefaultResponseErrorHandler());
-        return restTemplate;
-    }
-    @Bean
-    public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
+    public PoolingHttpClientConnectionManager poolingConnectionManager() {
+        SSLContextBuilder builder = new SSLContextBuilder();
         try {
-            HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                public boolean isTrusted(X509Certificate[] arg0, String arg1) {
                     return true;
                 }
-            }).build();
-            httpClientBuilder.setSSLContext(sslContext);
-            HostnameVerifier hostnameVerifier = NoopHostnameVerifier.INSTANCE;
-            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, hostnameVerifier);
-            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                    .register("https", sslConnectionSocketFactory).build();// 注册http和https请求
-            // 开始设置连接池
-            PoolingHttpClientConnectionManager poolingHttpClientConnectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-            poolingHttpClientConnectionManager.setMaxTotal(500); // 最大连接数500
-            poolingHttpClientConnectionManager.setDefaultMaxPerRoute(100); // 同路由并发数100
-            httpClientBuilder.setConnectionManager(poolingHttpClientConnectionManager);
-            httpClientBuilder.setRetryHandler(new DefaultHttpRequestRetryHandler(3, true)); // 重试次数
-            HttpClient httpClient = httpClientBuilder.build();
-            HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(httpClient); // httpClient连接配置
-            clientHttpRequestFactory.setConnectTimeout(20000);              // 连接超时
-            clientHttpRequestFactory.setReadTimeout(30000);                 // 数据读取超时时间
-            clientHttpRequestFactory.setConnectionRequestTimeout(20000);    // 连接不够用的等待时间
-            return clientHttpRequestFactory;
-        } catch (KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-            log.error("初始化HTTP连接池出错", e);
+            });
+        } catch (NoSuchAlgorithmException | KeyStoreException e) {
+            LOGGER.error("Pooling Connection Manager Initialisation failure because of " + e.getMessage(), e);
         }
-        return null;
+
+        SSLConnectionSocketFactory sslsf = null;
+        try {
+            sslsf = new SSLConnectionSocketFactory(builder.build());
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            LOGGER.error("Pooling Connection Manager Initialisation failure because of " + e.getMessage(), e);
+        }
+
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
+                .<ConnectionSocketFactory>create()
+                .register("https", sslsf)
+                .register("http", new PlainConnectionSocketFactory())
+                .build();
+
+        PoolingHttpClientConnectionManager poolingConnectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        poolingConnectionManager.setMaxTotal(p.getMaxTotalConnections());  //最大连接数
+        poolingConnectionManager.setDefaultMaxPerRoute(p.getDefaultMaxPerRoute());  //同路由并发数
+        return poolingConnectionManager;
     }
+
+    @Bean
+    public ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
+        return new ConnectionKeepAliveStrategy() {
+            @Override
+            public long getKeepAliveDuration(HttpResponse response, HttpContext httpContext) {
+                HeaderElementIterator it = new BasicHeaderElementIterator
+                        (response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+                while (it.hasNext()) {
+                    HeaderElement he = it.nextElement();
+                    String param = he.getName();
+                    String value = he.getValue();
+                    if (value != null && param.equalsIgnoreCase("timeout")) {
+                        return Long.parseLong(value) * 1000;
+                    }
+                }
+                return p.getDefaultKeepAliveTimeMillis();
+            }
+        };
+    }
+
+    @Bean
+    public CloseableHttpClient httpClient() {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(p.getRequestTimeout())
+                .setConnectTimeout(p.getConnectTimeout())
+                .setSocketTimeout(p.getSocketTimeout()).build();
+
+        return HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .setConnectionManager(poolingConnectionManager())
+                .setKeepAliveStrategy(connectionKeepAliveStrategy())
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  // 重试次数
+                .build();
+    }
+
+    @Bean
+    public Runnable idleConnectionMonitor(final PoolingHttpClientConnectionManager connectionManager) {
+        return new Runnable() {
+            @Override
+            @Scheduled(fixedDelay = 10000)
+            public void run() {
+                try {
+                    if (connectionManager != null) {
+                        LOGGER.trace("run IdleConnectionMonitor - Closing expired and idle connections...");
+                        connectionManager.closeExpiredConnections();
+                        connectionManager.closeIdleConnections(p.getCloseIdleConnectionWaitTimeSecs(), TimeUnit.SECONDS);
+                    } else {
+                        LOGGER.trace("run IdleConnectionMonitor - Http Client Connection manager is not initialised");
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("run IdleConnectionMonitor - Exception occurred. msg={}, e={}", e.getMessage(), e);
+                }
+            }
+        };
+    }
+
+    @Bean
+    public TaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setThreadNamePrefix("poolScheduler");
+        scheduler.setPoolSize(50);
+        return scheduler;
+    }
+}
+```
+
+然后再配置RestTemplateConfig类，使用之前配置好的CloseableHttpClient类注入，同时配置一些默认的消息转换器：
+
+``` java
+/**
+ * RestTemplate客户端连接池配置
+ *
+ * @author XiongNeng
+ * @version 1.0
+ * @since 2018/1/24
+ */
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+public class RestTemplateConfig {
+
+    @Resource
+    private CloseableHttpClient httpClient;
+
+    @Bean
+    public RestTemplate restTemplate(MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
+
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("utf-8"));
+        messageConverters.add(stringHttpMessageConverter);
+        messageConverters.add(jackson2HttpMessageConverter);
+        restTemplate.setMessageConverters(messageConverters);
+
+        return restTemplate;
+    }
+
+    @Bean
+    public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
+        HttpComponentsClientHttpRequestFactory rf = new HttpComponentsClientHttpRequestFactory();
+        rf.setHttpClient(httpClient);
+        return rf;
+    }
+
 }
 ```
 
