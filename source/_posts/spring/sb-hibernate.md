@@ -123,7 +123,7 @@ spring:
         new_generator_mappings: false
         format_sql: true
   datasource:
-      url: jdbc:mysql://127.0.0.1:3306/pos?useSSL=false&autoReconnect=true&tinyInt1isBit=false&useUnicode=true&characterEncoding=utf8
+      url: jdbc:mysql://127.0.0.1:3306/pos?serverTimezone=UTC&useSSL=false&autoReconnect=true&tinyInt1isBit=false&useUnicode=true&characterEncoding=utf8
       username: root
       password: 123456
 ```
@@ -211,8 +211,8 @@ public class ArticleDAO implements IArticleDAO {
     @Override
     public boolean articleExists(String title, String category) {
         String hql = "FROM Article as atcl WHERE atcl.title = ? and atcl.category = ?";
-        int count = entityManager.createQuery(hql).setParameter(1, title)
-                .setParameter(2, category).getResultList().size();
+        int count = entityManager.createQuery(hql).setParameter(0, title)
+                .setParameter(1, category).getResultList().size();
         return count > 0;
     }
 }
