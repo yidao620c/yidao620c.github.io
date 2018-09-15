@@ -39,7 +39,7 @@ MongoDB的适用场景：
 
 MongoDB的安装教程请参考 [官网安装](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/)
 
-我是在centos7上面安装的，并且修改配置文件`/etc/mongod.conf`，将绑定端口设置成`0.0.0.0`，让其他主机也能访问。
+我是在centos7上面安装的MongoDB 4.0，并且修改配置文件`/etc/mongod.conf`，将绑定端口设置成`0.0.0.0`，让其他主机也能访问。
 
 启动mongodb后，添加一个用户，步骤如下：
 

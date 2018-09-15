@@ -90,6 +90,11 @@ RabbitMQ需要安装erlang和RabbitMQ Server，
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.9.6</version>
+    </dependency>
 
     <dependency>
         <groupId>org.springframework.boot</groupId>
