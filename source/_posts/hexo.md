@@ -576,59 +576,19 @@ $ git remote -v //查看远程分支名字
 $ git push origin source // 将当前git_blog下的内容push到Github上的远程仓库的source分支（会自动创建）上
 ```
 
-2) 在B中建立git_blog目录，安装npm，安装Hexo，添加SSH，然后在B中建立本地的source分支，并与远程的source分支进行了绑定。
-git_blog下的yidao620c.github.com文件夹里保存了和远程source分支相同的内容。
+2) 在电脑B中将source分支clone下来
+
 ``` bash
 $ git clone -b source git@github.com:yidao620c/yidao620c.github.com.git
 $ cd yidao620c.github.com
-$ git branch -a
-$ git checkout -b source origin/source
-$ cnpm install hexo
 $ cnpm install
 ```
 
 **重要记录**
 
-千万别执行`hexo init`这个命令啊，同时`Next`主题的安装步骤还是需要的。
+别执行`hexo init`这个命令。
 
-首先`package.json`改成绝对版本号：
-``` json
-{
-  "name": "hexo-site",
-  "version": "0.0.0",
-  "private": true,
-  "hexo": {
-    "version": "3.7.1"
-  },
-  "dependencies": {
-    "hexo": "^3.7.1",
-    "hexo-algolia": "^1.2.3",
-    "hexo-deployer-git": "^0.3.1",
-    "hexo-generator-archive": "^0.1.5",
-    "hexo-generator-category": "^0.1.3",
-    "hexo-generator-feed": "^1.2.2",
-    "hexo-generator-index": "^0.2.0",
-    "hexo-generator-searchdb": "^1.0.8",
-    "hexo-generator-tag": "^0.2.0",
-    "hexo-leancloud-counter-security": "^1.3.2",
-    "hexo-renderer-ejs": "^0.3.0",
-    "hexo-renderer-jade": "^0.4.1",
-    "hexo-renderer-marked": "^0.3.0",
-    "hexo-renderer-sass": "^0.3.2",
-    "hexo-renderer-stylus": "^0.3.1",
-    "hexo-server": "^0.2.0"
-  }
-}
-```
-
-### 使用方法
-
-如果是新电脑，先把source分支clone下来：
-```bash
-git clone -b source --single-branch https://github.com/yidao620c/yidao620c.github.io.git
-```
-
-在任意一台mac操作，都需先切换并保持在source分支上。使用git命令管理source文件；使用hexo命令进行同步至远程master分支，无需处理本地master分支
+在任意一台机器上面操作，都需先切换并保持在source分支上。使用git命令管理source文件；使用hexo命令进行同步至远程master分支，无需处理本地master分支
 
 1. 在A中使用Hexo的new、g、d方法添加、生成、部署新的博客，内容都会被同步自动放到Github的master分支上
 2. 在A中使用git命令的`push origin source`同步source到远程source分支
@@ -647,13 +607,6 @@ $ git push origin source
 ```
 
 将新内容提交至Github的source分支上，完成source管理。
-
-### 其他说明
-``` bash
-git add -f xxx // 强制添加文件/文件夹为tracked状态
-git rm --cache xxx // 解除文件为tracked状态
-git rm -r --cache xxx // 解除文件夹为tracked状态
-```
 
 ## FAQ
 
