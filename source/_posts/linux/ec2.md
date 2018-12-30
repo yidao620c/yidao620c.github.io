@@ -91,96 +91,100 @@ net.ipv4.tcp_fastopen = 3
 
 然后点击"启用系统代理"，选择PAC模式，在PAC中选择从xxx更新本地PAC，就可以实现科学上网了。
 
-## 开启锐速
+## 开启BBR加速
 
-[锐速](https://github.com/91yun/serverspeeder) 是一个 TCP 加速软件，对 Shadowsocks 客户端和服务器端间的传输速度有显著提升。
+可以起到单边加速TCP连接的效果。
 
-「锐速」的一大优势是只需要在服务器端单边部署就行了，换句话说，你不需要再安装另外一个应用。
+Google提交到Linux主线并发表在ACM queue期刊上的TCP-BBR拥塞控制算法。继承了Google“先在生产环境上部署，再开源和发论文”的研究传统。
+TCP-BBR已经再YouTube服务器和Google跨数据中心的内部广域网(B4)上部署。由此可见出该算法的前途。
 
-一键安装：
+TCP-BBR的目标就是最大化利用网络上瓶颈链路的带宽。一条网络链路就像一条水管，要想最大化利用这条水管，最好的办法就是给这跟水管灌满水。
 
-``` bash
-wget -N --no-check-certificate https://github.com/91yun/serverspeeder/raw/master/serverspeeder.sh && bash serverspeeder.sh
+BBR解决了两个问题：
+
+1. 在有一定丢包率的网络链路上充分利用带宽。非常适合高延迟，高带宽的网络链路。
+2. 降低网络链路上的buffer占用率，从而降低延迟。非常适合慢速接入网络的用户。
+Google 在 2016年9月份开源了他们的优化网络拥堵算法BBR，最新版本的 Linux内核(4.9-rc8)中已经集成了该算法。
+
+对于TCP单边加速，并非所有人都很熟悉，不过有另外一个大名鼎鼎的商业软件“锐速”，相信很多人都清楚。
+特别是对于使用国外服务器或者VPS的人来说，效果更佳。
+
+BBR项目地址：
+```
+https://github.com/google/bbr
 ```
 
-安装上面官网的的安装步骤执行一键安装脚本会出现如下的错误信息：
+升级内核，第一步首先是升级内核到支持BBR的版本：
+
+1.yum更新系统版本：
 ```
-前面的省略...
-Complete!
-=================================================
-操作系统：CentOS 
-发行版本：7.4 
-内核版本：3.10.0-693.el7.x86_64 
-位数：x64 
-锐速版本：3.10.61.0 
-=================================================
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 96179  100 96179    0     0  77305      0  0:00:01  0:00:01 --:--:-- 77314
-
-
-锐速暂不支持该内核，程序退出.自动安装判断比较严格，你可以到http://www.91yun.org/serverspeeder91yun手动下载安装文件尝试不同版本
-
+yum update
 ```
 
-锐速只能适配几个特定的内核，我现在的CentOS7.4内核并不支持，那么就需要修改内核来适配了。具体步骤如下
-
-**改核适配锐速**
-
-### 监测VPS架构
-
-``` bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/91yun/code/master/vm_check.sh && bash vm_check.sh
+2.查看系统版本：
+```
+[centos@ip-172-31-23-1 ~]$ cat /etc/redhat-release 
+CentOS Linux release 7.5.1804 (Core)
 ```
 
-如果是kvm还是xen或者vmare则可以装锐速，如果是Openvz，则不可装锐速。
-
-### Centos6安装内核（推荐使用）
-
-CentOS 6支持安装锐速的内核：2.6.32–504.3.3.el6.x86_64
-
-``` bash
-uname -r #查看当前内核版本
-rpm -ivh http://xz.wn789.com/CentOSkernel/kernel-firmware-2.6.32-504.3.3.el6.noarch.rpm
-rpm -ivh http://xz.wn789.com/CentOSkernel/kernel-2.6.32-504.3.3.el6.x86_64.rpm --force
-rpm -qa | grep kernel #查看是否安装成功
-reboot #重启VPS
-uname -r #当前使用内核版本
+3.安装elrepo并升级内核：
+```
+[root@ip-172-31-23-1 ~]# rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+[root@ip-172-31-23-1 ~]# rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+[root@ip-172-31-23-1 ~]# yum --enablerepo=elrepo-kernel install kernel-ml -y
 ```
 
-### Centos7安装内核（不太推荐）
-
-CentOS 7支持安装锐速的内核：3.10.0-327.el7.x86_64
-
-``` bash
-yum install -y linux-firmware
-rpm -ivh http://xz.wn789.com/CentOSkernel/kernel-3.10.0-229.1.2.el7.x86_64.rpm --force
-rpm -qa | grep kernel #查看内核是否安装成功
-reboot #重启VPS
-uname -r #当前使用内核版本
+4.更新grub文件并重启系统：
+```
+[root@ip-172-31-23-1 ~]# egrep ^menuentry /etc/grub2.cfg | cut -f 2 -d \'
+CentOS Linux (4.20.0-1.el7.elrepo.x86_64) 7 (Core)
+CentOS Linux (3.10.0-862.3.2.el7.x86_64) 7 (Core)
+CentOS Linux (0-rescue-b30d0f2110ac3807b210c19ede3ce88f) 7 (Core)
+[root@ip-172-31-23-1 ~]# grub2-set-default 0
+[root@ip-172-31-23-1 ~]# reboot
 ```
 
-锐速针对Centos 7的版本较少，推荐在Centos 6中安装。
-
-成功界面如下，看到license信息过期时间为"2034-12-31"就没问题了。
-
-![](https://xnstatic-1253397658.file.myqcloud.com/ss07.png)
-
-### 部署锐速
-
-依然使用一键安装脚本，输入以下命令：
-``` bash
-wget -N --no-check-certificate https://raw.githubusercontent.com/91yun/serverspeeder/master/serverspeeder-all.sh && bash serverspeeder-all.sh
+5.重启完成后查看内核是否已更换为4.xx版本：
+```
+[centos@ip-172-31-23-1 ~]$ uname -r
+4.20.0-1.el7.elrepo.x86_64
 ```
 
-安装需要一段时间，等待一会。
+6.开启bbr：
+```
+vim /etc/sysctl.conf    # 在文件末尾添加如下内容
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+```
 
-至此，整个搭建过程就大功告成了！接下来，尽情地享受起飞的速度吧😄
+7.加载系统参数：
+```
+[root@ip-172-31-23-1 ~]# sysctl -p
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+```
+
+输出了我们添加的那两行配置代表正常。
+
+8.确定bbr已经成功开启：
+```
+[root@ip-172-31-23-1 ~]#  sysctl net.ipv4.tcp_available_congestion_control
+net.ipv4.tcp_available_congestion_control = reno cubic bbr
+[root@ip-172-31-23-1 ~]# lsmod | grep bbr
+tcp_bbr                20480  5
+```
+
+输出内容如上，则表示bbr已经成功开启。
 
 ---------------
 
 参考文章
 
 * [科学上网的终极姿势](https://zoomyale.com/2016/vultr_and_ss/)
-* [CentOS改核适配锐速](http://www.topchinaz.com/centos-%E6%94%B9%E6%A0%B8%E9%80%82%E9%85%8D%E9%94%90%E9%80%9F%EF%BC%88digitalocean-centos7-4%EF%BC%89/)
+* [CentOS7.4搭建shadowsocks，以及配置BBR加速](http://blog.51cto.com/zero01/2064660)
+
+**备注**
+
+2018年12月更新，由于我的私钥弄丢了，登录不上EC2主机，所以重新创建了一个实例，选了CentOS7.5，并使用了BBR加速。
+所以创建EC2的时候私钥千万一定要自己保存好啊。
 
