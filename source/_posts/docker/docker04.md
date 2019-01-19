@@ -27,10 +27,20 @@ COPY 支持两种形式：
 
 注意：src 只能指定 build context 中的文件或目录。
 
+如果dest在容器中不存在，会被自动创建。经过我的实际测试，存在以下情况：
+
+1. src是文件，而dest以/结尾，那么创建dest/文件夹，并将src复制到文件夹中
+1. src是文件，而dest不以/结尾，那么创建dest父目录，并将src复制到父目录并改名为dest
+1. src是文件夹，不管dest是否/结尾，都会创建dest文件夹，并将src目录下的所有内容复制到dest文件夹中（不包括src目录本身）。
+
+对文件而言，dest是否以/结尾非常重要。
+
 ## ADD
 
 与 COPY 类似，从 build context 复制文件到镜像。
 不同的是，如果 src 是归档文件（tar, zip, tgz, xz 等），文件会被自动解压到 dest。
+
+经测试发现，如果是归档文件，不管dest是否以/结尾，最终都会创建dest/并将归档文件复制到这个文件夹后解压出来。
 
 ## ENV
 
@@ -147,10 +157,15 @@ ENTRYPOINT ["/bin/sh", "-c", "echo Hello, $name"]
 应该优先使用 Exec 格式的 ENTRYPOINT 指令。CMD 可为 ENTRYPOINT 提供额外的默认参数，
 同时可利用 docker run 命令行替换默认参数。
 3. 如果想为容器设置默认的启动命令，可使用 CMD 指令。用户可在 docker run 命令行中替换此默认命令。
+4. apt-get update 和 apt-get install 被放在一个 RUN 指令中执行，这样能够保证每次安装的是最新的包
 
+在书籍《第一本Docker书》上面举了一个例子，组合使用ENTRYPOINT和CMD指令来完成一些巧妙的工作。
+比如，我们可以在Dockerfile指定如下内容：
 
+```
+ENTRYPOINT ["/usr/bin/nginx"]
+CMD ["-h"]
+```
 
-
-
-
-
+当我们启动容器时候，任何命令行中指定参数会被传递给nginx守护进程，比如我们指定 `-g "daemon off"`让nginx以前台方式运行。
+如果用户不指定任何启动命令参数，那么CMD指令的-h会被传递给nginx守护进程，显示帮助信息。这样就能利用CMD实现有个默认的启动参数。
