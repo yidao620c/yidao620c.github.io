@@ -75,21 +75,24 @@ docker run -d -p 8020:80 httpd
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/docker01.png)
 
-
 ## 镜像下载加速
 由于 Docker Hub 的服务器在国外，下载镜像会比较慢。幸好 DaoCloud 为我们提供了免费的国内镜像服务。
 
 下面介绍如果使用镜像服务。
 
-在 daocloud.io 免费注册一个用户，可直接用GitHub用户注册。登录后，点击顶部菜单“加速器”。
+在 daocloud.io 免费注册一个用户，可直接用GitHub用户注册。进入加速器页面: <https://www.daocloud.io/mirror>
 
-![](https://xnstatic-1253397658.file.myqcloud.com/docker02.png)
+对于linux平台，下面有一行脚本：
 
-点开后将里面的脚本copy出来运行：
+```
+curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://f1361db2.m.daocloud.io
+```
 
-![](https://xnstatic-1253397658.file.myqcloud.com/docker03.png)
-
-然后重启docker，体验飞一般的感觉：
+我测试的时候，这个脚本会在/etc/docker/daemon.json中写入：
+```
+{"registry-mirrors": ["http://f1361db2.m.daocloud.io"],}
+```
+请把里面的逗号去掉，然后重启docker，体验飞一般的感觉：
 ```
 sudo systemctl restart docker.service
 ```

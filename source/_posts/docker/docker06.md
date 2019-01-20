@@ -12,8 +12,6 @@ tags: docker
 
 ```
 docker run -d --name "node001" httpd
-# 对于默认没有长期服务启动的镜像，使用下面这种
-docker run -d -e "container=docker" --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup --name node001 centos7.2-mysql /usr/sbin/init
 ```
 
 查看当前正在运行的容器
@@ -58,6 +56,17 @@ docker stop 3d5ea3e73344
 ```
 docker history httpd
 ```
+
+## 如果让一个容器长期运行
+
+默认情况下，容器中运行的进程如果没有前台进程了或者所有的前台进程都运行完只剩下后台进程，则容器会退出。
+因为Docker容器仅在它的1号进程（PID为1）运行时，会保持运行。如果1号进程退出了，Docker容器也就退出了。
+
+有几种办法可以让容器长期运行：
+
+1. 使用runit或supervisord这类进程管理器来运行进程
+2. 通过指定一些运行参数将后台服务以前台进程方式运行，比如`nginx -g 'daemon off;'`，`/usr/sbin/apache2 -D FOREGROUND`
+3. 如果运行自己的脚本，可最后添加 `exec /bin/bash`，启动容器时候`docker run -dit image`即可
 
 ## 进入容器方法
 

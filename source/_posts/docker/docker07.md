@@ -62,11 +62,81 @@ lo        Link encap:Local Loopback
 ```
 
 在容器中可以看到 host 的所有网卡，并且连 hostname 也是 host 的。直接使用 Docker host 的网络最大的好处就是性能，
-不过容器会占用主机的端口。
+不过容器会占用主机的端口。Docker host 的另一个用途是让容器可以直接配置 host 网路。比如某些跨 host 的网络解决方案，
+其本身也是以容器方式运行的，这些方案需要对网络进行配置，比如管理 iptables
 
 **bridge网络**
 
 Docker 安装时会创建一个 命名为 docker0 的网桥。如果不指定--network，创建的容器默认都会挂到 docker0 上。
+
+比如我创建一个容器看看
+```
+docker run --name httpd -d httpd
+```
+
+然后看一下网络接口：
+```
+[root@ecs-hw01 ~]# brctl show
+bridge name     bridge id           STP enabled	    interfaces
+docker0         8000.024206a84de0   no              veth5c8e660
+```
+
+一个新的网络接口 veth5c8e660 被挂到了 docker0 上，veth5c8e660就是新创建容器的虚拟网卡。
+
+下面看一下容器的网络配置。
+
+```
+[root@9e0341cf45b8 /]# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+145: eth0@if146: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 172.17.0.2/16 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::42:acff:fe11:2/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+容器有一个网卡 eth0@if146。大家可能会问了，为什么不是 veth5c8e660 呢？
+
+实际上 eth0@if146 和 veth5c8e660 是一对 veth pair。veth pair 是一种成对出现的特殊网络设备，
+可以把它们想象成由一根虚拟网线连接起来的一对网卡，网卡的一头（eth0@if146）在容器中，另一头（veth5c8e660）挂在网桥 docker0 上，
+其效果就是将 eth0@if146 也挂在了 docker0 上。
+
+我们还看到 eth0@if146 已经配置了 IP 172.17.0.2，为什么是这个网段呢？让我们通过 docker network inspect bridge 看一下 bridge 网络的配置信息:
+
+```
+[root@ecs-hw01 ~]# docker network inspect bridge
+[
+    {
+        "Name": "bridge",
+        "Id": "62b50083925d00339f0c9a017f12e6b24b87fb524ee4ffaddeaa11702d298b10",
+        "Created": "2019-01-20T16:31:16.167687604+08:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+...
+```
+
+原来 bridge 网络配置的 subnet 就是 172.17.0.0/16，并且网关是 172.17.0.1。这个网关在哪儿呢？大概你已经猜出来了，就是 docker0。
+
+当前容器网络拓扑结构如图所示：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/docker-network20.jpg)
 
 ## 自定义网络
 
@@ -268,7 +338,8 @@ busybox 能够 ping 到 httpd，并且可以访问 httpd 的 web 服务。
 
 ## 三种通信方式
 
-容器之间可通过 IP，Docker DNS Server 或 joined 容器三种方式通信。
+上一节讲了如何让容器处在同一个网络之下，也就是使用Docker Networking的方式，这也是推荐方式。
+本节讲一下同一网络下的容器通信的几种方式。容器之间可通过 IP，Docker DNS Server 或 joined 容器三种方式通信。
 
 **IP 通信**
 
@@ -326,7 +397,7 @@ busybox 和 web1 的网卡 mac 地址与 IP 完全一样，它们共享了相同
 ```
 / # wget 127.0.0.1
 Connecting to 127.0.0.1 (127.0.0.1:80)
-index.html           100% |************************************************************************************************|    45   0:00:00 ETA
+index.html           100% |*****************************************|    45   0:00:00 ETA
 / # cat index.html 
 <html><body><h1>It works!</h1></body></html>
 ```
@@ -366,7 +437,7 @@ HTTP request sent, awaiting response... 200 OK
 Length: 45 [text/html]
 Saving to: ‘index.html’
 
-100%[=======================================================================================================================================================================>] 45          --.-K/s   in 0s      
+100%[===============================================================>] 45          --.-K/s   in 0s      
 
 2018-05-24 19:28:45 (7.69 MB/s) - ‘index.html’ saved [45/45]
 
