@@ -57,24 +57,6 @@ sudo systemctl start docker
 sudo systemctl status docker
 ```
 
-## 测试docker
-通过运行`hello world`镜像来测试容器是否已经被成功安装：
-```
-sudo docker run hello-world
-```
-
-这条命令会现在一个test镜像并在容器里运行它，当容器运行后会打印一条信息并退出来。
-
-或者运行一个httpd镜像：
-```
-docker run -d -p 8020:80 httpd
-```
-从 Docker Hub 下载 httpd 镜像。镜像中已经安装好了 Apache HTTP Server，并将容器的 80 端口映射到 host 的 8020 端口
-
-然后访问：`http://[hostIP]`就可以看到效果了：
-
-![](https://xnstatic-1253397658.file.myqcloud.com/docker01.png)
-
 ## 镜像下载加速
 由于 Docker Hub 的服务器在国外，下载镜像会比较慢。幸好 DaoCloud 为我们提供了免费的国内镜像服务。
 
@@ -96,3 +78,21 @@ curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://f1361db2
 ```
 sudo systemctl restart docker.service
 ```
+
+## 测试docker
+通过运行`hello world`镜像来测试容器是否已经被成功安装：
+```
+sudo docker run hello-world
+```
+
+这条命令会现在一个test镜像并在容器里运行它，当容器运行后会打印一条信息并退出来。
+
+或者运行一个httpd镜像：
+```
+docker run -d -p 8020:80 httpd
+```
+从 Docker Hub 下载 httpd 镜像。镜像中已经安装好了 Apache HTTP Server，并将容器的 80 端口映射到 host 的 8020 端口
+
+然后访问：`http://[hostIP]`就可以看到效果了：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/docker01.png)
