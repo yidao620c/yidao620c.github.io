@@ -52,7 +52,7 @@ docker 原生的 driver 包括 none、bridge、overlay 和 macvlan，第三方 d
 
 接下来我们将详细讨论各种跨主机网络方案，首先学习 Overlay。
 
-## Overlay
+## 环境准备
 
 为支持容器跨主机通信，Docker 提供了 overlay driver，使用户可以创建基于 VxLAN 的 overlay 网络。
 Docerk overlay 网络需要一个 key-value 数据库用于保存网络状态信息，包括 Network、Endpoint、IP 等。
@@ -69,7 +69,7 @@ docker run -d -p 8500:8500 -h consul --name consul progrium/consul -server -boot
 ![](https://xnstatic-1253397658.file.myqcloud.com/docker100.jpg)
 
 接下来修改 host1 和 host2 的 docker daemon 的配置文件`/usr/lib/systemd/system/docker.service`，
-我只列出ExecStart最后部分：
+我只列出ExecStart最后部分：             
 ```
 -H unix:///var/run/docker.sock \
 -H tcp://0.0.0.0:2376 \
@@ -94,6 +94,232 @@ systemctl restart docker.service
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/docker102.jpg)
 
+## 创建overlay网络
 
+在host1上面创建overlay网络ov_net1:
 
+```
+docker network create -d overlay ov_net1
+```
+
+`-d overlay` 指定 driver 为 overaly。
+
+查看当前所有docker网络：
+
+```
+[root@localhost ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+a72ce58f3bd2        bridge              bridge              local
+bc794f4afe7a        host                host                local
+3e0372add56d        none                null                local
+4c21b88438fb        ov_net1             overlay             global
+```
+
+注意到 ov_net1 的 SCOPE 为 global，而其他网络为 local。在 host2 上查看存在的网络：
+
+```
+[root@localhost ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+3f811e49c9f1        bridge              bridge              local
+a16bad2e5ceb        host                host                local
+8b8ed97c4bcc        none                null                local
+4c21b88438fb        ov_net1             overlay             global
+```
+host2 上也能看到 ov_net1。这是因为创建 ov_net1 时 host1 将 overlay 网络信息存入了 consul，
+host2 从 consul 读取到了新网络的数据。之后 ov_net1 的任何变化都会同步到 host1 和 host2。
+
+`docker network inspect` 查看 ov_net1 的详细信息：
+
+```
+[
+    {
+        "Name": "ov_net1",
+        省略...
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "10.0.0.0/24",
+                    "Gateway": "10.0.0.1"
+                }
+            ]
+        },
+    }
+]
+```
+
+IPAM 是指 IP Address Management，docker 自动为 ov_net1 分配的 IP 空间为 10.0.0.0/24。
+
+## 在 overlay 中运行容器
+
+运行一个 busybox 容器并连接到 ov_net1：
+
+```
+docker run -itd --name bbox1 --network ov_net1 busybox
+```
+
+查看容器的网络配置：
+```
+[root@localhost ~]# docker exec bbox1 ip r
+default via 172.18.0.1 dev eth1 
+10.0.0.0/24 dev eth0 scope link  src 10.0.0.2 
+172.18.0.0/16 dev eth1 scope link  src 172.18.0.2 
+```
+
+bbox1 有两个网络接口 eth0 和 eth1。eth0 IP 为 10.0.0.2，连接的是 overlay 网络 ov_net1。eth1 IP 172.18.0.2，
+容器的默认路由是走 eth1，eth1 是哪儿来的呢？
+
+其实，docker 会创建一个 bridge 网络 “docker_gwbridge”，为所有连接到 overlay 网络的容器提供访问外网的能力
+
+```
+[root@localhost ~]# docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+a72ce58f3bd2        bridge              bridge              local
+375d48203637        docker_gwbridge     bridge              local
+bc794f4afe7a        host                host                local
+3e0372add56d        none                null                local
+4c21b88438fb        ov_net1             overlay             global
+```
+
+从 `docker network inspect docker_gwbridge` 输出可确认 docker_gwbridge 的 IP 地址范围是 172.18.0.0/16，
+当前连接的容器就是 bbox1（172.18.0.2）
+
+```
+"IPAM": {
+    "Driver": "default",
+    "Options": null,
+    "Config": [
+        {
+            "Subnet": "172.18.0.0/16",
+            "Gateway": "172.18.0.1"
+        }
+    ]
+},
+"Internal": false,
+"Attachable": false,
+"Ingress": false,
+"ConfigFrom": {
+    "Network": ""
+},
+"ConfigOnly": false,
+"Containers": {
+    "384ea73907b3c57ea3a7d66d7e131ce17457cd24e4485bb386f8d8b97562e5ce": {
+        "Name": "gateway_742d88ece54f",
+        "EndpointID": "d6069af3fa630d2d3e0f80ee71325aaabb061d9435df370dbff93cb6c92a1478",
+        "MacAddress": "02:42:ac:12:00:02",
+        "IPv4Address": "172.18.0.2/16",
+        "IPv6Address": ""
+    }
+},
+```
+
+而且此网络的网关就是网桥 docker_gwbridge 的 IP 172.18.0.1
+
+```
+[root@localhost ~]# ifconfig docker_gwbridge
+docker_gwbridge: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.18.0.1  netmask 255.255.0.0  broadcast 172.18.255.255
+        inet6 fe80::42:3bff:fe06:a807  prefixlen 64  scopeid 0x20<link>
+```
+
+这样容器 bbox1 就可以通过 docker_gwbridge 访问外网。
+
+如果外网要访问容器，可通过主机端口映射，比如：
+
+```
+docker run -p 80:80 -d --net ov_net1 --name web1 httpd
+```
+
+验证完外网的连通性，下一节验证 overlay 网络跨主机通信。
+
+## overlay 网络跨主机通信
+
+在 host2 中运行容器 bbox2：
+
+```
+docker run -itd --name bbox2 --network ov_net1 busybox
+```
+
+查看bbox2容器内网络配置
+```
+[root@localhost ~]# docker exec bbox2 ip r
+default via 172.18.0.1 dev eth1 
+10.0.0.0/24 dev eth0 scope link  src 10.0.0.3 
+172.18.0.0/16 dev eth1 scope link  src 172.18.0.2 
+```
+
+bbox2 IP 为 10.0.0.3，可以直接 ping bbox1：
+```
+[root@host2 ~]# docker exec bbox2 ping -c 2 bbox1
+PING bbox1 (10.0.0.2): 56 data bytes
+--- bbox1 ping statistics ---
+2 packets transmitted, 0 packets received, 100% packet loss
+```
+
+哦吼吼，ping不通
+
+找解决方案如下：
+
+第一步，所有主机名都修改一下，改成不同
+第二步，关闭selinux，防火墙开通几个端口或者完全关闭
+```
+iptables -A INPUT -p tcp -m tcp --dport 7946 -j ACCEPT
+iptables -A INPUT -p udp -m udp --dport 7946 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --dport 4789 -j ACCEPT
+iptables -A INPUT -p 50 -j ACCEPT
+
+systemctl stop firewalld
+```
+第三步，继续查找原因。我的几个机器是VirtualBox安装的，
+确保在virtualbox设置中打开了host1和host2所有虚拟网卡的混杂模式。
+
+成功搞定！
+```
+[root@host2 ~]# docker exec bbox2 ping -c 2 bbox1
+PING bbox1 (10.0.0.2): 56 data bytes
+64 bytes from 10.0.0.2: seq=0 ttl=64 time=1003.159 ms
+64 bytes from 10.0.0.2: seq=1 ttl=64 time=2.794 ms
+
+--- bbox1 ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+```
+
+可见 overlay 网络中的容器可以直接通信，同时 docker 也实现了 DNS 服务。
+
+总结下overlay 网络的具体实现：
+
+docker 会为每个 overlay 网络创建一个独立的 network namespace，其中会有一个 linux bridge br0，
+endpoint 还是由 veth pair 实现，一端连接到容器中（即 eth0），另一端连接到 namespace 的 br0 上。
+
+br0 除了连接所有的 endpoint，还会连接一个 vxlan 设备，用于与其他 host 建立 vxlan tunnel。
+容器之间的数据就是通过这个 tunnel 通信的。逻辑网络拓扑结构如图所示（截的别人的图）：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/docker20190215-01.jpg)
+
+要查看 overlay 网络的 namespace 可以在 host1 和 host2 上执行 ip netns
+（请确保在此之前执行过 `ln -s /var/run/docker/netns /var/run/netns`），可以看到两个 host 上有一个相同的 namespace
+
+```
+[root@host2 ~]# ip netns
+d72b529b1df2 (id: 1)
+1-4c21b88438 (id: 0)
+```
+
+这就是 ov_net1 的 namespace，查看 namespace 中的 br0 上的设备。
+```
+[root@host2 ~]# ip netns exec 1-4c21b88438 brctl show
+bridge name	bridge id		STP enabled	interfaces
+br0		8000.626988b3db42	no		    veth0
+							            vxlan0
+```
+
+查看 vxlan0 设备的具体配置信息可知此 overlay 使用的 VNI（VxLAN ID）为 256。
+
+```
+[root@host2 ~]# ip netns exec 1-4c21b88438 ip -d l show vxlan0
+6: vxlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1450 qdisc noqueue master br0 state UNKNOWN mode DEFAULT group default 
+    link/ether da:53:ff:c8:09:98 brd ff:ff:ff:ff:ff:ff link-netnsid 0 promiscuity 1 
+    vxlan id 256 srcport 0 0 dstport 4789 proxy l2miss l3miss ageing 300 noudpcsum noudp6zerocsumtx noudp6zerocsumrx
+```
 
