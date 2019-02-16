@@ -323,3 +323,63 @@ br0		8000.626988b3db42	no		    veth0
     vxlan id 256 srcport 0 0 dstport 4789 proxy l2miss l3miss ageing 300 noudpcsum noudp6zerocsumtx noudp6zerocsumrx
 ```
 
+## overlay网络隔离
+
+不同的 overlay 网络是相互隔离的。我在host1上面创建第二个 overlay 网络 ov_net2 并运行容器 bbox3。
+
+```
+docker network create -d overlay ov_net2
+docker run -itd --name bbox3 --network ov_net2 busybox
+```
+
+查看bbox3容器的网络
+```
+[root@host1 ~]# docker exec bbox3 ip r
+default via 172.18.0.1 dev eth1 
+10.0.1.0/24 dev eth0 scope link  src 10.0.1.2 
+172.18.0.0/16 dev eth1 scope link  src 172.18.0.3
+```
+
+ip地址为10.0.1.2，尝试ping一下bbox1的ip地址（10.0.0.2）：
+```
+[root@host1 ~]# docker exec bbox3 ping -c 2 10.0.0.2
+PING 10.0.0.2 (10.0.0.2): 56 data bytes
+
+--- 10.0.0.2 ping statistics ---
+2 packets transmitted, 0 packets received, 100% packet loss
+```
+ping 失败，可见不同 overlay 网络之间是隔离的。即便是通过 docker_gwbridge 也不能通信。
+
+```
+[root@host1 ~]# docker exec bbox3 ping -c 2 172.18.0.2
+PING 172.18.0.2 (172.18.0.2): 56 data bytes
+
+--- 172.18.0.2 ping statistics ---
+2 packets transmitted, 0 packets received, 100% packet loss
+```
+
+docker 默认为 overlay 网络分配 24 位掩码的子网（10.0.X.0/24），所有主机共享这个 subnet，
+容器启动时会顺序从此空间分配 IP。当然我们也可以通过 --subnet 指定 IP 空间。
+
+```
+docker network create -d overlay --subnet 10.22.1.0/24 ov_net3
+```
+
+## 总结Overlay网络
+
+* Overlay网络会自动创建一个docker_gwbridge网卡，作用是为Docker容器提供上外网需求
+* Docker容器不能通过docker_gwbridge网卡互相通信，即使在同一台Docker主机, 同一个Overlay网络也不行
+* Docker容器间通信只能通过overlay网络
+* Overlay网络间是相互隔离的，通过VXLan隔离
+* Docker容器网络的命名空间与Overlay网络的命名空间通过一对veth pair连接起来
+* Overlay网络独立的命名空间里面会有一个网桥br0
+* Docker容器的veth pair对端veth0与vxlan0设备通过br0这个Linux bridge桥接在一起， br0在同一宿主机上起到虚拟交换机的作用，
+如果目标地址在同一宿主机上，则直接通信，如果不在则通过设置vxlan0这个VXLan设备进行跨主机通信
+* VXLan0设备会在创建时，由Docker daemon 为其分配vxlan隧道ID，起到网络隔离的作用
+* Docker Host集群会通过key/value存储共享数据，在7496端口上，互相之间通过gossip协议学习各个宿主机上运行了那些容器。
+守护进程根据这些数据在vxlan0设备上生成静态MAC转发表
+* 根据静态MAC转发表的设置，通过UDP端口4789，将流量转发到对端宿主机网卡上
+* 根据流量包中的VxLan隧道ID，将流量转发到对端宿主机的overlay网络的网络命名空间中。
+* 对端宿主机的overlay网络的网络命名空间中br0网桥，起到虚拟交换机的作用，将流量根据MAC地址转发到对应容器内部。
+
+
