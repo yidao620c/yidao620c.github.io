@@ -3,7 +3,7 @@ title: "HTTPS协议详解"
 date: 2017-11-16 18:22:19 +0800
 comments: true
 toc: true
-categories: web
+categories: 网络安全
 tags: [https]
 ---
 

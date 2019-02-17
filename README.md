@@ -7,3 +7,7 @@
 ### 评论系统
 
 使用gitment省事多了
+
+### 更新索引
+
+hexo algolia

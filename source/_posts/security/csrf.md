@@ -3,7 +3,7 @@ title: "CSRF攻击介绍"
 date: 2016-07-22 18:36:08 +0800
 comments: true
 toc: true
-categories: web
+categories: 网络安全
 tags: [CSRF]
 ---
 CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。

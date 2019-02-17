@@ -3,7 +3,7 @@ title: "简单介绍OAuth2.0的授权流程"
 date: 2017-03-29 12:52:17 +0800
 comments: true
 toc: true
-categories: web
+categories: 网络安全
 tags: [oauth]
 ---
 

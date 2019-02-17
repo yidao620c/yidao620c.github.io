@@ -3,7 +3,7 @@ title: "SQL注入攻击介绍"
 date: 2016-07-26 20:07:19 +0800
 comments: true
 toc: true
-categories: web
+categories: 网络安全
 tags: [SQL注入]
 ---
 
