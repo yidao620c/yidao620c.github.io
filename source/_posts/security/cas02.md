@@ -15,10 +15,10 @@ tags: [CAS]
 * Maven：3.6.0
 * JDK：1.8
 * cas-server域名：cas.server.com
-* tomcat服务器：我用的SpringBoot插件
+* tomcat服务器：SpringBoot内置/tomcat8
 * 操作系统：华为云主机上CentOS 7
 
-Cas支持Gradle和Maven两种方式部署，使用SpringBoot构建，我这里使用Maven的方式。<!--more-->
+Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。<!--more-->
 
 ## 下载
 
@@ -247,4 +247,28 @@ xx.xx.xx.xx cas.server.com
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/cas20190217-03.jpg)
 
+## tomcat部署
 
+上面演示的是SpringBoot内置容器运行方式，现在演示如何部署到已有的tomcat容器中。
+
+tomcat的下载和安装我就不讲了，直接下载tomcat包解压即可。
+
+然后把上面mvn package命令生成的cas.war复制到webapps/目录中。
+
+**配置SSL**
+
+修改tomcat的配置文件server.xml，找到下面的代码：
+
+```
+<Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+           maxThreads="150" SSLEnabled="true">
+    <SSLHostConfig>
+        <Certificate certificateKeystoreFile="/etc/cas/casServer.keystore"
+                     certificateKeystoreType="JKS" certificateKeystorePassword="changeit" />
+    </SSLHostConfig>
+</Connector>
+```
+
+完了后去bin目录执行start.sh即可。访问：<https://cas.server.com:8443/cas>
+
+效果一样，完成验证！
