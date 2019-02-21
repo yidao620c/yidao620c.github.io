@@ -1,5 +1,5 @@
 ---
-title: "CAS实现单点登录原理"
+title: "CAS教程-原理篇"
 date: 2019-01-02 09:12:33 +0800
 comments: true
 toc: true

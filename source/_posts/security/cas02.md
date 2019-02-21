@@ -1,5 +1,5 @@
 ---
-title: "CAS服务安装"
+title: "CAS教程-服务安装"
 date: 2019-01-03 10:22:12 +0800
 comments: true
 toc: true
@@ -11,7 +11,7 @@ tags: [CAS]
 
 我的环境：
 
-* CAS-server：5.2.X
+* CAS-server：5.3.X
 * Maven：3.6.0
 * JDK：1.8
 * cas-server域名：cas.server.com
@@ -20,16 +20,45 @@ tags: [CAS]
 
 Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。<!--more-->
 
+## Maven镜像配置
+
+华为和Sonatype 联合发布中国官方 Maven 仓库，特意试了试，感觉速度挺快的，比阿里的快。这里贴一下配置：
+
+```
+  <servers>
+	<server>
+      <id>huaweicloud</id>
+      <username>anonymous</username>
+      <password>devcloud</password>
+    </server>
+  </servers>
+  
+  <mirrors>
+      <mirror>
+  		<id>nexus-aliyun</id>
+  		<mirrorOf>central</mirrorOf>
+  		<name>Nexus aliyun</name>
+  		<url>http://maven.aliyun.com/nexus/content/groups/public</url>
+  	</mirror>
+  	<mirror>
+          <id>huaweicloud</id>
+          <mirrorOf>*</mirrorOf>
+          <name>Nexus osc thirdparty</name>
+          <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+        </mirror>
+    </mirrors>
+```
+
 ## 下载
 
 Maven地址：https://github.com/apereo/cas-overlay-template
 
 Gradle地址：https://github.com/apereo/cas-gradle-overlay-template
 
-我下载的是5.2分支：
+我下载的是5.3分支：
 
 ```
-git clone https://github.com/apereo/cas-overlay-template.git -b 5.2
+git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
 ```
 
 ## 构建
@@ -189,9 +218,9 @@ keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/
 
 ## 修改配置
 
-第一步，先将上面创建的证书文件 casServer.crt、casServer.keystore 拷贝到项目的/etc/cas/目录中。
+第一步，先将上面创建的证书文件 `casServer.crt`、`casServer.keystore` 拷贝到项目的/etc/cas/目录中。
 
-第二步，然后修改cas.properties文件
+第二步，然后修改`cas.properties`文件
 
 ```
 cas.server.name: https://cas.server.com:8443
@@ -210,7 +239,7 @@ server.ssl.key-alias=cas.server.com
 
 第三步，修改log4j2.xml 日志文件
 
-在cas-overlay-template-master项目中，创建一个logs目录，用于存放日志文件，
+在`cas-overlay-template-master`项目中，创建一个logs目录，用于存放日志文件，
 默认cas在项目根目录下生成日志，日志多了不方便管理，修改log4j2.xml文件，将日志目录做调整。
 
 比如将`fileName="${sys:cas.log.dir}/cas.log"` 修改为 `fileName="${sys:cas.log.dir}/logs/cas.log"`
@@ -237,15 +266,15 @@ xx.xx.xx.xx cas.server.com
 
 默认账号：`casuser`默认密码：`Mellon` 
 
-![](https://xnstatic-1253397658.file.myqcloud.com/cas20190217-01.jpg)
+![](https://xnstatic-1253397658.file.myqcloud.com/cas20190221-01.png)
 
 登录成功后页面：
 
-![](https://xnstatic-1253397658.file.myqcloud.com/cas20190217-02.jpg)
+![](https://xnstatic-1253397658.file.myqcloud.com/cas20190221-02.png)
 
 退出登录：
 
-![](https://xnstatic-1253397658.file.myqcloud.com/cas20190217-03.jpg)
+![](https://xnstatic-1253397658.file.myqcloud.com/cas20190221-03.png)
 
 ## tomcat部署
 
