@@ -80,6 +80,8 @@ cd cas-overlay-template/
 
 * 名字和姓氏输入项：访问的域名地址
 * alias：别名可以随便写，一般要有意义，后续操作别名要一致，我这里保持和域名统一了
+* 密码：changeit
+* 别名：cas.server.com
 
 **使用java自带keytool创建本地密钥库**
 
@@ -255,6 +257,8 @@ server.ssl.key-alias=cas.server.com
 ```
 [root@ecs-hw01 cas-overlay-template]# ./build.sh run
 ```
+
+如果是windows本地开发就在terminal中执行`build run`
 
 本地修改host文件
 
