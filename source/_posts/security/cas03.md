@@ -312,3 +312,192 @@ cas:
 用户数据存在远端、不允许cas直接访问数据库、cas不希望你知道帐号数据的表结构
 
 由于Rest方式并不需要直接通过JDBC链接数据库，所以在上一节文章中介绍的JDBC和mysql驱动依赖项就可以删掉了，保留一个就可以了
+
+```
+<dependency>
+    <groupId>org.apereo.cas</groupId>
+    <artifactId>cas-server-support-rest-authentication</artifactId>
+    <version>${cas.version}</version>
+</dependency>
+```
+
+同样的，把之前的jdbc配置可以删掉了，配置如下即可：
+```
+##
+# REST 认证开始, 请求远程调用接口
+#
+cas.authn.rest.uri=http://localhost:8080/cas_db/user/login
+cas.authn.rest.passwordEncoder.type=DEFAULT
+cas.authn.rest.passwordEncoder.characterEncoding=UTF-8
+cas.authn.rest.passwordEncoder.encodingAlgorithm=MD5
+```
+
+REST认证流程是这样的，当用户点击登录后，cas会发送post请求到 http://localhost:8080/cas_db/login 
+并且把用户信息以"用户名:密码"进行Base64编码放在authorization请求头中。
+
+若输入用户名密码为：admin/123；那么请求头包括：authorization=Basic Base64(admin:MD5(123))。
+
+那么发送后客户端必须响应一下数据，cas明确规定如下：
+
+* cas 服务端会通过post请求，并且把用户信息以”用户名:密码”进行Base64编码放在authorization请求头中
+* 200状态码：并且格式为{"@class":"org.apereo.cas.authentication.principal.SimplePrincipal","id":"casuser","attributes":{}}是成功的；
+* 403状态码：用户不可用；
+* 404状态码：账号不存在；
+* 423状态码：账户被锁定；
+* 428状态码：过期；
+* 其他登录失败
+
+接下来编写REST认证服务，使用SpringBoot+Maven+MyBatis构建：
+
+用户类
+```
+@TableName(value = "sys_user")
+public class User extends Model<User> {
+
+private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键ID
+     */
+    @TableId(value="id", type= IdType.AUTO)
+    private Integer id;
+    /**
+     * 账号
+     */
+    @NotNull
+    private String username;
+    /**
+     * 密码
+     */
+    @JsonIgnore
+    private String password;
+    /**
+     * 联系电话
+     */
+    private String email;
+    /**
+     * 备注
+     */
+    private String address;
+    /**
+     * 状态 1:正常 2:禁用
+     */
+    private Integer age;
+
+    private Integer expired;
+    private Integer disabled;
+    private Integer locked;
+
+    //需要返回实现org.apereo.cas.authentication.principal.Principal的类名接口
+    @TableField(exist=false)
+    @JsonProperty("@class")
+    private String clazz = "org.apereo.cas.authentication.principal.SimplePrincipal";
+
+    @JsonProperty("attributes")
+    @TableField(exist=false)
+    private Map<String, Object> attributes = new HashMap<>();
+    
+    // 省略getter/setter
+}
+```
+
+接口类：
+```
+@RestController
+@RequestMapping("/user")
+public class SysUserController {
+    private Logger logger = LogManager.getLogger(SysUserController.class);
+
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/login")
+    public Object login(@RequestHeader HttpHeaders httpHeaders) {
+        logger.info("Rest api login.");
+        logger.debug("request headers: " + httpHeaders);
+        User user = null;
+        try {
+            UserTemp userTemp = obtainUserFormHeader(httpHeaders);
+
+            //当没有 传递 参数的情况
+            if (userTemp == null) {
+                return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+            }
+
+            //尝试查找用户库是否存在
+            user = userService.findByUsername(userTemp.username);
+            if (user != null) {
+                if (!user.getPassword().equals(userTemp.password)) {
+                    //密码不匹配
+                    return new ResponseEntity(HttpStatus.BAD_REQUEST);
+                }
+                if (user.getDisabled() == 1) {
+                    //禁用 403
+                    return new ResponseEntity(HttpStatus.FORBIDDEN);
+                }
+                if (user.getLocked() == 1) {
+                    //锁定 423
+                    return new ResponseEntity(HttpStatus.LOCKED);
+                }
+                if (user.getExpired() == 1) {
+                    //过期 428
+                    return new ResponseEntity(HttpStatus.PRECONDITION_REQUIRED);
+                }
+            } else {
+                //不存在 404
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
+            }
+        } catch (UnsupportedEncodingException e) {
+            logger.error("", e);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        logger.info("[{" + user.getUsername() + "}] login is ok");
+        logger.info(JacksonUtil.bean2Json(user));
+        //成功返回json
+        return user;
+    }
+
+
+    /**
+     * 根据请求头获取用户名及密码
+     *
+     * @param httpHeaders
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private UserTemp obtainUserFormHeader(HttpHeaders httpHeaders) throws UnsupportedEncodingException {
+        /*
+         *
+         * This allows the CAS server to reach to a remote REST endpoint via a POST for verification of credentials.
+         * Credentials are passed via an Authorization header whose value is Basic XYZ where XYZ is a Base64 encoded version of the credentials.
+         */
+        //根据官方文档，当请求过来时，会通过把用户信息放在请求头authorization中，并且通过Basic认证方式加密
+        String authorization = httpHeaders.getFirst("authorization");//将得到 Basic Base64(用户名:密码)
+        if (StringUtils.isEmpty(authorization)) {
+            return null;
+        }
+        String baseCredentials = authorization.split(" ")[1];
+        String usernamePassword = new String(Base64Utils.decodeFromString(baseCredentials), StandardCharsets.UTF_8);//用户名:密码
+        logger.debug("login user: " + usernamePassword);
+        String[] credentials = usernamePassword.split(":");
+        return new UserTemp(credentials[0], credentials[1]);
+    }
+
+
+    /**
+     * 解析请求过来的用户
+     */
+    private class UserTemp {
+        private String username;
+        private String password;
+
+        UserTemp(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+    }
+}
+```
+
+Service类我就不贴了，启动后验证登录流程。
+
