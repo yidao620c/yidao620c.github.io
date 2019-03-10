@@ -501,3 +501,36 @@ public class SysUserController {
 
 Service类我就不贴了，启动后验证登录流程。
 
+## 代码调试
+
+通过官网的overlay构建会发现跟目录有build.cmd/build.sh两个文件，就是在根目录下。
+其中有一段代码，不难发现是采用java -jar的方式启用了一个远程调试5000端口，当然了这个端口也是可以改的
+```
+function debug() {
+   package && java -Xdebug -Xrunjdwp:transport=dt_socket,address=5000,server=y,suspend=n -jar target/cas.war
+}
+```
+
+启用调试:
+```
+build debug
+```
+
+IDEA启动监听，增加一个Remote Server调试器。填写三个配置：
+
+1. 命令行参数：-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000
+2. Host: localhost
+3. Port: 5000
+
+配置好后启动debug，看到如下说明成功一半：
+```
+Connected to the target VM, address: 'localhost:5000', transport: 'socket'
+```
+
+调试代码：
+
+RestAuthenticationHandler进行调试，具体调试哪个代码按自己的实际情况。
+
+![](https://xnstatic-1253397658.file.myqcloud.com/cas20190309-001.jpg)
+
+
