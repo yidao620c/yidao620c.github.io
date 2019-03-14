@@ -1,5 +1,5 @@
 ---
-title: "CAS教程-实现单点登录"
+title: "CAS教程 - 实现单点登录"
 date: 2019-01-09 18:16:55 +0800
 comments: true
 toc: true
@@ -16,7 +16,7 @@ tags: [CAS]
 
 项目                        | 地址                                | 说明
 ----------------------------|------------------------------------|-------------------
-cas-overlay-template-master | https://cas.server.com:8443/cas    | cas-server 服务端
+cas-overlay                 | https://cas.server.com:8443/cas    | cas-server 服务端
 cas-app1                    | http://app1.com:8181               | cas-client 客户端1
 cas-app2                    | http://app2.com:8282               | cas-client 客户端2
 
