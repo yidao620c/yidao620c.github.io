@@ -23,6 +23,7 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 
 
 本地hosts文件配置如下:
+
 ```
 127.0.0.1    cas.server.com
 127.0.0.1    sso.server.com
@@ -59,4 +60,118 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 1. 验证通过，建立成功的SessionId
 
 ## 实战
+
+### cas-server 配置
+
+如果需要使用rest的请求方式，就需要添加下面的依赖。
+
+```
+<!--开启cas server的rest支持-->
+<dependency>
+    <groupId>org.apereo.cas</groupId>
+    <artifactId>cas-server-support-rest</artifactId>
+    <version>${cas.version}</version>
+</dependency>
+```
+
+### sso-server 配置
+
+一些常规依赖，主要是redis
+
+```
+<!--HttpClient-->
+<dependency>
+   <groupId>org.apache.httpcomponents</groupId>
+   <artifactId>httpclient</artifactId>
+   <version>4.5.3</version>
+</dependency>
+
+<!--Gson-->
+<dependency>
+   <groupId>com.google.code.gson</groupId>
+   <artifactId>gson</artifactId>
+   <version>2.8.2</version>
+</dependency>
+
+<!--redis-->
+<dependency>
+   <groupId>org.springframework.boot</groupId>
+   <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+### cas-app配置
+
+主要改动了一下login.html登录页面。增加一个拦截器判断用户是否登录
+
+```
+$(document).ready(function() {
+    var service = GetQueryString("service");
+    // 如果为空，表示直接进入登录页面
+    if (service == null) {
+        service = "http://app1.com:8181/fire/index.html";
+    }
+    console.info("service：" + service);
+    $("#service").val(service); // 受访受限url的地址
+    // 新进行判断用户是否登录过
+    $.ajax({
+        method: "GET",
+        url: "http://sso.server.com:9000/sso/user/check",
+        data: {
+            'service': service
+        },
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,
+        dataType: "jsonp",
+        jsonp: "callback",
+        // cache: false,
+        success: function(result) {
+            console.info("请求成功");
+            console.info(result);
+            if (result.status == 1) {
+                // 设置 302 重定向跳转
+                window.location.href = result.data;
+            } else {
+                // 显示登录页面
+                $("#loginDiv").show("slow");
+            }
+        },
+        error: function(data) {
+            console.info("请求失败");
+            $("#loginDiv").show("slow");
+        }
+    });
+});
+</script>
+```
+
+登录form提交的URL是 sso server的地址：
+
+```
+<div id="loginDiv" style="display: none">
+    <form action="http://sso.server.com:9000/sso/user/login" method="post">
+        <table>
+            <tr>
+                <td>用户名:</td>
+                <td><input id="username" name="username" type="text" ></td>
+            </tr>
+            <tr>
+                <td>密 码:</td>
+                <td><input id="password" name="password" type="password"></td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="hidden" name="service" id="service" value="">
+                    <input type="submit" value="登录">
+                </td>
+                <td><input type="reset"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+```
+
+其他直接看github源码
 
