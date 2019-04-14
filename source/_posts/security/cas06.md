@@ -14,7 +14,7 @@ tags: [CAS]
 1. 配置cas关于redis的依赖
 2. 配置application.properties，添加redis的配置信息
 
-接下来讲解如何通过Redis存储Ticket，以及通过Restful API方式验证Ticket。<!-more-->
+接下来讲解如何通过Redis存储Ticket，以及通过Restful API方式验证Ticket。<!--more-->
 
 ## maven配置
 
