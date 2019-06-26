@@ -1,11 +1,13 @@
 ---
 layout: post
-title: "使用Octopress搭建GitHub博客"
-date: 2015-03-18 17:41:21 +0800
+title: 使用Octopress搭建GitHub博客
+date: '2015-03-18 17:41:21 +0800'
 comments: true
 toc: true
 categories: 朝花夕拾
-tags: [octopress]
+tags:
+  - octopress
+abbrlink: 7370
 ---
 
 经过iteye博客——WordPress——github的三重进化，时间来到了2015年，

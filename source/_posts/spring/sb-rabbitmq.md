@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 使用消息队列RabbitMQ"
-date: 2017-08-06 12:33:21 +0800
+title: SpringBoot系列 - 使用消息队列RabbitMQ
+date: '2017-08-06 12:33:21 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 32282
 ---
 
 RabbitMQ 即一个消息队列，主要是用来实现应用程序的异步和解耦，同时也能起到消息缓冲，消息分发的作用。

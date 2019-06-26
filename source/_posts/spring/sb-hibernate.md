@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 集成Hibernate"
-date: 2017-07-03 14:41:39 +0800
+title: SpringBoot系列 - 集成Hibernate
+date: '2017-07-03 14:41:39 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 30340
 ---
 
 Hibernate与MyBatis都是流行的持久层开发框架，前一遍介绍了怎样在SpringBoot中集成MyBatis，本篇来介绍如何集成Hibernate作为DAO层。

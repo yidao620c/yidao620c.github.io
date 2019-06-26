@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记05- Item详解"
-date: 2016-03-16 01:00:15 +0800
+title: Scrapy笔记05- Item详解
+date: '2016-03-16 01:00:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 16515
 ---
 
 Item是保存结构数据的地方，Scrapy可以将解析结果以字典形式返回，但是Python中字典缺少结构，在大型爬虫系统中很不方便。

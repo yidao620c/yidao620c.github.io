@@ -1,11 +1,13 @@
 ---
 layout: post
-title: "xpath入门笔记"
-date: 2015-05-19 14:01:07 +0800
+title: xpath入门笔记
+date: '2015-05-19 14:01:07 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [xpath]
+tags:
+  - xpath
+abbrlink: 60536
 ---
 
 XPath即为XML路径语言（XML Path Language），它是一种用来确定XML文档中某部分位置的语言。

@@ -1,10 +1,12 @@
 ---
-title: "centos7上systemd详解"
-date: 2016-06-07 12:22:15 +0800
+title: centos7上systemd详解
+date: '2016-06-07 12:22:15 +0800'
 comments: true
 toc: true
 categories: linux
-tags: [systemd]
+tags:
+  - systemd
+abbrlink: 11751
 ---
 CentOS 7继承了RHEL 7的新的特性，例如强大的systemd，
 而systemd的使用也使得以往系统服务的/etc/init.d的启动脚本的方式就此改变，

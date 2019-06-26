@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - 并发调度"
-date: 2017-05-26 09:17:21 +0800
+title: RabbitMQ简易教程 - 并发调度
+date: '2017-05-26 09:17:21 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 26448
 ---
 
 RabbitMQ任务调度默认是阻塞的，使用pika中的`channel.start_consuming()`的时候，

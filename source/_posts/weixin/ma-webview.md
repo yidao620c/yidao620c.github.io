@@ -1,9 +1,10 @@
 ---
 title: 小程序开发 - webview
-date: 2017-12-12 10:16:53
 toc: true
 categories: 微信开发
 tags: 小程序
+abbrlink: 46286
+date: 2017-12-12 10:16:53
 ---
 
 最近要做一个项目需要在小程序中打开外链，小程序最近开放了web-view组件，

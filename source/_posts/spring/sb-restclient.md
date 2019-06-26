@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 使用RestTemplate"
-date: 2017-07-06 18:29:52 +0800
+title: SpringBoot系列 - 使用RestTemplate
+date: '2017-07-06 18:29:52 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 35668
 ---
 
 spring框架提供的RestTemplate类可用于在应用中调用rest服务，它简化了与http服务的通信方式，统一了RESTful的标准，封装了http链接，

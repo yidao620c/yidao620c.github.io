@@ -1,10 +1,13 @@
 ---
-title: "Spring集成Axis2"
-date: 2017-09-06 15:22:10 +0800
+title: Spring集成Axis2
+date: '2017-09-06 15:22:10 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [spring,axis2]
+tags:
+  - spring
+  - axis2
+abbrlink: 57631
 ---
 
 虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。

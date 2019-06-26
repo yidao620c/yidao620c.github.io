@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "Jenkins持续集成 - 安装配置"
-date: 2017-03-20 12:55:12 +0800
+title: Jenkins持续集成 - 安装配置
+date: '2017-03-20 12:55:12 +0800'
 toc: true
 categories: fullstack
-tags: [jenkins]
+tags:
+  - jenkins
+abbrlink: 34143
 ---
 Jenkins是一个用Java编写的开源的持续集成工具，前身是Hudson项目。
 在与Oracle发生争执后，项目从Hudson复制过来继续发展。

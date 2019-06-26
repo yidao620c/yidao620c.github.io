@@ -1,10 +1,12 @@
 ---
-title: "git简明教程 - 协作篇"
-date: 2017-02-08 22:52:36 +0800
+title: git简明教程 - 协作篇
+date: '2017-02-08 22:52:36 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [git]
+tags:
+  - git
+abbrlink: 23853
 ---
 
 Git是分布式版本控制系统，同一个Git仓库，可以分布到不同的机器上。怎么分布呢？最早，

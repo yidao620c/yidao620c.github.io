@@ -1,10 +1,12 @@
 ---
-title: "Nginx+uWSGI部署Python Web应用"
-date: 2017-01-20 07:32:15 +0800
+title: Nginx+uWSGI部署Python Web应用
+date: '2017-01-20 07:32:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [uwsgi]
+tags:
+  - uwsgi
+abbrlink: 63589
 ---
 web开发的过程中一定会遇到 cgi、wsgi 之类的名词，然后看着他们十分相似的解释估计还没开始写代码就晕了，这都什么鬼？
 今天我就聊聊这些容易搞混的名称。

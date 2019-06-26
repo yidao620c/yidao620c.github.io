@@ -1,10 +1,12 @@
 ---
-title: "nginx笔记 - 配置和使用"
-date: 2017-01-08 12:22:15 +0800
+title: nginx笔记 - 配置和使用
+date: '2017-01-08 12:22:15 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [nginx]
+tags:
+  - nginx
+abbrlink: 60436
 ---
 nginx是一个优秀的 HTTP 和反向代理服务器，一个邮件代理服务器，
 一个通用TCP/UDP代理服务器，官网地址：<https://nginx.org/en/>

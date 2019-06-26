@@ -1,9 +1,10 @@
 ---
 title: 使用GitBook编写项目文档
-date: 2017-11-30 12:16:53
 toc: true
 categories: 朝花夕拾
 tags: gitbook
+abbrlink: 61295
+date: 2017-11-30 12:16:53
 ---
 
 我之前写了一篇如何在readthedoc上面发布文档的文章，现在又多了一个选择，就是使用GitBook来编写文档。

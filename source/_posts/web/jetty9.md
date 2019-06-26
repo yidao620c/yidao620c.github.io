@@ -1,10 +1,12 @@
 ---
-title: "Jetty9简易教程"
-date: 2017-06-12 20:12:08 +0800
+title: Jetty9简易教程
+date: '2017-06-12 20:12:08 +0800'
 comments: true
 toc: true
 categories: web
-tags: [jetty9]
+tags:
+  - jetty9
+abbrlink: 18126
 ---
 Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。
 Jetty 可以用来作为一个传统的 Web 服务器，也可以作为一个动态的内容服务器，并且 Jetty 可以非常容易的嵌入到 Java 应用程序当中。

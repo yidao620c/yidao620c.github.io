@@ -1,10 +1,12 @@
 ---
-title: "CAS教程 - 定制开发"
-date: 2019-01-05 21:15:34 +0800
+title: CAS教程 - 定制开发
+date: '2019-01-05 21:15:34 +0800'
 comments: true
 toc: true
 categories: 网络安全
-tags: [CAS]
+tags:
+  - CAS
+abbrlink: 1019
 ---
 
 现在开始对CasServer进行二次开发，比如如何设置数据库连接，如何使用数据库的用户名和密码登录，

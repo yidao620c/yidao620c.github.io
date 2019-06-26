@@ -1,10 +1,12 @@
 ---
-title: "python核心 - 模块和包"
-date: 2015-10-30 22:22:22 +0800
+title: python核心 - 模块和包
+date: '2015-10-30 22:22:22 +0800'
 comments: true
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 42645
 ---
 模块和包都是用来组织代码用的，在python中一个模块就是一个.py文件，而一个包就是一个包含了`__init__.py`的文件夹。
 使用模块最大的好处就是提高代码可维护性，我们在编写代码的时候通常会引用内置模块或第三方模块。

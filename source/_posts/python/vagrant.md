@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "Vagrant创建虚拟化开发环境"
-date: 2016-09-02 22:22:22 +0800
+title: Vagrant创建虚拟化开发环境
+date: '2016-09-02 22:22:22 +0800'
 toc: true
 categories: python
-tags: [vagrant]
+tags:
+  - vagrant
+abbrlink: 35980
 ---
 
 作为一名开发者，是否经常抱怨环境问题，某个bug只出现在你的环境下面，找了很久才找到原来是一个很小的环境差异导致。

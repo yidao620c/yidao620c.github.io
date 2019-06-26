@@ -1,10 +1,12 @@
 ---
-title: "WireShark基本使用"
-date: 2017-01-05 16:33:19 +0800
+title: WireShark基本使用
+date: '2017-01-05 16:33:19 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [wireshark]
+tags:
+  - wireshark
+abbrlink: 60059
 ---
 wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。
 使用wireshark的人必须了解网络协议，否则就看不懂wireshark了。

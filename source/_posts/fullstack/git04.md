@@ -1,10 +1,12 @@
 ---
-title: "git简明教程 - 撤销篇"
-date: 2017-02-08 23:58:12 +0800
+title: git简明教程 - 撤销篇
+date: '2017-02-08 23:58:12 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [git]
+tags:
+  - git
+abbrlink: 43192
 ---
 
 在实际使用git的过程中，我发现最常遇到的就是撤销，git里面有reset、checkout、revert来帮助我们撤回修改。

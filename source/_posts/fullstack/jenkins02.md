@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "Jenkins持续集成 - 管道详解"
-date: 2017-03-22 09:32:16 +0800
+title: Jenkins持续集成 - 管道详解
+date: '2017-03-22 09:32:16 +0800'
 toc: true
 categories: fullstack
-tags: [jenkins]
+tags:
+  - jenkins
+abbrlink: 1844
 ---
 前面一篇介绍了Jenkins的入门安装和简单演示，这篇讲解最核心的Pipeline部分。
 

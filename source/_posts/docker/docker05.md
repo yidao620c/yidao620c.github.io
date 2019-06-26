@@ -1,9 +1,10 @@
 ---
 title: Docker每天学一点05 - Registry
-date: 2017-04-07 12:07:09
 toc: true
 categories: docker
 tags: docker
+abbrlink: 3685
+date: 2017-04-07 12:07:09
 ---
 
 前面已经学会怎样构建镜像了，这一章介绍怎样分发镜像给多个Docker Host使用，

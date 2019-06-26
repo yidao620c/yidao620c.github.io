@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "python核心 - 单元测试"
-date: 2015-12-22 22:22:22 +0800
+title: python核心 - 单元测试
+date: '2015-12-22 22:22:22 +0800'
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 20610
 ---
 
 单元测试在所有编程语言中都不陌生，对于一个健壮的软件来讲单元测试是很有必要的，

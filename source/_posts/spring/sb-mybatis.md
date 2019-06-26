@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 集成MyBatis"
-date: 2017-07-02 10:23:53 +0800
+title: SpringBoot系列 - 集成MyBatis
+date: '2017-07-02 10:23:53 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 2255
 ---
 
 MyBatis 是一款优秀的持久层框架，它支持定制化 SQL、存储过程以及高级映射。MyBatis 避免了几乎所有的 JDBC 代码和手动设置参数以及获取结果集。

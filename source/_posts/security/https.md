@@ -1,10 +1,12 @@
 ---
-title: "HTTPS协议详解"
-date: 2017-11-16 18:22:19 +0800
+title: HTTPS协议详解
+date: '2017-11-16 18:22:19 +0800'
 comments: true
 toc: true
 categories: 网络安全
-tags: [https]
+tags:
+  - https
+abbrlink: 44627
 ---
 
 HTTPS（全称：`Hypertext Transfer Protocol over Secure Socket Layer`），是以安全为目标的HTTP通道，简单讲是HTTP的安全版。

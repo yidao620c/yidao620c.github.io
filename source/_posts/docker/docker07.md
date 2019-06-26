@@ -1,9 +1,10 @@
 ---
 title: Docker每天学一点07 - 单主机网络
-date: 2017-04-10 12:17:22
 toc: true
 categories: docker
 tags: docker
+abbrlink: 57288
+date: 2017-04-10 12:17:22
 ---
 
 这一篇学习容器之间、容器和外界之间怎样相互通信。Docker 网络从覆盖范围可分为单主机的容器网络和跨主机的容器网络，

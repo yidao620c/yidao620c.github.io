@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "python核心 - IO编程"
-date: 2015-12-20 22:22:22 +0800
+title: python核心 - IO编程
+date: '2015-12-20 22:22:22 +0800'
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 62128
 ---
 IO在计算机中指Input/Output，也就是输入和输出。由于程序和运行时数据是在内存中驻留，
 由CPU这个超快的计算核心来执行，涉及到数据交换的地方，通常是磁盘、网络等，就需要IO接口。

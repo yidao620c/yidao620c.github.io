@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - RPC"
-date: 2017-05-16 09:09:37 +0800
+title: RabbitMQ简易教程 - RPC
+date: '2017-05-16 09:09:37 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 17827
 ---
 
 在教程第二篇里面我们学习了如何实现一个任务队列，异步方式去处理那些比较耗时的任务。

@@ -1,10 +1,12 @@
 ---
-title: "CSRF攻击介绍"
-date: 2016-07-22 18:36:08 +0800
+title: CSRF攻击介绍
+date: '2016-07-22 18:36:08 +0800'
 comments: true
 toc: true
 categories: 网络安全
-tags: [CSRF]
+tags:
+  - CSRF
+abbrlink: 16060
 ---
 CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。
 也被称为 `one click attack/session riding`，缩写为：CSRF/XSRF。

@@ -1,11 +1,13 @@
 ---
 layout: post
-title: "SiteMesh使用笔记"
-date: 2015-03-28 10:42:23 +0800
+title: SiteMesh使用笔记
+date: '2015-03-28 10:42:23 +0800'
 comments: true
 toc: true
 categories: java
-tags: [sitemesh]
+tags:
+  - sitemesh
+abbrlink: 36004
 ---
 
 SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重复编码的。

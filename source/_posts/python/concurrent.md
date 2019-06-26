@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "python核心 - 并发编程"
-date: 2015-12-18 22:22:22 +0800
+title: python核心 - 并发编程
+date: '2015-12-18 22:22:22 +0800'
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 64578
 ---
 
 现在是多核和并发时代，所以不管什么语言都要支持这个特性。并发是看上去同时执行，并行是在多核上同时执行。

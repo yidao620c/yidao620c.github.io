@@ -1,10 +1,12 @@
 ---
-title: "发布Maven构件到中央仓库"
-date: 2018-01-27 12:09:12 +0800
+title: 发布Maven构件到中央仓库
+date: '2018-01-27 12:09:12 +0800'
 comments: true
 toc: true
 categories: 开发工具
-tags: [maven]
+tags:
+  - maven
+abbrlink: 61361
 ---
 
 之前写过一篇如何使用Nexus私服，发布自己写的maven构件，供大家使用。但是只能在公司内部用，

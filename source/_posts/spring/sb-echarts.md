@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 集成Echarts导出图片"
-date: 2017-08-19 15:17:28 +0800
+title: SpringBoot系列 - 集成Echarts导出图片
+date: '2017-08-19 15:17:28 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 11587
 ---
 
 Echarts是百度一款开源可视化图表库，基于html5 Canvas的。能够快速让你看到漂亮的效果。也是百度开源产品中的良心之作。

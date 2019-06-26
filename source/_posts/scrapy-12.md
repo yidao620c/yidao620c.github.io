@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记12- 抓取动态网站"
-date: 2016-04-15 00:38:12 +0800
+title: Scrapy笔记12- 抓取动态网站
+date: '2016-04-15 00:38:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 42468
 ---
 前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。
 但是如今的互联网大部分的web页面都是动态的，经常逛的网站例如京东、淘宝等，商品列表都是js，并有Ajax渲染，

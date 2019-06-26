@@ -1,10 +1,12 @@
 ---
-title: "git简明教程 - 基础篇"
-date: 2017-02-06 21:32:30 +0800
+title: git简明教程 - 基础篇
+date: '2017-02-06 21:32:30 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [git]
+tags:
+  - git
+abbrlink: 59934
 ---
 很早就想些一篇关于git的文章了，这玩意儿实在好用，但是内容又比较多，
 这里我讲解最基本使用技巧，这个足以应对99%以上的场景，剩下那些真的要用到就去看官网手册。

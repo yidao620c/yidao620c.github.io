@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - cxf实现WebService"
-date: 2017-07-13 18:25:37 +0800
+title: SpringBoot系列 - cxf实现WebService
+date: '2017-07-13 18:25:37 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 12880
 ---
 
 说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，

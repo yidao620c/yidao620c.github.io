@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记06- Item Pipeline"
-date: 2016-03-18 01:00:12 +0800
+title: Scrapy笔记06- Item Pipeline
+date: '2016-03-18 01:00:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 40609
 ---
 
 当一个item被蜘蛛爬取到之后会被发送给Item Pipeline，然后多个组件按照顺序处理这个item。

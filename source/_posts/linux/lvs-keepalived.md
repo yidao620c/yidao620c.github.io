@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群"
-date: 2015-09-16 16:40:04 +0800
+title: CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群
+date: '2015-09-16 16:40:04 +0800'
 toc: true
 categories: linux
-tags: [负载均衡]
+tags:
+  - 负载均衡
+abbrlink: 18663
 ---
 
 我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。

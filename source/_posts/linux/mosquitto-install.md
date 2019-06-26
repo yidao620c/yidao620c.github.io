@@ -1,11 +1,13 @@
 ---
 layout: post
-title: "mqtt消息中间件mosquitto的安装和配置"
-date: 2015-05-17 16:33:07 +0800
+title: mqtt消息中间件mosquitto的安装和配置
+date: '2015-05-17 16:33:07 +0800'
 comments: true
 toc: true
 categories: linux
-tags: [mqtt]
+tags:
+  - mqtt
+abbrlink: 34260
 ---
 
 Mosquitto是一个开源(BSD许可证)的消息代理，实现MQTT(消息队列遥测传输)协议版本3.1.1。

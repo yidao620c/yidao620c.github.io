@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 集成SocketIO实时通信"
-date: 2017-07-16 19:09:58 +0800
+title: SpringBoot系列 - 集成SocketIO实时通信
+date: '2017-07-16 19:09:58 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 59332
 ---
 
 上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。

@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - 安装"
-date: 2017-05-06 10:55:13 +0800
+title: RabbitMQ简易教程 - 安装
+date: '2017-05-06 10:55:13 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 24310
 ---
 
 最近又开始捣鼓RabbitMQ了，一个超好用的队列中间件，官网教程更新，自己也将有用的东东记录下来。

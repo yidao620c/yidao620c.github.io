@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - 路由"
-date: 2017-05-13 19:17:55 +0800
+title: RabbitMQ简易教程 - 路由
+date: '2017-05-13 19:17:55 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 11718
 ---
 
 前面一篇实现了一个非常基础的日志系统，交换机将所有接收到的消息广播到它所知道的多个接受者。

@@ -1,9 +1,10 @@
 ---
 title: Docker每天学一点08 - 存储
-date: 2017-04-11 10:37:55
 toc: true
 categories: docker
 tags: docker
+abbrlink: 46558
+date: 2017-04-11 10:37:55
 ---
 
 Docker 为容器提供了两种存放数据的资源：

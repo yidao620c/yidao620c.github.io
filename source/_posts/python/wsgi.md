@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "WGSI简易教程"
-date: 2016-04-22 20:02:42 +0800
+title: WGSI简易教程
+date: '2016-04-22 20:02:42 +0800'
 toc: true
 categories: python
-tags: [wsgi]
+tags:
+  - wsgi
+abbrlink: 57725
 ---
 
 WSGI的全称是Web Server Gateway Interface，翻译过来就是Web服务器网关接口。具体的来说，WSGI是一个规范，定义了Web服务器如何与Python应用程序进行交互，使得使用Python写的Web应用程序可以和Web服务器对接起来。最新版本在[PEP-3333](https://www.python.org/dev/peps/pep-3333/)中定义。

@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "python核心 - 面向对象编程"
-date: 2015-12-06 22:22:22 +0800
+title: python核心 - 面向对象编程
+date: '2015-12-06 22:22:22 +0800'
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 59306
 ---
 
 面向对象编程——Object Oriented Programming，简称OOP，是一种程序设计思想。

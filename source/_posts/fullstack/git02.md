@@ -1,10 +1,12 @@
 ---
-title: "git简明教程 - 分支篇"
-date: 2017-02-07 22:08:25 +0800
+title: git简明教程 - 分支篇
+date: '2017-02-07 22:08:25 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [git]
+tags:
+  - git
+abbrlink: 551
 ---
 
 终于要介绍git的杀手级特性分支了，这也是大部分人使用git的原因。

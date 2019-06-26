@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记07- 内置服务"
-date: 2016-03-19 01:12:12 +0800
+title: Scrapy笔记07- 内置服务
+date: '2016-03-19 01:12:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 34374
 ---
 
 Scrapy使用Python内置的的日志系统来记录事件日志。

@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 集成Thymeleaf构建Web应用"
-date: 2017-07-01 18:17:29 +0800
+title: SpringBoot系列 - 集成Thymeleaf构建Web应用
+date: '2017-07-01 18:17:29 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 55972
 ---
 
 Thymeleaf 是一个跟 Velocity、FreeMarker 类似的模板引擎，它可以完全替代 JSP 。相较与其他的模板引擎，它有如下三个极吸引人的特点：

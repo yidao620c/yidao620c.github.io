@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记09- 部署"
-date: 2016-03-21 00:16:12 +0800
+title: Scrapy笔记09- 部署
+date: '2016-03-21 00:16:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 4229
 ---
 
 本篇主要介绍两种部署爬虫的方案。如果仅仅在开发调试的时候在本地部署跑起来是很容易的，不过要是生产环境，爬虫任务量大，并且持续时间长，那么还是建议使用专业的部署方法。主要是两种方案：

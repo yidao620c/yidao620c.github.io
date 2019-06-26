@@ -1,10 +1,13 @@
 ---
-title: "Java加解密算法"
-date: 2017-11-22 16:38:21 +0800
+title: Java加解密算法
+date: '2017-11-22 16:38:21 +0800'
 comments: true
 toc: true
 categories: 算法之美
-tags: [AES, RSA]
+tags:
+  - AES
+  - RSA
+abbrlink: 64400
 ---
 
 密码学领域有对称加密和非对称加密算法，本篇将使用Java语言来实现几种常见的加解密算法。

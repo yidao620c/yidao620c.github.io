@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "Java8中的lambda表达式"
-date: 2015-05-08 15:42:11 +0800
+title: Java8中的lambda表达式
+date: '2015-05-08 15:42:11 +0800'
 comments: true
 toc: true
 categories: java
 tags: java
+abbrlink: 58803
 ---
 
 2014年3月18日，Oracle终于发布Java8正式版。在新的版本里面加入了很多特性，

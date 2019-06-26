@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客06- 模板继承"
-date: 2015-08-15 21:44:21 +0800
+title: Django1.9开发博客06- 模板继承
+date: '2015-08-15 21:44:21 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 40067
 ---
 
 模板继承就是网站的多个页面可以共享同一个页面布局或者是页面的某几个部分的内容。通过这种方式你就需要在每个页面复制粘贴同样的代码了。

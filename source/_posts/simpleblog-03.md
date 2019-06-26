@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客03- 部署"
-date: 2015-08-06 19:03:57 +0800
+title: Django1.9开发博客03- 部署
+date: '2015-08-06 19:03:57 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 35320
 ---
 
 到目前为止，你的网站只能在你自己的电脑上访问到。你需要将它发布到公网上去让地球上的人都能看到，那么要怎么做呢？

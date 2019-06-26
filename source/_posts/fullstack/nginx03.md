@@ -1,10 +1,13 @@
 ---
-title: "nginx笔记 - 配置HTTPS"
-date: 2017-01-12 20:16:16 +0800
+title: nginx笔记 - 配置HTTPS
+date: '2017-01-12 20:16:16 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [nginx, https]
+tags:
+  - nginx
+  - https
+abbrlink: 35706
 ---
 TLS(transport layer security), 和它的后继者SSL是一个安全套接字层协议，是为了给普通的网络传输内容加密传输而来。
 

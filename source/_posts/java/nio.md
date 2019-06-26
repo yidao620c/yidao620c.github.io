@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "NIO笔记-缓存器细节"
-date: 2015-06-20 18:15:42 +0800
+title: NIO笔记-缓存器细节
+date: '2015-06-20 18:15:42 +0800'
 toc: false
 categories: java
 tags: java
+abbrlink: 32455
 ---
 
 **用缓存器操纵数据**

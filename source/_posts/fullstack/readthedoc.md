@@ -1,10 +1,13 @@
 ---
-title: "使用ReadtheDocs托管文档"
-date: 2017-01-22 20:16:09 +0800
+title: 使用ReadtheDocs托管文档
+date: '2017-01-22 20:16:09 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [sphinx, readthedocs]
+tags:
+  - sphinx
+  - readthedocs
+abbrlink: 715
 ---
 [Read the Docs](https://readthedocs.org/)是一个在线文档托管服务，
 你可以从各种版本控制系统中导入文档，如果你使用[webhooks](http://docs.readthedocs.io/en/latest/webhooks.html)，

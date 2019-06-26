@@ -1,10 +1,12 @@
 ---
-title: "简单介绍OAuth2.0的授权流程"
-date: 2017-03-29 12:52:17 +0800
+title: 简单介绍OAuth2.0的授权流程
+date: '2017-03-29 12:52:17 +0800'
 comments: true
 toc: true
 categories: 网络安全
-tags: [oauth]
+tags:
+  - oauth
+abbrlink: 16054
 ---
 
 OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表），

@@ -1,10 +1,12 @@
 ---
-title: "git简明教程 - 技巧篇"
-date: 2017-02-15 09:34:21 +0800
+title: git简明教程 - 技巧篇
+date: '2017-02-15 09:34:21 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [git]
+tags:
+  - git
+abbrlink: 48915
 ---
 
 这一篇会介绍git的一些常用技巧，开发中经常会遇到的问题，让我们感受git的强大之处。

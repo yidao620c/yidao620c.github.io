@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客05- 页面美化"
-date: 2015-08-12 10:23:50 +0800
+title: Django1.9开发博客05- 页面美化
+date: '2015-08-12 10:23:50 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 30400
 ---
 
 css是一种用来描述某种标记语言写的web站点的样式语言。这里我们并不想展开讨论，

@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客04- 三部曲"
-date: 2015-08-09 20:16:02 +0800
+title: Django1.9开发博客04- 三部曲
+date: '2015-08-09 20:16:02 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 56861
 ---
 
 其实在django中实现一个功能只需要三个步骤即可，这里我姑且叫它三部曲。

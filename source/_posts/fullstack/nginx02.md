@@ -1,10 +1,12 @@
 ---
-title: "nginx笔记 - 进阶篇"
-date: 2017-01-09 12:25:16 +0800
+title: nginx笔记 - 进阶篇
+date: '2017-01-09 12:25:16 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [nginx]
+tags:
+  - nginx
+abbrlink: 18549
 ---
 
 本篇介绍nginx的一些进阶使用方法，包括反向代理、虚拟主机、负载均衡、页面缓存等等。

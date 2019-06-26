@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "python核心 - 生成器"
-date: 2015-12-02 22:12:42 +0800
+title: python核心 - 生成器
+date: '2015-12-02 22:12:42 +0800'
 toc: true
 categories: python
-tags: [python核心]
+tags:
+  - python核心
+abbrlink: 32465
 ---
 在讲生成器之前，先讲讲python里面常用的几个常见的推导式：
 

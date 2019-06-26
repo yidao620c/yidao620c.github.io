@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "Jenkins持续集成 - 使用案例"
-date: 2017-03-25 09:32:16 +0800
+title: Jenkins持续集成 - 使用案例
+date: '2017-03-25 09:32:16 +0800'
 toc: true
 categories: fullstack
-tags: [jenkins]
+tags:
+  - jenkins
+abbrlink: 15782
 ---
 
 这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。

@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记11- 模拟登录"
-date: 2016-04-12 00:25:12 +0800
+title: Scrapy笔记11- 模拟登录
+date: '2016-04-12 00:25:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 21665
 ---
 有时候爬取网站的时候需要登录，在Scrapy中可以通过模拟登录保存cookie后再去爬取相应的页面。这里我通过登录github然后爬取自己的issue列表来演示下整个原理。
 

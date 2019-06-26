@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记04- Selector详解"
-date: 2016-03-14 02:00:15 +0800
+title: Scrapy笔记04- Selector详解
+date: '2016-03-14 02:00:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 30592
 ---
 
 在你爬取网页的时候，最普遍的事情就是在页面源码中提取需要的数据，我们有几个库可以帮你完成这个任务：

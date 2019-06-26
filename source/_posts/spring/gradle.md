@@ -1,10 +1,12 @@
 ---
-title: "Gradle构建入门"
-date: 2017-12-10 10:22:29 +0800
+title: Gradle构建入门
+date: '2017-12-10 10:22:29 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [gradle]
+tags:
+  - gradle
+abbrlink: 42153
 ---
 
 在开发Spring Boot应用的时候，除了Maven以外，Gradle也是一个不错的构建选择。

@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记03- Spider详解"
-date: 2016-03-12 01:19:15 +0800
+title: Scrapy笔记03- Spider详解
+date: '2016-03-12 01:19:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 52404
 ---
 
 Spider是爬虫框架的核心，爬取流程如下：

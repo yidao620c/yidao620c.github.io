@@ -1,9 +1,10 @@
 ---
 title: Docker每天学一点01 - 入门
-date: 2017-04-01 16:11:23
 toc: true
 categories: docker
 tags: docker
+abbrlink: 41901
+date: 2017-04-01 16:11:23
 ---
 
 容器是一种轻量级、可移植、自包含的软件打包技术，使应用程序可以在几乎任何地方以相同的方式运行。

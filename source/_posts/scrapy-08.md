@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记08- 文件与图片"
-date: 2016-03-20 01:16:12 +0800
+title: Scrapy笔记08- 文件与图片
+date: '2016-03-20 01:16:12 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 23354
 ---
 
 Scrapy为我们提供了可重用的[item pipelines](http://doc.scrapy.org/en/1.0/topics/item-pipeline.html)为某个特定的Item去下载文件。

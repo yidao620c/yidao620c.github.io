@@ -1,11 +1,12 @@
-
 ---
 layout: post
-title: "5分钟搭建一个license服务器"
-date: 2016-10-16 20:22:22 +0800
+title: 5分钟搭建一个license服务器
+date: '2016-10-16 20:22:22 +0800'
 toc: true
 categories: linux
-tags: [license]
+tags:
+  - license
+abbrlink: 7125
 ---
 
 作为一个码农对于那些优秀的开发工具爱不释手，它们对框架的支持、界面、插件都是那么的优秀，

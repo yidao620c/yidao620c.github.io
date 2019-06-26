@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "fastjson对Date的处理"
-date: 2015-04-22 13:45:15 +0800
+title: fastjson对Date的处理
+date: '2015-04-22 13:45:15 +0800'
 toc: true
 categories: java
 tags: java
+abbrlink: 10267
 ---
 
 fastjson对日期的序列化方式

@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客01- 入门篇"
-date: 2015-08-01 17:31:20 +0800
+title: Django1.9开发博客01- 入门篇
+date: '2015-08-01 17:31:20 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 6532
 ---
 
 笔者用过django一段时间了，是时候做点笔记了。不过官网文档稍微有点复杂，对新手而言很困难，

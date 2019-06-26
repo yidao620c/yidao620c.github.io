@@ -1,10 +1,13 @@
 ---
-title: "nginx反向代理WebSocket"
-date: 2018-03-12 11:24:23 +0800
+title: nginx反向代理WebSocket
+date: '2018-03-12 11:24:23 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [nginx, websocket]
+tags:
+  - nginx
+  - websocket
+abbrlink: 22533
 ---
 
 WebSocket协议相比较于HTTP协议成功握手后可以多次进行通讯，直到连接被关闭。但是WebSocket中的握手和HTTP中的握手兼容，

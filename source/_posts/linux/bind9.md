@@ -1,10 +1,13 @@
 ---
 layout: post
-title: "CentOS7.2搭建DNS服务器"
-date: 2016-07-01 09:33:22 +0800
+title: CentOS7.2搭建DNS服务器
+date: '2016-07-01 09:33:22 +0800'
 toc: true
 categories: linux
-tags: [dns, bind9]
+tags:
+  - dns
+  - bind9
+abbrlink: 33172
 ---
 Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
 全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。

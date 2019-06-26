@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "vim简易教程"
-date: 2016-06-02 20:07:22 +0800
+title: vim简易教程
+date: '2016-06-02 20:07:22 +0800'
 toc: true
 categories: linux
-tags: [vim]
+tags:
+  - vim
+abbrlink: 9657
 ---
 
 vim 是 Linux 系统上的最著名的文本/代码编辑器，也是早年的 Vi 编辑器的加强版，

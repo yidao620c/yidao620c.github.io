@@ -1,10 +1,13 @@
 ---
-title: "SpringBoot系列 - 集成JWT实现接口权限认证"
-date: 2017-07-09 20:12:22 +0800
+title: SpringBoot系列 - 集成JWT实现接口权限认证
+date: '2017-07-09 20:12:22 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot, jwt]
+tags:
+  - springboot
+  - jwt
+abbrlink: 40840
 ---
 
 ## RESTful API认证方式

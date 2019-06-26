@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记02- 完整示例"
-date: 2016-03-10 09:59:15 +0800
+title: Scrapy笔记02- 完整示例
+date: '2016-03-10 09:59:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 23055
 ---
 
 这篇文章我们通过一个比较完整的例子来教你使用Scrapy，我选择爬取[虎嗅网首页](http://www.huxiu.com/)的新闻列表。

@@ -1,10 +1,12 @@
 ---
-title: "Scrapy笔记01- 入门篇"
-date: 2016-03-08 10:59:15 +0800
+title: Scrapy笔记01- 入门篇
+date: '2016-03-08 10:59:15 +0800'
 comments: true
 toc: true
 categories: python
-tags: [scrapy]
+tags:
+  - scrapy
+abbrlink: 18790
 ---
 
 Scrapy是一个为了爬取网站数据，提取结构性数据而编写的应用框架。可以应用在包括数据挖掘，

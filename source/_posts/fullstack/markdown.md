@@ -1,10 +1,12 @@
 ---
-title: "markdown语法详解"
-date: 2015-03-22 16:22:15 +0800
+title: markdown语法详解
+date: '2015-03-22 16:22:15 +0800'
 comments: true
 toc: true
 categories: fullstack
-tags: [markdown]
+tags:
+  - markdown
+abbrlink: 6135
 ---
 
 Markdown 是一种轻量级标记语言。它允许人们“使用易读易写的纯文本格式编写文档，

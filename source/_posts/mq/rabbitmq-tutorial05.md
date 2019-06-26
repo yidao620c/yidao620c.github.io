@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - 主题"
-date: 2017-05-15 16:33:17 +0800
+title: RabbitMQ简易教程 - 主题
+date: '2017-05-15 16:33:17 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 44320
 ---
 
 前面一篇通过使用`direct`类型的交换机代替`fanout`广播类型交换机，

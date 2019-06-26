@@ -1,9 +1,10 @@
 ---
 title: Docker每天学一点02 - 架构详解
-date: 2017-04-02 09:21:56
 toc: true
 categories: docker
 tags: docker
+abbrlink: 45614
+date: 2017-04-02 09:21:56
 ---
 
 Docker 的核心组件包括：

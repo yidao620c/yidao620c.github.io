@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "使用WatchService监听文件变化"
-date: 2017-09-21 16:12:22 +0800
+title: 使用WatchService监听文件变化
+date: '2017-09-21 16:12:22 +0800'
 toc: true
 categories: java
 tags: java
+abbrlink: 63985
 ---
 
 在Java 7发布的新的IO框架中，除了大家都熟知的 `FileVisitor` 接口外，还有个 `WatchService` 接口经常被人忽视掉。

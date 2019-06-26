@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客14- 集成Xadmin"
-date: 2015-08-26 21:45:29 +0800
+title: Django1.9开发博客14- 集成Xadmin
+date: '2015-08-26 21:45:29 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 61965
 ---
 
 xadmin是一个django的管理后台实现，使用了更加灵活的架构设计及Bootstrap UI框架，

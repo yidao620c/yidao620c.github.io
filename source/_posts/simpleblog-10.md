@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客10- 全文搜索"
-date: 2015-08-21 15:32:28 +0800
+title: Django1.9开发博客10- 全文搜索
+date: '2015-08-21 15:32:28 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 37841
 ---
 
 Django本身不提供全文检索的功能，但django-haystack为其提供了全文检索的框架。

@@ -1,9 +1,10 @@
 ---
 title: 使用hexo搭建github博客
-date: 2016-03-06 19:47:53
 toc: true
 categories: 朝花夕拾
 tags: hexo
+abbrlink: 27592
+date: 2016-03-06 19:47:53
 ---
 
 最今天我又折腾了我的博客，将它从octopress迁移到hexo上来。之前还专门写了一篇怎样利用octopress搭建博客的文章，

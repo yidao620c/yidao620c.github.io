@@ -1,10 +1,12 @@
 ---
-title: "MySQL核心知识整理"
-date: 2016-09-17 12:07:14 +0800
+title: MySQL核心知识整理
+date: '2016-09-17 12:07:14 +0800'
 comments: true
 toc: true
 categories: database
-tags: [mysql]
+tags:
+  - mysql
+abbrlink: 58473
 ---
 
 用了这么久的mysql数据库，是时候来一篇总结了，这里整理使用过程中觉得比较重要也比较常用的知识点。

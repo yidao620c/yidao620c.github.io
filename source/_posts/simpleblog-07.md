@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Django1.9开发博客07- 实现功能"
-date: 2015-08-16 12:02:56 +0800
+title: Django1.9开发博客07- 实现功能
+date: '2015-08-16 12:02:56 +0800'
 toc: true
 categories: python
 tags: django
+abbrlink: 45644
 ---
 
 到目前为止我们已经完成了一个django应用的所有基础部分。

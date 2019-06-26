@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "servlet filter详解"
-date: 2015-04-06 21:08:25 +0800
+title: servlet filter详解
+date: '2015-04-06 21:08:25 +0800'
 toc: true
 categories: java
-tags: [servlet]
+tags:
+  - servlet
+abbrlink: 33952
 ---
 
 在写一个springmvc项目中想对用户的请求进行拦截，只有登录用户才能访问资源。

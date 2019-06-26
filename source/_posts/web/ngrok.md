@@ -1,10 +1,12 @@
 ---
-title: "CentOS7搭建ngrok服务器"
-date: 2017-12-29 09:48:19 +0800
+title: CentOS7搭建ngrok服务器
+date: '2017-12-29 09:48:19 +0800'
 comments: true
 toc: true
 categories: web
-tags: [ngrok]
+tags:
+  - ngrok
+abbrlink: 65249
 ---
 
 ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过公共的端口和外部建立一个安全的通道，

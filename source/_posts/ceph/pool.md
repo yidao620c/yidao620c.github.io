@@ -1,10 +1,12 @@
 ---
-title: "ceph pool相关命令"
-date: 2017-03-16 12:07:09 +0800
+title: ceph pool相关命令
+date: '2017-03-16 12:07:09 +0800'
 comments: true
 toc: true
 categories: ceph
-tags: [ceph]
+tags:
+  - ceph
+abbrlink: 51292
 ---
 
 安装完ceph集群后默认会创建一个名字叫rbd的存储池，可自己创建存储池。

@@ -1,10 +1,12 @@
 ---
-title: "聊一聊WebSocket"
-date: 2017-05-03 12:09:22 +0800
+title: 聊一聊WebSocket
+date: '2017-05-03 12:09:22 +0800'
 comments: true
 toc: true
 categories: web
-tags: [websocket]
+tags:
+  - websocket
+abbrlink: 27115
 ---
 
 WebSocket是HTML5开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。

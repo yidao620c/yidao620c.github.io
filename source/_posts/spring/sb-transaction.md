@@ -1,10 +1,12 @@
 ---
-title: "SpringBoot系列 - 声明式事务"
-date: 2017-07-26 15:55:36 +0800
+title: SpringBoot系列 - 声明式事务
+date: '2017-07-26 15:55:36 +0800'
 comments: true
 toc: true
 categories: spring
-tags: [springboot]
+tags:
+  - springboot
+abbrlink: 61524
 ---
 
 所有数据访问技术都有事务机制，这些技术提供了API来开启事务、提交事务完成数据操作，

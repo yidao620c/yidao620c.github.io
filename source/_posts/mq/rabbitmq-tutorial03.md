@@ -1,11 +1,12 @@
 ---
 layout: post
-title: "RabbitMQ简易教程 - 发布订阅"
-date: 2017-05-10 13:14:22 +0800
+title: RabbitMQ简易教程 - 发布订阅
+date: '2017-05-10 13:14:22 +0800'
 comments: true
 toc: true
 categories: mq
 tags: rabbitmq
+abbrlink: 59466
 ---
 
 前面一篇介绍的任务队列是每个消息只能被一个工作者取走。这一篇讲解发布/订阅消息模式，

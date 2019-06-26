@@ -1,10 +1,12 @@
 ---
-title: "JWT介绍和安全防范"
-date: 2017-06-22 19:12:35 +0800
+title: JWT介绍和安全防范
+date: '2017-06-22 19:12:35 +0800'
 comments: true
 toc: true
 categories: 网络安全
-tags: [jwt]
+tags:
+  - jwt
+abbrlink: 21652
 ---
 
 Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，

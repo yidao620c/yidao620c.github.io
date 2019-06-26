@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "redis笔记01 - 入门与安装"
-date: 2015-07-01 12:15:42 +0800
+title: redis笔记01 - 入门与安装
+date: '2015-07-01 12:15:42 +0800'
 toc: true
 categories: cache
 tags: redis
+abbrlink: 40122
 ---
 
 **更新**于2017/08/02，使用最新版 redis 4.0.1 演示

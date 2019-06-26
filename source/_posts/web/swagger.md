@@ -1,10 +1,12 @@
 ---
-title: "使用Swagger生成RESTful API文档"
-date: 2017-06-09 12:32:08 +0800
+title: 使用Swagger生成RESTful API文档
+date: '2017-06-09 12:32:08 +0800'
 comments: true
 toc: true
 categories: web
-tags: [swagger]
+tags:
+  - swagger
+abbrlink: 61300
 ---
 REST API都是要对外提供服务的，那么文档是必须的。Swagger是一个简单但功能强大的API表达工具。
 它具有地球上最大的API工具生态系统，数以千计的开发人员，使用几乎所有的现代编程语言，
