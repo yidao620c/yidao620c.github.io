@@ -13,7 +13,7 @@ abbrlink: 54935
 
 全部命令都是在 root 用户下执行
 
-安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。<!--more-->
+安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。
 
 ## 安装和添加基础工具
 ``` bash

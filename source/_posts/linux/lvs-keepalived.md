@@ -19,7 +19,7 @@ abbrlink: 18663
 + LVS集群的体系结构：<http://www.linuxvirtualserver.org/zh/lvs2.html>
 + LVS集群中的IP负载均衡技术：<http://www.linuxvirtualserver.org/zh/lvs3.html>
 + LVS集群的负载调度：<http://www.linuxvirtualserver.org/zh/lvs4.html>
-<!--more-->
+
 
 **2、什么是KeepAlived?**
 

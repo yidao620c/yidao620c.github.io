@@ -12,7 +12,7 @@ abbrlink: 41092
 之前写过一篇 [使用Ajax实现异步任务](https://www.xncoding.com/2017/05/02/web/async.html) 的文章，
 介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。
 但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费，
-这里正式介绍如果通过`WebSocket` + `RabbitMQ`来优雅的实现。<!--more-->
+这里正式介绍如果通过`WebSocket` + `RabbitMQ`来优雅的实现。
 
 ## WebSocket 双向通信
 

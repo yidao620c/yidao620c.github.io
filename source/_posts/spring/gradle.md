@@ -11,7 +11,7 @@ abbrlink: 42153
 
 在开发Spring Boot应用的时候，除了Maven以外，Gradle也是一个不错的构建选择。
 IDEA 默认使用Gradle工具做Android的构建程序，在开发APP的时候就必须要使用到Gradle了。
-这里简单记录一下使用的方法，以及跟IDEA的集成方式。<!--more-->
+这里简单记录一下使用的方法，以及跟IDEA的集成方式。
 
 ## 下载和安装
 

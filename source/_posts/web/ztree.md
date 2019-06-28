@@ -15,7 +15,7 @@ abbrlink: 12206
 
 官网地址：<http://www.treejs.cn/v3/main.php>
 
-另外还有好多实际效果的演示，可以去看看。<!--more-->
+另外还有好多实际效果的演示，可以去看看。
 
 ## 下载
 直接去github下载源码：<https://github.com/zTree/zTree_v3>

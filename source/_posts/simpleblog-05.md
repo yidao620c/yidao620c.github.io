@@ -11,7 +11,7 @@ abbrlink: 30400
 css是一种用来描述某种标记语言写的web站点的样式语言。这里我们并不想展开讨论，
 关于CSS我在这里推荐一个很不错的资源： [Codeacademy HTML & CSS course][]
 
-不想从头开始写，因为我们有现成的css框架，没必要重复造轮子。<!--more-->
+不想从头开始写，因为我们有现成的css框架，没必要重复造轮子。
 
 ### 使用Bootstrap
 目前最流行的css框架非bootstrap莫属了，官网地址：<http://getbootstrap.com/>

@@ -25,7 +25,7 @@ but many different kind of values are supported: Strings, Lists, Sets, Sorted Se
 缓存的应用场景有哪些呢？
 
 比如常见的电商场景，根据商品 ID 获取商品信息时，店铺信息和商品详情信息就可以缓存在 Redis，直接从 Redis 获取。
-减少了去数据库查询的次数。但会出现新的问题，就是如何对缓存进行更新？这就是下面要讲的。<!--more-->
+减少了去数据库查询的次数。但会出现新的问题，就是如何对缓存进行更新？这就是下面要讲的。
 
 ## 缓存更新策略
 

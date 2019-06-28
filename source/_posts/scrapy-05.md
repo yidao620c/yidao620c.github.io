@@ -11,7 +11,7 @@ abbrlink: 16515
 
 Item是保存结构数据的地方，Scrapy可以将解析结果以字典形式返回，但是Python中字典缺少结构，在大型爬虫系统中很不方便。
 
-Item提供了类字典的API，并且可以很方便的声明字段，很多Scrapy组件可以利用Item的其他信息。<!--more-->
+Item提供了类字典的API，并且可以很方便的声明字段，很多Scrapy组件可以利用Item的其他信息。
 
 ## 定义Item
 定义Item非常简单，只需要继承`scrapy.Item`类，并将所有字段都定义为`scrapy.Field`类型即可

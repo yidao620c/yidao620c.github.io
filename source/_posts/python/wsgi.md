@@ -11,7 +11,7 @@ abbrlink: 57725
 
 WSGI的全称是Web Server Gateway Interface，翻译过来就是Web服务器网关接口。具体的来说，WSGI是一个规范，定义了Web服务器如何与Python应用程序进行交互，使得使用Python写的Web应用程序可以和Web服务器对接起来。最新版本在[PEP-3333](https://www.python.org/dev/peps/pep-3333/)中定义。
 
-对于初学者来说，上面那段就是废话，说了跟没说一样。接下来详细说明下这个东东到底是如何工作的。<!--more-->
+对于初学者来说，上面那段就是废话，说了跟没说一样。接下来详细说明下这个东东到底是如何工作的。
 
 ### 为什么需要WSGI这个规范
 

@@ -13,7 +13,7 @@ REST，即Representational State Transfer的缩写，对这个词组的翻译是
 
 RESTful是一种软件设计风格，就是目前最流行的一种互联网软件架构。它结构清晰、符合标准、易于理解、扩展方便，所以正得到越来越多网站的采用。
 
-SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。<!--more-->
+SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。
 
 ## 几个注解
 

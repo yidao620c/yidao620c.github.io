@@ -24,7 +24,7 @@ print(type(now))
 ```
 如果仅导入import datetime，则必须引用全名datetime.datetime
 
-datetime.now()返回当前日期和时间，其类型是datetime <!--more-->
+datetime.now()返回当前日期和时间，其类型是datetime 
 
 ## 获取指定日期和时间
 要指定某个日期和时间，我们直接用参数构造一个datetime

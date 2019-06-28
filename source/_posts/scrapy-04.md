@@ -16,7 +16,7 @@ abbrlink: 30592
 2. [lxml](http://lxml.de/)是一个基于[ElementTree](https://docs.python.org/2/library/xml.etree.elementtree.html)的XML解析库(同时还能解析HTML),
 不过lxml并不是Python标准库
 
-而Scrapy实现了自己的数据提取机制，它们被称为选择器，通过[XPath](http://www.w3.org/TR/xpath)或[CSS](http://www.w3.org/TR/selectors)表达式在HTML文档中来选择特定的部分<!--more-->
+而Scrapy实现了自己的数据提取机制，它们被称为选择器，通过[XPath](http://www.w3.org/TR/xpath)或[CSS](http://www.w3.org/TR/selectors)表达式在HTML文档中来选择特定的部分
 
 [XPath](http://www.w3.org/TR/xpath)是一用来在XML中选择节点的语言，同时可以用在HTML上面。
 [CSS](http://www.w3.org/TR/selectors)是一种HTML文档上面的样式语言。

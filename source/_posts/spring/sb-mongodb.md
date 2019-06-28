@@ -24,7 +24,7 @@ MongoDB的适用场景：
 8. 应用需要99.999%高可用
 9. 应用需要大量的地理位置查询、文本查询
 
-本篇将介绍如何在SpringBoot中使用MongoDB数据库。<!--more-->
+本篇将介绍如何在SpringBoot中使用MongoDB数据库。
 
 ## maven依赖
 

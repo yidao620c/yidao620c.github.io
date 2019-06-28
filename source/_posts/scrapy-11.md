@@ -12,7 +12,7 @@ abbrlink: 21665
 
 要想实现登录就需要表单提交，先通过浏览器访问github的登录页面<https://github.com/login>，然后使用浏览器调试工具来得到登录时需要提交什么东西。
 ![](https://xnstatic-1253397658.file.myqcloud.com/scrapy01.png)
-我这里使用chrome浏览器的调试工具，F12打开后选择Network，并将Preserve log勾上。我故意输入错误的用户名和密码，得到它提交的form表单参数还有POST提交的UR<!--more-->
+我这里使用chrome浏览器的调试工具，F12打开后选择Network，并将Preserve log勾上。我故意输入错误的用户名和密码，得到它提交的form表单参数还有POST提交的UR
 ![](https://xnstatic-1253397658.file.myqcloud.com/scrapy02.png)
 去查看html源码会发现表单里面有个隐藏的`authenticity_token`值，这个是需要先获取然后跟用户名和密码一起提交的。
 ![](https://xnstatic-1253397658.file.myqcloud.com/scrapy03.png)

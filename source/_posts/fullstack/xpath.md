@@ -15,7 +15,7 @@ XPath基于XML的树状结构，提供在数据结构树中找寻节点的能力
 起初XPath的提出的初衷是将其作为一个通用的、介于XPointer与XSL间的语法模型。
 但是XPath很快的被开发者采用来当作小型查询语言。
 
-W3C网址： <http://www.w3schools.com/XPath/><!--more-->
+W3C网址： <http://www.w3schools.com/XPath/>
 
 ### 表示法
 

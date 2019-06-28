@@ -18,7 +18,7 @@ abbrlink: 23055
 * 编写一个spider来爬取某个网站并提取出所有的Item对象
 * 编写一个Item Pipline来存储提取出来的Item对象
 
-Scrapy使用Python语言编写，如果你对这门语言还不熟，请先去学习下基本知识。<!--more-->
+Scrapy使用Python语言编写，如果你对这门语言还不熟，请先去学习下基本知识。
 
 ## 创建Scrapy工程
 

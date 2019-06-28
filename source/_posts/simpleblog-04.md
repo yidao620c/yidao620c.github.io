@@ -15,7 +15,7 @@ abbrlink: 56861
 1. 定义urls映射
 1. 定义views
 1. 定义templates
-<!--more-->
+
 
 ### 什么是URL？
 URL就算一个WEB地址，你在浏览器输入这个地址，然后浏览器返回相应的网页给你。

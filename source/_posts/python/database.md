@@ -18,7 +18,7 @@ MySQL的驱动有多种实现，比如纯python实现的pymysql和mysql-connecto
 pip install mysql-connector
 ```
 
-我们演示如何连接到MySQL服务器的test数据库：<!--more-->
+我们演示如何连接到MySQL服务器的test数据库：
 ``` python
 # 导入MySQL驱动:
 >>> import mysql.connector

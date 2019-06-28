@@ -12,7 +12,7 @@ Docker 为容器提供了两种存放数据的资源：
 1. 由 storage driver 管理的镜像层和容器层。
 2. Data Volume
 
-接下来分别介绍下这两种存储方式。<!--more-->
+接下来分别介绍下这两种存储方式。
 
 ## storage driver
 

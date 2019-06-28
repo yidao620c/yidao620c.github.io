@@ -11,7 +11,7 @@ abbrlink: 57631
 ---
 
 虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。
-本篇讲解一下如何在Spring4里面集成Axis2开发WebService，包括服务器端和客户端。<!--more-->
+本篇讲解一下如何在Spring4里面集成Axis2开发WebService，包括服务器端和客户端。
 
 ## 服务端
 

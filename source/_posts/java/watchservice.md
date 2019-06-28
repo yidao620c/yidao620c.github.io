@@ -14,7 +14,7 @@ abbrlink: 63985
 `WatchService` 用来观察被注册了的对象的变化和事件。它和`Watchable`两个接口的配合使用，
 WatchService类似于在观察者模式中的观察者，Watchable类似域观察者模式中的被观察者。
 
-而Java 7中的`java.nio.file.Path`类就实现了Watchable接口，这样的话，和Path类一起可实现观察者模式。<!--more-->
+而Java 7中的`java.nio.file.Path`类就实现了Watchable接口，这样的话，和Path类一起可实现观察者模式。
 
 ## 基本使用
 

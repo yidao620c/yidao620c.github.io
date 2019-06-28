@@ -11,7 +11,7 @@ date: 2016-03-06 19:47:53
 最近试用了一下hexo，毫不犹豫的迁移过来了，实在是忍受不了octopress的速度，还有稳定性，经常莫名其妙的出错。
 
 hexo是一个台湾人做的基于Node.js的静态博客程序，优势是生成静态文件的速度非常快，支持markdown，
-我最终选定它的原因是它速度快而且不容易出错，并且可以一键部署到github或者其它静态服务器上去。折腾了一天总算搞定。<!--more-->
+我最终选定它的原因是它速度快而且不容易出错，并且可以一键部署到github或者其它静态服务器上去。折腾了一天总算搞定。
 
 ## 安装
 
@@ -609,6 +609,19 @@ $ git push origin source
 ```
 
 将新内容提交至Github的source分支上，完成source管理。
+
+## 切换至hexo-theme-itmuch
+
+地址：https://github.com/itmuch/hexo-theme-itmuch
+
+```
+git clone https://github.com/itmuch/hexo-theme-itmuch.git themes/hexo-theme-snippet
+npm i hexo-renderer-ejs hexo-renderer-less hexo-deployer-git -S
+npm i less@2.7.3 hexo-generator-json-content@2.2.0 hexo-generator-archive -S
+hexo clean && hexo g && hexo s
+```
+
+其他自定义配置看文档说明，不一一讲了。
 
 ## FAQ
 

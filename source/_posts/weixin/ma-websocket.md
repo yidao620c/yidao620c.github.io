@@ -12,7 +12,7 @@ date: 2017-12-15 12:47:12
 相比较传统的HTTP接口形式，websocket长连接可实现双向通信，但是用好它可并不简单。
 
 刚开始的时候做这个推送，我选用了Socket.IO协议来实现，服务器端用netty-socketio实现，
-而小程序用了一个第三方库[wxapp-socket-io](https://github.com/wxsocketio/wxapp-socket-io)，但是遇到各种问题，连接自动断掉，一直连不上服务器。<!--more-->
+而小程序用了一个第三方库[wxapp-socket-io](https://github.com/wxsocketio/wxapp-socket-io)，但是遇到各种问题，连接自动断掉，一直连不上服务器。
 
 经常出现如下情况，后台发现连接已经断了：
 

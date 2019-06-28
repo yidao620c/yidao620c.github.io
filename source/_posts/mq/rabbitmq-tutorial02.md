@@ -12,7 +12,7 @@ abbrlink: 10613
 这里演示的官网通过python使用消息队列的教程：<https://www.rabbitmq.com/getstarted.html>
 
 先演示最简单的一个入门级别的`hello world`例子，
-发送者发送一个字符串，接受者接收到消息后打印出来。然后再介绍怎样实现任务队列<!--more-->
+发送者发送一个字符串，接受者接收到消息后打印出来。然后再介绍怎样实现任务队列
 
 ## hello world
 

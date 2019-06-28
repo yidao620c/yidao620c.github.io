@@ -31,7 +31,7 @@ abbrlink: 42645
 
 1. 模块名不要跟内置模块名冲突，例如系统自带了`sys`模块，自己的模块就不可命名为`sys.py`
 2. 模块内函数与变量名称不要和内置函数名冲突，
-点[这里](http://docs.python.org/3/library/functions.html)查看Python的所有内置函数<!--more-->
+点[这里](http://docs.python.org/3/library/functions.html)查看Python的所有内置函数
 
 ## 导入模块
 要使用模块就需要先导入

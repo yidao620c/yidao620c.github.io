@@ -14,7 +14,7 @@ abbrlink: 18290
 而[pyenv](https://github.com/pyenv/pyenv)可以帮到我。
 
 pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚，
-通过在PATH最前面插入`shims`来决定应用使用的python版本，从而将你的命令传递给正确的python程序。<!--more-->
+通过在PATH最前面插入`shims`来决定应用使用的python版本，从而将你的命令传递给正确的python程序。
 
 我的系统环境是CentOS7.2
 

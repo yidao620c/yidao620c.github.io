@@ -15,7 +15,7 @@ MySQL的高可用方案一般有如下几种：
 mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Galera Cluster
 
 我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。
-对于小公司，一般推荐使用keepalived+双主，简单。<!--more-->
+对于小公司，一般推荐使用keepalived+双主，简单。
 
 ## Mysql数据库复制原理
 

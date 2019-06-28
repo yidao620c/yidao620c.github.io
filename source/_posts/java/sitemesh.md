@@ -23,7 +23,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
     <version>2.4.2</version>
 </dependency>
 ```
-<!--more-->
+
 
 ### 过滤器定义：
 在web.xml中：

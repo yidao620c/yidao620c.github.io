@@ -17,7 +17,7 @@ Scrapy为我们提供了可重用的[item pipelines](http://doc.scrapy.org/en/1.
 * 避免重复下载
 * 可以指定下载后保存的地方(文件系统目录中,Amazon S3中)
 
-Images Pipeline为处理图片提供了额外的功能：<!--more-->
+Images Pipeline为处理图片提供了额外的功能：
 
 * 将所有下载的图片格式转换成普通的JPG并使用RGB颜色模式
 * 生成缩略图

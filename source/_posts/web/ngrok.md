@@ -20,7 +20,7 @@ ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过
 
 ngrok是开源的，官网地址：<https://github.com/inconshreveable/ngrok>
 
-下面，我们开始搭建ngrok服务。操作系统为CentOS 7.2 <!--more-->
+下面，我们开始搭建ngrok服务。操作系统为CentOS 7.2 
 
 ## 准备工作
 

@@ -22,7 +22,7 @@ Spring 已经实现的异常线程池：
 4. `SimpleThreadPoolTaskExecutor`：是Quartz的`SimpleThreadPool`的类。线程池同时被quartz和非quartz使用，才需要使用此类
 5. `ThreadPoolTaskExecutor`：最常使用，推荐。其实质是对`java.util.concurrent.ThreadPoolExecutor`的包装
 
-在异步处理的方法上添加注解`@Async`，就会启动一个新的线程去执行。<!--more-->
+在异步处理的方法上添加注解`@Async`，就会启动一个新的线程去执行。
 
 ## 开启异步配置
 

@@ -17,7 +17,7 @@ abbrlink: 6532
 
 GitHub项目地址：<https://github.com/yidao620c/simpleblog>
 
-演示地址：<https://yidao620.pythonanywhere.com/><!--more-->
+演示地址：<https://yidao620.pythonanywhere.com/>
 
 非常期待有人合作一起完成正式版1.0。目前有74个人fork，但暂时还木有收到任何的pull requests。→_→
 

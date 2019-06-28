@@ -13,7 +13,7 @@ CentOS 7继承了RHEL 7的新的特性，例如强大的systemd，
 也大幅提高了系统服务的运行效率。但服务的配置和以往也发生了极大的不同，同时变的简单而易用了许多。
 
 CentOS 7的服务systemctl脚本存放在：/usr/lib/systemd/，有系统 system 和用户 user 之分，
-即：`/usr/lib/systemd/system` 和 `/usr/lib/systemd/user` <!--more-->
+即：`/usr/lib/systemd/system` 和 `/usr/lib/systemd/user` 
 
 ## 配置文件
 

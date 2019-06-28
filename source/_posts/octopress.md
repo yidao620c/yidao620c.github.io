@@ -14,7 +14,7 @@ abbrlink: 7370
 荒废了两年的Blog大业再次东山再起，于是经过一天的配置，本博客终于展现在你的眼前。
 本博客基于Octopress+Github Pages搭建，可以搭建全免费、稳定运行的个人博客。
 本文将简述在Windows平台（Win7 64bit）上搭建这套系统的全流程和要点。
-在继续看本文之前，请先确定你具有折腾的精神。<!--more-->
+在继续看本文之前，请先确定你具有折腾的精神。
 
 ### 介绍
 [Octopress](https://github.com/imathis/octopress)是一个基于Ruby语言的开源静态网站框架，

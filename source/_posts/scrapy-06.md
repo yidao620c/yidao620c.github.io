@@ -17,7 +17,7 @@ abbrlink: 40609
 * 清理HTML数据
 * 验证被抓取的数据(检查item是否包含某些字段)
 * 重复性检查(然后丢弃)
-* 将抓取的数据存储到数据库中<!--more-->
+* 将抓取的数据存储到数据库中
 
 ## 编写自己的Pipeline
 定义一个Python类，然后实现方法`process_item(self, item, spider)`即可，返回一个字典或Item，或者抛出`DropItem`异常丢弃这个Item。
@@ -137,7 +137,7 @@ ITEM_PIPELINES = {
 Scrapy使用`Request`和`Response`对象来爬取网站。`Request`对象被蜘蛛生成，然后被传递给下载器，之后下载器处理这个`Request`后返回`Response`对象，然后返回给生成`Request`的这个蜘蛛。
 
 ### 给回调函数传递额外的参数
-`Request`对象生成的时候会通过关键字参数`callback`指定回调函数，`Response`对象被当做第一个参数传入，有时候我们想传递额外的参数，比如我们构建某个Item的时候，需要两步，第一步是链接属性，第二步是详情属性，可以指定`Request.meta`<!--more-->
+`Request`对象生成的时候会通过关键字参数`callback`指定回调函数，`Response`对象被当做第一个参数传入，有时候我们想传递额外的参数，比如我们构建某个Item的时候，需要两步，第一步是链接属性，第二步是详情属性，可以指定`Request.meta`
 ``` python
 def parse_page1(self, response):
     item = MyItem()

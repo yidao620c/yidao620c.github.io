@@ -24,7 +24,7 @@ WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3
 * 协议标识符是ws（如果加密，则为wss），服务器网址就是 URL。
 
 有多种方式实现WebSocket协议，比如SpringBoot官方推荐的基于STOMP实现，实现起来非常简单，还有通过Socket.IO来实现。
-这里我讲一下基于STOMP的实现方案。<!--more-->
+这里我讲一下基于STOMP的实现方案。
 
 ## 概述
 

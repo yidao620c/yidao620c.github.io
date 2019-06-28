@@ -15,7 +15,7 @@ abbrlink: 58803
 其他特性比如日期API，泛型，反射，注解，集合框架，并发，Nashorn引擎等等这里暂时就不详细介绍了。
 具体可以参考：<http://openjdk.java.net/projects/jdk8/features>
 
-昨天参加了Oracle的Java8宣讲活动，有幸目睹了Simon Ritter的风采，写个总结来分享下。<!--more-->
+昨天参加了Oracle的Java8宣讲活动，有幸目睹了Simon Ritter的风采，写个总结来分享下。
 
 ### Java并发编程演变：
 

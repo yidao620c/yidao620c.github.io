@@ -13,7 +13,7 @@ abbrlink: 36872
 * OSGi: The Open Services Gateway Initiative(开放服务网关协议)，是用来模块化开发和部署Java应用程序和库（library）的一种架构，已经成为Java模块化事实上的标准了。详细解释请参考[OSGi简介](http://www.osgi.com.cn/article/7289226)
 * WSGI: Web Server Gateway Interface(Web服务器网关接口)，具体的来说，WSGI是一个Python专用规范，定义了Web服务器如何与Python应用程序进行交互，使得使用Python写的Web应用程序可以和Web服务器对接起来。最新版本在Python的PEP-3333定义的。详细解释请参考[WSGI简介](https://segmentfault.com/a/1190000003069785)
 
-所以，弄清楚之后才发现只有一个字母的差别，但是这两个东东一毛钱的关系都没有，^_^ <!--more-->
+所以，弄清楚之后才发现只有一个字母的差别，但是这两个东东一毛钱的关系都没有，^_^ 
 
 ### 为什么使用OSGi
 跟Java的Servlet协议和EJB协议类似，OSGi协议定义了两件事：一组OSGi容器必须实现的服务，以及容器和你的应用程序之间的接口标准。

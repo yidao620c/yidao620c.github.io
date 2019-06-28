@@ -16,7 +16,7 @@ abbrlink: 985
 主机IP：两台机器，192.168.203.103、192.168.203.104
 
 安装软件：jdk-8u51-linux-x64, apache-tomcat-8.0.24, tomcat-connectors-1.2.41, httpd-2.2.15, httpd-devel-2.2.15
-<!--more-->
+
 
 ### 一、两台机器都安装JAVA8
 

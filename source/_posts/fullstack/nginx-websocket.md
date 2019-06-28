@@ -18,7 +18,7 @@ WebSocket工作在HTTP的80和443端口并使用前缀ws://或者wss://进行协
 
 更多Websocket的介绍可参考我写的 [聊一聊WebSocket](https://www.xncoding.com/2017/05/03/web/websocket.html) 一文。
 
-开发小程序的时候需要用到WebSocket长连接和推送技术，但是必须使用wss，并且必须通过域名访问。这时候就需要用到nginx反向代理了。<!--more-->
+开发小程序的时候需要用到WebSocket长连接和推送技术，但是必须使用wss，并且必须通过域名访问。这时候就需要用到nginx反向代理了。
 
 ## 原理
 

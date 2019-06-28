@@ -16,7 +16,7 @@ abbrlink: 47600
 目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。
 这里我只讲Ajax的两种方式，因为更好的WebSocket方式我已经单独写了一篇文章来介绍。
 
-通过一个实际例子来演示下。<!--more-->
+通过一个实际例子来演示下。
 
 ## 服务器实现
 这里通过一个SpringMVC项目，实现服务器长时间任务部分：

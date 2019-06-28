@@ -15,7 +15,7 @@ abbrlink: 41580
 mv /etc/yum.repos.d/CentOS-Base.repo{,.bak}
 ```
 
-修改CentOS-Base.repo<!--more-->
+修改CentOS-Base.repo
 ```
 # CentOS-Base.repo
 #

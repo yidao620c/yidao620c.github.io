@@ -14,7 +14,7 @@ abbrlink: 7172
 接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。
 
 默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求，
-一般来说，没有必要再加入Quartz2了，不过你要是有更高级需求也可以整合Quartz2进来。<!--more-->
+一般来说，没有必要再加入Quartz2了，不过你要是有更高级需求也可以整合Quartz2进来。
 
 ## 定时任务架构
 

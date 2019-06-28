@@ -15,7 +15,7 @@ PyInstaller是一个能将Python程序转换成单个可执行文件的程序，
 环境为windows7操作系统，python2.7.8 virtual environment
 
 官网：<https://github.com/pyinstaller/pyinstaller>
-<!--more-->
+
 
 ### 详细步骤：
 1\. win7下面先安装这个依赖：pywin32，下载下来后切换到venv2.7，然后使用easy_install xxx.exe安装

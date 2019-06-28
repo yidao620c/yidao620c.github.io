@@ -12,7 +12,7 @@ abbrlink: 6110
 
 string是最简单的类型，你可以理解成与Memcached是一模一样的类型，一个key对应一个value，其上支持的操作与Memcached的操作类似。但它的功能更丰富。
 
-string类型是二进制安全的。意思是redis的string可以包含任何数据，比如jpg图片或者序列化的对象。从内部实现来看其实string可以看作byte数组，最大上限是1G字节，下面是string类型的定义:<!--more-->
+string类型是二进制安全的。意思是redis的string可以包含任何数据，比如jpg图片或者序列化的对象。从内部实现来看其实string可以看作byte数组，最大上限是1G字节，下面是string类型的定义:
 ```c
 struct sdshdr {
 　　long len;

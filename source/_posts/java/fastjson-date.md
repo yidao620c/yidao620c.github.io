@@ -16,7 +16,7 @@ fastjson对日期的序列化方式
 public Date birthday;
 ```
 
-另一种是通过SerializeConfig：<!--more-->
+另一种是通过SerializeConfig：
 ``` java
 private static SerializeConfig mapping = new SerializeConfig();
 private static String dateFormat;

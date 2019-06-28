@@ -15,7 +15,7 @@ Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在P
 
 例如我最常用的Flask框架就是以Werkzeug为基础开发的，这也是我要专门探究Werkzeug底层的原因，
 因为我想知道Flask的实现逻辑以及底层控制。这篇文章没有涉及到Flask的相关内容，
-只是以Werkzeug创建一个简单的Web应用，然后以这个Web应用为例剖析请求的处理以及响应的产生过程。<!--more-->
+只是以Werkzeug创建一个简单的Web应用，然后以这个Web应用为例剖析请求的处理以及响应的产生过程。
 
 官网教程给了个例子，创建一个类似[TinyURL](http://tinyurl.com/)的WEB应用，我就用官网这个例子来说明。
 

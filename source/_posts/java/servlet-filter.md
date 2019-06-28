@@ -13,7 +13,7 @@ abbrlink: 33952
 这时候可以使用到SpringMVC的拦截器Intercepter，但是这个只能局限在SpringMVC中使用，
 如果想更加通用一点，最好使用Servlet Filter实现这个需求。
 
-本文将通过几个实际的例子展示下Servlet中的Filter的使用。<!--more-->
+本文将通过几个实际的例子展示下Servlet中的Filter的使用。
 
 ### 我们为什么需要使用Filter？
 

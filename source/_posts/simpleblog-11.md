@@ -18,7 +18,7 @@ TinyMCE的官方网站是：<http://www.tinymce.com/>
 
 下载地址：<http://download.moxiecode.com/tinymce/tinymce_4.1.9.zip>
 
-TinyMCE的最新版本是4.1.9，下面是官网截屏：<!--more-->
+TinyMCE的最新版本是4.1.9，下面是官网截屏：
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/tinymce.png)
 

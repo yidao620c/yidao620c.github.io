@@ -19,7 +19,7 @@ yum groupinstall -y 'development tools'
 ``` bash
 yum install -y zlib-devel bzip2-devel openssl-devel xz-libs wget
 ```
-<!--more-->
+
 
 ## 源码安装Python 2.7.x
 ``` bash

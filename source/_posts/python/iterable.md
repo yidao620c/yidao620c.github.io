@@ -22,7 +22,7 @@ abbrlink: 17610
 当你使用一个`for`循环或者`map`，或着一个列表推导，那么会先通过iter()获取相应的迭代器，
 然后每次循环自动通过`next`方法调用这个迭代器(iterator)，从中获取每一个元素，从而完成迭代过程。
 
-在一个`iterable`对象上执行`iter`会返回一个`iterator`对象, 比如`iter(obj)` <!--more-->
+在一个`iterable`对象上执行`iter`会返回一个`iterator`对象, 比如`iter(obj)` 
 
 下面一个例子可以非常清晰的解释清楚：
 ```python

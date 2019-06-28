@@ -13,7 +13,7 @@ Jenkins是一个用Java编写的开源的持续集成工具，前身是Hudson项
 
 Jenkins提供了软件开发的持续集成服务。它运行在Servlet容器中（例如Apache Tomcat）。
 它支持许多软件配置管理（SCM）工具，可以执行基于Apache Ant和Apache Maven的项目，
-以及任意的Shell脚本和Windows批处理命令。Jenkins的主要开发者是川口耕介，MIT许可证。<!--more-->
+以及任意的Shell脚本和Windows批处理命令。Jenkins的主要开发者是川口耕介，MIT许可证。
 
 ## 安装
 

@@ -11,7 +11,7 @@ abbrlink: 37841
 Django本身不提供全文检索的功能，但django-haystack为其提供了全文检索的框架。
 django-haystack能为Django提供whoosh,solr,Xapian和Elasticsearc四种全文检索引擎作为后端。
 其中whoosh为纯python的实现，不是非常大型的应用，是没有问题的。
-本文将介绍Django1.9中通过django-haystack与whoosh集成以及whoosh的中文支持。<!--more-->
+本文将介绍Django1.9中通过django-haystack与whoosh集成以及whoosh的中文支持。
 
 ### 安装依赖：
 ```

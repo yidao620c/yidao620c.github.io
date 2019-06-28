@@ -31,7 +31,7 @@ ef4e11f77711        my-image            "/bin/bash"              2 days ago     
 3d5ea3e73344        httpd               "httpd-foreground"       4 days ago          Up 4 days           0.0.0.0:8020->80/tcp     boring_bardeen
 ```
 
-加一个`-a`选项可把所有容器都列出来：<!--more-->
+加一个`-a`选项可把所有容器都列出来：
 ```
 docker ps -a
 ```

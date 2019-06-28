@@ -13,7 +13,7 @@ abbrlink: 42468
 下载某个链接得到的页面里面含有异步加载的内容，这样再使用之前的方式我们根本获取不到异步加载的这些网页内容。
 
 使用Javascript渲染和处理网页是种非常常见的做法，如何处理一个大量使用Javascript的页面是Scrapy爬虫开发中一个常见的问题，
-这篇文章将说明如何在Scrapy爬虫中使用[scrapy-splash](https://github.com/scrapy-plugins/scrapy-splash)来处理页面中得Javascript。<!--more-->
+这篇文章将说明如何在Scrapy爬虫中使用[scrapy-splash](https://github.com/scrapy-plugins/scrapy-splash)来处理页面中得Javascript。
 
 ### scrapy-splash简介
 scrapy-splash利用[Splash](https://github.com/scrapy/scrapy)将javascript和Scrapy集成起来，使得Scrapy可以抓取动态网页。

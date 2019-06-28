@@ -20,7 +20,7 @@ abbrlink: 47979
 * tomcat服务器：SpringBoot内置/tomcat8
 * 操作系统：华为云主机上CentOS 7
 
-Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。<!--more-->
+Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。
 
 ## Maven镜像配置
 

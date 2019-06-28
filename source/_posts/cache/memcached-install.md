@@ -13,7 +13,7 @@ abbrlink: 7044
 memcached下载地址：[memcached-1.4.15.tar.gz](http://memcached.googlecode.com/files/memcached-1.4.15.tar.gz)
 
 libevent下载地址：[libevent-2.0.21-stable.tar.gz](https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz)
-<!--more-->
+
 
 ### 具体安装步骤
 

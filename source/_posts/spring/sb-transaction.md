@@ -24,7 +24,7 @@ JDO            | JDOTransactionManager
 分布式事务       | JtaTransactionManager
 
 而得益于SpringBoot的自动配置机制，为我们自动开启了声明式事务支持，
-我们无需添加注解`@EnableTransactionManagement` <!--more-->
+我们无需添加注解`@EnableTransactionManagement` 
 
 ## 事务基础
 

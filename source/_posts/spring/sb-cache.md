@@ -13,7 +13,7 @@ abbrlink: 27112
 导致大量时间都消耗在数据库查询或远程方法调用上面，性能下降，这时候就需要使用到缓存技术了。
 
 本文介绍SpringBoot 如何使用redis做缓存，如何对redis缓存进行定制化配置(如key的有效期)以及初始化redis做缓存。
-使用具体的代码介绍了@Cacheable，@CacheEvict，@CachePut，@CacheConfig等注解及其属性的用法。<!--more-->
+使用具体的代码介绍了@Cacheable，@CacheEvict，@CachePut，@CacheConfig等注解及其属性的用法。
 
 ## Spring缓存支持
 

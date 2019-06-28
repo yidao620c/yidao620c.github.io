@@ -18,7 +18,7 @@ pool是ceph存储数据时的逻辑分区，它起到namespace的作用。
 副本池是我们最常用的类型。
 
 pool也支持snapshot功能。可以运行ceph osd pool mksnap命令创建pool的快照，并且在必要的时候恢复它。
-还可以设置pool的拥有者属性，从而进行访问控制。<!--more-->
+还可以设置pool的拥有者属性，从而进行访问控制。
 
 下面记录一下和pool相关的命令
 

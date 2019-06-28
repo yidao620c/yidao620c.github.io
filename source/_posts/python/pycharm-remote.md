@@ -14,7 +14,7 @@ abbrlink: 16870
 
 通常有两种方法解决。一种是使用PyCharm内置支持的`Vagrant`，这个教程可以参考[Vagrant开发环境配置](https://github.com/astaxie/Go-in-Action/blob/master/ebook/zh/01.0.md)。
 不过很遗憾的是我自己在试验过程中启动VirtualBox虚拟机时候老是报错，暂时还没解决，读者可以自己试着测试看行不行。
-第二种方式就是通过PyCharm的远程解释器加上文件同步功能，实现本地编辑代码->同步到服务器->通过远程debug来调试测试程序。目前我选择的是第二种，虽然比第一种更笨拙点。<!--more-->
+第二种方式就是通过PyCharm的远程解释器加上文件同步功能，实现本地编辑代码->同步到服务器->通过远程debug来调试测试程序。目前我选择的是第二种，虽然比第一种更笨拙点。
 
 远程调试的功能在Eclipse、IntelliJ IDEA等大型IDE中均有支持，实现原理都基本相同，这里采用PyCharm进行说明。
 

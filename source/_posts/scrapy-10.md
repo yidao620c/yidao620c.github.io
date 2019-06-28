@@ -11,7 +11,7 @@ abbrlink: 17944
 有很多时候我们需要从多个网站爬取所需要的数据，比如我们想爬取多个网站的新闻，将其存储到数据库同一个表中。我们是不是要对每个网站都得去定义一个Spider类呢？
 其实不需要，我们可以通过维护一个规则配置表或者一个规则配置文件来动态增加或修改爬取规则，然后程序代码不需要更改就能实现多个网站爬取。
 
-要这样做，我们就不能再使用前面的`scrapy crawl test`这种命令了，我们需要使用编程的方式运行Scrapy spider，参考[官方文档](http://doc.scrapy.org/en/1.0/topics/practices.html#run-scrapy-from-a-script)<!--more-->
+要这样做，我们就不能再使用前面的`scrapy crawl test`这种命令了，我们需要使用编程的方式运行Scrapy spider，参考[官方文档](http://doc.scrapy.org/en/1.0/topics/practices.html#run-scrapy-from-a-script)
 
 ### 脚本运行Scrapy
 可以利用scrapy提供的[核心API](http://doc.scrapy.org/en/1.0/topics/api.html#topics-api)通过编程方式启动scrapy，代替传统的`scrapy crawl`启动方式。

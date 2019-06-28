@@ -11,7 +11,7 @@ abbrlink: 12880
 
 说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，
 但是一些特有或相对老旧的系统依然使用了传统的soap web service，例如银行、航空公司的机票查询接口等。
-本篇主要讲解spring boot整合cxf发布webservice服务和spring boot整合cxf客户端调用webservice服务。<!--more-->
+本篇主要讲解spring boot整合cxf发布webservice服务和spring boot整合cxf客户端调用webservice服务。
 
 ## maven依赖
 

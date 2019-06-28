@@ -12,7 +12,7 @@ abbrlink: 1019
 现在开始对CasServer进行二次开发，比如如何设置数据库连接，如何使用数据库的用户名和密码登录，
 如何使用Restful API方式实现SSO，如何自定义服务，如何自定义登陆界面等等。接下来将逐步介绍。
 
-Cas官方说明，如果你想对它默认项目有所更改，那么就使用覆盖它路径的方式进行。<!--more-->
+Cas官方说明，如果你想对它默认项目有所更改，那么就使用覆盖它路径的方式进行。
 
 更改CAS的配置既可以修改cas.properties文件，也能修改默认的application.properties。
 为了配置集中处理，我会把默认的application.properties配置文件提出来，只修改它，并把cas.properties内容都移到里面去。
