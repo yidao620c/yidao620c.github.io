@@ -20,5 +20,5 @@ comments: false
 
 ----------
 
-<center>![](https://xnstatic-1253397658.file.myqcloud.com/weixin1.png)</center>
+<center>![](/images/weixin.png)</center>
 
