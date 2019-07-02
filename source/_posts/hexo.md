@@ -623,6 +623,98 @@ hexo clean && hexo g && hexo s
 
 其他自定义配置看文档说明，不一一讲了。
 
+## Gitment评论
+
+应该到目前为止我gitment是最方便集成的，所以我只讲这个。但是默认开启后，在实际使用过程中会有问题，
+因为作者的认证服务器 `https://gh-oauth.imsun.net` 挂了，所以一直登陆不成功，提示 [object ProgressEvent]
+
+**解决办法**
+
+各个主题解决方案大同小异，在主题目录下面查找gitment.ejs文件。
+
+里面有段js引入：
+
+```
+<script type="text/javascript" src="https://imsun.github.io/gitment/dist/gitment.browser.js"></script>
+```
+
+把这个js文件下载下来，先放着。
+
+
+使用 Heroku 搭建GitHub 认证服务器
+
+Heroku是一个支持多种编程语言的云平台即服务，注册Heroku，在右上角的“new”，选择“Create New App”新建一个应用名字为YourAppName
+
+安装heroku客户端：
+
+```
+npm install heroku -g
+```
+
+然后登陆：`heroku login`
+
+获取 gh-oauth-server并进入到文件夹目录：
+
+```
+git clone https://github.com/imsun/gh-oauth-server.git
+cd gh-oauth-server
+```
+
+修改package.json，在script中添加如下代码：
+
+```
+"heroku": "NODE_ENV=production node server"
+```
+
+我的就变成下面这样：
+```
+{
+  "name": "gh-oauth-server",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node server",
+    "heroku": "NODE_ENV=production node server"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "multer": "^1.3.0",
+    "request": "^2.81.0"
+  }
+}
+```
+
+再新建一个Procfile文件，内容如下：
+```
+web: npm run heroku
+```
+
+在heroku上找到你刚刚创建的应用，切换到“Settings”，找到“Domain”的值，即应用的地址。
+
+然后在刚刚下载的gitment.browser.js文件里面进行替换：
+```
+// 将 gitment.browser.js中的 
+_utils.http.post('https://gh-oauth.imsun.net', {})
+// 改为
+_utils.http.post('https://YourAppName.herokuapp.com/', {})
+```
+
+改完后将这个js上传自己的CDN目录，比如我自己上传到自己腾讯云对象存储里面去了，得到一个链接地址。
+
+然后开始一系列花里胡哨的东西：
+
+```
+$ heroku git:clone -a YourAppName
+$ cd YourAppName
+$ 将gh-oauth-server文件夹目录下的所有文件，不包含.git目录都复制到YourAppName
+$ git add .
+$ git commit -am "init"
+$ git push heroku master
+```
+
+最后将gitment.ejs里面的那个js指向腾讯云对象存储的js地址即可。
+
+
 ## FAQ
 
 * 遇到有大括号的代码块，如果多行的不用管，如果单行的就单个反引号，并且在里面加raw标签，比如{% raw %} `{{test}}` {% endraw %}
