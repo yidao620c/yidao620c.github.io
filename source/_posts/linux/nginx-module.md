@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - nginx
+abbrlink: 1244
 ---
 
 编译安装Nginx的时候，有些模块默认并不会安装，比如http_ssl_module，那么为了让Nginx支持HTTPS，必须添加这个模块。

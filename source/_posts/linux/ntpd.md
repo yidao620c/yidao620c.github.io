@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - ntpd
+abbrlink: 9758
 ---
 
 NTP是网络时间协议(Network Time Protocol)，它是用来同步网络中各个计算机的时间的协议。把计算机的时钟同步到世界协调时UTC，

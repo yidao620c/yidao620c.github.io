@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - samba
+abbrlink: 22054
 ---
 
 Samba是在Linux系统上实现SMB协议的一个免费软件，由服务器及客户端程序构成。
