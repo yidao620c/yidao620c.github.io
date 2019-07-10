@@ -61,7 +61,7 @@ nginx: configuration file /usr/local/nginx/conf/nginx.conf test is successful
 /usr/local/nginx/sbin/nginx -s reload
 ```
 
-10. 查看模块是否已安装
+10、查看模块是否已安装
 ```
 /usr/local/nginx/sbin/nginx -V
 nginx version: nginx/1.10.2
@@ -71,7 +71,7 @@ TLS SNI support enabled
 configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module
 ```
 
-11. 重启Nginx
+11、重启Nginx
 ```
 ./nginx -s quit
 ./nginx
