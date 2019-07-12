@@ -1,6 +1,6 @@
 ---
 title: nginx笔记 - 配置HTTPS
-date: '2017-01-12 20:16:16 +0800'
+date: 2017-01-12 20:16:16 +0800
 comments: true
 toc: true
 categories: fullstack

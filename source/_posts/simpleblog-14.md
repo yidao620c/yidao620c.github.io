@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客14- 集成Xadmin
-date: '2015-08-26 21:45:29 +0800'
+date: 2015-08-26 21:45:29 +0800
 toc: true
 categories: python
 tags: django
@@ -140,18 +140,18 @@ xadmin.site.register(Category)
 <div id="meta-2" class="widget widget_meta">
     <h3>功能</h3>
     <ul>
-        {% if user.is_superuser %}
+        @% if user.is_superuser %@
         <li><a href="/xadmin">管理站点</a></li>
-        {% endif %}
-        {% if user.is_authenticated %}
+        @% endif %@
+        @% if user.is_authenticated %@
         <li>
-            <a href="{% url 'django.contrib.auth.views.logout' %}">登出</a>
+            <a href="@% url 'django.contrib.auth.views.logout' %@">登出</a>
         </li>
-        {% else %}
+        @% else %@
         <li>
-            <a href="{% url 'django.contrib.auth.views.login' %}">登录</a>
+            <a href="@% url 'django.contrib.auth.views.login' %@">登录</a>
         </li>
-        {% endif %}
+        @% endif %@
         <li><a href="#">文章<abbr title="RSS">RSS</abbr></a></li>
     </ul>
 </div>
@@ -163,8 +163,8 @@ xadmin.site.register(Category)
 修改其内容，改成自己想要的形式即可
 
 ``` html
-{% load staticfiles %}
-{% load i18n %}
+@% load staticfiles %@
+@% load i18n %@
 <html>
 <head>
     <meta name="viewport"
@@ -174,12 +174,12 @@ xadmin.site.register(Category)
     <meta name="robots" content="NONE,NOARCHIVE">
     <title>用户登录 - SimpleBlog</title>
     <!--...中间省略...-->
-    <script type="text/javascript" src="{% static 'xadmin/vendor/jquery/jquery.js' %}"></script>
+    <script type="text/javascript" src="@% static 'xadmin/vendor/jquery/jquery.js' %@"></script>
 </head>
 <body class="login">
 <div class="container">
-    <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
-        {% csrf_token %}
+    <form method="post" action="@% url 'django.contrib.auth.views.login' %@">
+        @% csrf_token %@
         <div class="panel panel-default panel-single" id="panel-login">
             <div class="panel-heading">
                 <h2 class="form-signin-heading">请登录</h2>
@@ -190,11 +190,11 @@ xadmin.site.register(Category)
 
 </div>
 <!--...中间省略...-->
-<script type="text/javascript" src="{% static 'xadmin/js/xadmin.main.js' %}"></script>
-<script type="text/javascript" src="{% static 'xadmin/js/xadmin.responsive.js' %}"></script>
+<script type="text/javascript" src="@% static 'xadmin/js/xadmin.main.js' %@"></script>
+<script type="text/javascript" src="@% static 'xadmin/js/xadmin.responsive.js' %@"></script>
 <script type="text/javascript"
-        src="{% static 'xadmin/vendor/jquery-ui/jquery.ui.effect.js' %}"></script>
-<script type="text/javascript" src="{% static 'xadmin/js/xadmin.plugin.themes.js' %}"></script>
+        src="@% static 'xadmin/vendor/jquery-ui/jquery.ui.effect.js' %@"></script>
+<script type="text/javascript" src="@% static 'xadmin/js/xadmin.plugin.themes.js' %@"></script>
 
 </body>
 </html>

@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 批处理
-date: '2017-08-01 19:10:22 +0800'
+date: 2017-08-01 19:10:22 +0800
 comments: true
 toc: true
 categories: spring
@@ -436,9 +436,11 @@ public class CsvBatchConfig {
                         });
                     }
                 });
-                setFieldSetMapper(new BeanWrapperFieldSetMapper<BudgetVtoll>() {{
-                    setTargetType(BudgetVtoll.class);
-                }});
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<BudgetVtoll>() {
+                    {
+                        setTargetType(BudgetVtoll.class);
+                    }
+                });
             }
         });
         return reader;
@@ -722,9 +724,11 @@ public class AppConfig {
                         });
                     }
                 });
-                setFieldSetMapper(new BeanWrapperFieldSetMapper<App>() {{
-                    setTargetType(App.class);
-                }});
+                setFieldSetMapper(new BeanWrapperFieldSetMapper<App>() {
+                    {
+                        setTargetType(App.class);
+                    }
+                });
             }
         });
         return reader;

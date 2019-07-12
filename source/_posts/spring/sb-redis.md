@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - Redis数据库
-date: '2017-07-30 12:21:58 +0800'
+date: 2017-07-30 12:21:58 +0800
 comments: true
 toc: true
 categories: spring

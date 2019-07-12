@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - 实现单点登录
-date: '2019-01-09 18:16:55 +0800'
+date: 2019-01-09 18:16:55 +0800
 comments: true
 toc: true
 categories: 网络安全

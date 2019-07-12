@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java8中的lambda表达式
-date: '2015-05-08 15:42:11 +0800'
+date: 2015-05-08 15:42:11 +0800
 comments: true
 toc: true
 categories: java

@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成JWT实现接口权限认证
-date: '2017-07-09 20:12:22 +0800'
+date: 2017-07-09 20:12:22 +0800
 comments: true
 toc: true
 categories: spring

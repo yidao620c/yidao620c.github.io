@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 使用AOP
-date: '2017-07-24 22:26:19 +0800'
+date: 2017-07-24 22:26:19 +0800
 comments: true
 toc: true
 categories: spring

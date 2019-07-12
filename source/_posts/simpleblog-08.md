@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客08- 继续完善
-date: '2015-08-18 08:24:11 +0800'
+date: 2015-08-18 08:24:11 +0800
 toc: true
 categories: python
 tags: django
@@ -24,7 +24,7 @@ abbrlink: 17738
 ```
 的上面一行添加如下链接：
 ``` html
-<a href="{% url 'post_draft_list' %}" class="top-menu">
+<a href="@% url 'post_draft_list' %@" class="top-menu">
 <span class="glyphicon glyphicon-edit"></span></a>
 ```
 
@@ -42,16 +42,16 @@ def post_draft_list(request):
 
 第四步添加一个template，新建blog/templates/blog/post_draft_list.html，内容如下：
 ``` html
-{% extends 'blog/base.html' %}
-{% block content %}
-    {% for post in posts %}
+@% extends 'blog/base.html' %@
+@% block content %@
+    @% for post in posts %@
         <div class="post">
-            <p class="date">created: {{ post.created_date|date:'d-m-Y' }}</p>
-            <h1><a href="{% url 'blog.views.post_detail' pk=post.pk %}">{{ post.title }}</a></h1>
-            <p>{{ post.text|truncatechars:200 }}</p>
+            <p class="date">created: @@ post.created_date|date:'d-m-Y' @@</p>
+            <h1><a href="@% url 'blog.views.post_detail' pk=post.pk %@">@@ post.title @@</a></h1>
+            <p>@@ post.text|truncatechars:200 @@</p>
         </div>
-    {% endfor %}
-{% endblock %}
+    @% endfor %@
+@% endblock %@
 ```
 
 这个模板跟我们的post_list.html非常相似。
@@ -68,19 +68,19 @@ def post_draft_list(request):
 
 打开blog/template/blog/post_detail.html，将下面这段
 ```
-{% if post.published_date %}
-    {{ post.published_date }}
-{% endif %}
+@% if post.published_date %@
+    @@ post.published_date @@
+@% endif %@
 ```
 
 换成下面这段：
 
 ``` html
-{% if post.published_date %}
-    {{ post.published_date }}
-{% else %}
-    <a class="btn btn-default" href="{% url 'blog.views.post_publish' pk=post.pk %}">Publish</a>
-{% endif %}
+@% if post.published_date %@
+    @@ post.published_date @@
+@% else %@
+    <a class="btn btn-default" href="@% url 'blog.views.post_publish' pk=post.pk %@">Publish</a>
+@% endif %@
 ```
 这里增加了一个else语句，意思是如果没有发布日期的话就增加一个发布按钮。
 
@@ -112,7 +112,7 @@ def post_publish(request, pk):
 
 第一步是在页面上添加链接，打开blog/templates/blog/post_detail.html，在编辑按钮下面一行添加如下：
 ``` html
-<a class="btn btn-default" href="{% url 'post_remove' pk=post.pk %}">
+<a class="btn btn-default" href="@% url 'post_remove' pk=post.pk %@">
 <span class="glyphicon glyphicon-remove"></span></a>
 ```
 第二步配置urls映射，打开blog/urls.py，添加如下一行：
@@ -169,24 +169,24 @@ def post_list(request):
 
 修改post_list.html页面，增加分页div
 ``` html
-{% for post in posts %}
+@% for post in posts %@
 ...这个中间是对于文章post的循环，这个不变...
-{% endfor %}
-{% if page %}
+@% endfor %@
+@% if page %@
     <div class="pagination">
         <span class="step-links">
-            {% if posts.has_previous %}
-                <a href="?page={{ posts.previous_page_number }}">previous</a>
-            {% endif %}
+            @% if posts.has_previous %@
+                <a href="?page=@@ posts.previous_page_number @@">previous</a>
+            @% endif %@
             <span class="current">
-                Page {{ posts.number }} of {{ posts.paginator.num_pages }}.
+                Page @@ posts.number @@ of @@ posts.paginator.num_pages @@.
             </span>
-            {% if posts.has_next %}
-                <a href="?page={{ posts.next_page_number }}">next</a>
-            {% endif %}
+            @% if posts.has_next %@
+                <a href="?page=@@ posts.next_page_number @@">next</a>
+            @% endif %@
         </span>
     </div>
-    {% endif %}
+    @% endif %@
 ```
 
 刷新下列表首页，看看分页效果。

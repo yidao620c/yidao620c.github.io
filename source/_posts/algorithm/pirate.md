@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 海盗分金
-date: '2015-06-01 17:15:42 +0800'
+date: 2015-06-01 17:15:42 +0800
 toc: false
 categories: 算法之美
 tags: 算法

@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成WebSocket实时通信
-date: '2017-07-15 12:28:16 +0800'
+date: 2017-07-15 12:28:16 +0800
 comments: true
 toc: true
 categories: spring

@@ -1,6 +1,6 @@
 ---
 title: Linux磁盘分区总结
-date: '2017-03-14 15:32:07 +0800'
+date: 2017-03-14 15:32:07 +0800
 comments: true
 toc: true
 categories: ceph

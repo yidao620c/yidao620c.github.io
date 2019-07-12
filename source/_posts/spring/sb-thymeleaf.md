@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成Thymeleaf构建Web应用
-date: '2017-07-01 18:17:29 +0800'
+date: 2017-07-01 18:17:29 +0800
 comments: true
 toc: true
 categories: spring

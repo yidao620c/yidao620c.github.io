@@ -1,7 +1,7 @@
 ---
 layout: post
 title: fastjson对Date的处理
-date: '2015-04-22 13:45:15 +0800'
+date: 2015-04-22 13:45:15 +0800
 toc: true
 categories: java
 tags: java
@@ -56,7 +56,7 @@ List<User> users = JSON.parseArray(text, User.class);
 
 泛型：
 ``` java
-String text = ...; // {"name":{"name":"ljw",age:18}}
+String text = ...; // {"name":{"name":"ljw",age:18} }
 Map<String, User> userMap = JSON.parseObject(text, new TypeReference<Map<String, User>>() {});
 ```
 

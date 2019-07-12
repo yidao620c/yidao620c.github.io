@@ -1,6 +1,6 @@
 ---
 title: python核心 - 打包与发布
-date: '2015-10-26 22:22:22 +0800'
+date: 2015-10-26 22:22:22 +0800
 comments: true
 toc: true
 categories: python

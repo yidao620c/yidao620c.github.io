@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - 服务安装
-date: '2019-01-03 10:22:12 +0800'
+date: 2019-01-03 10:22:12 +0800
 comments: true
 toc: true
 categories: 网络安全

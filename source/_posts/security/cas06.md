@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - Ticket存储和验证
-date: '2019-01-13 11:19:22 +0800'
+date: 2019-01-13 11:19:22 +0800
 comments: true
 toc: true
 categories: 网络安全

@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 多数据源配置
-date: '2017-07-10 17:32:56 +0800'
+date: 2017-07-10 17:32:56 +0800
 comments: true
 toc: true
 categories: spring

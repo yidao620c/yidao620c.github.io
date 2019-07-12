@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客04- 三部曲
-date: '2015-08-09 20:16:02 +0800'
+date: 2015-08-09 20:16:02 +0800
 toc: true
 categories: python
 tags: django
@@ -212,18 +212,18 @@ HTML页面只识别HTML标签，那么怎样让生成动态的内容呢？答案
     <div>
         <h1><a href="/">Django Girls Blog</a></h1>
     </div>
-    {% for post in posts %}
+    @% for post in posts %@
     <div>
-        <p>published: {{ post.published_date }}</p>
-            <h1><a href="">{{ post.title }}</a></h1>
-            <p>{{ post.text|linebreaks }}</p>
+        <p>published: @@ post.published_date @@</p>
+            <h1><a href="">@@ post.title @@</a></h1>
+            <p>@@ post.text|linebreaks @@</p>
     </div>
-    {% endfor %}
+    @% endfor %@
 </body>
 </html>
 ```
 
-在`{% raw %}{% for %}{% endraw %}` 和`{% raw %}{% endfor %}{% endraw %}`之间会循环每个post，然后每次生成一段
+在`@% raw %@@% for %@@% endraw %@` 和`@% raw %@@% endfor %@@% endraw %@`之间会循环每个post，然后每次生成一段
 
 现在再次访问首页，效果如下：
 

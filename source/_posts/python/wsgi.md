@@ -1,7 +1,7 @@
 ---
 layout: post
 title: WGSI简易教程
-date: '2016-04-22 20:02:42 +0800'
+date: 2016-04-22 20:02:42 +0800
 toc: true
 categories: python
 tags:

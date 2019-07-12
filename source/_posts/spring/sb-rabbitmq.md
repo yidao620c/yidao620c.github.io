@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 使用消息队列RabbitMQ
-date: '2017-08-06 12:33:21 +0800'
+date: 2017-08-06 12:33:21 +0800
 comments: true
 toc: true
 categories: spring

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 基于keepalived实现mysql双主
-date: '2016-09-19 21:17:24 +0800'
+date: 2016-09-19 21:17:24 +0800
 toc: true
 categories: database
 tags:

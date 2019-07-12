@@ -1,7 +1,7 @@
 ---
 layout: post
 title: centos7安装gitlab8.8
-date: '2016-09-09 22:22:22 +0800'
+date: 2016-09-09 22:22:22 +0800
 toc: true
 categories: fullstack
 tags:

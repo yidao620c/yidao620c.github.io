@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - Restful API方式实现SSO
-date: '2019-01-15 12:25:39 +0800'
+date: 2019-01-15 12:25:39 +0800
 comments: true
 toc: true
 categories: 网络安全

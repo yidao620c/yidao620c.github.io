@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客10- 全文搜索
-date: '2015-08-21 15:32:28 +0800'
+date: 2015-08-21 15:32:28 +0800
 toc: true
 categories: python
 tags: django
@@ -85,8 +85,8 @@ class PostIndex(indexes.SearchIndex, indexes.Indexable):
 如：`mysite/blog/templates/search/indexes/blog/post_text.txt`:
 
 ```
-{{ object.title }}
-{{ object.text }}
+@@ object.title @@
+@@ object.text @@
 ```
 
 ### settings.py
@@ -173,7 +173,7 @@ def full_search(request):
 ``` html
 <!-- searchbox START -->
 <div id="searchbox">
-    <form action="{% url 'blog.views.full_search' %}" method="get">
+    <form action="@% url 'blog.views.full_search' %@" method="get">
         <div class="content">
             <label>
                 <input type="text" class="textfield searchtip" name="q" size="24" value="">

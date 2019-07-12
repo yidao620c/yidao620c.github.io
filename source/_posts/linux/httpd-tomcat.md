@@ -1,6 +1,6 @@
 ---
 title: 利用httpd对Tomcat进行负载均衡
-date: '2015-10-13 10:59:15 +0800'
+date: 2015-10-13 10:59:15 +0800
 comments: true
 toc: true
 categories: linux

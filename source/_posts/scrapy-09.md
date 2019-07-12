@@ -1,6 +1,6 @@
 ---
 title: Scrapy笔记09- 部署
-date: '2016-03-21 00:16:12 +0800'
+date: 2016-03-21 00:16:12 +0800
 comments: true
 toc: true
 categories: python

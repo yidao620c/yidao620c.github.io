@@ -1,7 +1,7 @@
 ---
 layout: post
 title: python核心 - web开发
-date: '2015-12-30 22:22:22 +0800'
+date: 2015-12-30 22:22:22 +0800
 toc: true
 categories: python
 tags:
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
 Python处理URL的函数就是C：Controller，Controller负责业务逻辑，比如检查用户名是否存在，取出用户信息等等；
 
-包含变量{{ name }}的模板就是V：View，View负责显示逻辑，通过简单地替换一些变量，View最终输出的就是用户看到的HTML。
+包含变量@@ name @@的模板就是V：View，View负责显示逻辑，通过简单地替换一些变量，View最终输出的就是用户看到的HTML。
 
 MVC中的Model在哪？Model是用来传给View的，这样View在替换变量的时候，就可以从Model中取出相应的数据。
 
@@ -179,12 +179,12 @@ pip install jinja2
   <title>Please Sign In</title>
 </head>
 <body>
-  {% if message %}
-  <p style="color:red">{{ message }}</p>
-  {% endif %}
+  @% if message %@
+  <p style="color:red">@@ message @@</p>
+  @% endif %@
   <form action="/signin" method="post">
     <legend>Please sign in:</legend>
-    <p><input name="username" placeholder="Username" value="{{ username }}"></p>
+    <p><input name="username" placeholder="Username" value="@@ username @@"></p>
     <p><input name="password" placeholder="Password" type="password"></p>
     <p><button type="submit">Sign In</button></p>
   </form>
@@ -196,10 +196,10 @@ pip install jinja2
 ``` html signin-ok.html
 <html>
 <head>
-  <title>Welcome, {{ username }}</title>
+  <title>Welcome, @@ username @@</title>
 </head>
 <body>
-  <p>Welcome, {{ username }}!</p>
+  <p>Welcome, @@ username @@!</p>
 </body>
 </html>
 ```

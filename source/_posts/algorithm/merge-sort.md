@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 归并排序中对小数组采用插入排序
-date: '2015-09-22 10:47:35 +0800'
+date: 2015-09-22 10:47:35 +0800
 toc: true
 categories: 算法之美
 tags:

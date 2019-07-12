@@ -1,7 +1,7 @@
 ---
 layout: post
 title: python核心 - 面向对象编程
-date: '2015-12-06 22:22:22 +0800'
+date: 2015-12-06 22:22:22 +0800
 toc: true
 categories: python
 tags:

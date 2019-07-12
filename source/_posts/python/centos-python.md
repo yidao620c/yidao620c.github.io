@@ -1,7 +1,7 @@
 ---
 layout: post
 title: centos6.x安装python2.7
-date: '2015-10-10 19:02:42 +0800'
+date: 2015-10-10 19:02:42 +0800
 toc: true
 categories: python
 tags:

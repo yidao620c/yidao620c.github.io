@@ -1,7 +1,7 @@
 ---
 layout: post
 title: SQLAlchemy入门
-date: '2016-03-07 10:12:42 +0800'
+date: 2016-03-07 10:12:42 +0800
 toc: true
 categories: python
 tags:

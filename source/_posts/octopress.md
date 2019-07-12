@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 使用Octopress搭建GitHub博客
-date: '2015-03-18 17:41:21 +0800'
+date: 2015-03-18 17:41:21 +0800
 comments: true
 toc: true
 categories: 朝花夕拾
@@ -173,15 +173,15 @@ footer: false
 
 <section>
     <ul class="ds-recent-comments"
-        data-num-items="{{ site.duoshuo_asides_num }}"
-        data-show-avatars="{{ site.duoshuo_asides_avatars }}"
-        data-show-time="{{ site.duoshuo_asides_time }}"
-        data-show-title="{{ site.duoshuo_asides_title }}"
-        data-show-admin="{{ site.duoshuo_asides_admin }}"
-        data-excerpt-length="{{ site.duoshuo_asides_length }}"></ul>
+        data-num-items="@@ site.duoshuo_asides_num @@"
+        data-show-avatars="@@ site.duoshuo_asides_avatars @@"
+        data-show-time="@@ site.duoshuo_asides_time @@"
+        data-show-title="@@ site.duoshuo_asides_title @@"
+        data-show-admin="@@ site.duoshuo_asides_admin @@"
+        data-excerpt-length="@@ site.duoshuo_asides_length @@"></ul>
     <!--多说js加载开始，一个页面只需要加载一次 -->
     <script type="text/javascript">
-        var duoshuoQuery = {short_name:"{{ site.duoshuo_short_name }}"};
+        var duoshuoQuery = {short_name:"@@ site.duoshuo_short_name @@"};
         (function() {
             var ds = document.createElement('script');
             ds.type = 'text/javascript';ds.async = true;
@@ -196,7 +196,7 @@ footer: false
 4) 修改`source/_includes/custom/navigation.html`，在首页新增一个链接：
 
 ``` html
-<li><a href="{{ root_url }}/blog/comments">最新评论</a></li>
+<li><a href="@@ root_url @@/blog/comments">最新评论</a></li>
 ```
 
 **3) 国内访问加速**

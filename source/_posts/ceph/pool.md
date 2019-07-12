@@ -1,6 +1,6 @@
 ---
 title: ceph pool相关命令
-date: '2017-03-16 12:07:09 +0800'
+date: 2017-03-16 12:07:09 +0800
 comments: true
 toc: true
 categories: ceph

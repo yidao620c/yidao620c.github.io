@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客12- i18n国际化
-date: '2015-08-24 19:12:29 +0800'
+date: 2015-08-24 19:12:29 +0800
 toc: true
 categories: python
 tags: django
@@ -98,30 +98,30 @@ django-admin.py compilemessages
 我们用`base.html`来做演示，打开`mysite/templates/mysite/base.html`
 
 ``` html
-{% load staticfiles %}
-{% load i18n %}
+@% load staticfiles %@
+@% load i18n %@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <title>{% trans 'Simple Blog'%}</title>
+    <title>@% trans 'Simple Blog'%@</title>
 </head>
 <body class="customize-support">
 <div class="page-header">
-    {% if user.is_authenticated %}
-        <a href="{% url 'post_new' %}" class="top-menu"><span
+    @% if user.is_authenticated %@
+        <a href="@% url 'post_new' %@" class="top-menu"><span
                 class="glyphicon glyphicon-plus"></span></a>
-        <a href="{% url 'post_draft_list' %}" class="top-menu"><span
+        <a href="@% url 'post_draft_list' %@" class="top-menu"><span
                 class="glyphicon glyphicon-edit"></span></a>
-        <p class="top-menu" style="font-size: 15pt;">{% trans 'Hello'%} {{ user.username }}
+        <p class="top-menu" style="font-size: 15pt;">@% trans 'Hello'%@ @@ user.username @@
             <small>&nbsp;</small>
-            <a href="{% url 'django.contrib.auth.views.logout' %}" class="top-menu">
+            <a href="@% url 'django.contrib.auth.views.logout' %@" class="top-menu">
                 <span class="glyphicon glyphicon-log-out"></span></a>
         </p>
-    {% else %}
-        <a href="{% url 'django.contrib.auth.views.login' %}" class="top-menu">
+    @% else %@
+        <a href="@% url 'django.contrib.auth.views.login' %@" class="top-menu">
             <span class="glyphicon glyphicon-log-in"></span></a>
-    {% endif %}
-    <h1><a href="{% url 'blog.views.post_list' %}">{% trans 'Simple Blog'%}</a></h1>
+    @% endif %@
+    <h1><a href="@% url 'blog.views.post_list' %@">@% trans 'Simple Blog'%@</a></h1>
 </div>
 ...
 </body>
@@ -130,7 +130,7 @@ django-admin.py compilemessages
 
 注意
 ```
-<title>{% trans 'Simple Blog'%}</title>
+<title>@% trans 'Simple Blog'%@</title>
 ```
 这句，如果用户选择中文，那么就会被翻译成`极简博客`。这个在django.po文件中定义过。其他的内容也是类似，就不多说了。
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 5分钟搭建一个license服务器
-date: '2016-10-16 20:22:22 +0800'
+date: 2016-10-16 20:22:22 +0800
 toc: true
 categories: linux
 tags:

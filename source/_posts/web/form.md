@@ -1,6 +1,6 @@
 ---
 title: 防止表单重复提交
-date: '2016-07-29 09:22:08 +0800'
+date: 2016-07-29 09:22:08 +0800
 comments: true
 toc: true
 categories: web

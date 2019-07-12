@@ -1,6 +1,6 @@
 ---
 title: Scrapy笔记10- 动态配置爬虫
-date: '2016-04-10 00:16:12 +0800'
+date: 2016-04-10 00:16:12 +0800
 comments: true
 toc: true
 categories: python

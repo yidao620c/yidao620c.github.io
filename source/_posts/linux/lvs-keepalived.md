@@ -1,7 +1,7 @@
 ---
 layout: post
 title: CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群
-date: '2015-09-16 16:40:04 +0800'
+date: 2015-09-16 16:40:04 +0800
 toc: true
 categories: linux
 tags:

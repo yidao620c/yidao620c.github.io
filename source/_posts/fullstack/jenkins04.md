@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Jenkins持续集成 - 高级特性
-date: '2017-03-27 20:10:33 +0800'
+date: 2017-03-27 20:10:33 +0800
 toc: true
 categories: fullstack
 tags:

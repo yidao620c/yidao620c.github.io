@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 使用pyenv创建多版本python环境
-date: '2016-05-09 12:28:39 +0800'
+date: 2016-05-09 12:28:39 +0800
 toc: true
 categories: python
 tags:

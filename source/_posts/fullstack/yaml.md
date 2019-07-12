@@ -1,7 +1,7 @@
 ---
 layout: post
 title: yaml入门笔记
-date: '2015-05-22 13:53:45 +0800'
+date: 2015-05-22 13:53:45 +0800
 comments: true
 toc: true
 categories: fullstack

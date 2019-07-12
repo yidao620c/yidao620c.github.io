@@ -1,7 +1,7 @@
 ---
 layout: post
 title: jinja2模板
-date: '2016-09-05 22:22:22 +0800'
+date: 2016-09-05 22:22:22 +0800
 toc: true
 categories: python
 tags:
@@ -32,7 +32,7 @@ pip install jinja2
 通过创建一个Template类，不过这种方法不是推荐方式：
 ``` python
 >>> from jinja2 import Template
->>> template = Template('Hello {{ name }}!')
+>>> template = Template('Hello @@ name @@!')
 >>> template.render(name='John Doe')
 u'Hello John Doe!'
 ```
@@ -73,7 +73,7 @@ Jinja2内部使用Unicode，所以传给render方法的参数必须是unicode对
 Jinja2的模板默认编码是utf-8，一些库会严格检查str类型比如`datetime.strftime`，它不接受unicode参数。
 所以Jinja2对于ascii字符串返回str，其他的返回unicode，比如：
 ``` python
->>> m = Template(u"{% set a, b = 'foo', 'föö' %}").module
+>>> m = Template(u"@% set a, b = 'foo', 'föö' %@").module
 >>> m.a
 'foo'
 >>> m.b
@@ -130,7 +130,7 @@ class MyLoader(BaseLoader):
 * jinja2.ModuleLoader(path) #预编译好的模块
 
 #### 自定义过滤器
-{% raw %}`{{ 42|myfilter(23) }}`{% endraw %}会被`myfilter(42, 23)`调用，一个例子
+@% raw %@`@@ 42|myfilter(23) @@`@% endraw %@会被`myfilter(42, 23)`调用，一个例子
 ``` python
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
@@ -141,8 +141,8 @@ environment.filters['datetimeformat'] = datetimeformat
 ```
 模板中使用：
 ```
-written on: {{ article.pub_date|datetimeformat }}
-publication date: {{ article.pub_date|datetimeformat('%d-%m-%Y') }}
+written on: @@ article.pub_date|datetimeformat @@
+publication date: @@ article.pub_date|datetimeformat('%d-%m-%Y') @@
 ```
 还能给过滤器传入当前模板的context或environment，
 所以就有了environmentfilter(), contextfilter() 和evalcontextfilter()三个装饰器。
@@ -176,13 +176,13 @@ def nl2br(eval_ctx, value):
 </head>
 <body>
     <ul id="navigation">
-    {% for item in navigation %}
-        <li><a href="{{ item.href }}">{{ item.caption }}</a></li>
-    {% endfor %}
+    @% for item in navigation %@
+        <li><a href="@@ item.href @@">@@ item.caption @@</a></li>
+    @% endfor %@
     </ul>
 
     <h1>My Webpage</h1>
-    {{ a_variable }}
+    @@ a_variable @@
 
     {# a comment #}
 </body>
@@ -191,22 +191,22 @@ def nl2br(eval_ctx, value):
 
 默认的语法配置是这样的，你可以自己自定义：
 
-    * {% raw %}{% ... %}{% endraw %} 这个是语句
-    * {% raw %}{{ ... }}{% endraw %} 这个是表达式，打印模板输出
-    * {% raw %}{# ... #}{% endraw %} 这个是注释部分，不会输出
+    * @% raw %@@% ... %@@% endraw %@ 这个是语句
+    * @% raw %@@@ ... @@@% endraw %@ 这个是表达式，打印模板输出
+    * @% raw %@{# ... #}@% endraw %@ 这个是注释部分，不会输出
     * #  ... #  这个是行语句
 
 #### 变量
 两种访问方式：
 ```
-{{ foo.bar }}
-{{ foo['bar'] }}
+@@ foo.bar @@
+@@ foo['bar'] @@
 
 # 过滤器
-{{ name|striptags|title }}
+@@ name|striptags|title @@
 
 # 测试
-{% if loop.index is divisibleby(3) %}
+@% if loop.index is divisibleby(3) %@
 ```
 
 空行控制，如果trim_blocks 和 lstrip_blocks都启用，那么模板自己的控制块行将不输出。
@@ -217,14 +217,14 @@ def nl2br(eval_ctx, value):
 ``` html
 <ul>
 # for item in seq
-    <li>{{ item }}</li>
+    <li>@@ item @@</li>
 # endfor
 </ul>
 
 <ul>
-{% for item in seq %}
-    <li>{{ item }}</li>
-{% endfor %}
+@% for item in seq %@
+    <li>@@ item @@</li>
+@% endfor %@
 </ul>
 ```
 
@@ -234,52 +234,52 @@ def nl2br(eval_ctx, value):
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block head %}
+    @% block head %@
     <link rel="stylesheet" href="style.css" />
-    <title>{% block title %}{% endblock %} - My Webpage</title>
-    {% endblock %}
+    <title>@% block title %@@% endblock %@ - My Webpage</title>
+    @% endblock %@
 </head>
 <body>
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">@% block content %@@% endblock %@</div>
     <div id="footer">
-        {% block footer %}
+        @% block footer %@
         &copy; Copyright 2008 by <a href="http://domain.invalid/">you</a>.
-        {% endblock %}
+        @% endblock %@
     </div>
 </body>
 </html>
 ```
 一个子模板继承上面的基础模板
 ``` html
-{% extends "base.html" %}
-{% block title %}Index{% endblock %}
-{% block head %}
-    {{ super() }}
+@% extends "base.html" %@
+@% block title %@Index@% endblock %@
+@% block head %@
+    @@ super() @@
     <style type="text/css">
         .important { color: #336699; }
     </style>
-{% endblock %}
-{% block content %}
+@% endblock %@
+@% block content %@
     <h1>Index</h1>
     <p class="important">
       Welcome to my awesome homepage.
     </p>
-{% endblock %}
+@% endblock %@
 ```
 
 还能指定模板名字，更加具有可读性
 ``` html
-{% block sidebar %}
-    {% block inner_sidebar %}
+@% block sidebar %@
+    @% block inner_sidebar %@
         ...
-    {% endblock inner_sidebar %}
-{% endblock sidebar %}
+    @% endblock inner_sidebar %@
+@% endblock sidebar %@
 ```
 
 #### 字符转换
 可自动转换html字符，也可以手动转换
 ```
-{{ user.username|e }}
+@@ user.username|e @@
 ```
 当使用自动转换时，所有的会被转换，除非你声明它是安全的。有两种方式声明安全：
 
@@ -291,78 +291,78 @@ def nl2br(eval_ctx, value):
 ``` html
 <h1>Members</h1>
 <ul>
-{% for user in users %}
-  <li>{{ user.username|e }}</li>
-{% endfor %}
+@% for user in users %@
+  <li>@@ user.username|e @@</li>
+@% endfor %@
 </ul>
 
-{% for user in users %}
-    {%- if loop.index is even %}{% continue %}{% endif %}
+@% for user in users %@
+    @%- if loop.index is even %@@% continue %@@% endif %@
     ...
-{% endfor %}
+@% endfor %@
 ```
 
 key-value形式的循环：
 ``` html
 <dl>
-{% for key, value in my_dict.iteritems() %}
-    <dt>{{ key|e }}</dt>
-    <dd>{{ value|e }}</dd>
-{% endfor %}
+@% for key, value in my_dict.iteritems() %@
+    <dt>@@ key|e @@</dt>
+    <dd>@@ value|e @@</dd>
+@% endfor %@
 </dl>
 ```
 
 if判断
 ``` html
-{% if kenny.sick %}
+@% if kenny.sick %@
     Kenny is sick.
-{% elif kenny.dead %}
+@% elif kenny.dead %@
     You killed Kenny!  You bastard!!!
-{% else %}
+@% else %@
     Kenny looks okay --- so far
-{% endif %}
+@% endif %@
 ```
 
 赋值语句
 ```
-{% set navigation = [('index.html', 'Index'), ('about.html', 'About')] %}
-{% set key, value = call_something() %}
+@% set navigation = [('index.html', 'Index'), ('about.html', 'About')] %@
+@% set key, value = call_something() %@
 ```
 
 块赋值
 ```
-{% set navigation %}
+@% set navigation %@
     <li><a href="/">Index</a>
     <li><a href="/downloads">Downloads</a>
-{% endset %}
+@% endset %@
 ```
 
 包含模板
 ```
-{% include 'header.html' %}
-{% include "sidebar.html" ignore missing %}
-{% include "sidebar.html" ignore missing with context %}
-{% include "sidebar.html" ignore missing without context %}
+@% include 'header.html' %@
+@% include "sidebar.html" ignore missing %@
+@% include "sidebar.html" ignore missing with context %@
+@% include "sidebar.html" ignore missing without context %@
     Body
-{% include 'footer.html' %}
+@% include 'footer.html' %@
 ```
 
 #### i18n
 国际化例子
 ```
-<p>{% trans user=user.username %}Hello {{ user }}!{% endtrans %}</p>
-{{ _('Hello %(user)s!')|format(user=user.username) }}
+<p>@% trans user=user.username %@Hello @@ user @@!@% endtrans %@</p>
+@@ _('Hello %(user)s!')|format(user=user.username) @@
 ```
 
 临时指定autoescape
 ```
-{% autoescape true %}
+@% autoescape true %@
     Autoescaping is active within this block
-{% endautoescape %}
+@% endautoescape %@
 
-{% autoescape false %}
+@% autoescape false %@
     Autoescaping is inactive within this block
-{% endautoescape %}
+@% endautoescape %@
 ```
 
 ### jinja2扩展

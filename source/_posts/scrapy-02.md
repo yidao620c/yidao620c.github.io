@@ -1,6 +1,6 @@
 ---
 title: Scrapy笔记02- 完整示例
-date: '2016-03-10 09:59:15 +0800'
+date: 2016-03-10 09:59:15 +0800
 comments: true
 toc: true
 categories: python
@@ -212,7 +212,7 @@ DATABASE = {'drivername': 'mysql',
             'username': 'root',
             'password': 'mysql',
             'database': 'spider',
-            'query': {'charset': 'utf8'}}
+            'query': {'charset': 'utf8'@@
 ```
 再次运行爬虫
 ``` bash

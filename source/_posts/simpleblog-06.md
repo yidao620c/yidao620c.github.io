@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客06- 模板继承
-date: '2015-08-15 21:44:21 +0800'
+date: 2015-08-15 21:44:21 +0800
 toc: true
 categories: python
 tags: django
@@ -23,14 +23,14 @@ abbrlink: 40067
 
 打开base.html，然后将post_list.html的所有内容都复制过来，现在它的内容如下：
 ``` html
-{% load staticfiles %}
+@% load staticfiles %@
 <html>
 <head>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <link href="http://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+<link rel="stylesheet" href="@% static 'css/blog.css' %@">
 <title>Django Girls Blog</title>
 </head>
 <body>
@@ -40,13 +40,13 @@ abbrlink: 40067
     <div class="content">
         <div class="row">
             <div class="col-md-8">
-                {% for post in posts %}
+                @% for post in posts %@
                     <div class="post">
-                        <h1><a href="">{{ post.title }}</a></h1>
-                        <p>published: {{ post.published_date }}</p>
-                        <p>{{ post.text|linebreaks }}</p>
+                        <h1><a href="">@@ post.title @@</a></h1>
+                        <p>published: @@ post.published_date @@</p>
+                        <p>@@ post.text|linebreaks @@</p>
                     </div>
-                {% endfor %}
+                @% endfor %@
             </div>
         </div>
     </div>
@@ -62,49 +62,49 @@ abbrlink: 40067
     <div class="content">
         <div class="row">
             <div class="col-md-8">
-            {% block content %}
-            {% endblock %}
+            @% block content %@
+            @% endblock %@
             </div>
         </div>
     </div>
 </body>
 ```
 
-我们其实就是将`{% raw %}{% for post in posts %}{% endfor %}{% endraw %}`
-替换成了`{% raw %}{% block content %}{% endblock %}{% endraw %}`。
+我们其实就是将`@% raw %@@% for post in posts %@@% endfor %@@% endraw %@`
+替换成了`@% raw %@@% block content %@@% endblock %@@% endraw %@`。
 在base.html中我们创建了一个名字为content的block，其他页面可以通过继承base.html，
 替换这个content块来生成新的页面，页面其他内容保持不变。
 
-保存后，再修改post_list.html页面，只保留{% for post in posts %}{% endfor %}的内容：
+保存后，再修改post_list.html页面，只保留@% for post in posts %@@% endfor %@的内容：
 ``` html
-{% for post in posts %}
+@% for post in posts %@
     <div class="post">
-        <h1><a href="">{{ post.title }}</a></h1>
-        <p>published: {{ post.published_date }}</p>
-        <p>{{ post.text|linebreaks }}</p>
+        <h1><a href="">@@ post.title @@</a></h1>
+        <p>published: @@ post.published_date @@</p>
+        <p>@@ post.text|linebreaks @@</p>
     </div>
-{% endfor %}
+@% endfor %@
 ```
 然后添加这句到post_list.html页面的最开始部分：
 ```
-{% extends 'blog/base.html' %}
+@% extends 'blog/base.html' %@
 ```
 这句话的意思就是该模板继承自blog/base.html模板
 
-还有一步就是要将刚刚的内容放到{% raw %}{% block content %}和
-{% endblock content %}{% endraw %}之间，这时候整个页面是这样的：
+还有一步就是要将刚刚的内容放到@% raw %@@% block content %@和
+@% endblock content %@@% endraw %@之间，这时候整个页面是这样的：
 
 ``` html
-{% extends 'blog/base.html' %}
-{% block content %}
-{% for post in posts %}
+@% extends 'blog/base.html' %@
+@% block content %@
+@% for post in posts %@
     <div class="post">
-        <h1><a href="">{{ post.title }}</a></h1>
-        <p>published: {{ post.published_date }}</p>
-        <p>{{ post.text|linebreaks }}</p>
+        <h1><a href="">@@ post.title @@</a></h1>
+        <p>published: @@ post.published_date @@</p>
+        <p>@@ post.text|linebreaks @@</p>
     </div>
-{% endfor %}
-{% endblock content %}
+@% endfor %@
+@% endblock content %@
 ```
 保存后刷新页面，看下是不是能正常工作：
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: python核心 - 单元测试
-date: '2015-12-22 22:22:22 +0800'
+date: 2015-12-22 22:22:22 +0800
 toc: true
 categories: python
 tags:
@@ -205,8 +205,8 @@ assertNotIsInstance(a, b)     | not isinstance(a, b)
 
 Method                                                                | Checks that
 ----------------------------------------------------------------------|--------------------------
-{% raw %}assertRaises(exc, fun, *args, **kwds){% endraw %}            | {% raw %}fun(*args, **kwds) raises exc{% endraw %}
-{% raw %}assertRaisesRegexp(exc, r, fun, *args, **kwds){% endraw %}   | {% raw %}fun(*args, **kwds) raises exc and the message matches regex{% endraw %}
+@% raw %@assertRaises(exc, fun, *args, **kwds)@% endraw %@            | @% raw %@fun(*args, **kwds) raises exc@% endraw %@
+@% raw %@assertRaisesRegexp(exc, r, fun, *args, **kwds)@% endraw %@   | @% raw %@fun(*args, **kwds) raises exc and the message matches regex@% endraw %@
 
 其他高级用法：
 

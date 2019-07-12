@@ -346,35 +346,35 @@ changyan:
 
 找到`next/layout/_third-party/comments/changyan.swig:1~4行`
 ```
-{% if theme.changyan.enable and theme.changyan.appid and theme.changyan.appkey %}
-  {% if is_home() %}
-    <script id="cy_cmt_num" src="https://changyan.sohu.com/upload/plugins/plugins.list.count.js?clientId={{theme.changyan.appid}}"></script>
-  {% else %}
+@% if theme.changyan.enable and theme.changyan.appid and theme.changyan.appkey %@
+  @% if is_home() %@
+    <script id="cy_cmt_num" src="https://changyan.sohu.com/upload/plugins/plugins.list.count.js?clientId=@@theme.changyan.appid@@"></script>
+  @% else %@
     ...省略
 ```
 
 只需要将
 ```
-{% else %}
+@% else %@
 ```
 
 改成
 
 ```
-{% elseif page.comments %}
+@% elseif page.comments %@
 ```
 
 然后再找到`next/layout/_mavro/post.swig:175～178行`
 
 ```
-<a href="{{ url_for(post.path) }}#SOHUCS" itemprop="discussionUrl">
-                 <span id="url::{{ post.permalink }}" class="cy_cmt_count" data-xid="{{ post.path }}" itemprop="commentsCount" ></span>
+<a href="@@ url_for(post.path) @@#SOHUCS" itemprop="discussionUrl">
+                 <span id="url::@@ post.permalink @@" class="cy_cmt_count" data-xid="@@ post.path @@" itemprop="commentsCount" ></span>
                </a>
 ```
 
 只需要将`post.permalink`这个值包一层encodeURI方法，如下修改：
 ```
-<span id="url::{{ encodeURI(post.permalink) }}" class="cy_cmt_count" data-xid="{{ post.path }}" itemprop="commentsCount" ></span>
+<span id="url::@@ encodeURI(post.permalink) @@" class="cy_cmt_count" data-xid="@@ post.path @@" itemprop="commentsCount" ></span>
 ```
 
 另外如果部署在自己服务器上面的话，你可以在带www的文章下评论完，然后去不带www的文章下看看，评论已经不存在，我做了nginx 301重定向解决。
@@ -623,6 +623,76 @@ hexo clean && hexo g && hexo s
 
 其他自定义配置看文档说明，不一一讲了。
 
+## 代码高亮插件
+
+把代码高亮禁用掉后再编译，出现` Error: template not found: blog/base.html`的异常。
+
+这是因为代码中包含`{紧挨着{`这种双大括号引起的，特别是django模板里面大量的这样代码。然后我把所有的大括号改成了@。
+
+另外出现一个错误：hexo-renderer-pandoc，我卸载后重新安装最新的：
+
+```
+npm remove --save hexo-renderer-pandoc
+npm install --save hexo-renderer-pandoc
+```
+
+后面又出现：` pandoc exited with code null`，发现所有博客头部不能有引号。我勒个去，于是把所有的引号去掉
+
+参考这篇文章：<https://www.zfl9.com/hexo-code.html>
+
+hexo 默认的代码高亮插件为 highlight.js，highlight.js 的代码高亮个人感觉不是很好看（主要是配色方面，感觉不够“高亮”），
+然后偶然之间发现了一个还不错的代码高亮插件：prism.js，所以就琢磨着如何将 hexo 的 highlight.js 替换为 prism.js。
+
+### 禁用 highlight.js
+
+修改站点根目录下的 _config.yml 配置文件，具体如下：
+
+``` yml
+highlight:
+  enable: false
+  line_number: false
+  auto_detect: false
+  tab_replace:
+```
+
+### 获取 prism.js
+
+下载页面：<https://prismjs.com/download.html>；选择 theme 主题、language 支持的语言（不要选太多，够用就好）、plugin 插件；
+然后点击下载按钮就行了。下载到本地之后，将它们重命名为 prism.js、prism.css，
+然后将它们放置到 $HEXO/themes/hexo-theme-snippet/source/js/prism/ 目录下（prism 文件夹需要自己新建）
+
+### 配置 prism.js
+
+1、修改 `$HEXO/themes/hexo-theme-snippet/layout/_partials/head.ejs`，在尾部添加以下代码：
+```
+<link rel="stylesheet" href="/js/prism/prism.css">
+```
+
+2、修改 `$HEXO/themes/hexo-theme-snippet/layout/_partials/footer.ejs`，在尾部添加以下代码：
+```
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+```
+
+如果你选择了 `Copy to Clipboard Button prism.js` 插件，
+则还需下载 [clipboard.js](https://cdn.bootcss.com/clipboard.js/1.7.1/clipboard.min.js)，
+因为这个插件需要使用 clipboard.js 里面的函数，如果不这样做，在 Chrome 浏览器中将无法正常显示代码块，
+将 clipboard.js 放到 `$HEXO/themes/hexo-theme-snippet/source/js/prism/` 目录下。
+
+3、修改 `$HEXO/node_modules/marked/lib/marked.js`
+
+搜索 <pre><code class=" 关键字（应该只有一处），该行的内容为：
+
+```
+return '<pre><code class="'
+```
+
+将这行语句改为：如果你下载的 prism.js 未选择 Line Numbers 插件，则去掉 line-numbers（注意后面还有个空格，也要去掉）：
+
+```
+return '<pre><code class="line-numbers language-'
+```
+
 ## Gitment评论
 
 应该到目前为止我gitment是最方便集成的，所以我只讲这个。但是默认开启后，在实际使用过程中会有问题，
@@ -717,7 +787,7 @@ $ git push heroku master
 
 ## FAQ
 
-* 遇到有大括号的代码块，如果多行的不用管，如果单行的就单个反引号，并且在里面加raw标签，比如{% raw %} `{{test}}` {% endraw %}
+* 遇到有大括号的代码块，如果多行的不用管，如果单行的就单个反引号，并且在里面加raw标签，比如@% raw %@ `@@test@@` @% endraw %@
 * 关闭hexo的将回车当换行做法是用正常的markdown两个回车当换行，在全局_config.yml中添加配置
 ```
   marked:

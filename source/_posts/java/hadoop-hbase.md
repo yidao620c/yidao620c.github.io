@@ -1,7 +1,7 @@
 ---
 layout: post
 title: centos6上安装Hadoop和HBase
-date: '2015-05-27 14:01:57 +0800'
+date: 2015-05-27 14:01:57 +0800
 toc: true
 categories: java
 tags:

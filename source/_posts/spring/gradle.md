@@ -1,6 +1,6 @@
 ---
 title: Gradle构建入门
-date: '2017-12-10 10:22:29 +0800'
+date: 2017-12-10 10:22:29 +0800
 comments: true
 toc: true
 categories: spring

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Vagrant创建虚拟化开发环境
-date: '2016-09-02 22:22:22 +0800'
+date: 2016-09-02 22:22:22 +0800
 toc: true
 categories: python
 tags:

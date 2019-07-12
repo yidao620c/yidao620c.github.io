@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - 定制开发
-date: '2019-01-05 21:15:34 +0800'
+date: 2019-01-05 21:15:34 +0800
 comments: true
 toc: true
 categories: 网络安全
@@ -342,7 +342,7 @@ REST认证流程是这样的，当用户点击登录后，cas会发送post请求
 那么发送后客户端必须响应一下数据，cas明确规定如下：
 
 * cas 服务端会通过post请求，并且把用户信息以”用户名:密码”进行Base64编码放在authorization请求头中
-* 200状态码：并且格式为{"@class":"org.apereo.cas.authentication.principal.SimplePrincipal","id":"casuser","attributes":{}}是成功的；
+* 200状态码：并且格式为{"@class":"org.apereo.cas.authentication.principal.SimplePrincipal","id":"casuser","attributes":{} }是成功的；
 * 403状态码：用户不可用；
 * 404状态码：账号不存在；
 * 423状态码：账户被锁定；

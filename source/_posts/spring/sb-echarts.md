@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成Echarts导出图片
-date: '2017-08-19 15:17:28 +0800'
+date: 2017-08-19 15:17:28 +0800
 comments: true
 toc: true
 categories: spring
@@ -383,12 +383,14 @@ public class ApplicationTests {
         // 测试维度，输入值n
         List<String> dimensions = Arrays.asList("10000次", "100000次", "1000000次");
         // 有几个测试对象，就有几组测试数据，每组测试数据中对应几个维度的结果
-        List<List<Double>> allData = new ArrayList<List<Double>>(){{
-           add(Arrays.asList(2.17, 9.10, 21.70));
-           add(Arrays.asList(1.94, 8.94, 19.43));
-           add(Arrays.asList(4.88, 22.88, 48.89));
-           add(Arrays.asList(9.11, 58.14, 108.44));
-        }};
+        List<List<Double>> allData = new ArrayList<List<Double>>(){
+            {
+               add(Arrays.asList(2.17, 9.10, 21.70));
+               add(Arrays.asList(1.94, 8.94, 19.43));
+               add(Arrays.asList(4.88, 22.88, 48.89));
+               add(Arrays.asList(9.11, 58.14, 108.44));
+            }
+        };
         String optionStr = generateOption(titleStr, objects, dimensions, allData, "秒");
         // POST到接口上
         postOption(optionStr, "http://localhost:9075/api/v1/data");

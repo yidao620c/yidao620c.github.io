@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - cxf实现WebService
-date: '2017-07-13 18:25:37 +0800'
+date: 2017-07-13 18:25:37 +0800
 comments: true
 toc: true
 categories: spring

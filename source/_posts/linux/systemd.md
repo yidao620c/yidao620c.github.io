@@ -1,6 +1,6 @@
 ---
 title: centos7上systemd详解
-date: '2016-06-07 12:22:15 +0800'
+date: 2016-06-07 12:22:15 +0800
 comments: true
 toc: true
 categories: linux

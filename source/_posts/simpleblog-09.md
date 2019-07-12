@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客09- 用户认证
-date: '2015-08-20 21:47:47 +0800'
+date: 2015-08-20 21:47:47 +0800
 toc: true
 categories: python
 tags: django
@@ -61,31 +61,31 @@ urlpatterns = patterns('',
 然后我们再定义一个登陆页面，创建目录mysite/templates/registration，
 并在里面新建模板文件login.html，内容如下：
 ``` html
-{% extends "mysite/base.html" %}
+@% extends "mysite/base.html" %@
 
-{% block content %}
+@% block content %@
 
-    {% if form.errors %}
+    @% if form.errors %@
     <p>Your username and password didn't match. Please try again.</p>
-    {% endif %}
+    @% endif %@
 
-    <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
-    {% csrf_token %}
+    <form method="post" action="@% url 'django.contrib.auth.views.login' %@">
+    @% csrf_token %@
     <table>
     <tr>
-        <td>{{ form.username.label_tag }}</td>
-        <td>{{ form.username }}</td>
+        <td>@@ form.username.label_tag @@</td>
+        <td>@@ form.username @@</td>
     </tr>
     <tr>
-        <td>{{ form.password.label_tag }}</td>
-        <td>{{ form.password }}</td>
+        <td>@@ form.password.label_tag @@</td>
+        <td>@@ form.password @@</td>
     </tr>
     </table>
 
     <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ next }}" />
+    <input type="hidden" name="next" value="@@ next @@" />
     </form>
-{% endblock %}
+@% endblock %@
 ```
 你可以看到我们仍然使用到了模板继承。这个时候可以定义一个`mysite/templates/mysite/base.html`，
 把`blog/templates/blog/base.html`的内容复制给它即可。
@@ -104,19 +104,19 @@ LOGIN_REDIRECT_URL = '/'
 ``` html
 <body>
     <div class="page-header">
-        {% if user.is_authenticated %}
-        <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
-        <a href="{% url 'post_draft_list' %}" class="top-menu"><span class="glyphicon glyphicon-edit"></span></a>
-        {% else %}
-        <a href="{% url 'django.contrib.auth.views.login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
-        {% endif %}
-        <h1><a href="{% url 'blog.views.post_list' %}">Django Girls</a></h1>
+        @% if user.is_authenticated %@
+        <a href="@% url 'post_new' %@" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+        <a href="@% url 'post_draft_list' %@" class="top-menu"><span class="glyphicon glyphicon-edit"></span></a>
+        @% else %@
+        <a href="@% url 'django.contrib.auth.views.login' %@" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
+        @% endif %@
+        <h1><a href="@% url 'blog.views.post_list' %@">Django Girls</a></h1>
     </div>
     <div class="content">
         <div class="row">
             <div class="col-md-8">
-            {% block content %}
-            {% endblock %}
+            @% block content %@
+            @% endblock %@
             </div>
         </div>
     </div>
@@ -124,25 +124,25 @@ LOGIN_REDIRECT_URL = '/'
 ```
 然后修改blog/templates/blog/post_detail.html如下：
 ``` html
-{% extends 'blog/base.html' %}
+@% extends 'blog/base.html' %@
 
-{% block content %}
+@% block content %@
     <div class="date">
-        {% if post.published_date %}
-            {{ post.published_date }}
-        {% else %}
-            {% if user.is_authenticated %}
-                <a class="btn btn-default" href="{% url 'blog.views.post_publish' pk=post.pk %}">Publish</a>
-            {% endif %}
-        {% endif %}
-        {% if user.is_authenticated %}
-            <a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-            <a class="btn btn-default" href="{% url 'post_remove' pk=post.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
-        {% endif %}
+        @% if post.published_date %@
+            @@ post.published_date @@
+        @% else %@
+            @% if user.is_authenticated %@
+                <a class="btn btn-default" href="@% url 'blog.views.post_publish' pk=post.pk %@">Publish</a>
+            @% endif %@
+        @% endif %@
+        @% if user.is_authenticated %@
+            <a class="btn btn-default" href="@% url 'post_edit' pk=post.pk %@"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a class="btn btn-default" href="@% url 'post_remove' pk=post.pk %@"><span class="glyphicon glyphicon-remove"></span></a>
+        @% endif %@
     </div>
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.text|linebreaks }}</p>
-{% endblock %}
+    <h1>@@ post.title @@</h1>
+    <p>@@ post.text|linebreaks @@</p>
+@% endblock %@
 ```
 ## 用户注销
 当用户登录后显示欢迎语句，Hello ，然后后面跟一个logout链接。还是依靠django帮我们处理logout动作。
@@ -150,14 +150,14 @@ LOGIN_REDIRECT_URL = '/'
 修改mysite/templates/mysite/base.html文件如下：
 ``` html
 <div class="page-header">
-    {% if user.is_authenticated %}
-    <a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
-    <a href="{% url 'post_draft_list' %}" class="top-menu"><span class="glyphicon glyphicon-edit"></span></a>
-    <p class="top-menu">Hello {{ user.username }}<small>&nbsp;<a href="{% url 'django.contrib.auth.views.logout' %}">Log out</a></p>
-    {% else %}
-    <a href="{% url 'django.contrib.auth.views.login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
-    {% endif %}
-    <h1><a href="{% url 'blog.views.post_list' %}">Django Girls</a></h1>
+    @% if user.is_authenticated %@
+    <a href="@% url 'post_new' %@" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+    <a href="@% url 'post_draft_list' %@" class="top-menu"><span class="glyphicon glyphicon-edit"></span></a>
+    <p class="top-menu">Hello @@ user.username @@<small>&nbsp;<a href="@% url 'django.contrib.auth.views.logout' %@">Log out</a></p>
+    @% else %@
+    <a href="@% url 'django.contrib.auth.views.login' %@" class="top-menu"><span class="glyphicon glyphicon-lock"></span></a>
+    @% endif %@
+    <h1><a href="@% url 'blog.views.post_list' %@">Django Girls</a></h1>
 </div>
 ```
 很显然这时候logout肯定会报错。我们还得做些事情。

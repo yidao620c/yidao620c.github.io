@@ -1,6 +1,6 @@
 ---
 title: 使用Ajax实现异步任务
-date: '2017-05-02 09:07:13 +0800'
+date: 2017-05-02 09:07:13 +0800
 comments: true
 toc: true
 categories: web

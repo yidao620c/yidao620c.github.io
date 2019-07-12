@@ -1,6 +1,6 @@
 ---
 title: nginx反向代理WebSocket
-date: '2018-03-12 11:24:23 +0800'
+date: 2018-03-12 11:24:23 +0800
 comments: true
 toc: true
 categories: fullstack

@@ -1,6 +1,6 @@
 ---
 title: 使用ReadtheDocs托管文档
-date: '2017-01-22 20:16:09 +0800'
+date: 2017-01-22 20:16:09 +0800
 comments: true
 toc: true
 categories: fullstack
@@ -408,7 +408,7 @@ xelatex scrapy-cookbook.tex
 \date{Dec 09, 2017}
 \release{3.0.0}
 \author{熊能}
-\newcommand{\sphinxlogo}{\vbox{}}
+\newcommand{\sphinxlogo}{\vbox{@@
 \renewcommand{\releasename}{Release}
 \makeindex
 
@@ -420,21 +420,21 @@ xelatex scrapy-cookbook.tex
 \newcommand{\sectionbreak}{\clearpage}
 
 % 章节编号只编号到 subsection
-\newcommand\normalsecnumdepth{\setcounter{secnumdepth}{2}}
+\newcommand\normalsecnumdepth{\setcounter{secnumdepth}{2@@
 
 % 所有层次章节都不编号
-\newcommand\specialsecnumdepth{\setcounter{secnumdepth}{-2}}  
+\newcommand\specialsecnumdepth{\setcounter{secnumdepth}{-2@@  
 
 % toc 到 subsection
 \newcommand\normaltocdepth{
     \setcounter{tocdepth}{2}
-    \addtocontents{toc}{\setcounter{tocdepth}{2}}
+    \addtocontents{toc}{\setcounter{tocdepth}{2@@
 }
 
 % toc 到 section
 \newcommand\specialtocdepth{
     \setcounter{tocdepth}{1}
-    \addtocontents{toc}{\setcounter{tocdepth}{1}}
+    \addtocontents{toc}{\setcounter{tocdepth}{1@@
 }
 
 \begin{document}
@@ -446,11 +446,11 @@ xelatex scrapy-cookbook.tex
 \section{目录}
 \vspace{-36pt}
 \sphinxtableofcontents
-\phantomsection\label{\detokenize{index::doc}}
+\phantomsection\label{\detokenize{index::doc@@
 
 
 \section{版权}
-\label{\detokenize{copyright::doc}}\label{\detokenize{copyright:copyright}}\label{\detokenize{copyright:python-cookbook-3rd-edition-documentation}}
+\label{\detokenize{copyright::doc@@\label{\detokenize{copyright:copyright@@\label{\detokenize{copyright:python-cookbook-3rd-edition-documentation@@
 \begin{DUlineblock}{0em}
 \item[] 书名：    《Python Cookbook》3rd Edition
 \item[] 作者：     David Beazley, Brian K. Jones

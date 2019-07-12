@@ -1,6 +1,6 @@
 ---
 title: Nginx+uWSGI部署Python Web应用
-date: '2017-01-20 07:32:15 +0800'
+date: 2017-01-20 07:32:15 +0800
 comments: true
 toc: true
 categories: python

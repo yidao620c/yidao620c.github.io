@@ -1,6 +1,6 @@
 ---
 title: 发布Maven构件到中央仓库
-date: '2018-01-27 12:09:12 +0800'
+date: 2018-01-27 12:09:12 +0800
 comments: true
 toc: true
 categories: 开发工具

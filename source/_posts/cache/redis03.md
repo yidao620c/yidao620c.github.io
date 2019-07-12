@@ -1,7 +1,7 @@
 ---
 layout: post
 title: redis笔记03 - 进阶篇
-date: '2015-07-12 16:15:42 +0800'
+date: 2015-07-12 16:15:42 +0800
 toc: true
 categories: cache
 tags: redis

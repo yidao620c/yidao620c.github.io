@@ -1,7 +1,7 @@
 ---
 layout: post
 title: awk命令笔记
-date: '2016-09-22 22:22:22 +0800'
+date: 2016-09-22 22:22:22 +0800
 toc: true
 categories: linux
 tags:

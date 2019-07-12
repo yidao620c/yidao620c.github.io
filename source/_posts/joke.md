@@ -1,6 +1,6 @@
 ---
 title: 开心一刻
-date: '2015-02-07 14:02:04 +0800'
+date: 2015-02-07 14:02:04 +0800
 comments: true
 toc: false
 categories: 朝花夕拾

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: SiteMesh使用笔记
-date: '2015-03-28 10:42:23 +0800'
+date: 2015-03-28 10:42:23 +0800
 comments: true
 toc: true
 categories: java

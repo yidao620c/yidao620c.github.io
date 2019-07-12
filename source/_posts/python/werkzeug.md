@@ -287,45 +287,45 @@ def on_short_link_details(self, request, short_id):
 `layout.html`
 ``` html
 <!doctype html>
-<title>{% block title %}{% endblock %} | shortly</title>
+<title>@% block title %@@% endblock %@ | shortly</title>
 <link rel=stylesheet href=/static/style.css type=text/css>
 <div class=box>
   <h1><a href=/>shortly</a></h1>
   <p class=tagline>Shortly is a URL shortener written with Werkzeug
-  {% block body %}{% endblock %}
+  @% block body %@@% endblock %@
 </div>
 ```
 
 `new_url.html`
 ``` html
-{% extends "layout.html" %}
-{% block title %}Create New Short URL{% endblock %}
-{% block body %}
+@% extends "layout.html" %@
+@% block title %@Create New Short URL@% endblock %@
+@% block body %@
   <h2>Submit URL</h2>
   <form action="" method=post>
-    {% if error %}
-      <p class=error><strong>Error:</strong> {{ error }}
-    {% endif %}
+    @% if error %@
+      <p class=error><strong>Error:</strong> @@ error @@
+    @% endif %@
     <p>URL:
-      <input type=text name=url value="{{ url }}" class=urlinput>
+      <input type=text name=url value="@@ url @@" class=urlinput>
       <input type=submit value="Shorten">
   </form>
-{% endblock %}
+@% endblock %@
 ```
 
 `short_link_details.html`
 ``` html
-{% extends "layout.html" %}
-{% block title %}Details about /{{ short_id }}{% endblock %}
-{% block body %}
-  <h2><a href="/{{ short_id }}">/{{ short_id }}</a></h2>
+@% extends "layout.html" %@
+@% block title %@Details about /@@ short_id @@@% endblock %@
+@% block body %@
+  <h2><a href="/@@ short_id @@">/@@ short_id @@</a></h2>
   <dl>
     <dt>Full link
-    <dd class=link><div>{{ link_target }}</div>
+    <dd class=link><div>@@ link_target @@</div>
     <dt>Click count:
-    <dd>{{ click_count }}
+    <dd>@@ click_count @@
   </dl>
-{% endblock %}
+@% endblock %@
 ```
 
 ### 第9步：样式

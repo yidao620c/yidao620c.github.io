@@ -1,6 +1,6 @@
 ---
 title: markdown语法详解
-date: '2015-03-22 16:22:15 +0800'
+date: 2015-03-22 16:22:15 +0800
 comments: true
 toc: true
 categories: fullstack
@@ -240,7 +240,7 @@ $$
 $$ (x+1)^2 = \class{hidden}{(x+1)(x+1)} $$
 
 $$
-(x+1)^2 = \cssId{step1}{\style{visibility:hidden}{(x+1)(x+1)}}
+(x+1)^2 = \cssId{step1}{\style{visibility:hidden}{(x+1)(x+1)@@
 $$
 ```
 

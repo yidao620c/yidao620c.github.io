@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 自己写starter
-date: '2017-07-22 16:22:19 +0800'
+date: 2017-07-22 16:22:19 +0800
 comments: true
 toc: true
 categories: spring

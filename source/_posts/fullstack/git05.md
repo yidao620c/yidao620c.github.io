@@ -1,6 +1,6 @@
 ---
 title: git简明教程 - 技巧篇
-date: '2017-02-15 09:34:21 +0800'
+date: 2017-02-15 09:34:21 +0800
 comments: true
 toc: true
 categories: fullstack

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: OSGi简易教程
-date: '2016-04-16 01:02:42 +0800'
+date: 2016-04-16 01:02:42 +0800
 toc: true
 categories: java
 tags:

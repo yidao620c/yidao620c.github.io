@@ -1,7 +1,7 @@
 ---
 layout: post
 title: RabbitMQ简易教程 - 任务队列
-date: '2017-05-08 09:15:22 +0800'
+date: 2017-05-08 09:15:22 +0800
 comments: true
 toc: true
 categories: mq

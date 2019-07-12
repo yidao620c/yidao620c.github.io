@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成Shiro权限管理
-date: '2017-07-07 09:56:08 +0800'
+date: 2017-07-07 09:56:08 +0800
 comments: true
 toc: true
 categories: spring

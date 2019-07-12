@@ -1,7 +1,7 @@
 ---
 layout: post
 title: centos7配置mysql主从复制
-date: '2016-09-16 22:22:22 +0800'
+date: 2016-09-16 22:22:22 +0800
 toc: true
 categories: database
 tags:

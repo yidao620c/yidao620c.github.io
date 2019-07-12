@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 使用PyInstaller打包Python程序
-date: '2015-09-07 10:22:26 +0800'
+date: 2015-09-07 10:22:26 +0800
 toc: true
 categories: python
 tags:

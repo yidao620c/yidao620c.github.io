@@ -1,6 +1,6 @@
 ---
 title: CAS教程 - Service配置
-date: '2019-01-12 23:10:22 +0800'
+date: 2019-01-12 23:10:22 +0800
 comments: true
 toc: true
 categories: 网络安全
@@ -171,7 +171,7 @@ cas.javascript.file=/js/cas.js
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title th:text="${#themes.code('pageTitle')}"></title>
-    <link rel="stylesheet" th:href="@{${#themes.code('css.file')}}" />
+    <link rel="stylesheet" th:href="@{${#themes.code('css.file')@@" />
 </head>
 
 <body>

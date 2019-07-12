@@ -1,6 +1,6 @@
 ---
 title: SpringBoot系列 - 集成MongoDB
-date: '2017-07-04 12:25:38 +0800'
+date: 2017-07-04 12:25:38 +0800
 comments: true
 toc: true
 categories: spring

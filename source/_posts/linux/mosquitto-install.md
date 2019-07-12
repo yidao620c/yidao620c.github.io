@@ -1,7 +1,7 @@
 ---
 layout: post
 title: mqtt消息中间件mosquitto的安装和配置
-date: '2015-05-17 16:33:07 +0800'
+date: 2015-05-17 16:33:07 +0800
 comments: true
 toc: true
 categories: linux

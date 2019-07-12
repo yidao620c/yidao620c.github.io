@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客05- 页面美化
-date: '2015-08-12 10:23:50 +0800'
+date: 2015-08-12 10:23:50 +0800
 toc: true
 categories: python
 tags: django
@@ -73,36 +73,36 @@ h1 a是CSS选择器，上面的意思是在h1标签下的链接a的文字颜色�
 
 接下来我们要让模板加载静态css文件，打开blog/templates/blog/post_list.html，在最开始部分加入：
 ```
-{% load staticfiles %}
+@% load staticfiles %@
 ```
 
 然后在bootstrap引用的后面添加下面这句
 ```
-<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+<link rel="stylesheet" href="@% static 'css/blog.css' %@">
 ```
 最后，整个模板文件类似这样：
 ``` html
-{% load staticfiles %}
+@% load staticfiles %@
 <html>
     <head>
         <title>Django Girls blog</title>
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+        <link rel="stylesheet" href="@% static 'css/blog.css' %@">
     </head>
     <body>
         <div>
             <h1><a href="/">Django Girls Blog</a></h1>
         </div>
 
-        {% for post in posts %}
+        @% for post in posts %@
             <div>
-                <p>published: {{ post.published_date }}</p>
-                <h1><a href="">{{ post.title }}</a></h1>
-                <p>{{ post.text|linebreaks }}</p>
+                <p>published: @@ post.published_date @@</p>
+                <h1><a href="">@@ post.title @@</a></h1>
+                <p>@@ post.text|linebreaks @@</p>
             </div>
-        {% endfor %}
+        @% endfor %@
     </body>
 </html>
 ```
@@ -156,13 +156,13 @@ h1 a {
 <div class="content">
     <div class="row">
         <div class="col-md-8">
-            {% for post in posts %}
+            @% for post in posts %@
                 <div class="post">
-                    <h1><a href="">{{ post.title }}</a></h1>
-                    <p>published: {{ post.published_date }}</p>
-                    <p>{{ post.text|linebreaks }}</p>
+                    <h1><a href="">@@ post.title @@</a></h1>
+                    <p>published: @@ post.published_date @@</p>
+                    <p>@@ post.text|linebreaks @@</p>
                 </div>
-            {% endfor %}
+            @% endfor %@
         </div>
     </div>
 </div>

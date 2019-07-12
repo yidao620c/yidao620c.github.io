@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 使用WatchService监听文件变化
-date: '2017-09-21 16:12:22 +0800'
+date: 2017-09-21 16:12:22 +0800
 toc: true
 categories: java
 tags: java

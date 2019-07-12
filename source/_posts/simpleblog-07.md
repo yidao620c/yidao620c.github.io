@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Django1.9开发博客07- 实现功能
-date: '2015-08-16 12:02:56 +0800'
+date: 2015-08-16 12:02:56 +0800
 toc: true
 categories: python
 tags: django
@@ -16,9 +16,9 @@ abbrlink: 45644
 ## 文章详情
 对于首页每一篇文章，我们希望点击标题后可以进入该文章的阅读页面。修改post_list.html中的标题href如下：
 ``` html
-<h1><a href="{% url 'blog.views.post_detail' pk=post.pk %}">{{ post.title }}</a></h1>
+<h1><a href="@% url 'blog.views.post_detail' pk=post.pk %@">@@ post.title @@</a></h1>
 ```
-我来详细解释下这个{% raw %}{% url ‘blog.views.post_detail’ pk=post.pk %}，{% %}{% endraw %}
+我来详细解释下这个@% raw %@@% url ‘blog.views.post_detail’ pk=post.pk %@，@% %@@% endraw %@
 表示使用django模板标签而不是普通的HTML文字，这里我们使用了url标签来生成真正的url链接。
 blog.views.post_detail是视图的全路径。
 
@@ -61,17 +61,17 @@ def post_detail(request, pk):
 ### post_detail模板
 然后再增加模板blog/templates/blog/post_detail.html：
 ``` html
-{% extends 'blog/base.html' %}
+@% extends 'blog/base.html' %@
 
-{% block content %}
+@% block content %@
     <div class="date">
-        {% if post.published_date %}
-            {{ post.published_date }}
-        {% endif %}
+        @% if post.published_date %@
+            @@ post.published_date @@
+        @% endif %@
     </div>
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.text|linebreaks }}</p>
-{% endblock %}
+    <h1>@@ post.title @@</h1>
+    <p>@@ post.text|linebreaks @@</p>
+@% endblock %@
 ```
 
 这次我们还是采用模板继承方式，这里我们还用到了模板标签if，这是一个条件判断的标签。
@@ -116,31 +116,31 @@ PostForm需要继承自forms.ModelForm，这样django就能实现某些神奇的
 ### 增加链接
 打开blog/templates/blog/base.html，在名字为page-header的div中添加一个新增文章的链接：
 ``` html
-<a href="{% url 'blog.views.post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+<a href="@% url 'blog.views.post_new' %@" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
 ```
 
 这时候你的base.html应该是这样的：
 ``` html
-{% load staticfiles %}
+@% load staticfiles %@
 <html>
 <head>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <link href="http://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+<link rel="stylesheet" href="@% static 'css/blog.css' %@">
 <title>Django Girls Blog</title>
 </head>
 <body>
     <div class="page-header">
-        <a href="{% url 'blog.views.post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
+        <a href="@% url 'blog.views.post_new' %@" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
         <h1><a href="/">Django Girls Blog</a></h1>
     </div>
     <div class="content">
         <div class="row">
             <div class="col-md-8">
-                {% block content %}
-                {% endblock %}
+                @% block content %@
+                @% endblock %@
             </div>
         </div>
     </div>
@@ -180,15 +180,15 @@ def post_new(request):
 ### post_edit.html模板
 在blog/templates/blog目录新建一个post_edit.html页面，然后写入下列内容：
 ``` html
-{% extends 'blog/base.html' %}
+@% extends 'blog/base.html' %@
 
-{% block content %}
+@% block content %@
     <h1>New post</h1>
-    <form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
+    <form method="POST" class="post-form">@% csrf_token %@
+        @@ form.as_p @@
         <button type="submit" class="save btn btn-default">Save</button>
     </form>
-{% endblock %}
+@% endblock %@
 ```
 保存后，刷新首页，点击加号那个链接可以看到如下页面：
 
@@ -238,23 +238,23 @@ django已经自动帮我们做了验证，是不是很酷呢？
 
 首先打开blog/templates/blog/post_detail.html，添加一行：
 ``` html
-<a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}">
+<a class="btn btn-default" href="@% url 'post_edit' pk=post.pk %@">
 <span class="glyphicon glyphicon-pencil"></span></a>
 ```
 现在它的内容是这样的：
 ``` html
-{% extends 'blog/base.html' %}
+@% extends 'blog/base.html' %@
 
-{% block content %}
+@% block content %@
     <div class="date">
-    {% if post.published_date %}
-        {{ post.published_date }}
-    {% endif %}
-    <a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+    @% if post.published_date %@
+        @@ post.published_date @@
+    @% endif %@
+    <a class="btn btn-default" href="@% url 'post_edit' pk=post.pk %@"><span class="glyphicon glyphicon-pencil"></span></a>
     </div>
-    <h1>{{ post.title }}</h1>
-    <p>{{ post.text|linebreaks }}</p>
-{% endblock %}
+    <h1>@@ post.title @@</h1>
+    <p>@@ post.text|linebreaks @@</p>
+@% endblock %@
 ```
 然后修改blog/urls.py文件，添加一条：
 ``` python
