@@ -708,6 +708,18 @@ return '<pre><code class="'
 return '<pre><code class="line-numbers language-'
 ```
 
+4、关于代码横向滚动条一直出不来的原因
+
+原来style.css里面设置了`::-webkit-scrollbar`，将其注释掉即可：
+
+``` css
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    height: 5px;
+    width: 5px;
+}
+```
+
 ## Gitment评论
 
 应该到目前为止我gitment是最方便集成的，所以我只讲这个。但是默认开启后，在实际使用过程中会有问题，
