@@ -16,12 +16,12 @@ abbrlink: 42706
 参考：[IDEA-165800 Can’t download dependency's source code](https://youtrack.jetbrains.com/issue/IDEA-165800)
 
 使用如下命令行下载：
-```
+``` bash
 mvn dependency:resolve -Dclassifier=sources
 ```
 
 如果只想下载指定的包，使用（多个使用逗号分隔）：
-```
+``` bash
 mvn dependency:sources -DincludeArtifactIds=commons-io,:mybatis
 ```
 
