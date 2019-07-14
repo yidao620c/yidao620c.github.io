@@ -636,7 +636,13 @@ npm remove --save hexo-renderer-pandoc
 npm install --save hexo-renderer-pandoc
 ```
 
-后面又出现：` pandoc exited with code null`，发现所有博客头部不能有引号。我勒个去，于是把所有的引号去掉
+后面又出现：` pandoc exited with code null`，发现所有博客头部不能有引号。我勒个去，于是把所有的引号去掉。
+后来又经常出现这个错误，可能是因为hexo包损坏，于是我重新安装了hexo：
+
+``` none
+npm remove --save hexo
+npm install --save hexo
+```
 
 参考这篇文章：<https://www.zfl9.com/hexo-code.html>
 
