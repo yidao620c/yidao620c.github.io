@@ -1,0 +1,596 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="mqtt,">
+
+
+    <meta name="description" content="Mosquitto是一个开源(BSD许可证)的消息代理，实现MQTT(消息队列遥测传输)协议版本3.1.1。
+MQTT（MQ Telemetry Transport），消息队列遥测传输协议，轻量级的发布/订阅协议，
+适用于一些条件比较苛刻的环境，进行低带宽、不可靠或间歇性的通信。目前已经是物联...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>mqtt消息中间件mosquitto的安装和配置 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="mqtt消息中间件mosquitto的安装和配置">
+            
+                mqtt消息中间件mosquitto的安装和配置
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/linux">
+            linux
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/mqtt" title='mqtt'>
+                        mqtt
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/05/17</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Mosquitto是一个开源(BSD许可证)的消息代理，实现MQTT(消息队列遥测传输)协议版本3.1.1。</p>
+<p>MQTT（MQ Telemetry Transport），消息队列遥测传输协议，轻量级的发布/订阅协议，
+适用于一些条件比较苛刻的环境，进行低带宽、不可靠或间歇性的通信。目前已经是物联网消息通信事实上的标准协议了。</p>
+<p>值得一提的是mqtt提供三种不同质量的消息服务：</p>
+<ul>
+<li>“至多一次”：消息发布完全依赖底层 TCP/IP 网络。会发生消息丢失或重复。这一级别可用于如下情况，环境传感器数据，丢失一次读记录无所谓，因为不久后还会有第二次发送。</li>
+<li>“至少一次”：确保消息到达，但消息重复可能会发生。</li>
+<li>“只有一次”：确保消息到达一次。这一级别可用于如下情况，在计费系统中，消息重复或丢失会导致不正确的结果。</li>
+</ul>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>参考官网 <a href="http://mosquitto.org/download/" target="_blank" rel="noopener">http://mosquitto.org/download/</a></p>
+<p>服务器操作系统为CentOS6.4，使用最简单的yum安装</p>
+<h4 id="1，先加入yum源："><a href="#1，先加入yum源：" class="headerlink" title="1，先加入yum源："></a>1，先加入yum源：</h4><p>在<code>/etc/yum.repos.d/</code>目录中新建一个<code>mosquitto.repo</code>文件，里面写入：</p>
+<pre><code>[home_oojah_mqtt]
+name=mqtt (CentOS_CentOS-6)
+type=rpm-md
+baseurl=http://download.opensuse.org/repositories/home:/oojah:/mqtt/CentOS_CentOS-6/
+gpgcheck=1
+gpgkey=http://download.opensuse.org/repositories/home:/oojah:/mqtt/CentOS_CentOS-6/repodata/repomd.xml.key
+enabled=1
+</code></pre><h4 id="2，开始安装"><a href="#2，开始安装" class="headerlink" title="2，开始安装"></a>2，开始安装</h4><pre><code class="line-numbers language-bash">sudo yum search all mosquitto
+sudo yum install mosquitto mosquitto-clients libmosquitto-devel libmosquittopp-devel python-mosquitto
+</code></pre>
+<h4 id="3，配置"><a href="#3，配置" class="headerlink" title="3，配置"></a>3，配置</h4><p>安装完成之后，所有配置文件会被放置于/etc/mosquitto/目录下，
+其中最重要的就是Mosquitto的配置文件，即mosquitto.conf，以下是详细的配置参数说明。</p>
+<pre><code># =================================================================
+# General configuration
+# =================================================================
+
+# 客户端心跳的间隔时间
+#retry_interval 20
+
+# 系统状态的刷新时间
+#sys_interval 10
+
+# 系统资源的回收时间，0表示尽快处理
+#store_clean_interval 10
+
+# 服务进程的PID
+#pid_file /var/run/mosquitto.pid
+
+# 服务进程的系统用户
+#user mosquitto
+
+# 客户端心跳消息的最大并发数
+#max_inflight_messages 10
+
+# 客户端心跳消息缓存队列
+#max_queued_messages 100
+
+# 用于设置客户端长连接的过期时间，默认永不过期
+#persistent_client_expiration
+
+# =================================================================
+# Default listener
+# =================================================================
+
+# 服务绑定的IP地址
+#bind_address
+
+# 服务绑定的端口号
+#port 1883
+
+# 允许的最大连接数，-1表示没有限制
+#max_connections -1
+
+# cafile：CA证书文件
+# capath：CA证书目录
+# certfile：PEM证书文件
+# keyfile：PEM密钥文件
+#cafile
+#capath
+#certfile
+#keyfile
+
+# 必须提供证书以保证数据安全性
+#require_certificate false
+
+# 若require_certificate值为true，use_identity_as_username也必须为true
+#use_identity_as_username false
+
+# 启用PSK（Pre-shared-key）支持
+#psk_hint
+
+# SSL/TSL加密算法，可以使用“openssl ciphers”命令获取
+# as the output of that command.
+#ciphers
+
+# =================================================================
+# Persistence
+# =================================================================
+
+# 消息自动保存的间隔时间
+#autosave_interval 1800
+
+# 消息自动保存功能的开关
+#autosave_on_changes false
+
+# 持久化功能的开关
+persistence true
+
+# 持久化DB文件
+#persistence_file mosquitto.db
+
+# 持久化DB文件目录
+#persistence_location /var/lib/mosquitto/
+
+# =================================================================
+# Logging
+# =================================================================
+
+# 4种日志模式：stdout、stderr、syslog、topic
+# none 则表示不记日志，此配置可以提升些许性能
+log_dest none
+
+# 选择日志的级别（可设置多项）
+#log_type error
+#log_type warning
+#log_type notice
+#log_type information
+
+# 是否记录客户端连接信息
+#connection_messages true
+
+# 是否记录日志时间
+#log_timestamp true
+
+# =================================================================
+# Security
+# =================================================================
+
+# 客户端ID的前缀限制，可用于保证安全性
+#clientid_prefixes
+
+# 允许匿名用户
+#allow_anonymous true
+
+# 用户/密码文件，默认格式：username:password
+#password_file
+
+# PSK格式密码文件，默认格式：identity:key
+#psk_file
+
+# pattern write sensor/%u/data
+# ACL权限配置，常用语法如下：
+# 用户限制：user &lt;username&gt;
+# 话题限制：topic [read|write] &lt;topic&gt;
+# 正则限制：pattern write sensor/%u/data
+#acl_file
+
+# =================================================================
+# Bridges
+# =================================================================
+
+# 允许服务之间使用“桥接”模式（可用于分布式部署）
+#connection &lt;name&gt;
+#address &lt;host&gt;[:&lt;port&gt;]
+#topic &lt;topic&gt; [[[out | in | both] qos-level] local-prefix remote-prefix]
+
+# 设置桥接的客户端ID
+#clientid
+
+# 桥接断开时，是否清除远程服务器中的消息
+#cleansession false
+
+# 是否发布桥接的状态信息
+#notifications true
+
+# 设置桥接模式下，消息将会发布到的话题地址
+# $SYS/broker/connection/&lt;clientid&gt;/state
+#notification_topic
+
+# 设置桥接的keepalive数值
+#keepalive_interval 60
+
+# 桥接模式，目前有三种：automatic、lazy、once
+#start_type automatic
+
+# 桥接模式automatic的超时时间
+#restart_timeout 30
+
+# 桥接模式lazy的超时时间
+#idle_timeout 60
+
+# 桥接客户端的用户名
+#username
+
+# 桥接客户端的密码
+#password
+
+# bridge_cafile：桥接客户端的CA证书文件
+# bridge_capath：桥接客户端的CA证书目录
+# bridge_certfile：桥接客户端的PEM证书文件
+# bridge_keyfile：桥接客户端的PEM密钥文件
+#bridge_cafile
+#bridge_capath
+#bridge_certfile
+#bridge_keyfile
+
+# 自己的配置可以放到以下目录中
+include_dir /etc/mosquitto/conf.d
+</code></pre><h4 id="4，启动服务，两种方式"><a href="#4，启动服务，两种方式" class="headerlink" title="4，启动服务，两种方式"></a>4，启动服务，两种方式</h4><pre><code class="line-numbers language-bash">mosquitto -c /etc/mosquitto/mosquitto.conf -d
+sudo /etc/init.d/mosquitto start
+</code></pre>
+<hr>
+<h3 id="演示部分"><a href="#演示部分" class="headerlink" title="演示部分"></a>演示部分</h3><p>前面已经开启了服务，如果没有请参考前面步骤。</p>
+<p>一、开启另一个终端窗口，运行订阅程序mosquitto_sub:</p>
+<p><em>注意</em>：</p>
+<p>消息推送的发布和订阅要有主题，选项[-t] 主题，即：mosquitto -t 主题</p>
+<p>如需指定用户名称则加选项[-i] 用户名，即：mosquitto_sub -t 主题 -i 订阅端</p>
+<pre><code>mosquitto_sub -t mqtt
+</code></pre><p>二、开启另一个终端窗口，运行发布程序mosquitto_pub:</p>
+<p>指定消息推送的主题，发布端用户名和消息：</p>
+<pre><code>mosquitto_pub -t 主题 -i 发布端 -h 主机 -m 你好
+</code></pre><p>*注意：如果消息中间有空格则消息要用引号括起来。</p>
+<pre><code>mosquitto_pub -t 主题 -i 发布端 -h host -m &#39;我是发布端，你好。&#39;
+mosquitto_pub -h localhost -t mqtt -m &quot;hello world.&quot;
+</code></pre><p>这时候前面那个订阅窗口就可以收到”hello world”的消息了。</p>
+<p>演示成功！！！</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/05/17/linux/mosquitto-install.html">mqtt消息中间件mosquitto的安装和配置</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/05/19/fullstack/xpath.html" class="pre-post btn btn-default" title='xpath入门笔记'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">xpath入门笔记</span>
+        </a>
+    
+    
+        <a href="/2015/05/08/java/java8-lambda.html" class="next-post btn btn-default" title='Java8中的lambda表达式'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Java8中的lambda表达式</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1，先加入yum源："><span class="toc-text">1，先加入yum源：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2，开始安装"><span class="toc-text">2，开始安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3，配置"><span class="toc-text">3，配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4，启动服务，两种方式"><span class="toc-text">4，启动服务，两种方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#演示部分"><span class="toc-text">演示部分</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

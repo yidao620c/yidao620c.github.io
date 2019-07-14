@@ -1,0 +1,461 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="Scrapy使用Python内置的的日志系统来记录事件日志。
+日志配置
+LOG_ENABLED = true
+LOG_ENCODING = &quot;utf-8&quot;
+LOG_LEVEL = logging.INFO
+LOG_FILE = &quot;log/spider.log&qu...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记07- 内置服务 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记07- 内置服务">
+            
+                Scrapy笔记07- 内置服务
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/03/19</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Scrapy使用Python内置的的日志系统来记录事件日志。
+日志配置</p>
+<pre><code class="line-numbers language-python">LOG_ENABLED = true
+LOG_ENCODING = &quot;utf-8&quot;
+LOG_LEVEL = logging.INFO
+LOG_FILE = &quot;log/spider.log&quot;
+LOG_STDOUT = True
+LOG_FORMAT = &quot;%(asctime)s [%(name)s] %(levelname)s: %(message)s&quot;
+LOG_DATEFORMAT = &quot;%Y-%m-%d %H:%M:%S&quot;
+</code></pre>
+<p>使用也很简单</p>
+<pre><code class="line-numbers language-python">import logging
+logger = logging.getLogger(__name__)
+logger.warning(&quot;This is a warning&quot;)
+</code></pre>
+<p>如果在Spider里面使用，那就更简单了，因为logger就是它的一个实例变量</p>
+<pre><code class="line-numbers language-python">import scrapy
+
+class MySpider(scrapy.Spider):
+
+    name = &#39;myspider&#39;
+    start_urls = [&#39;http://scrapinghub.com&#39;]
+
+    def parse(self, response):
+        self.logger.info(&#39;Parse function called on %s&#39;, response.url)
+</code></pre>
+<h2 id="发送email"><a href="#发送email" class="headerlink" title="发送email"></a>发送email</h2><p>Scrapy发送email基于<a href="http://twistedmatrix.com/documents/current/core/howto/defer-intro.html" target="_blank" rel="noopener">Twisted non-blocking IO</a>实现，只需几个简单配置即可。</p>
+<p>初始化</p>
+<pre><code class="line-numbers language-python">mailer = MailSender.from_settings(settings)
+</code></pre>
+<p>发送不包含附件</p>
+<pre><code class="line-numbers language-python">mailer.send(to=[&quot;someone@example.com&quot;], subject=&quot;Some subject&quot;, body=&quot;Some body&quot;, cc=[&quot;another@example.com&quot;])
+</code></pre>
+<p>配置</p>
+<pre><code class="line-numbers language-python">MAIL_FROM = &#39;scrapy@localhost&#39;
+MAIL_HOST = &#39;localhost&#39;
+MAIL_PORT = 25
+MAIL_USER = &quot;&quot;
+MAIL_PASS = &quot;&quot;
+MAIL_TLS = False
+MAIL_SSL = False
+</code></pre>
+<h2 id="同一个进程运行多个Spider"><a href="#同一个进程运行多个Spider" class="headerlink" title="同一个进程运行多个Spider"></a>同一个进程运行多个Spider</h2><pre><code class="line-numbers language-python">import scrapy
+from scrapy.crawler import CrawlerProcess
+
+class MySpider1(scrapy.Spider):
+    # Your first spider definition
+    ...
+
+class MySpider2(scrapy.Spider):
+    # Your second spider definition
+    ...
+
+process = CrawlerProcess()
+process.crawl(MySpider1)
+process.crawl(MySpider2)
+process.start() # the script will block here until all crawling jobs are finished
+
+</code></pre>
+<h2 id="分布式爬虫"><a href="#分布式爬虫" class="headerlink" title="分布式爬虫"></a>分布式爬虫</h2><p>Scrapy并没有提供内置的分布式抓取功能，不过有很多方法可以帮你实现。</p>
+<p>如果你有很多个spider，最简单的方式就是启动多个<code>Scrapyd</code>实例，然后将spider分布到各个机器上面。</p>
+<p>如果你想多个机器运行同一个spider，可以将url分片后交给每个机器上面的spider。比如你把URL分成3份</p>
+<pre><code>http://somedomain.com/urls-to-crawl/spider1/part1.list
+http://somedomain.com/urls-to-crawl/spider1/part2.list
+http://somedomain.com/urls-to-crawl/spider1/part3.list
+</code></pre><p>然后运行3个<code>Scrapyd</code>实例，分别启动它们，并传递part参数</p>
+<pre><code>curl http://scrapy1.mycompany.com:6800/schedule.json -d project=myproject -d spider=spider1 -d part=1
+curl http://scrapy2.mycompany.com:6800/schedule.json -d project=myproject -d spider=spider1 -d part=2
+curl http://scrapy3.mycompany.com:6800/schedule.json -d project=myproject -d spider=spider1 -d part=3
+</code></pre><h2 id="防止被封的策略"><a href="#防止被封的策略" class="headerlink" title="防止被封的策略"></a>防止被封的策略</h2><p>一些网站实现了一些策略来禁止爬虫来爬取它们的网页。有的比较简单，有的相当复杂，如果你需要详细了解可以咨询<a href="http://scrapy.org/support/" target="_blank" rel="noopener">商业支持</a></p>
+<p>下面是对于这些网站的一些有用的建议：</p>
+<ul>
+<li>使用user agent池。也就是每次发送的时候随机从池中选择不一样的浏览器头信息，防止暴露爬虫身份</li>
+<li>禁止Cookie，某些网站会通过Cookie识别用户身份，禁用后使得服务器无法识别爬虫轨迹</li>
+<li>设置download_delay下载延迟，数字设置为5秒，越大越安全</li>
+<li>如果有可能的话尽量使用<a href="http://www.googleguide.com/cached_pages.html" target="_blank" rel="noopener">Google cache</a>获取网页，而不是直接访问</li>
+<li>使用一个轮转IP池，例如免费的<a href="https://www.torproject.org/" target="_blank" rel="noopener">Tor project</a>或者是付费的<a href="http://proxymesh.com/" target="_blank" rel="noopener">ProxyMesh</a></li>
+<li>使用大型分布式下载器，这样就能完全避免被封了，只需要关注怎样解析页面就行。一个例子就是<a href="http://scrapinghub.com/crawlera" target="_blank" rel="noopener">Crawlera</a></li>
+</ul>
+<p>如果这些还是无法避免被禁，可以考虑<a href="http://scrapy.org/support/" target="_blank" rel="noopener">商业支持</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/03/19/scrapy-07.html">Scrapy笔记07- 内置服务</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/03/20/scrapy-08.html" class="pre-post btn btn-default" title='Scrapy笔记08- 文件与图片'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记08- 文件与图片</span>
+        </a>
+    
+    
+        <a href="/2016/03/18/scrapy-06.html" class="next-post btn btn-default" title='Scrapy笔记06- Item Pipeline'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记06- Item Pipeline</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#发送email"><span class="toc-text">发送email</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#同一个进程运行多个Spider"><span class="toc-text">同一个进程运行多个Spider</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分布式爬虫"><span class="toc-text">分布式爬虫</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#防止被封的策略"><span class="toc-text">防止被封的策略</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

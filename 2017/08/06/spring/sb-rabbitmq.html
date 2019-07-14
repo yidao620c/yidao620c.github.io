@@ -1,0 +1,714 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="RabbitMQ 即一个消息队列，主要是用来实现应用程序的异步和解耦，同时也能起到消息缓冲，消息分发的作用。
+RabbitMQ是实现AMQP（高级消息队列协议）的消息中间件的一种，AMQP，即Advanced Message Queuing Protocol，
+高级消息队列协议，是应用层协议的...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 使用消息队列RabbitMQ | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 使用消息队列RabbitMQ">
+            
+                SpringBoot系列 - 使用消息队列RabbitMQ
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/08/06</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>RabbitMQ 即一个消息队列，主要是用来实现应用程序的异步和解耦，同时也能起到消息缓冲，消息分发的作用。</p>
+<p>RabbitMQ是实现AMQP（高级消息队列协议）的消息中间件的一种，AMQP，即Advanced Message Queuing Protocol，
+高级消息队列协议，是应用层协议的一个开放标准，为面向消息的中间件设计。</p>
+<p>在项目中，将一些无需即时返回且耗时的操作提取出来，进行了异步处理，而这种异步处理的方式大大的节省了服务器的请求响应时间，
+提高了系统的吞吐量。</p>
+<p>本篇将详细介绍RabbitMQ以及如何在SpringBoot中使用。</p>
+<h2 id="简单概念"><a href="#简单概念" class="headerlink" title="简单概念"></a>简单概念</h2><p>关于消息中间件RabbitMQ的详细介绍可以参考我的博客系列教程：<a href="https://www.xncoding.com/tags/rabbitmq/">RabbitMQ简易教程</a></p>
+<p>这里我只对一些最核心的概念拿出来讲一下，不理解这些就根本无法理解下面的代码。</p>
+<p>几个名词术语：</p>
+<ul>
+<li>Broker - 简单来说就是消息队列服务器的实体。</li>
+<li>Exchange - 消息路由器，转发消息到绑定的队列上，指定消息按什么规则，路由到哪个队列。</li>
+<li>Queue - 消息队列，用来存储消息，每个消息都会被投入到一个或多个队列。</li>
+<li>Binding - 绑定，它的作用就是把 Exchange 和 Queue 按照路由规则绑定起来。</li>
+<li>RoutingKey - 路由关键字，Exchange 根据这个关键字进行消息投递。</li>
+<li>Producter - 消息生产者，产生消息的程序。</li>
+<li>Consumer - 消息消费者，接收消息的程序。</li>
+<li>Channel - 消息通道，在客户端的每个连接里可建立多个Channel，每个channel代表一个会话。</li>
+</ul>
+<p>一般消息队列都是生产者将消息发送到队列，消费者监听队列进行消费。rabbitmq中一个虚拟主机（默认 /）持有一个或者多个交换机（Exchange）。
+用户只能在虚拟主机的粒度进行权限控制，交换机根据一定的策略（RoutingKey）绑定(Binding)到队列(Queue)上，
+这样生产者和队列就没有直接联系，而是将消息发送的交换机，交换机再把消息转发到对应绑定的队列上。</p>
+<p>上面说了交换机（Exchange）作为rabbitmq的一个独特的重要的概念，单独拿出来讲一下。我们用到的最常见的是4中类型：</p>
+<ol>
+<li>Direct: 先匹配, 再投送。即在绑定时设定一个routing_key, 消息的routing_key匹配时, 才会被交换器投送到绑定的队列中去. 交换机跟队列必须是精确的对应关系，这种最为简单。</li>
+<li>Topic: 转发消息主要是根据通配符。在这种交换机下，队列和交换机的绑定会定义一种路由模式，那么，通配符就要在这种路由模式和路由键之间匹配后交换机才能转发消息 这种可以认为是Direct 的灵活版  </li>
+<li>Headers: 也是根据规则匹配, 相较于 direct 和 topic 固定地使用 routingkey , headers则是一个自定义匹配规则的类型，
+在队列与交换器绑定时会设定一组键值对规则，消息中也包括一组键值对( headers属性)，当这些键值对有一对或全部匹配时，消息被投送到对应队列</li>
+<li>Fanout : 消息广播模式，不管路由键或者是路由模式，会把消息发给绑定给它的全部队列，如果配置了routingkey会被忽略</li>
+</ol>
+<p>理解交换机如何投送消息的原理后，后面的就比较简单了。</p>
+<h2 id="Ack机制"><a href="#Ack机制" class="headerlink" title="Ack机制"></a>Ack机制</h2><p>在RabbitMQ的消息队列编程中，有个非常重要的概率叫消息确认机制，也就是Ack机制，这里我需要单独讲一下。</p>
+<p>每个Consumer可能需要一段时间才能处理完收到的数据。如果在这个过程中，Consumer出错了或者异常退出了，而数据还没有处理完成，那么非常不幸，这段数据就丢失了。</p>
+<p>因为我们采用no-ack的方式进行确认，也就是说，每次Consumer接到数据后，而不管是否处理完成，RabbitMQ Server会立即把这个Message标记为完成，然后从queue中删除了。
+如果一个Consumer异常退出了，它处理的数据能够被另外的Consumer处理，这样数据在这种情况下就不会丢失了（注意是这种情况下）。</p>
+<p>为了保证数据不被丢失，RabbitMQ支持消息确认机制，即acknowledgments。为了保证数据能被正确处理而不仅仅是被Consumer收到，那么我们不能采用no-ack。而应该是在处理完数据后发送ack。
+在处理数据后发送的ack，就是告诉RabbitMQ数据已经被接收，处理完成，RabbitMQ可以去安全的删除它了。</p>
+<p>如果Consumer退出了但是没有发送ack，那么RabbitMQ就会把这个Message发送到下一个Consumer。这样就保证了在Consumer异常退出的情况下数据也不会丢失。</p>
+<p>这里并没有用到超时机制。RabbitMQ仅仅通过Consumer的连接中断来确认该Message并没有被正确处理。也就是说，RabbitMQ给了Consumer足够长的时间来做数据处理。
+这样即使你通过Ctr-C中断了Recieve.cs，那么Message也不会丢失了，它会被分发到下一个Consumer。</p>
+<p>如果忘记了ack，那么后果很严重。当Consumer退出时，Message会重新分发。然后RabbitMQ会占用越来越多的内存，由于RabbitMQ会长时间运行，因此这个“内存泄漏”是致命的。</p>
+<p>下面的例子中我会使用手动Ack模式。</p>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>RabbitMQ需要安装erlang和RabbitMQ Server，
+安装教程请参考：<a href="https://www.xncoding.com/2017/05/06/mq/rabbitmq-tutorial01.html">RabbitMQ简易教程 - 安装</a></p>
+<p>请先按照教程安装好RabbitMQ后，添加一个用户spring/123456，后面配置要用到。</p>
+<h2 id="SpringBoot中集成"><a href="#SpringBoot中集成" class="headerlink" title="SpringBoot中集成"></a>SpringBoot中集成</h2><p>接下来正式开始讲解如何在SpringBoot中集成了。</p>
+<h3 id="maven依赖"><a href="#maven依赖" class="headerlink" title="maven依赖"></a>maven依赖</h3><p>第一版当然是先添加maven依赖了，有官方现成的starter依赖，如下：</p>
+<pre><code class="line-numbers language-xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+        &lt;version&gt;2.9.6&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;com.vaadin.external.google&lt;/groupId&gt;
+                &lt;artifactId&gt;android-json&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>在application.yml中添加rabbitmq相关配置：</p>
+<pre><code class="line-numbers language-yml">spring:
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: spring
+    password: 123456
+    publisher-confirms: true #支持发布确认
+    publisher-returns: true  #支持发布返回
+    listener:
+      simple:
+        acknowledge-mode: manual #采用手动应答
+        concurrency: 1 #指定最小的消费者数量
+        max-concurrency: 1 #指定最大的消费者数量
+        retry:
+          enabled: true #是否支持重试
+</code></pre>
+<h3 id="配置类"><a href="#配置类" class="headerlink" title="配置类"></a>配置类</h3><p>最核心的类就是RabbitMQ的配置类，在里面定制模版类、声明交换机、队列、绑定交换机到队列。</p>
+<p>这里我声明了一个Direct类型的交换机，并通过路由键绑定到一个队列中来测试Direct模式，
+另外还声明了Fanout类型的交换机，并绑定到2个队列来测试广播模式。</p>
+<pre><code class="line-numbers language-java">@Configuration
+public class RabbitConfig {
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    /**
+     * 定制化amqp模版      可根据需要定制多个
+     * &lt;p&gt;
+     * &lt;p&gt;
+     * 此处为模版类定义 Jackson消息转换器
+     * ConfirmCallback接口用于实现消息发送到RabbitMQ交换器后接收ack回调   即消息发送到exchange  ack
+     * ReturnCallback接口用于实现消息发送到RabbitMQ 交换器，但无相应队列与交换器绑定时的回调  即消息发送不到任何一个队列中  ack
+     *
+     * @return the amqp template
+     */
+    // @Primary
+    @Bean
+    public AmqpTemplate amqpTemplate() {
+        Logger log = LoggerFactory.getLogger(RabbitTemplate.class);
+        // 使用jackson 消息转换器
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setEncoding(&quot;UTF-8&quot;);
+        // 消息发送失败返回到队列中，yml需要配置 publisher-returns: true
+        rabbitTemplate.setMandatory(true);
+        rabbitTemplate.setReturnCallback((message, replyCode, replyText, exchange, routingKey) -&gt; {
+            String correlationId = message.getMessageProperties().getCorrelationIdString();
+            log.debug(&quot;消息：{} 发送失败, 应答码：{} 原因：{} 交换机: {}  路由键: {}&quot;, correlationId, replyCode, replyText, exchange, routingKey);
+        });
+        // 消息确认，yml需要配置 publisher-confirms: true
+        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -&gt; {
+            if (ack) {
+                log.debug(&quot;消息发送到exchange成功,id: {}&quot;, correlationData.getId());
+            } else {
+                log.debug(&quot;消息发送到exchange失败,原因: {}&quot;, cause);
+            }
+        });
+        return rabbitTemplate;
+    }
+
+    /* ----------------------------------------------------------------------------Direct exchange test--------------------------------------------------------------------------- */
+
+    /**
+     * 声明Direct交换机 支持持久化.
+     *
+     * @return the exchange
+     */
+    @Bean(&quot;directExchange&quot;)
+    public Exchange directExchange() {
+        return ExchangeBuilder.directExchange(&quot;DIRECT_EXCHANGE&quot;).durable(true).build();
+    }
+
+    /**
+     * 声明一个队列 支持持久化.
+     *
+     * @return the queue
+     */
+    @Bean(&quot;directQueue&quot;)
+    public Queue directQueue() {
+        return QueueBuilder.durable(&quot;DIRECT_QUEUE&quot;).build();
+    }
+
+    /**
+     * 通过绑定键 将指定队列绑定到一个指定的交换机 .
+     *
+     * @param queue    the queue
+     * @param exchange the exchange
+     * @return the binding
+     */
+    @Bean
+    public Binding directBinding(@Qualifier(&quot;directQueue&quot;) Queue queue,
+                                 @Qualifier(&quot;directExchange&quot;) Exchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(&quot;DIRECT_ROUTING_KEY&quot;).noargs();
+    }
+
+    /* ----------------------------------------------------------------------------Fanout exchange test--------------------------------------------------------------------------- */
+
+    /**
+     * 声明 fanout 交换机.
+     *
+     * @return the exchange
+     */
+    @Bean(&quot;fanoutExchange&quot;)
+    public FanoutExchange fanoutExchange() {
+        return (FanoutExchange) ExchangeBuilder.fanoutExchange(&quot;FANOUT_EXCHANGE&quot;).durable(true).build();
+    }
+
+    /**
+     * Fanout queue A.
+     *
+     * @return the queue
+     */
+    @Bean(&quot;fanoutQueueA&quot;)
+    public Queue fanoutQueueA() {
+        return QueueBuilder.durable(&quot;FANOUT_QUEUE_A&quot;).build();
+    }
+
+    /**
+     * Fanout queue B .
+     *
+     * @return the queue
+     */
+    @Bean(&quot;fanoutQueueB&quot;)
+    public Queue fanoutQueueB() {
+        return QueueBuilder.durable(&quot;FANOUT_QUEUE_B&quot;).build();
+    }
+
+    /**
+     * 绑定队列A 到Fanout 交换机.
+     *
+     * @param queue          the queue
+     * @param fanoutExchange the fanout exchange
+     * @return the binding
+     */
+    @Bean
+    public Binding bindingA(@Qualifier(&quot;fanoutQueueA&quot;) Queue queue,
+                            @Qualifier(&quot;fanoutExchange&quot;) FanoutExchange fanoutExchange) {
+        return BindingBuilder.bind(queue).to(fanoutExchange);
+    }
+
+    /**
+     * 绑定队列B 到Fanout 交换机.
+     *
+     * @param queue          the queue
+     * @param fanoutExchange the fanout exchange
+     * @return the binding
+     */
+    @Bean
+    public Binding bindingB(@Qualifier(&quot;fanoutQueueB&quot;) Queue queue,
+                            @Qualifier(&quot;fanoutExchange&quot;) FanoutExchange fanoutExchange) {
+        return BindingBuilder.bind(queue).to(fanoutExchange);
+    }
+}
+</code></pre>
+<h3 id="监听器"><a href="#监听器" class="headerlink" title="监听器"></a>监听器</h3><p>接下来编写消息队列的监听器类，监听队列消息并做相应的处理，并通过Ack机制确认处理完成：</p>
+<pre><code class="line-numbers language-java">/**
+ * 消息监听器
+ *
+ * @author XiongNeng
+ * @version 1.0
+ */
+@Component
+public class Receiver {
+    private static final Logger log = LoggerFactory.getLogger(Receiver.class);
+
+    /**
+     * FANOUT广播队列监听一.
+     *
+     * @param message the message
+     * @param channel the channel
+     * @throws IOException the io exception  这里异常需要处理
+     */
+    @RabbitListener(queues = {&quot;FANOUT_QUEUE_A&quot;})
+    public void on(Message message, Channel channel) throws IOException {
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
+        log.debug(&quot;FANOUT_QUEUE_A &quot; + new String(message.getBody()));
+    }
+
+    /**
+     * FANOUT广播队列监听二.
+     *
+     * @param message the message
+     * @param channel the channel
+     * @throws IOException the io exception   这里异常需要处理
+     */
+    @RabbitListener(queues = {&quot;FANOUT_QUEUE_B&quot;})
+    public void t(Message message, Channel channel) throws IOException {
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
+        log.debug(&quot;FANOUT_QUEUE_B &quot; + new String(message.getBody()));
+    }
+
+    /**
+     * DIRECT模式.
+     *
+     * @param message the message
+     * @param channel the channel
+     * @throws IOException the io exception  这里异常需要处理
+     */
+    @RabbitListener(queues = {&quot;DIRECT_QUEUE&quot;})
+    public void message(Message message, Channel channel) throws IOException {
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), true);
+        log.debug(&quot;DIRECT &quot; + new String(message.getBody()));
+    }
+}
+</code></pre>
+<h3 id="消息发送者"><a href="#消息发送者" class="headerlink" title="消息发送者"></a>消息发送者</h3><p>再写一个消息发送服务，用来向交换机发送消息：</p>
+<pre><code class="line-numbers language-java">/**
+ * 消息发送服务
+ */
+@Service
+public class SenderService {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    /**
+     * 测试广播模式.
+     *
+     * @param p the p
+     * @return the response entity
+     */
+    public void broadcast(String p) {
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(&quot;FANOUT_EXCHANGE&quot;, &quot;&quot;, p, correlationData);
+    }
+
+    /**
+     * 测试Direct模式.
+     *
+     * @param p the p
+     * @return the response entity
+     */
+    public void direct(String p) {
+        CorrelationData correlationData = new CorrelationData(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend(&quot;DIRECT_EXCHANGE&quot;, &quot;DIRECT_ROUTING_KEY&quot;, p, correlationData);
+    }
+
+}
+</code></pre>
+<h2 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h2><p>代码写完后当然要写个测试用例测一下嘛。</p>
+<pre><code class="line-numbers language-java">/**
+ * SenderServiceTest
+ *
+ * @author XiongNeng
+ * @version 1.0
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
+public class SenderServiceTest {
+    @Autowired
+    private SenderService senderService;
+
+    @Test
+    public void testCache() {
+        // 测试广播模式
+        senderService.broadcast(&quot;同学们集合啦！&quot;);
+        // 测试Direct模式
+        senderService.direct(&quot;定点消息&quot;);
+    }
+}
+</code></pre>
+<p>运行结果：</p>
+<pre><code>[cTaskExecutor-1] com.xncoding.pos.mq.Receiver             : FANOUT_QUEUE_A &quot;同学们集合啦！&quot;
+[cTaskExecutor-1] com.xncoding.pos.mq.Receiver             : DIRECT &quot;定点消息&quot;
+[cTaskExecutor-1] com.xncoding.pos.mq.Receiver             : FANOUT_QUEUE_B &quot;同学们集合啦！&quot;
+</code></pre><p>可以看到，广播消息被两个队列收到了，Direct消息只有一个收到。完美！</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-rabbitmq" target="_blank" rel="noopener">springboot-rabbitmq</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/08/06/spring/sb-rabbitmq.html">SpringBoot系列 - 使用消息队列RabbitMQ</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/08/19/spring/sb-echarts.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成Echarts导出图片'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成Echarts导出图片</span>
+        </a>
+    
+    
+        <a href="/2017/08/01/spring/sb-batch.html" class="next-post btn btn-default" title='SpringBoot系列 - 批处理'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 批处理</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#简单概念"><span class="toc-text">简单概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Ack机制"><span class="toc-text">Ack机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#环境准备"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringBoot中集成"><span class="toc-text">SpringBoot中集成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#maven依赖"><span class="toc-text">maven依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置文件"><span class="toc-text">配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置类"><span class="toc-text">配置类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#监听器"><span class="toc-text">监听器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消息发送者"><span class="toc-text">消息发送者</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行测试"><span class="toc-text">运行测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="架构,">
+
+
+    <meta name="description" content="高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，
+它通常是指，通过设计减少系统不能提供服务的时间。
+单点往往是系统高可用最大的风险和敌人，应该尽量在系统设计的过程中避免单点。
+高可用保证的原则是“集群化”，或者叫“冗余”：只有一个单点，挂了服务会受影响...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>常见互联网高可用架构 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="常见互联网高可用架构">
+            
+                常见互联网高可用架构
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/架构设计">
+            架构设计
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/架构" title='架构'>
+                        架构
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/06/30</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，
+它通常是指，通过设计减少系统不能提供服务的时间。</p>
+<p>单点往往是系统高可用最大的风险和敌人，应该尽量在系统设计的过程中避免单点。
+高可用保证的原则是“集群化”，或者叫“冗余”：只有一个单点，挂了服务会受影响。
+如果有冗余备份，挂了还有其他backup能够顶上。</p>
+<p>有了冗余之后，还不够，每次出现故障需要人工介入恢复势必会增加系统的不可服务实践。
+所以，又往往是通过“自动故障转移”来实现系统的高可用。</p>
+<p>接下来我们看下典型互联网架构中，如何通过”冗余+自动故障转移”来保证系统的高可用特性。</p>
+<h2 id="常见的互联网分层架构"><a href="#常见的互联网分层架构" class="headerlink" title="常见的互联网分层架构"></a>常见的互联网分层架构</h2><p>先用一个图简单说明一下这个分层架构：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch001.png" alt></p>
+<p>从上至下分别为：</p>
+<ol>
+<li>客户端层：典型调用方是浏览器browser或者手机应用APP</li>
+<li>反向代理层：系统入口，反向代理</li>
+<li>站点应用层：实现核心应用逻辑，返回html或者json</li>
+<li>服务层：如果实现了服务化，就有这一层</li>
+<li>数据-缓存层：缓存加速访问存储</li>
+<li>数据-数据库层：数据库固化数据存储</li>
+</ol>
+<p>整个系统的高可用，又是通过每一层的”冗余+自动故障转移”来综合实现的。</p>
+<p>下面从反向代理层开始，分别介绍每一层的高可用实现</p>
+<h2 id="反向代理层高可用"><a href="#反向代理层高可用" class="headerlink" title="反向代理层高可用"></a>反向代理层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch002.png" alt></p>
+<p>【客户端层】到【反向代理层】的高可用，是通过反向代理层的冗余来实现的。以nginx为例：有两台nginx，
+一台对线上提供服务，另一台冗余以保证高可用，常见的实践是keepalived存活探测，相同virtual IP提供服务。</p>
+<p>自动故障转移：当nginx挂了的时候，keepalived能够探测到，会自动的进行故障转移，
+将流量自动迁移到备份nginx，由于使用的是相同的virtual IP，这个切换过程对调用方是透明的。</p>
+<h2 id="站点层高可用"><a href="#站点层高可用" class="headerlink" title="站点层高可用"></a>站点层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch003.png" alt></p>
+<p>【反向代理层】到【站点层】的高可用，是通过站点层的冗余来实现的。
+假设反向代理层是nginx，<code>nginx.conf</code>里能够配置多个web后端，并且nginx能够探测到多个后端的存活性。</p>
+<p>自动故障转移：当web-server挂了的时候，nginx能够探测到，会自动的进行故障转移，
+将流量自动迁移到其他的web-server，整个过程由nginx自动完成，对调用方是透明的。</p>
+<h2 id="服务层高可用"><a href="#服务层高可用" class="headerlink" title="服务层高可用"></a>服务层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch004.png" alt></p>
+<p>【站点层】到【服务层】的高可用，是通过服务层的冗余来实现的。“服务连接池”会建立与下游服务多个连接，每次请求会“随机”选取连接来访问下游服务。</p>
+<p>自动故障转移：当service挂了的时候，service-connection-pool能够探测到，会自动的进行故障转移，将流量自动迁移到其他的service，
+整个过程由连接池自动完成，对调用方是透明的（所以说RPC-client中的服务连接池是很重要的基础组件）。</p>
+<p>一般这个会使用到分布式服务框架。</p>
+<h2 id="缓存高可用"><a href="#缓存高可用" class="headerlink" title="缓存高可用"></a>缓存高可用</h2><p>业务对缓存并不一定有“高可用”要求，更多的对缓存的使用场景，是用来“加速数据访问”：把一部分数据放到缓存里，
+如果缓存挂了或者缓存没有命中，是可以去后端的数据库中再取数据的。这类允许“cache miss”的业务场景，缓存架构的建议是：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch005.png" alt></p>
+<p>缓存实例挂了屏蔽：当有水平切分的实例挂掉时，代理层直接返回cache miss，此时缓存挂掉对调用方也是透明的。
+key水平切分实例减少，不建议做re-hash，这样容易引发缓存数据的不一致。</p>
+<h2 id="数据库层的高可用"><a href="#数据库层的高可用" class="headerlink" title="数据库层的高可用"></a>数据库层的高可用</h2><p>大部分互联网技术，数据库层都用了“主从同步，读写分离”架构，所以数据库层的高可用，又分为“读库高可用”与“写库高可用”两类。</p>
+<h3 id="数据库读高可用"><a href="#数据库读高可用" class="headerlink" title="数据库读高可用"></a>数据库读高可用</h3><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch006.png" alt></p>
+<p>【数据库读】的高可用，是通过读库的冗余来实现的。
+既然冗余了读库，一般来说就至少有2个从库，“数据库连接池”会建立与读库多个连接，每次请求会路由到这些读库。</p>
+<p>自动故障转移：当读库挂了的时候，db-connection-pool能够探测到，会自动的进行故障转移，将流量自动迁移到其他的读库，
+整个过程由连接池自动完成，对调用方是透明的（所以说DAO中的数据库连接池是很重要的基础组件）。</p>
+<h3 id="数据库写高可用"><a href="#数据库写高可用" class="headerlink" title="数据库写高可用"></a>数据库写高可用</h3><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch007.png" alt></p>
+<p>【数据库写】的高可用，是通过写库的冗余来实现的。
+以mysql为例，可以设置两个mysql双主同步，一台对线上提供服务，另一台冗余以保证高可用，常见的实践是keepalived存活探测，相同virtual IP提供服务。</p>
+<p>自动故障转移：当写库挂了的时候，keepalived能够探测到，会自动的进行故障转移，将流量自动迁移到shadow-db-master，
+由于使用的是相同的virtual IP，这个切换过程对调用方是透明的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计减少系统不能提供服务的时间。
+方法论上，高可用是通过冗余+自动故障转移来实现的。</p>
+<p>整个互联网分层系统架构的高可用，又是通过每一层的冗余+自动故障转移来综合实现的，具体的：</p>
+<ol>
+<li>【客户端层】到【反向代理层】的高可用，是通过反向代理层的冗余实现的，常见实践是keepalived + virtual IP自动故障转移</li>
+<li>【反向代理层】到【站点层】的高可用，是通过站点层的冗余实现的，常见实践是nginx与web-server之间的存活性探测与自动故障转移</li>
+<li>【站点层】到【服务层】的高可用，是通过服务层的冗余实现的，常见实践是通过service-connection-pool来保证自动故障转移</li>
+<li>【服务层】到【缓存层】的高可用，是通过缓存数据的冗余实现的，常见实践是缓存客户端双读双写，或者利用缓存集群的主从数据同步与sentinel保活与自动故障转移；更多的业务场景，对缓存没有高可用要求，可以使用缓存服务化来对调用方屏蔽底层复杂性</li>
+<li>【服务层】到【数据库“读”】的高可用，是通过读库的冗余实现的，常见实践是通过db-connection-pool来保证自动故障转移</li>
+<li>【服务层】到【数据库“写”】的高可用，是通过写库的冗余实现的，常见实践是keepalived + virtual IP自动故障转移</li>
+</ol>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/06/30/architect/ha.html">常见互联网高可用架构</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/01/spring/sb-thymeleaf.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成Thymeleaf构建Web应用'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成Thymeleaf构建Web应用</span>
+        </a>
+    
+    
+        <a href="/2017/06/22/security/jwt.html" class="next-post btn btn-default" title='JWT介绍和安全防范'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">JWT介绍和安全防范</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#常见的互联网分层架构"><span class="toc-text">常见的互联网分层架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#反向代理层高可用"><span class="toc-text">反向代理层高可用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#站点层高可用"><span class="toc-text">站点层高可用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务层高可用"><span class="toc-text">服务层高可用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存高可用"><span class="toc-text">缓存高可用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据库层的高可用"><span class="toc-text">数据库层的高可用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#数据库读高可用"><span class="toc-text">数据库读高可用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据库写高可用"><span class="toc-text">数据库写高可用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="Scrapy为我们提供了可重用的item pipelines为某个特定的Item去下载文件。
+通常来说你会选择使用Files Pipeline或Images Pipeline。
+这两个管道都实现了：
+
+避免重复下载
+可以指定下载后保存的地方(文件系统目录中,Amazon S3中)
+
+Image...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记08- 文件与图片 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记08- 文件与图片">
+            
+                Scrapy笔记08- 文件与图片
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/03/20</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Scrapy为我们提供了可重用的<a href="http://doc.scrapy.org/en/1.0/topics/item-pipeline.html" target="_blank" rel="noopener">item pipelines</a>为某个特定的Item去下载文件。
+通常来说你会选择使用Files Pipeline或Images Pipeline。</p>
+<p>这两个管道都实现了：</p>
+<ul>
+<li>避免重复下载</li>
+<li>可以指定下载后保存的地方(文件系统目录中,Amazon S3中)</li>
+</ul>
+<p>Images Pipeline为处理图片提供了额外的功能：</p>
+<ul>
+<li>将所有下载的图片格式转换成普通的JPG并使用RGB颜色模式</li>
+<li>生成缩略图</li>
+<li>检查图片的宽度和高度确保它们满足最小的尺寸限制</li>
+</ul>
+<p>管道同时会在内部保存一个被调度下载的URL列表，然后将包含相同媒体的相应关联到这个队列上来，从而防止了多个item共享这个媒体时重复下载。</p>
+<h2 id="使用Files-Pipeline"><a href="#使用Files-Pipeline" class="headerlink" title="使用Files Pipeline"></a>使用Files Pipeline</h2><p>一般我们会按照下面的步骤来使用文件管道：</p>
+<ol>
+<li>在某个Spider中，你爬取一个item后，将相应的文件URL放入<code>file_urls</code>字段中</li>
+<li>item被返回之后就会转交给item pipeline</li>
+<li>当这个item到达<code>FilesPipeline</code>时，在<code>file_urls</code>字段中的URL列表会通过标准的Scrapy调度器和下载器来调度下载，并且优先级很高，在抓取其他页面前就被处理。而这个<code>item</code>会一直在这个pipeline中被锁定，直到所有的文件下载完成。</li>
+<li>当文件被下载完之后，结果会被赋值给另一个<code>files</code>字段。这个字段包含一个关于下载文件新的字典列表，比如下载路径，源地址，文件校验码。<code>files</code>里面的顺序和<code>file_url</code>顺序是一致的。要是某个写文件下载出错就不会出现在这个<code>files</code>中了。</li>
+</ol>
+<h2 id="使用Images-Pipeline"><a href="#使用Images-Pipeline" class="headerlink" title="使用Images Pipeline"></a>使用Images Pipeline</h2><p><code>ImagesPipeline</code>跟<code>FilesPipeline</code>的使用差不多，不过使用的字段名不一样，<code>image_urls</code>保存图片URL地址，<code>images</code>保存下载后的图片信息。</p>
+<p>使用<code>ImagesPipeline</code>的好处是你可以通过配置来提供额外的功能，比如生成文件缩略图，通过图片大小过滤需要下载的图片等。</p>
+<p><code>ImagesPipeline</code>使用<a href="https://github.com/python-pillow/Pillow" target="_blank" rel="noopener">Pillow</a>来生成缩略图以及转换成标准的JPEG/RGB格式。因此你需要安装这个包，我们建议你使用Pillow而不是PIL。</p>
+<h2 id="使用例子"><a href="#使用例子" class="headerlink" title="使用例子"></a>使用例子</h2><p>要使用媒体管道，请先在配置文件中打开它</p>
+<pre><code class="line-numbers language-python"># 同时使用图片和文件管道
+ITEM_PIPELINES = {
+                  &#39;scrapy.pipelines.images.ImagesPipeline&#39;: 1,
+                  &#39;scrapy.pipelines.files.FilesPipeline&#39;: 2,
+                 }
+FILES_STORE = &#39;/path/to/valid/dir&#39;  # 文件存储路径
+IMAGES_STORE = &#39;/path/to/valid/dir&#39; # 图片存储路径
+# 90 days of delay for files expiration
+FILES_EXPIRES = 90
+# 30 days of delay for images expiration
+IMAGES_EXPIRES = 30
+# 图片缩略图
+IMAGES_THUMBS = {
+    &#39;small&#39;: (50, 50),
+    &#39;big&#39;: (270, 270),
+}
+# 图片过滤器，最小高度和宽度
+IMAGES_MIN_HEIGHT = 110
+IMAGES_MIN_WIDTH = 110
+</code></pre>
+<p>一个使用了缩略图的下载例子会生成如下图片：</p>
+<pre><code>&lt;IMAGES_STORE&gt;/full/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
+&lt;IMAGES_STORE&gt;/thumbs/small/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
+&lt;IMAGES_STORE&gt;/thumbs/big/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
+</code></pre><p>然后，某个Item返回时，有<code>file_urls</code>或<code>image_urls</code>，并且存在相应的<code>files</code>或<code>images</code>字段</p>
+<pre><code class="line-numbers language-python">import scrapy
+
+class MyItem(scrapy.Item):
+
+    # ... other item fields ...
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+</code></pre>
+<h2 id="自定义媒体管道"><a href="#自定义媒体管道" class="headerlink" title="自定义媒体管道"></a>自定义媒体管道</h2><p>如果你还需要更加复杂的功能，想自定义下载媒体逻辑，请参考<a href="http://doc.scrapy.org/en/1.0/topics/media-pipeline.html#topics-media-pipeline-override" target="_blank" rel="noopener">扩展媒体管道</a></p>
+<p>不管是扩展<code>FilesPipeline</code>还是<code>ImagesPipeline</code>,都只需重写下面两个方法</p>
+<ul>
+<li><code>get_media_requests(self, item, info)</code>,返回一个<code>Request</code>对象</li>
+<li><code>item_completed(self, results, item, info)</code>,当上门的Request下载完成后回调这个方法，然后填充<code>files</code>或<code>images</code>字段</li>
+</ul>
+<p>下面是一个扩展<code>ImagesPipeline</code>的例子，我只取path信息，并将它赋给<code>image_paths</code>字段，而不是默认的<code>images</code></p>
+<pre><code class="line-numbers language-python">import scrapy
+from scrapy.pipelines.images import ImagesPipeline
+from scrapy.exceptions import DropItem
+
+class MyImagesPipeline(ImagesPipeline):
+
+    def get_media_requests(self, item, info):
+        for image_url in item[&#39;image_urls&#39;]:
+            yield scrapy.Request(image_url)
+
+    def item_completed(self, results, item, info):
+        image_paths = [x[&#39;path&#39;] for ok, x in results if ok]
+        if not image_paths:
+            raise DropItem(&quot;Item contains no images&quot;)
+        item[&#39;image_paths&#39;] = image_paths
+        return item
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/03/20/scrapy-08.html">Scrapy笔记08- 文件与图片</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/03/21/scrapy-09.html" class="pre-post btn btn-default" title='Scrapy笔记09- 部署'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记09- 部署</span>
+        </a>
+    
+    
+        <a href="/2016/03/19/scrapy-07.html" class="next-post btn btn-default" title='Scrapy笔记07- 内置服务'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记07- 内置服务</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#使用Files-Pipeline"><span class="toc-text">使用Files Pipeline</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用Images-Pipeline"><span class="toc-text">使用Images Pipeline</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用例子"><span class="toc-text">使用例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义媒体管道"><span class="toc-text">自定义媒体管道</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

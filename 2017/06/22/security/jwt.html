@@ -1,0 +1,493 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="jwt,">
+
+
+    <meta name="description" content="Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，
+特别适用于分布式站点的单点登录（SSO）场景。JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，
+以便...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>JWT介绍和安全防范 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="JWT介绍和安全防范">
+            
+                JWT介绍和安全防范
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/jwt" title='jwt'>
+                        jwt
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/06/22</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，
+特别适用于分布式站点的单点登录（SSO）场景。JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，
+以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。&lt;!–more&gt;</p>
+<p>JWT官网：<a href="https://jwt.io/" target="_blank" rel="noopener">https://jwt.io/</a></p>
+<p>JWT是由三段信息构成的，将这三段信息文本用.链接一起就构成了Jwt字符串。就像这样:</p>
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+</code></pre><h2 id="JWT的构成"><a href="#JWT的构成" class="headerlink" title="JWT的构成"></a>JWT的构成</h2><p>第一部分我们称它为头部（header),第二部分我们称其为载荷（payload, 类似于飞机上承载的物品)，第三部分是签证（signature)。</p>
+<p><em>header</em></p>
+<p>jwt的头部承载两部分信息：</p>
+<ul>
+<li>声明类型，这里是jwt</li>
+<li>声明加密的算法 通常直接使用 HMAC SHA256</li>
+</ul>
+<p>这里的加密算法是单向函数散列算法，常见的有MD5、SHA、HAMC。这里使用基于密钥的Hash算法HMAC生成散列值。</p>
+<ul>
+<li>MD5 message-digest algorithm 5 （信息-摘要算法）缩写，广泛用于加密和解密技术，常用于文件校验。校验？不管文件多大，经过MD5后都能生成唯一的MD5值</li>
+<li>SHA (Secure Hash Algorithm，安全散列算法），数字签名等密码学应用中重要的工具，安全性高于MD5</li>
+<li>HMAC (Hash Message Authentication Code，散列消息鉴别码，基于密钥的Hash算法的认证协议。用公开函数和密钥产生一个固定长度的值作为认证标识，用这个标识鉴别消息的完整性。常用于接口签名验证</li>
+</ul>
+<p>完整的头部就像下面这样的JSON：</p>
+<pre><code>{
+  &#39;typ&#39;: &#39;JWT&#39;,
+  &#39;alg&#39;: &#39;HS256&#39;
+}
+</code></pre><p>然后将头部进行base64加密（该加密是可以对称解密的),构成了第一部分</p>
+<pre><code>eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+</code></pre><p><em>playload</em></p>
+<p>载荷就是存放有效信息的地方，这些有效信息包含三个部分：</p>
+<ul>
+<li>标准中注册的声明</li>
+<li>公共的声明</li>
+<li>私有的声明</li>
+</ul>
+<p>标准中注册的声明 (建议但不强制使用) ：</p>
+<ul>
+<li>iss: jwt签发者</li>
+<li>sub: jwt所面向的用户</li>
+<li>aud: 接收jwt的一方</li>
+<li>exp: jwt的过期时间，这个过期时间必须要大于签发时间</li>
+<li>nbf: 定义在什么时间之前，该jwt都是不可用的.</li>
+<li>iat: jwt的签发时间</li>
+<li>jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击。</li>
+</ul>
+<p>公共的声明：</p>
+<p>公共的声明可以添加任何的信息，一般添加用户的相关信息或其他业务需要的必要信息.但不建议添加敏感信息，因为该部分在客户端可解密</p>
+<p>私有的声明：</p>
+<p>私有声明是提供者和消费者所共同定义的声明，一般不建议存放敏感信息，因为base64是对称解密的，意味着该部分信息可以归类为明文信息。</p>
+<p>定义一个payload:</p>
+<pre><code>{
+  &quot;sub&quot;: &quot;1234567890&quot;,
+  &quot;name&quot;: &quot;John Doe&quot;,
+  &quot;admin&quot;: true
+}
+</code></pre><p>然后将其进行base64加密，得到Jwt的第二部分：</p>
+<pre><code>eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
+</code></pre><p><em>signature</em></p>
+<p>jwt的第三部分是一个签证信息，这个签证信息由三部分组成：</p>
+<pre><code>header (base64后的)
+payload (base64后的)
+secret
+</code></pre><p>这个部分需要base64加密后的header和base64加密后的payload使用.连接组成的字符串，
+然后通过header中声明的加密方式进行加盐secret组合加密，然后就构成了jwt的第三部分。</p>
+<pre><code class="line-numbers language-js">// javascript
+var encodedString = base64UrlEncode(header) + &#39;.&#39; + base64UrlEncode(payload);
+var signature = HMACSHA256(encodedString, &#39;secret&#39;); // TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+</code></pre>
+<p>将这三部分用.连接成一个完整的字符串,构成了最终的jwt:</p>
+<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+</code></pre><p>注意：secret是保存在服务器端的，jwt的签发生成也是在服务器端的，secret就是用来进行jwt的签发和jwt的验证，
+所以，它就是你服务端的私钥，在任何场景都不应该流露出去。一旦客户端得知这个secret, 那就意味着客户端是可以自我签发jwt了。</p>
+<h2 id="如何应用"><a href="#如何应用" class="headerlink" title="如何应用"></a>如何应用</h2><p>一般是在请求头里加入Authorization，并加上Bearer标注：</p>
+<pre><code class="line-numbers language-js">fetch(&#39;api/user/1&#39;, {
+  headers: {
+    &#39;Authorization&#39;: &#39;Bearer &#39; + token
+  }
+})
+</code></pre>
+<p>服务器负责解析这个HTTP头来做用户认证和授权处理。大致流程如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jwt20.png" alt></p>
+<h2 id="攻击面"><a href="#攻击面" class="headerlink" title="攻击面"></a>攻击面</h2><h3 id="敏感信息泄露"><a href="#敏感信息泄露" class="headerlink" title="敏感信息泄露"></a>敏感信息泄露</h3><p>JWT中的header 和 payload 虽然看起来不可读，但实际上都只经过简单编码，
+开发者可能误将敏感信息存储在里面。使用上述工具可以方便地解码JWT中前两部分的信息。</p>
+<h3 id="指定算法为none"><a href="#指定算法为none" class="headerlink" title="指定算法为none"></a>指定算法为none</h3><p>上面提到算法 none 是JWT规范中强制要求实现的，但有些实现JWT的库直接将使用none 算法的token视为已经过校验。
+这样攻击者就可以设置alg 为none ，使signature 部分为空，然后构造包含任意payload 的JWT来欺骗服务端。</p>
+<h3 id="将签名算法从非对称类型改为对称类型"><a href="#将签名算法从非对称类型改为对称类型" class="headerlink" title="将签名算法从非对称类型改为对称类型"></a>将签名算法从非对称类型改为对称类型</h3><p>使用非对称加密算法（主要基于RSA、ECDSA，如S256）分发JWT的过程是使用私钥（private）加密生成JWT，使用公钥（public）解密验证。</p>
+<p>使用对称加密算法（主要基于HMAC，如HS256）分发JWT的过程是使用同一个密钥（secret）生成和验证JWT。</p>
+<p>如果服务端期待收到的算法类型为RS256，然后以RS256和public去验证JWT，而实际上收到的算法类型是HS256，
+那么服务端就可能尝试把public当作secret，然后用HS256算法解密验证JWT。</p>
+<p>由于RS256的public人人都可获得，攻击者可以预先以public为密钥，用HS256算法伪造包含任意payload 的JWT，从而成功通过服务端的验证。</p>
+<h3 id="爆破密钥"><a href="#爆破密钥" class="headerlink" title="爆破密钥"></a>爆破密钥</h3><p>WT的安全性依赖于密钥的保密性，任何拥有密钥的人都可以构造任何内容的合法token。</p>
+<p>当一个JSON Web Token 被分发出去，如果密钥不够强壮就存在被爆破的风险，而且整个爆破过程可以离线进行。</p>
+<p>已经有人写了一些工具，推荐如下：</p>
+<ul>
+<li><a href="https://github.com/jmaxxz/jwtbrute" target="_blank" rel="noopener">jwtbrute</a></li>
+<li><a href="https://github.com/Sjord/jwtcrack/blob/master/crackjwt.py" target="_blank" rel="noopener">Sjord’ python script</a></li>
+<li><a href="https://github.com/magnumripper/JohnTheRipper" target="_blank" rel="noopener">John the Ripper</a></li>
+</ul>
+<h3 id="伪造密钥"><a href="#伪造密钥" class="headerlink" title="伪造密钥"></a>伪造密钥</h3><p>时JWT采用header 中的kid 字段关联校验算法的密钥，这个密钥可能是对称加密的密钥，也可能是非对称加密的公钥。
+如果能够猜测kid 和 密钥的关联性，攻击者就可能修改kid 来欺骗服务端，使其校验时使用攻击者可控的密钥，
+于是攻击者就可以伪造任意内容的可通过校验的JWT。</p>
+<h2 id="安全建议"><a href="#安全建议" class="headerlink" title="安全建议"></a>安全建议</h2><p>验证函数应忽略JWT中的algo 字段，预先就明确JWT使用的算法，如果需要使用多种算法，可以在header 中使用表示”key ID” 的kid 字段，查询每个kid 对应的算法。
+JWT/JWS 标准应该移除 header 中的algo 字段。JWT的许多安全缺陷都来自于开发者依赖这一客户端可控的字段。
+开发者应升级相应库到最新版本，因为旧版本可能存在致命缺陷。</p>
+<ol>
+<li>不应该在jwt的payload部分存放敏感信息，因为该部分是客户端可解密的部分。</li>
+<li>保护好secret私钥，该私钥非常重要。</li>
+<li>请使用https的安全通道进行传输</li>
+<li>验证函数应忽略JWT中的algo 字段，预先就明确JWT使用的算法，如果需要使用多种算法，
+可以在header中使用表示”key ID”的kid字段，查询每个kid对应的算法。</li>
+<li>JWT/JWS 标准应该移除 header 中的algo 字段。JWT的许多安全缺陷都来自于开发者依赖这一客户端可控的字段。</li>
+<li>开发者应升级相应库到最新版本，因为旧版本可能存在致命缺陷。</li>
+</ol>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="https://www.jianshu.com/p/576dbf44b2ae" target="_blank" rel="noopener">什么是 JWT – JSON WEB TOKEN</a></li>
+<li><a href="https://findneo.github.io/180503jwt/" target="_blank" rel="noopener">JSON Web Token的认识与攻击</a></li>
+</ul>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/06/22/security/jwt.html">JWT介绍和安全防范</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/06/30/architect/ha.html" class="pre-post btn btn-default" title='常见互联网高可用架构'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">常见互联网高可用架构</span>
+        </a>
+    
+    
+        <a href="/2017/06/20/security/session.html" class="next-post btn btn-default" title='聊聊Web会话管理'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">聊聊Web会话管理</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JWT的构成"><span class="toc-text">JWT的构成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何应用"><span class="toc-text">如何应用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#攻击面"><span class="toc-text">攻击面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#敏感信息泄露"><span class="toc-text">敏感信息泄露</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#指定算法为none"><span class="toc-text">指定算法为none</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#将签名算法从非对称类型改为对称类型"><span class="toc-text">将签名算法从非对称类型改为对称类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#爆破密钥"><span class="toc-text">爆破密钥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#伪造密钥"><span class="toc-text">伪造密钥</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安全建议"><span class="toc-text">安全建议</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文章"><span class="toc-text">参考文章</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

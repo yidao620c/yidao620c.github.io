@@ -1,0 +1,592 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，
+但是一些特有或相对老旧的系统依然使用了传统的soap web service，例如银行、航空公司的机票查询接口等。
+本篇主要讲解spring boot整合cxf发布webservic...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - cxf实现WebService | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - cxf实现WebService">
+            
+                SpringBoot系列 - cxf实现WebService
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/13</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，
+但是一些特有或相对老旧的系统依然使用了传统的soap web service，例如银行、航空公司的机票查询接口等。
+本篇主要讲解spring boot整合cxf发布webservice服务和spring boot整合cxf客户端调用webservice服务。</p>
+<h2 id="maven依赖"><a href="#maven依赖" class="headerlink" title="maven依赖"></a>maven依赖</h2><pre><code class="line-numbers language-xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- CXF webservice --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.cxf&lt;/groupId&gt;
+        &lt;artifactId&gt;cxf-spring-boot-starter-jaxws&lt;/artifactId&gt;
+        &lt;version&gt;3.2.4&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;!-- CXF webservice --&gt;
+
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.hamcrest&lt;/groupId&gt;
+        &lt;artifactId&gt;hamcrest-all&lt;/artifactId&gt;
+        &lt;version&gt;1.3&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h2 id="服务接口"><a href="#服务接口" class="headerlink" title="服务接口"></a>服务接口</h2><p>先定义一个简单的用户类User：</p>
+<pre><code class="line-numbers language-java">package com.xncoding.webservice.model;
+
+public class User {
+    private Long id;
+    private String name;
+    private Integer age;
+
+    public User() {
+    }
+
+    public User(Long id, String name, Integer age) {
+        this.id = id;
+        this.name = name;
+        this.age = age;
+    }
+
+    // getter and setter
+}
+</code></pre>
+<p>注意，上面的包名是下面接口定义的targetNamespace的倒序。</p>
+<p>创建一个简单的服务接口，定义了两个方法，一个返回字符串，一个返回一个实体类User：</p>
+<pre><code class="line-numbers language-java">package com.xncoding.webservice.service;
+
+import com.xncoding.webservice.model.User;
+
+import javax.jws.WebMethod;
+import javax.jws.WebParam;
+import javax.jws.WebService;
+
+@WebService(name = &quot;CommonService&quot;, // 暴露服务名称
+        targetNamespace = &quot;http://model.webservice.xncoding.com/&quot;// 命名空间,一般是接口的包名倒序
+)
+public interface ICommonService {
+    @WebMethod
+    public String sayHello(@WebParam(name = &quot;userName&quot;) String name);
+
+    @WebMethod
+    public User getUser(@WebParam(name = &quot;userName&quot;) String name);
+}
+</code></pre>
+<h2 id="接口实现"><a href="#接口实现" class="headerlink" title="接口实现"></a>接口实现</h2><p>接下来实现这个接口，编写相应的业务逻辑：</p>
+<pre><code class="line-numbers language-java">package com.xncoding.webservice.service.impl;
+
+import com.xncoding.webservice.model.User;
+import com.xncoding.webservice.service.ICommonService;
+import org.springframework.stereotype.Component;
+
+import javax.jws.WebService;
+
+@WebService(serviceName = &quot;CommonService&quot;, // 与接口中指定的name一致
+        targetNamespace = &quot;http://model.webservice.xncoding.com/&quot;, // 与接口中的命名空间一致,一般是接口的包名倒
+        endpointInterface = &quot;com.xncoding.webservice.service.ICommonService&quot;// 接口地址
+)
+@Component
+public class CommonServiceImpl implements ICommonService {
+
+    @Override
+    public String sayHello(String name) {
+        return &quot;Hello ,&quot; + name;
+    }
+
+    @Override
+    public User getUser(String name) {
+        return new User(1000L, name, 23);
+    }
+}
+</code></pre>
+<h2 id="配置类"><a href="#配置类" class="headerlink" title="配置类"></a>配置类</h2><p>接下来编写cxf的配置类：</p>
+<pre><code class="line-numbers language-java">@Configuration
+public class CxfConfig {
+    @Autowired
+    private Bus bus;
+
+    @Autowired
+    ICommonService commonService;
+
+    /**
+     * JAX-WS
+     **/
+    @Bean
+    public Endpoint endpoint() {
+        EndpointImpl endpoint = new EndpointImpl(bus, commonService);
+        endpoint.publish(&quot;/CommonService&quot;);
+        return endpoint;
+    }
+}
+</code></pre>
+<p>这里把<code>Commonservice</code>接口发布在了路径<code>/services/CommonService</code>下，wsdl文档路径为<code>http://localhost:{port}/services/CommonService?wsdl</code></p>
+<p>如果你想自定义wsdl的访问url，那么可以在application.yml中自定义：</p>
+<pre><code class="line-numbers language-yml">cxf:
+  path: /services  # 替换默认的/services路径
+</code></pre>
+<h2 id="客户端访问"><a href="#客户端访问" class="headerlink" title="客户端访问"></a>客户端访问</h2><p>直接客户端去访问有两种方式</p>
+<h3 id="代理类工厂的方式"><a href="#代理类工厂的方式" class="headerlink" title="代理类工厂的方式"></a>代理类工厂的方式</h3><p>这种方式需要拿到对方的接口</p>
+<pre><code class="line-numbers language-java">@Test
+public void cl1() {
+    try {
+        // 接口地址
+        // 代理工厂
+        JaxWsProxyFactoryBean jaxWsProxyFactoryBean = new JaxWsProxyFactoryBean();
+        // 设置代理地址
+        jaxWsProxyFactoryBean.setAddress(wsdlAddress);
+        // 设置接口类型
+        jaxWsProxyFactoryBean.setServiceClass(ICommonService.class);
+        // 创建一个代理接口实现
+        ICommonService cs = (ICommonService) jaxWsProxyFactoryBean.create();
+        // 数据准备
+        String userName = &quot;Leftso&quot;;
+        // 调用代理接口的方法调用并返回结果
+        String result = cs.sayHello(userName);
+        System.out.println(&quot;返回结果:&quot; + result);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+</code></pre>
+<h3 id="动态调用方式"><a href="#动态调用方式" class="headerlink" title="动态调用方式"></a>动态调用方式</h3><pre><code class="line-numbers language-java">@Test
+public void cl2() {
+    // 创建动态客户端
+    JaxWsDynamicClientFactory dcf = JaxWsDynamicClientFactory.newInstance();
+    Client client = dcf.createClient(wsdlAddress);
+    // 需要密码的情况需要加上用户名和密码
+    // client.getOutInterceptors().add(new ClientLoginInterceptor(USER_NAME, PASS_WORD));
+    Object[] objects;
+    try {
+        // invoke(&quot;方法名&quot;,参数1,参数2,参数3....);
+        objects = client.invoke(&quot;sayHello&quot;, &quot;Leftso&quot;);
+        System.out.println(&quot;返回类型：&quot; + objects[0].getClass());
+        System.out.println(&quot;返回数据:&quot; + objects[0]);
+    } catch (java.lang.Exception e) {
+        e.printStackTrace();
+    }
+}
+
+@Test
+public void cl3() {
+    // 创建动态客户端
+    JaxWsDynamicClientFactory dcf = JaxWsDynamicClientFactory.newInstance();
+    Client client = dcf.createClient(wsdlAddress);
+    Object[] objects;
+    try {
+        // invoke(&quot;方法名&quot;,参数1,参数2,参数3....);
+        objects = client.invoke(&quot;getUser&quot;, &quot;张三&quot;);
+        System.out.println(&quot;返回类型：&quot; + objects[0].getClass());
+        System.out.println(&quot;返回数据:&quot; + objects[0]);
+        User user = (User) objects[0];
+        System.out.println(&quot;返回对象User.name=&quot; + user.getName());
+    } catch (java.lang.Exception e) {
+        e.printStackTrace();
+    }
+}
+</code></pre>
+<p>注意到如果方法返回对象的话，那么对象所在的包一定是targetNamespace的倒序。</p>
+<h2 id="生成客户端代码"><a href="#生成客户端代码" class="headerlink" title="生成客户端代码"></a>生成客户端代码</h2><p>这是推荐做法，就是根据wsdl的访问路径来生成客户端代码。这里有两种生成方式</p>
+<h3 id="Apache的wsdl2java工具"><a href="#Apache的wsdl2java工具" class="headerlink" title="Apache的wsdl2java工具"></a>Apache的wsdl2java工具</h3><pre><code>wsdl2java -autoNameResolution http://xxx?wsdl
+</code></pre><h3 id="JDK自带的工具（推荐）"><a href="#JDK自带的工具（推荐）" class="headerlink" title="JDK自带的工具（推荐）"></a>JDK自带的工具（推荐）</h3><p>JDK自己内置了一个wsimport工具，这个是推荐的生成方式。</p>
+<pre><code>wsimport -encoding utf-8 -p com.xncoding.webservice.client -keep http://xxx?wsdl -s d:/ws -B-XautoNameResolution
+</code></pre><p>其中：</p>
+<pre><code>-encoding ：指定编码格式（此处是utf-8的指定格式）
+-keep：是否生成Java源文件
+-s：指定.java文件的输出目录
+-d：指定.class文件的输出目录
+-p：定义生成类的包名，不定义的话有默认包名
+-verbose：在控制台显示输出信息
+-b：指定jaxws/jaxb绑定文件或额外的schemas
+-extension：使用扩展来支持SOAP1.2
+</code></pre><p>上面的命令会在<code>d:/ws</code>目录下面生成相应的客户端代码。</p>
+<p>客户端使用例子：</p>
+<pre><code class="line-numbers language-java">CommonService_Service c = new CommonService_Service();
+com.xncoding.webservice.client.User user = c.getCommonServiceImplPort().getUser(&quot;Tom&quot;);
+assertThat(user.getName(), is(&quot;Tom&quot;));
+</code></pre>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-cxf" target="_blank" rel="noopener">springboot-cxf</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/13/spring/sb-cxf.html">SpringBoot系列 - cxf实现WebService</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/15/spring/sb-websocket.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成WebSocket实时通信'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成WebSocket实时通信</span>
+        </a>
+    
+    
+        <a href="/2017/07/12/spring/sb-schedule.html" class="next-post btn btn-default" title='SpringBoot系列 - 定时任务'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 定时任务</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#maven依赖"><span class="toc-text">maven依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务接口"><span class="toc-text">服务接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#接口实现"><span class="toc-text">接口实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置类"><span class="toc-text">配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端访问"><span class="toc-text">客户端访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代理类工厂的方式"><span class="toc-text">代理类工厂的方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#动态调用方式"><span class="toc-text">动态调用方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成客户端代码"><span class="toc-text">生成客户端代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Apache的wsdl2java工具"><span class="toc-text">Apache的wsdl2java工具</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JDK自带的工具（推荐）"><span class="toc-text">JDK自带的工具（推荐）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="有很多时候我们需要从多个网站爬取所需要的数据，比如我们想爬取多个网站的新闻，将其存储到数据库同一个表中。我们是不是要对每个网站都得去定义一个Spider类呢？
+其实不需要，我们可以通过维护一个规则配置表或者一个规则配置文件来动态增加或修改爬取规则，然后程序代码不需要更改就能实现多个网站爬取。
+...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记10- 动态配置爬虫 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记10- 动态配置爬虫">
+            
+                Scrapy笔记10- 动态配置爬虫
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/04/10</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>有很多时候我们需要从多个网站爬取所需要的数据，比如我们想爬取多个网站的新闻，将其存储到数据库同一个表中。我们是不是要对每个网站都得去定义一个Spider类呢？
+其实不需要，我们可以通过维护一个规则配置表或者一个规则配置文件来动态增加或修改爬取规则，然后程序代码不需要更改就能实现多个网站爬取。</p>
+<p>要这样做，我们就不能再使用前面的<code>scrapy crawl test</code>这种命令了，我们需要使用编程的方式运行Scrapy spider，参考<a href="http://doc.scrapy.org/en/1.0/topics/practices.html#run-scrapy-from-a-script" target="_blank" rel="noopener">官方文档</a></p>
+<h3 id="脚本运行Scrapy"><a href="#脚本运行Scrapy" class="headerlink" title="脚本运行Scrapy"></a>脚本运行Scrapy</h3><p>可以利用scrapy提供的<a href="http://doc.scrapy.org/en/1.0/topics/api.html#topics-api" target="_blank" rel="noopener">核心API</a>通过编程方式启动scrapy，代替传统的<code>scrapy crawl</code>启动方式。</p>
+<p>Scrapy构建于Twisted异步网络框架基础之上，因此你需要在Twisted reactor里面运行。</p>
+<p>首先你可以使用<code>scrapy.crawler.CrawlerProcess</code>这个类来运行你的spider，这个类会为你启动一个Twisted reactor，并能配置你的日志和shutdown处理器。所有的scrapy命令都使用这个类。
+<code>`</code> python run.py
+import scrapy
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings</p>
+<p>process = CrawlerProcess(get_project_settings())</p>
+<p>process.crawl(MySpider)
+process.start() # the script will block here until the crawling is finished</p>
+<pre><code>然后你就可以直接执行这个脚本
+``` bash
+python run.py
+</code></pre><p>另外一个功能更强大的类是<code>scrapy.crawler.CrawlerRunner</code>，推荐你使用这个
+<code>`</code> python run.py
+from twisted.internet import reactor
+import scrapy
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.log import configure_logging</p>
+<p>class MySpider(scrapy.Spider):</p>
+<pre><code># Your spider definition
+...
+</code></pre><p>configure_logging({‘LOG_FORMAT’: ‘%(levelname)s: %(message)s’})
+runner = CrawlerRunner()</p>
+<p>d = runner.crawl(MySpider)
+d.addBoth(lambda _: reactor.stop())
+reactor.run() # the script will block here until the crawling is finished</p>
+<pre><code>
+### 同一进程运行多个spider
+默认情况当你每次执行`scrapy crawl`命令时会创建一个新的进程。但我们可以使用核心API在同一个进程中同时运行多个spider
+``` python
+import scrapy
+from twisted.internet import reactor
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.log import configure_logging
+
+class MySpider1(scrapy.Spider):
+    # Your first spider definition
+    ...
+
+class MySpider2(scrapy.Spider):
+    # Your second spider definition
+    ...
+
+configure_logging()
+runner = CrawlerRunner()
+runner.crawl(MySpider1)
+runner.crawl(MySpider2)
+d = runner.join()
+d.addBoth(lambda _: reactor.stop())
+
+reactor.run() # the script will block here until all crawling jobs are finished
+</code></pre><h3 id="定义规则表"><a href="#定义规则表" class="headerlink" title="定义规则表"></a>定义规则表</h3><p>好了言归正传，有了前面的脚本启动基础，就可以开始我们的动态配置爬虫了。
+我们的需求是这样的，从两个不同的网站爬取我们所需要的新闻文章，然后存储到article表中。</p>
+<p>首先我们需要定义规则表和文章表，通过动态的创建蜘蛛类，我们以后就只需要维护规则表即可了。这里我使用SQLAlchemy框架来映射数据库。
+<code>`</code> python models.py</p>
+<p>#!/usr/bin/env python</p>
+<h1 id="encoding-utf-8"><a href="#encoding-utf-8" class="headerlink" title="-- encoding: utf-8 --"></a>-<em>- encoding: utf-8 -</em>-</h1><p>“””
+Topic: 定义数据库模型实体
+Desc :
+“””
+import datetime</p>
+<p>from sqlalchemy.engine.url import URL
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
+from coolscrapy.settings import DATABASE</p>
+<p>Base = declarative_base()</p>
+<p>class ArticleRule(Base):
+    “””自定义文章爬取规则”””
+    <strong>tablename</strong> = ‘article_rule’</p>
+<pre><code>id = Column(Integer, primary_key=True)
+# 规则名称
+name = Column(String(30))
+# 运行的域名列表，逗号隔开
+allow_domains = Column(String(100))
+# 开始URL列表，逗号隔开
+start_urls = Column(String(100))
+# 下一页的xpath
+next_page = Column(String(100))
+# 文章链接正则表达式(子串)
+allow_url = Column(String(200))
+# 文章链接提取区域xpath
+extract_from = Column(String(200))
+# 文章标题xpath
+title_xpath = Column(String(100))
+# 文章内容xpath
+body_xpath = Column(Text)
+# 发布时间xpath
+publish_time_xpath = Column(String(30))
+# 文章来源
+source_site = Column(String(30))
+# 规则是否生效
+enable = Column(Integer)
+</code></pre><p>class Article(Base):
+    “””文章类”””
+    <strong>tablename</strong> = ‘articles’</p>
+<pre><code>id = Column(Integer, primary_key=True)
+url = Column(String(100))
+title = Column(String(100))
+body = Column(Text)
+publish_time = Column(String(30))
+source_site = Column(String(30))
+</code></pre><pre><code>
+### 定义文章Item
+这个很简单了，没什么需要说明的
+``` python items.py
+import scrapy
+
+
+class Article(scrapy.Item):
+    title = scrapy.Field()
+    url = scrapy.Field()
+    body = scrapy.Field()
+    publish_time = scrapy.Field()
+    source_site = scrapy.Field()
+</code></pre><h3 id="定义ArticleSpider"><a href="#定义ArticleSpider" class="headerlink" title="定义ArticleSpider"></a>定义ArticleSpider</h3><p>接下来我们将定义爬取文章的蜘蛛，这个spider会使用一个Rule实例来初始化，然后根据Rule实例中的xpath规则来获取相应的数据。</p>
+<pre><code class="line-numbers language-python">from coolscrapy.utils import parse_text
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+from coolscrapy.items import Article
+
+
+class ArticleSpider(CrawlSpider):
+    name = &quot;article&quot;
+
+    def __init__(self, rule):
+        self.rule = rule
+        self.name = rule.name
+        self.allowed_domains = rule.allow_domains.split(&quot;,&quot;)
+        self.start_urls = rule.start_urls.split(&quot;,&quot;)
+        rule_list = []
+        # 添加`下一页`的规则
+        if rule.next_page:
+            rule_list.append(Rule(LinkExtractor(restrict_xpaths=rule.next_page)))
+        # 添加抽取文章链接的规则
+        rule_list.append(Rule(LinkExtractor(
+            allow=[rule.allow_url],
+            restrict_xpaths=[rule.extract_from]),
+            callback=&#39;parse_item&#39;))
+        self.rules = tuple(rule_list)
+        super(ArticleSpider, self).__init__()
+
+    def parse_item(self, response):
+        self.log(&#39;Hi, this is an article page! %s&#39; % response.url)
+
+        article = Article()
+        article[&quot;url&quot;] = response.url
+
+        title = response.xpath(self.rule.title_xpath).extract()
+        article[&quot;title&quot;] = parse_text(title, self.rule.name, &#39;title&#39;)
+
+        body = response.xpath(self.rule.body_xpath).extract()
+        article[&quot;body&quot;] = parse_text(body, self.rule.name, &#39;body&#39;)
+
+        publish_time = response.xpath(self.rule.publish_time_xpath).extract()
+        article[&quot;publish_time&quot;] = parse_text(publish_time, self.rule.name, &#39;publish_time&#39;)
+
+        article[&quot;source_site&quot;] = self.rule.source_site
+
+        return article
+</code></pre>
+<p>要注意的是start_urls，rules等都初始化成了对象的属性，都由传入的rule对象初始化，parse_item方法中的抽取规则也都有rule对象提供。</p>
+<h3 id="编写pipeline存储到数据库中"><a href="#编写pipeline存储到数据库中" class="headerlink" title="编写pipeline存储到数据库中"></a>编写pipeline存储到数据库中</h3><p>我们还是使用SQLAlchemy来将文章Item数据存储到数据库中
+<code>`</code> python pipelines.py
+@contextmanager
+def session_scope(Session):
+    “””Provide a transactional scope around a series of operations.”””
+    session = Session()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()</p>
+<p>class ArticleDataBasePipeline(object):
+    “””保存文章到数据库”””</p>
+<pre><code>def __init__(self):
+    engine = db_connect()
+    create_news_table(engine)
+    self.Session = sessionmaker(bind=engine)
+
+def open_spider(self, spider):
+    &quot;&quot;&quot;This method is called when the spider is opened.&quot;&quot;&quot;
+    pass
+
+def process_item(self, item, spider):
+    a = Article(url=item[&quot;url&quot;],
+                title=item[&quot;title&quot;].encode(&quot;utf-8&quot;),
+                publish_time=item[&quot;publish_time&quot;].encode(&quot;utf-8&quot;),
+                body=item[&quot;body&quot;].encode(&quot;utf-8&quot;),
+                source_site=item[&quot;source_site&quot;].encode(&quot;utf-8&quot;))
+    with session_scope(self.Session) as session:
+        session.add(a)
+
+def close_spider(self, spider):
+    pass
+</code></pre><pre><code>
+### 修改run.py启动脚本
+我们将上面的run.py稍作修改即可定制我们的文章爬虫启动脚本
+``` python run.py
+import logging
+from spiders.article_spider import ArticleSpider
+from twisted.internet import reactor
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.project import get_project_settings
+from scrapy.utils.log import configure_logging
+from coolscrapy.models import db_connect
+from coolscrapy.models import ArticleRule
+from sqlalchemy.orm import sessionmaker
+
+if __name__ == &#39;__main__&#39;:
+    settings = get_project_settings()
+    configure_logging(settings)
+    db = db_connect()
+    Session = sessionmaker(bind=db)
+    session = Session()
+    rules = session.query(ArticleRule).filter(ArticleRule.enable == 1).all()
+    session.close()
+    runner = CrawlerRunner(settings)
+
+    for rule in rules:
+        # stop reactor when spider closes
+        # runner.signals.connect(spider_closing, signal=signals.spider_closed)
+        runner.crawl(ArticleSpider, rule=rule)
+
+    d = runner.join()
+    d.addBoth(lambda _: reactor.stop())
+
+    # blocks process so always keep as the last statement
+    reactor.run()
+    logging.info(&#39;all finished.&#39;)
+</code></pre><p>OK，一切搞定。现在我们可以往ArticleRule表中加入成百上千个网站的规则，而不用添加一行代码，就可以对这成百上千个网站进行爬取。
+当然你完全可以做一个Web前端来完成维护ArticleRule表的任务。当然ArticleRule规则也可以放在除了数据库的任何地方，比如配置文件。</p>
+<p>你可以在<a href="https://github.com/yidao620c/core-scrapy" target="_blank" rel="noopener">GitHub</a>上看到本文的完整项目源码。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/04/10/scrapy-10.html">Scrapy笔记10- 动态配置爬虫</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/04/12/scrapy-11.html" class="pre-post btn btn-default" title='Scrapy笔记11- 模拟登录'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记11- 模拟登录</span>
+        </a>
+    
+    
+        <a href="/2016/03/21/scrapy-09.html" class="next-post btn btn-default" title='Scrapy笔记09- 部署'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记09- 部署</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#脚本运行Scrapy"><span class="toc-text">脚本运行Scrapy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定义规则表"><span class="toc-text">定义规则表</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#encoding-utf-8"><span class="toc-text">-- encoding: utf-8 --</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#定义ArticleSpider"><span class="toc-text">定义ArticleSpider</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编写pipeline存储到数据库中"><span class="toc-text">编写pipeline存储到数据库中</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

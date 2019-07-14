@@ -1,0 +1,805 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="CAS,">
+
+
+    <meta name="description" content="现在开始对CasServer进行二次开发，比如如何设置数据库连接，如何使用数据库的用户名和密码登录，
+如何使用Restful API方式实现SSO，如何自定义服务，如何自定义登陆界面等等。接下来将逐步介绍。
+Cas官方说明，如果你想对它默认项目有所更改，那么就使用覆盖它路径的方式进行。
+更改C...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CAS教程 - 定制开发 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CAS教程 - 定制开发">
+            
+                CAS教程 - 定制开发
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/CAS" title='CAS'>
+                        CAS
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2019/01/05</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>现在开始对CasServer进行二次开发，比如如何设置数据库连接，如何使用数据库的用户名和密码登录，
+如何使用Restful API方式实现SSO，如何自定义服务，如何自定义登陆界面等等。接下来将逐步介绍。</p>
+<p>Cas官方说明，如果你想对它默认项目有所更改，那么就使用覆盖它路径的方式进行。</p>
+<p>更改CAS的配置既可以修改cas.properties文件，也能修改默认的application.properties。
+为了配置集中处理，我会把默认的application.properties配置文件提出来，只修改它，并把cas.properties内容都移到里面去。</p>
+<h2 id="修改默认用户名和密码"><a href="#修改默认用户名和密码" class="headerlink" title="修改默认用户名和密码"></a>修改默认用户名和密码</h2><p>在cas-overlay-template-master项目中，新建一个src/main/resources目录，将resources目录设置成资源目录。
+然后将<code>将target/war/work/org.apereo.cas/cas-server-webapp-tomcat/WEB-INF/classes/application.properties</code>复制到resources目录中。</p>
+<p>将前面修改的<code>cas.properties</code>内容复制到里面去。</p>
+<p>然后找到最后的<code>cas.authn.accept.users=casuser::Mellon</code>，改成我自己的：</p>
+<pre><code>cas.authn.accept.users=xiongneng::xiongneng
+</code></pre><p>重新build后放到tomcat容器中，再看看效果。使用新的用户名密码登录成功！</p>
+<h2 id="yml配置文件"><a href="#yml配置文件" class="headerlink" title="yml配置文件"></a>yml配置文件</h2><p>将war包下的<code>application.properties</code>文件、<code>application.yml</code>都移到resources目录，然后将properties文件置空。
+cas默认会先读取properties文件，然后再读取yml文件，这样就完美的解决了通过yml启动cas了。</p>
+<p>下一步将properties文件内容转成yml格式复制到yml中，推荐转换网站：<a href="http://www.toyaml.com" target="_blank" rel="noopener">http://www.toyaml.com</a></p>
+<pre><code class="line-numbers language-yml">cas:
+    adminPagesSecurity:
+        ip: 127.0.0.1
+    authn:
+        accept:
+            users: xiongneng::xiongneng
+    server:
+        name: https://cas.server.com:8443
+        prefix: https://cas.server.com:8443/cas
+后面省略》。。
+</code></pre>
+<p>重新build后启动再访问看看。</p>
+<h2 id="单点登录JDBC认证"><a href="#单点登录JDBC认证" class="headerlink" title="单点登录JDBC认证"></a>单点登录JDBC认证</h2><p>之前介绍过在application.properties文件中，修改默认的静态用户名和密码。这节分析下，取消静态登陆方式，
+该用从数据库链接获取用户进行登录认证。</p>
+<p>CAS支持各种数据库，我这里选用MySQL进行实践。CAS支持多种JDBC的认证方案，这里推荐方案是通过盐等手段进行加密再进行匹配。</p>
+<p>常用单向加密算法：MD5、SHA、HMAC，推荐加密策略为单向加密算法(密码+动态盐+私有盐)*加密次数。</p>
+<p>先创建cas数据库：</p>
+<pre><code>CREATE DATABASE IF NOT EXISTS cas default charset utf8 COLLATE utf8_general_ci;
+</code></pre><p>然后创建用户表：</p>
+<pre><code class="line-numbers language-sql">create table sys_user (
+ `id` int(11) not null auto_increment,
+ `username` varchar(30) not null,
+ `password` varchar(64) not null,
+ `email`    varchar(50),
+ `address`  varchar(100),
+ `age`      int,
+ `expired` int,     #是否过期 0否 1是
+ `disabled` int,    #是否禁用 0否 1是
+ `locked` int,      #是否锁定 0否 1是
+  primary key (`id`)
+) engine=innodb auto_increment=1;
+</code></pre>
+<p>插入几条数据，这里密码就采用简单点的MD5散列值：</p>
+<pre><code>/*123*/
+insert into sys_user values (&#39;1&#39;, &#39;admin&#39;, &#39;202cb962ac59075b964b07152d234b70&#39;, &#39;admin@foxmail.com&#39;, &#39;广州天河&#39;, 24, 0, 0, 0);
+/*12345678*/
+insert into sys_user values (&#39;2&#39;, &#39;zhangsan&#39;, &#39;25d55ad283aa400af464c76d713c07ad&#39;, &#39;zhangsan@foxmail.com&#39;, &#39;广州越秀&#39;, 26, 0, 0, 0);
+/*1234*/
+/*禁用账户*/
+insert into sys_user values(&#39;3&#39;, &#39;zhaosi&#39;,&#39;81dc9bdb52d04dc20036dbd8313ed055&#39;, &#39;zhaosi@foxmail.com&#39;, &#39;广州海珠&#39;, 25, 0 , 1, 0);
+/*12345*/
+/*过期账户*/
+insert into sys_user values(&#39;4&#39;, &#39;wangwu&#39;,&#39;827ccb0eea8a706c4c34a16891f84e7b&#39;, &#39;wangwu@foxmail.com&#39;, &#39;广州番禺&#39;, 27, 1 , 0, 0);
+/*123*/
+/*锁定账户*/
+insert into sys_user values(&#39;5&#39;, &#39;boss&#39;,&#39;202cb962ac59075b964b07152d234b70&#39;, &#39;boss@foxmail.com&#39;, &#39;深圳&#39;, 30, 0 , 0, 1);
+</code></pre><p>我们需要在原来的pom.xml基础上，添加数据库驱动，以及jdbc的支持：</p>
+<pre><code>&lt;properties&gt;
+    &lt;cas.version&gt;5.3.8&lt;/cas.version&gt;
+    &lt;mysql.driver.version&gt;8.0.15&lt;/mysql.driver.version&gt;
+&lt;/properties&gt;
+
+&lt;!--数据库认证相关 start--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apereo.cas&lt;/groupId&gt;
+    &lt;artifactId&gt;cas-server-support-jdbc-drivers&lt;/artifactId&gt;
+    &lt;version&gt;${cas.version}&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apereo.cas&lt;/groupId&gt;
+    &lt;artifactId&gt;cas-server-support-jdbc&lt;/artifactId&gt;
+    &lt;version&gt;${cas.version}&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;version&gt;${mysql.driver.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><p>里面有个依赖找不到，我就手动下载安装到本地：</p>
+<pre><code>mvn install:install-file -Dfile=D:/download/xmlsectool-2.0.0.jar \
+-DgroupId=net.shibboleth.tool -DartifactId=xmlsectool -Dversion=2.0.0 -Dpackaging=jar
+</code></pre><p>接下来配置application.yml文件。</p>
+<p>1 首先禁用默认的用户名和密码。</p>
+<p>2 增加如下配置</p>
+<pre><code>cas:
+  adminPagesSecurity:
+    ip: 127.0.0.1
+  authn:
+#    accept:
+#      users: test::test
+    jdbc:
+      query:
+        - dialect: org.hibernate.dialect.MySQLDialect
+          driverClass: com.mysql.cj.jdbc.Driver
+          fieldDisabled: disabled
+          fieldExpired: expired
+          fieldPassword: password
+          sql: select * from sys_user where username=?
+          url: jdbc:mysql://127.0.0.1:3306/cas?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai
+          user: test
+          password: test
+          passwordEncoder:
+            type: DEFAULT
+            characterEncoding: UTF-8
+            encodingAlgorithm: MD5
+</code></pre><p>以上配置，如驱动，查询数据库等等需要根据不同的场景进行调整</p>
+<ol>
+<li>若密码无加密，调整passwordEncoder.type=NONE</li>
+<li>若密码加密策略为SHA，调整passwordEncoder.encodingAlgorithm=SHA</li>
+<li>若算法为自定义，实现<code>org.springframework.security.crypto.password.PasswordEncoder</code>接口，
+并且把类名配置在<code>passwordEncoder.type</code></li>
+</ol>
+<p><strong>Encode Database Authentication 编码加密</strong></p>
+<p>对密码进行盐值处理再加密，增加了反查难度，如上面的例子，对密码只是简单的加密，不同的帐号有可能相同的值，
+能判断出密码是一致，但通过此方案，大大增加了难度，所以安全系数也高了许多，推荐策略。</p>
+<p>数据库新增表：</p>
+<pre><code>/*
+ * 账号加盐表
+ */
+create table sys_user_encode (
+  `id` int(11) not null auto_increment,
+  `username` varchar(30) not null,
+  `password` varchar(64) not null,
+  `email`    varchar(50),
+  `address`  varchar(100),
+  `age`      int,
+ `expired`   int,    #是否过期 0否 1是
+ `disabled`  int,    #是否禁用 0否 1是
+ `locked`    int,    #是否锁定 0否 1是
+  primary key (`id`)
+) engine=innodb auto_increment=1;
+</code></pre><p>插入数据：</p>
+<pre><code># 明文密码 123
+insert into sys_user_encode values (&#39;1&#39;, &#39;admin_en&#39;, &#39;bfb194d5bd84a5fc77c1d303aefd36c3&#39;, &#39;huang.wenbin@foxmail.com&#39;, &#39;江门蓬江&#39;, 24, 0, 0, 0);
+# 明文密码 12345678
+insert into sys_user_encode values (&#39;2&#39;, &#39;zhangsan_en&#39;, &#39;68ae075edf004353a0403ee681e45056&#39;,  &#39;zhangsan@foxmail.com&#39;, &#39;深圳宝安&#39;, 21, 0, 0, 0);
+#明文密码 1234
+insert into sys_user_encode values (&#39;4&#39;, &#39;wangwu_en&#39;, &#39;44b907d6fee23a552348eabf5fcf1ac7&#39;,  &#39;wangwu@foxmail.com&#39;, &#39;佛山顺德&#39;, 19, 1, 0, 0);
+</code></pre><p>将之前jdbc.query的配置改成jdbc.encode：</p>
+<pre><code>cas:
+  adminPagesSecurity:
+    ip: 127.0.0.1
+  authn:
+#    accept:
+#      users: test::test
+    jdbc:
+      encode:
+        - dialect: org.hibernate.dialect.MySQLDialect
+          driverClass: com.mysql.cj.jdbc.Driver
+          disabledFieldName: disabled
+          expiredFieldName: expired
+          passwordFieldName: password
+          sql: select * from sys_user_encode where username=?
+          url: jdbc:mysql://127.0.0.1:3306/cas?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai
+          user: test
+          password: test
+          algorithmName: MD5 #对处理盐值后的算法
+          numberOfIterations: 2 #加密迭代次数
+          # numberOfIterationsFieldName: #该列名的值可替代上面的值，但对密码加密时必须取该值进行处理
+          saltFieldName: username #盐值固定列
+          staticSalt: . #静态盐值
+</code></pre><h2 id="自定义密码验证"><a href="#自定义密码验证" class="headerlink" title="自定义密码验证"></a>自定义密码验证</h2><p>加密的类，必须实现<code>org.springframework.security.crypto.password.PasswordEncoder</code>，因为验证的时候，cas就是调用接口，然后验证是否正确。
+现在自己写一个实现了这个接口的类：</p>
+<pre><code class="line-numbers language-java">package com.xncoding.cas;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+
+/**
+ * 自定义加密类
+ */
+public class CustomPasswordEncoder implements PasswordEncoder {
+
+    public String encode(CharSequence password) {
+        try {
+            //给数据进行md5加密
+            MessageDigest md = MessageDigest.getInstance(&quot;MD5&quot;);
+            md.update(password.toString().getBytes());
+            String pwd = new BigInteger(1, md.digest()).toString(16);
+            System.out.println(&quot;encode方法：加密前（&quot; + password + &quot;），加密后（&quot; + pwd + &quot;）&quot;);
+            return pwd;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 调用这个方法来判断密码是否匹配
+     */
+    @Override
+    public boolean matches(CharSequence rawPassword, String encodePassword) {
+        // 判断密码是否存在
+        if (rawPassword == null) {
+            return false;
+        }
+
+        //通过md5加密后的密码
+        String pass = this.encode(rawPassword.toString());
+
+        System.out.println(&quot;matches方法：rawPassword：&quot; + rawPassword + &quot;，encodePassword：&quot; + encodePassword + &quot;，pass：&quot; + pass);
+        //比较密码是否相等的问题
+        return pass.equals(encodePassword);
+    }
+}
+</code></pre>
+<p>注册加密的类：</p>
+<pre><code>cas:
+  adminPagesSecurity:
+    ip: 127.0.0.1
+  authn:
+#    accept:
+#      users: test::test
+    jdbc:
+      query:
+        - dialect: org.hibernate.dialect.MySQLDialect
+          driverClass: com.mysql.cj.jdbc.Driver
+          fieldDisabled: disabled
+          fieldExpired: expired
+          fieldPassword: password
+          sql: select * from sys_user where username=?
+          url: jdbc:mysql://127.0.0.1:3306/cas?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false&amp;serverTimezone=Asia/Shanghai
+          user: test
+          password: test
+          passwordEncoder:
+            type: com.xncoding.cas.CustomPasswordEncoder
+            characterEncoding: UTF-8
+            encodingAlgorithm: MD5
+</code></pre><h2 id="Rest认证"><a href="#Rest认证" class="headerlink" title="Rest认证"></a>Rest认证</h2><p>通过REST数据接口对用户进行认证，通过请求接口，返回固定格式，进行对密码匹配，判断用户是否合法。</p>
+<p>什么场景下用rest认证？</p>
+<p>用户数据存在远端、不允许cas直接访问数据库、cas不希望你知道帐号数据的表结构</p>
+<p>由于Rest方式并不需要直接通过JDBC链接数据库，所以在上一节文章中介绍的JDBC和mysql驱动依赖项就可以删掉了，保留一个就可以了</p>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.apereo.cas&lt;/groupId&gt;
+    &lt;artifactId&gt;cas-server-support-rest-authentication&lt;/artifactId&gt;
+    &lt;version&gt;${cas.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><p>同样的，把之前的jdbc配置可以删掉了，配置如下即可：</p>
+<pre><code>##
+# REST 认证开始, 请求远程调用接口
+#
+cas.authn.rest.uri=http://localhost:8080/cas_db/user/login
+cas.authn.rest.passwordEncoder.type=DEFAULT
+cas.authn.rest.passwordEncoder.characterEncoding=UTF-8
+cas.authn.rest.passwordEncoder.encodingAlgorithm=MD5
+</code></pre><p>REST认证流程是这样的，当用户点击登录后，cas会发送post请求到 <a href="http://localhost:8080/cas_db/login" target="_blank" rel="noopener">http://localhost:8080/cas_db/login</a> 
+并且把用户信息以”用户名:密码”进行Base64编码放在authorization请求头中。</p>
+<p>若输入用户名密码为：admin/123；那么请求头包括：authorization=Basic Base64(admin:MD5(123))。</p>
+<p>那么发送后客户端必须响应一下数据，cas明确规定如下：</p>
+<ul>
+<li>cas 服务端会通过post请求，并且把用户信息以”用户名:密码”进行Base64编码放在authorization请求头中</li>
+<li>200状态码：并且格式为{“@class”:”org.apereo.cas.authentication.principal.SimplePrincipal”,”id”:”casuser”,”attributes”:{} }是成功的；</li>
+<li>403状态码：用户不可用；</li>
+<li>404状态码：账号不存在；</li>
+<li>423状态码：账户被锁定；</li>
+<li>428状态码：过期；</li>
+<li>其他登录失败</li>
+</ul>
+<p>接下来编写REST认证服务，使用SpringBoot+Maven+MyBatis构建：</p>
+<p>用户类</p>
+<pre><code>@TableName(value = &quot;sys_user&quot;)
+public class User extends Model&lt;User&gt; {
+
+private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键ID
+     */
+    @TableId(value=&quot;id&quot;, type= IdType.AUTO)
+    private Integer id;
+    /**
+     * 账号
+     */
+    @NotNull
+    private String username;
+    /**
+     * 密码
+     */
+    @JsonIgnore
+    private String password;
+    /**
+     * 联系电话
+     */
+    private String email;
+    /**
+     * 备注
+     */
+    private String address;
+    /**
+     * 状态 1:正常 2:禁用
+     */
+    private Integer age;
+
+    private Integer expired;
+    private Integer disabled;
+    private Integer locked;
+
+    //需要返回实现org.apereo.cas.authentication.principal.Principal的类名接口
+    @TableField(exist=false)
+    @JsonProperty(&quot;@class&quot;)
+    private String clazz = &quot;org.apereo.cas.authentication.principal.SimplePrincipal&quot;;
+
+    @JsonProperty(&quot;attributes&quot;)
+    @TableField(exist=false)
+    private Map&lt;String, Object&gt; attributes = new HashMap&lt;&gt;();
+
+    // 省略getter/setter
+}
+</code></pre><p>接口类：</p>
+<pre><code>@RestController
+@RequestMapping(&quot;/user&quot;)
+public class SysUserController {
+    private Logger logger = LogManager.getLogger(SysUserController.class);
+
+    @Autowired
+    private UserService userService;
+
+    @PostMapping(&quot;/login&quot;)
+    public Object login(@RequestHeader HttpHeaders httpHeaders) {
+        logger.info(&quot;Rest api login.&quot;);
+        logger.debug(&quot;request headers: &quot; + httpHeaders);
+        User user = null;
+        try {
+            UserTemp userTemp = obtainUserFormHeader(httpHeaders);
+
+            //当没有 传递 参数的情况
+            if (userTemp == null) {
+                return new ResponseEntity&lt;User&gt;(HttpStatus.NOT_FOUND);
+            }
+
+            //尝试查找用户库是否存在
+            user = userService.findByUsername(userTemp.username);
+            if (user != null) {
+                if (!user.getPassword().equals(userTemp.password)) {
+                    //密码不匹配
+                    return new ResponseEntity(HttpStatus.BAD_REQUEST);
+                }
+                if (user.getDisabled() == 1) {
+                    //禁用 403
+                    return new ResponseEntity(HttpStatus.FORBIDDEN);
+                }
+                if (user.getLocked() == 1) {
+                    //锁定 423
+                    return new ResponseEntity(HttpStatus.LOCKED);
+                }
+                if (user.getExpired() == 1) {
+                    //过期 428
+                    return new ResponseEntity(HttpStatus.PRECONDITION_REQUIRED);
+                }
+            } else {
+                //不存在 404
+                return new ResponseEntity(HttpStatus.NOT_FOUND);
+            }
+        } catch (UnsupportedEncodingException e) {
+            logger.error(&quot;&quot;, e);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        }
+        logger.info(&quot;[{&quot; + user.getUsername() + &quot;}] login is ok&quot;);
+        logger.info(JacksonUtil.bean2Json(user));
+        //成功返回json
+        return user;
+    }
+
+
+    /**
+     * 根据请求头获取用户名及密码
+     *
+     * @param httpHeaders
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    private UserTemp obtainUserFormHeader(HttpHeaders httpHeaders) throws UnsupportedEncodingException {
+        /*
+         *
+         * This allows the CAS server to reach to a remote REST endpoint via a POST for verification of credentials.
+         * Credentials are passed via an Authorization header whose value is Basic XYZ where XYZ is a Base64 encoded version of the credentials.
+         */
+        //根据官方文档，当请求过来时，会通过把用户信息放在请求头authorization中，并且通过Basic认证方式加密
+        String authorization = httpHeaders.getFirst(&quot;authorization&quot;);//将得到 Basic Base64(用户名:密码)
+        if (StringUtils.isEmpty(authorization)) {
+            return null;
+        }
+        String baseCredentials = authorization.split(&quot; &quot;)[1];
+        String usernamePassword = new String(Base64Utils.decodeFromString(baseCredentials), StandardCharsets.UTF_8);//用户名:密码
+        logger.debug(&quot;login user: &quot; + usernamePassword);
+        String[] credentials = usernamePassword.split(&quot;:&quot;);
+        return new UserTemp(credentials[0], credentials[1]);
+    }
+
+
+    /**
+     * 解析请求过来的用户
+     */
+    private class UserTemp {
+        private String username;
+        private String password;
+
+        UserTemp(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+    }
+}
+</code></pre><p>Service类我就不贴了，启动后验证登录流程。</p>
+<h2 id="代码调试"><a href="#代码调试" class="headerlink" title="代码调试"></a>代码调试</h2><p>通过官网的overlay构建会发现跟目录有build.cmd/build.sh两个文件，就是在根目录下。
+其中有一段代码，不难发现是采用java -jar的方式启用了一个远程调试5000端口，当然了这个端口也是可以改的</p>
+<pre><code>function debug() {
+   package &amp;&amp; java -Xdebug -Xrunjdwp:transport=dt_socket,address=5000,server=y,suspend=n -jar target/cas.war
+}
+</code></pre><p>启用调试:</p>
+<pre><code>build debug
+</code></pre><p>IDEA启动监听，增加一个Remote Server调试器。填写三个配置：</p>
+<ol>
+<li>命令行参数：-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000</li>
+<li>Host: localhost</li>
+<li>Port: 5000</li>
+</ol>
+<p>配置好后启动debug，看到如下说明成功一半：</p>
+<pre><code>Connected to the target VM, address: &#39;localhost:5000&#39;, transport: &#39;socket&#39;
+</code></pre><p>调试代码：</p>
+<p>RestAuthenticationHandler进行调试，具体调试哪个代码按自己的实际情况。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190309-001.jpg" alt></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2019/01/05/security/cas03.html">CAS教程 - 定制开发</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2019/01/09/security/cas04.html" class="pre-post btn btn-default" title='CAS教程 - 实现单点登录'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">CAS教程 - 实现单点登录</span>
+        </a>
+    
+    
+        <a href="/2019/01/03/security/cas02.html" class="next-post btn btn-default" title='CAS教程 - 服务安装'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CAS教程 - 服务安装</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#修改默认用户名和密码"><span class="toc-text">修改默认用户名和密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#yml配置文件"><span class="toc-text">yml配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#单点登录JDBC认证"><span class="toc-text">单点登录JDBC认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义密码验证"><span class="toc-text">自定义密码验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rest认证"><span class="toc-text">Rest认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码调试"><span class="toc-text">代码调试</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

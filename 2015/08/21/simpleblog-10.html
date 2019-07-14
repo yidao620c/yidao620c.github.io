@@ -1,0 +1,508 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="Django本身不提供全文检索的功能，但django-haystack为其提供了全文检索的框架。
+django-haystack能为Django提供whoosh,solr,Xapian和Elasticsearc四种全文检索引擎作为后端。
+其中whoosh为纯python的实现，不是非常大型的应...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Django1.9开发博客10- 全文搜索 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Django1.9开发博客10- 全文搜索">
+            
+                Django1.9开发博客10- 全文搜索
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/08/21</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Django本身不提供全文检索的功能，但django-haystack为其提供了全文检索的框架。
+django-haystack能为Django提供whoosh,solr,Xapian和Elasticsearc四种全文检索引擎作为后端。
+其中whoosh为纯python的实现，不是非常大型的应用，是没有问题的。
+本文将介绍Django1.9中通过django-haystack与whoosh集成以及whoosh的中文支持。</p>
+<h3 id="安装依赖："><a href="#安装依赖：" class="headerlink" title="安装依赖："></a>安装依赖：</h3><pre><code>pip install django-haystack
+pip install whoosh
+pip install jieba
+</code></pre><h3 id="建立模型"><a href="#建立模型" class="headerlink" title="建立模型"></a>建立模型</h3><p>我们以文章为搜索目标，现在我的app名字为blog，
+模型文件是mysite/blog/models.py ：</p>
+<pre><code class="line-numbers language-python"># coding=utf-8
+from django.db import models
+@python_2_unicode_compatible
+class Post(models.Model):
+    class Meta:
+        verbose_name = u&#39;文章&#39;
+        verbose_name_plural = u&#39;文章&#39;
+    # 作者
+    author = models.ForeignKey(User)
+    # 标题
+    title = models.CharField(max_length=200)
+    # 正文
+    text = models.TextField()
+    # 标签
+    tags = models.ManyToManyField(Tag)
+    # 分类目录
+    category = models.ForeignKey(Category)
+    # 点击量
+    click = models.IntegerField(default=0)
+    # 创建时间
+    created_date = models.DateTimeField(default=timezone.now)
+    # 发布时间
+    published_date = models.DateTimeField(blank=True, null=True)
+
+    def publish(self):
+        self.published_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.title
+</code></pre>
+<h3 id="search-indexes-py"><a href="#search-indexes-py" class="headerlink" title="search_indexes.py"></a>search_indexes.py</h3><p>在app目录下建立一个search_indexes.py（mysite/blog/search_indexes.py）代码如下：</p>
+<pre><code class="line-numbers language-python">#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+from models import Post
+from haystack import indexes
+class PostIndex(indexes.SearchIndex, indexes.Indexable):
+    # 文章内容
+    text = indexes.CharField(document=True, use_template=True)
+    # 对title字段进行索引
+    title = indexes.CharField(model_attr=&#39;title&#39;)
+    def get_model(self):
+        return Post
+
+    def index_queryset(self, using=None):
+        return self.get_model().objects.all()
+</code></pre>
+<p><em>备注</em>：search_indexes.py文件名不能修改，否则报错：<code>No fields were found in any search_indexes.</code></p>
+<h3 id="post-text-txt"><a href="#post-text-txt" class="headerlink" title="post_text.txt"></a>post_text.txt</h3><p>因为在search_indexes.py使用了use_template=True，所以可以同时使用模板对索引字段进行定义。</p>
+<p>如：<code>mysite/blog/templates/search/indexes/blog/post_text.txt</code>:</p>
+<pre><code>@@ object.title @@
+@@ object.text @@
+</code></pre><h3 id="settings-py"><a href="#settings-py" class="headerlink" title="settings.py"></a>settings.py</h3><pre><code class="line-numbers language-python"># Application definition
+INSTALLED_APPS = (
+    ...
+    &#39;haystack&#39;,
+)
+</code></pre>
+<h3 id="urls-py"><a href="#urls-py" class="headerlink" title="urls.py"></a>urls.py</h3><pre><code class="line-numbers language-python">urlpatterns = patterns(
+    &#39;&#39;,
+    url(r&#39;^admin/&#39;, include(admin.site.urls)),
+    url(r&#39;^xadmin/&#39;, include(xadmin.site.urls), name=&#39;xadmin&#39;),
+    url(r&#39;^accounts/login/$&#39;, &#39;django.contrib.auth.views.login&#39;),
+    url(r&#39;^accounts/logout/$&#39;, &#39;django.contrib.auth.views.logout&#39;, {&#39;next_page&#39;: &#39;/&#39;}),
+    url(r&#39;^search/&#39;, include(&#39;haystack.urls&#39;)),
+    url(r&#39;&#39;, include(&#39;blog.urls&#39;)),
+)
+</code></pre>
+<h3 id="jieba中文分词"><a href="#jieba中文分词" class="headerlink" title="jieba中文分词"></a>jieba中文分词</h3><p>jieba其实已经提供了集成whoosh的ChineseAnalyzer，
+也就是说不需要自己写ChineseAnalyzer了，直接在whoosh_backend.py中直接引用就好；
+同时，不推荐将whoosh_backend.py放到Lib下面，这样移植性会有问题，自己的代码，还是放在项目下面为妙。</p>
+<p>1. 将文件haystack.backends.whoosh_backend.py拷贝到app下面，并重命名为whoosh_cn_backend.py，
+如blog/whoosh_cn_backend.py。重点的改造有：</p>
+<ul>
+<li><p>增加：</p>
+<pre><code class="line-numbers language-python">from jieba.analyse import ChineseAnalyzer
+</code></pre>
+</li>
+<li><p>修改</p>
+<pre><code class="line-numbers language-python">schema_fields[field_class.index_fieldname] = TEXT(stored=True, analyzer=ChineseAnalyzer(), field_boost=field_class.boost, sortable=True)
+</code></pre>
+</li>
+</ul>
+<p>2. 修改后端引擎，setting.py配置：</p>
+<pre><code class="line-numbers language-python"># full text search
+HAYSTACK_CONNECTIONS = {
+    &#39;default&#39;: {
+        &#39;ENGINE&#39;: &#39;blog.whoosh_cn_backend.WhooshEngine&#39;,
+        &#39;PATH&#39;: os.path.join(BASE_DIR, &#39;whoosh_index&#39;),
+    },
+}
+</code></pre>
+<h3 id="重建索引"><a href="#重建索引" class="headerlink" title="重建索引"></a>重建索引</h3><pre><code class="line-numbers language-python">python manage.py rebuild_index
+</code></pre>
+<h3 id="索引更新"><a href="#索引更新" class="headerlink" title="索引更新"></a>索引更新</h3><p>最简单的办法就是在settings.py中添加：</p>
+<pre><code class="line-numbers language-python">HAYSTACK_SIGNAL_PROCESSOR = &#39;haystack.signals.RealtimeSignalProcessor&#39;
+</code></pre>
+<h3 id="自定义搜索示例"><a href="#自定义搜索示例" class="headerlink" title="自定义搜索示例"></a>自定义搜索示例</h3><p>(1) 先定义view：</p>
+<pre><code class="line-numbers language-python">from haystack.forms import SearchForm
+def full_search(request):
+    &quot;&quot;&quot;全局搜索&quot;&quot;&quot;
+    keywords = request.GET[&#39;q&#39;]
+    sform = SearchForm(request.GET)
+    posts = sform.search()
+    return render(request, &#39;blog/post_search_list.html&#39;,
+                  {&#39;posts&#39;: posts, &#39;list_header&#39;: &#39;关键字 \&#39;{}\&#39; 搜索结果&#39;.format(keywords)})
+</code></pre>
+<p>(2) 然后在template页面中：</p>
+<pre><code class="line-numbers language-html">&lt;!-- searchbox START --&gt;
+&lt;div id=&quot;searchbox&quot;&gt;
+    &lt;form action=&quot;@% url &#39;blog.views.full_search&#39; %@&quot; method=&quot;get&quot;&gt;
+        &lt;div class=&quot;content&quot;&gt;
+            &lt;label&gt;
+                &lt;input type=&quot;text&quot; class=&quot;textfield searchtip&quot; name=&quot;q&quot; size=&quot;24&quot; value=&quot;&quot;&gt;
+            &lt;/label&gt;
+            &lt;input type=&quot;submit&quot; class=&quot;button&quot; value=&quot;&quot;&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+</code></pre>
+<p>更详细内容请参考官方文档：<a href="http://django-haystack.readthedocs.org/en/latest/" target="_blank" rel="noopener">http://django-haystack.readthedocs.org/en/latest/</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/08/21/simpleblog-10.html">Django1.9开发博客10- 全文搜索</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/08/22/simpleblog-11.html" class="pre-post btn btn-default" title='Django1.9开发博客11- 富文本与代码高亮'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Django1.9开发博客11- 富文本与代码高亮</span>
+        </a>
+    
+    
+        <a href="/2015/08/20/simpleblog-09.html" class="next-post btn btn-default" title='Django1.9开发博客09- 用户认证'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Django1.9开发博客09- 用户认证</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装依赖："><span class="toc-text">安装依赖：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#建立模型"><span class="toc-text">建立模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#search-indexes-py"><span class="toc-text">search_indexes.py</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#post-text-txt"><span class="toc-text">post_text.txt</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#settings-py"><span class="toc-text">settings.py</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#urls-py"><span class="toc-text">urls.py</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#jieba中文分词"><span class="toc-text">jieba中文分词</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重建索引"><span class="toc-text">重建索引</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#索引更新"><span class="toc-text">索引更新</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义搜索示例"><span class="toc-text">自定义搜索示例</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

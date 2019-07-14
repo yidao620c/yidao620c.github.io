@@ -1,0 +1,778 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="mysql,">
+
+
+    <meta name="description" content="用了这么久的mysql数据库，是时候来一篇总结了，这里整理使用过程中觉得比较重要也比较常用的知识点。
+开源数据库里面mysql的份额最高，也是最流行的，其实性能也非常高，所以一直用它。
+安装和配置在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他i...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>MySQL核心知识整理 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="MySQL核心知识整理">
+            
+                MySQL核心知识整理
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/database">
+            database
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/mysql" title='mysql'>
+                        mysql
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/09/17</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>用了这么久的mysql数据库，是时候来一篇总结了，这里整理使用过程中觉得比较重要也比较常用的知识点。</p>
+<p>开源数据库里面mysql的份额最高，也是最流行的，其实性能也非常高，所以一直用它。</p>
+<h2 id="安装和配置"><a href="#安装和配置" class="headerlink" title="安装和配置"></a>安装和配置</h2><p>在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。</p>
+<p>从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 <code>wget</code> 下载：</p>
+<pre><code>wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
+</code></pre><p>安装 yum Repository</p>
+<pre><code>yum -y install mysql57-community-release-el7-8.noarch.rpm
+</code></pre><p>搜索 mysql server</p>
+<pre><code>yum search mysql-com
+</code></pre><p>安装</p>
+<pre><code>yum -y install mysql-community-server.x86_64
+</code></pre><p>启动、停止、查看状态、开机启动等</p>
+<pre><code>systemctl start mysqld.service
+systemctl stop mysqld.service
+systemctl status mysqld.service
+systemctl enable mysqld.service
+</code></pre><p>登陆数据库</p>
+<p>MySQL5.7.6 之后会在启动 mysql 进程的时候生成一个用户密码，首次登陆需要这个密码才行。
+密码保存在 mysql 进程的日志里，即<code>/var/log/mysqld.log</code></p>
+<pre><code>cat /var/log/mysqld.log | grep &#39;password&#39;
+# 登录
+mysql -uroot -p
+</code></pre><p>修改root密码，先登录进去后：</p>
+<pre><code>mysql&gt; ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;new_password&#39;;
+</code></pre><p>最后，安装完了可以删除 MySQL 的 Repository ，这样可以减少 yum 检查更新的时间，使用下面的命令：</p>
+<pre><code>yum -y remove mysql57-community-release-el7-8.noarch
+</code></pre><p>修改权限，让其他的机器也能访问：</p>
+<pre><code>mysql&gt; GRANT ALL ON *.* TO &#39;root&#39;@&#39;%&#39; IDENTIFIED BY &#39;mysql&#39;;
+mysql&gt; flush privileges;
+</code></pre><p>如果还不能远程访问，就需要关闭防火墙。</p>
+<h2 id="常见数据库操作"><a href="#常见数据库操作" class="headerlink" title="常见数据库操作"></a>常见数据库操作</h2><p>创建新的数据库并制定UTF-8编码</p>
+<pre><code>drop database fastloan3;
+create database fastloan3 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+</code></pre><p>通过sql脚本文件执行sql：</p>
+<pre><code>mysql -uroot -p... fastloan3 &lt; t_invoice.sql
+</code></pre><p>导出数据库</p>
+<pre><code>mysqldump -u... -p... mydb &gt; mydb_tables.sql
+mysqldump -u... -p... mydb t1 t2 t3 &gt; mydb_tables.sqlhe
+</code></pre><p>查看表空间占用大小</p>
+<pre><code>mysql&gt; use information_schema;
+mysql&gt; SELECT TABLE_NAME,DATA_LENGTH+INDEX_LENGTH,TABLE_ROWS
+FROM TABLES WHERE TABLE_SCHEMA=&#39;数据库名&#39; //AND TABLE_NAME=&#39;表名&#39;
+</code></pre><p>查看详细表结构，包括注释</p>
+<pre><code>show full columns from &lt;table_name&gt;
+SELECT COLUMN_NAME, COLUMN_TYPE, EXTRA, COLUMN_COMMENT
+FROM information_schema.columns
+WHERE table_name = &#39;metrics&#39; AND table_schema = &#39;fastloan3&#39;;
+</code></pre><h2 id="关于表连接"><a href="#关于表连接" class="headerlink" title="关于表连接"></a>关于表连接</h2><p>SQL的Join语法有很多inner的，有outer的，有left的，有时候对于Select出来的结果集是什么样子有点不是很清楚。
+这里我通过实际例子来演示它们的用法。</p>
+<p>假设我们有两张表。TableA是左边的表。TableB是右边的表。其各有5条记录，
+其中有4条记录name是相同的，如下所示：让我们看看不同JOIN的不同</p>
+<p><strong>A表</strong></p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HaHa</td>
+</tr>
+<tr>
+<td>2</td>
+<td>HeiHei</td>
+</tr>
+<tr>
+<td>3</td>
+<td>WaWa</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SaSa</td>
+</tr>
+<tr>
+<td>5</td>
+<td>YaYa</td>
+</tr>
+</tbody>
+</table>
+<p><strong>B表</strong></p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>HeiHei</td>
+</tr>
+<tr>
+<td>2</td>
+<td>WaWa</td>
+</tr>
+<tr>
+<td>3</td>
+<td>SaSa</td>
+</tr>
+<tr>
+<td>4</td>
+<td>YaYa</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ZaZa</td>
+</tr>
+</tbody>
+</table>
+<h3 id="INNER-JOIN"><a href="#INNER-JOIN" class="headerlink" title="INNER JOIN"></a>INNER JOIN</h3><p><code>INNER JOIN</code>跟<code>JOIN</code>是一样的，一般<code>INNER</code>关键字可以省略。
+<code>INNER JOIN</code>将只会返回相匹配的元素项，即不会返回结果为NULL的数据项。</p>
+<pre><code class="line-numbers language-sql">SELECT
+    *
+FROM
+    TableA
+INNER JOIN TableB ON TableA.name = TableB.name
+</code></pre>
+<p>结果集</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>id1</th>
+<th>name1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>HeiHei</td>
+<td>1</td>
+<td>HeiHei</td>
+</tr>
+<tr>
+<td>3</td>
+<td>WaWa</td>
+<td>2</td>
+<td>WaWa</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SaSa</td>
+<td>3</td>
+<td>SaSa</td>
+</tr>
+<tr>
+<td>5</td>
+<td>YaYa</td>
+<td>4</td>
+<td>YaYa</td>
+</tr>
+</tbody>
+</table>
+<h3 id="LEFT-OUTER-JOIN"><a href="#LEFT-OUTER-JOIN" class="headerlink" title="LEFT [OUTER] JOIN"></a>LEFT [OUTER] JOIN</h3><p>请注意这里的<code>OUTER</code>是可选的，<code>LEFT JOIN</code> 和 <code>LEFT OUTER JOIN</code>是一样的。
+左连接（<code>LEFT OUTER JOIN</code>）会输出左表中的所有结果，如果右表中有相应项，则会输出，否则为NULL。</p>
+<pre><code class="line-numbers language-sql">SELECT
+    *
+FROM
+    TableA
+LEFT OUTER JOIN TableB ON TableA.name = TableB.name
+</code></pre>
+<p>结果集</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>id1</th>
+<th>name1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>HeiHei</td>
+<td>1</td>
+<td>HeiHei</td>
+</tr>
+<tr>
+<td>3</td>
+<td>WaWa</td>
+<td>2</td>
+<td>WaWa</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SaSa</td>
+<td>3</td>
+<td>SaSa</td>
+</tr>
+<tr>
+<td>5</td>
+<td>YaYa</td>
+<td>4</td>
+<td>YaYa</td>
+</tr>
+<tr>
+<td>1</td>
+<td>HaHa</td>
+<td>NULL</td>
+<td>NULL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="RIGHT-OUTER-JOIN"><a href="#RIGHT-OUTER-JOIN" class="headerlink" title="RIGHT [OUTER] JOIN"></a>RIGHT [OUTER] JOIN</h3><p>右连接（<code>RIGHT OUTER JOIN</code>）会输出右表中的所有结果，如果左表中有相应项，则会输出，否则为NULL。</p>
+<pre><code class="line-numbers language-sql">SELECT
+    *
+FROM
+    TableA
+RIGHT OUTER JOIN TableB ON TableA.name = TableB.name
+</code></pre>
+<p>结果集</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>name</th>
+<th>id1</th>
+<th>name1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2</td>
+<td>HeiHei</td>
+<td>1</td>
+<td>HeiHei</td>
+</tr>
+<tr>
+<td>3</td>
+<td>WaWa</td>
+<td>2</td>
+<td>WaWa</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SaSa</td>
+<td>3</td>
+<td>SaSa</td>
+</tr>
+<tr>
+<td>5</td>
+<td>YaYa</td>
+<td>4</td>
+<td>YaYa</td>
+</tr>
+<tr>
+<td>NULL</td>
+<td>NULL</td>
+<td>5</td>
+<td>ZaZa</td>
+</tr>
+</tbody>
+</table>
+<h3 id="UNION-与-UNION-ALL"><a href="#UNION-与-UNION-ALL" class="headerlink" title="UNION 与 UNION ALL"></a>UNION 与 UNION ALL</h3><p><code>UNION</code>操作符用于合并两个或多个 <code>SELECT</code> 语句的结果集。请注意，<code>UNION</code> 内部的 <code>SELECT</code> 语句必须拥有相同数量的列。
+列也必须拥有相似的数据类型。同时，每条<code>SELECT</code>语句中的列的顺序必须相同。<code>UNION</code>只选取不同的记录，而<code>UNION ALL</code>会列出所有记录。</p>
+<pre><code class="line-numbers language-sql">SELECT name FROM TableA
+UNION
+SELECT name FROM TableB
+</code></pre>
+<p>结果集（注意下面没有重复项）</p>
+<pre><code>HaHa
+HeiHei
+WaWa
+SaSa
+YaYa
+ZaZa
+</code></pre><p>使用<code>UNION ALL</code></p>
+<pre><code class="line-numbers language-sql">SELECT name FROM TableA
+UNION ALL
+SELECT name FROM TableB
+</code></pre>
+<p>结果集</p>
+<pre><code>HaHa
+HeiHei
+WaWa
+SaSa
+YaYa
+HeiHei
+WaWa
+SaSa
+YaYa
+ZaZa
+</code></pre><h2 id="分组查询GROUP-BY"><a href="#分组查询GROUP-BY" class="headerlink" title="分组查询GROUP BY"></a>分组查询GROUP BY</h2><p>很多时候需要分组统计查询，这里就需要使用到<code>GROUP BY</code>，以及<code>HAVING</code>子句。</p>
+<p>在 SQL 中增加 HAVING 子句原因是，WHERE 关键字无法与合计函数一起使用。</p>
+<pre><code class="line-numbers language-sql">SELECT column_name, aggregate_function(column_name)
+FROM table_name
+WHERE column_name operator value
+GROUP BY column_name
+HAVING aggregate_function(column_name) operator value
+</code></pre>
+<p>比如我们拥有下面一个<code>Orders</code>表：</p>
+<table>
+<thead>
+<tr>
+<th>O_Id</th>
+<th>OrderDate</th>
+<th>OrderPrice</th>
+<th>Customer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>2008/12/29</td>
+<td>1000</td>
+<td>Bush</td>
+</tr>
+<tr>
+<td>2</td>
+<td>2008/11/23</td>
+<td>1600</td>
+<td>Carter</td>
+</tr>
+<tr>
+<td>3</td>
+<td>2008/10/05</td>
+<td>700</td>
+<td>Bush</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2008/09/28</td>
+<td>300</td>
+<td>Bush</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2008/08/06</td>
+<td>2000</td>
+<td>Adams</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2008/07/21</td>
+<td>100</td>
+<td>Carter</td>
+</tr>
+</tbody>
+</table>
+<p>现在，我们希望查找订单总金额少于 2000 的客户:</p>
+<pre><code class="line-numbers language-sql">SELECT Customer,SUM(OrderPrice) FROM Orders
+GROUP BY Customer
+HAVING SUM(OrderPrice)&lt;2000
+</code></pre>
+<p>现在我们希望查找客户 “Bush” 或 “Adams” 拥有超过 1500 的订单总金额。
+我们在 SQL 语句中增加了一个普通的 WHERE 子句：</p>
+<pre><code class="line-numbers language-sql">SELECT Customer,SUM(OrderPrice) FROM Orders
+WHERE Customer=&#39;Bush&#39; OR Customer=&#39;Adams&#39;
+GROUP BY Customer
+HAVING SUM(OrderPrice)&gt;1500
+</code></pre>
+<p>结果集：</p>
+<table>
+<thead>
+<tr>
+<th>Customer</th>
+<th>SUM(OrderPrice)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bush</td>
+<td>2000</td>
+</tr>
+<tr>
+<td>Adams</td>
+<td>2000</td>
+</tr>
+</tbody>
+</table>
+<p>现在我要求”Bush” 或 “Adams” 拥有超过 1500 的订单平均金额：</p>
+<pre><code>SELECT Customer,SUM(OrderPrice) FROM Orders
+WHERE Customer=&#39;Bush&#39; OR Customer=&#39;Adams&#39;
+GROUP BY Customer
+HAVING AVG(OrderPrice)&gt;1500
+</code></pre><p>结果集：</p>
+<table>
+<thead>
+<tr>
+<th>Customer</th>
+<th>SUM(OrderPrice)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Adams</td>
+<td>2000</td>
+</tr>
+</tbody>
+</table>
+<p>Bush被淘汰了，因为他的平均订单金额（(1000+700+300)/3）&lt;1500</p>
+<h2 id="其他有用函数"><a href="#其他有用函数" class="headerlink" title="其他有用函数"></a>其他有用函数</h2><p><code>MID(str,pos,len)</code>提取子串，pos从1开始。</p>
+<pre><code class="line-numbers language-sql">SELECT MID(Customer,1,3) FROM Orders;
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/09/17/database/mysql.html">MySQL核心知识整理</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/09/19/database/mysql-ha2.html" class="pre-post btn btn-default" title='基于keepalived实现mysql双主'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">基于keepalived实现mysql双主</span>
+        </a>
+    
+    
+        <a href="/2016/09/16/database/mysql-ha.html" class="next-post btn btn-default" title='centos7配置mysql主从复制'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">centos7配置mysql主从复制</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装和配置"><span class="toc-text">安装和配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常见数据库操作"><span class="toc-text">常见数据库操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于表连接"><span class="toc-text">关于表连接</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#INNER-JOIN"><span class="toc-text">INNER JOIN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LEFT-OUTER-JOIN"><span class="toc-text">LEFT [OUTER] JOIN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RIGHT-OUTER-JOIN"><span class="toc-text">RIGHT [OUTER] JOIN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UNION-与-UNION-ALL"><span class="toc-text">UNION 与 UNION ALL</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分组查询GROUP-BY"><span class="toc-text">分组查询GROUP BY</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他有用函数"><span class="toc-text">其他有用函数</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

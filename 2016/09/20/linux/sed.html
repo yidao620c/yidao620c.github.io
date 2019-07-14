@@ -1,0 +1,457 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="sed,">
+
+
+    <meta name="description" content="在linux中通常要进行文本处理，sed是一个非常强大的文本处理命令工具。
+配合正则表达式可以进行文本搜索、替换、插入、删除等操作。
+sed基本上就是正则模式匹配，所以你的正则表达式要比较强才能玩的好它。
+sed是一种新型的，非交互式的编辑器。它能执行与编辑器vi和ex相同的编辑任务。
+sed...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>sed命令笔记 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="sed命令笔记">
+            
+                sed命令笔记
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/linux">
+            linux
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/sed" title='sed'>
+                        sed
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/09/20</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在linux中通常要进行文本处理，sed是一个非常强大的文本处理命令工具。
+配合正则表达式可以进行文本搜索、替换、插入、删除等操作。
+sed基本上就是正则模式匹配，所以你的正则表达式要比较强才能玩的好它。</p>
+<p>sed是一种新型的，非交互式的编辑器。它能执行与编辑器vi和ex相同的编辑任务。
+sed编辑器没有提供交互使用方式，使用者只能在命令行输入编辑命令、指定文件名，然后在屏幕上查看输出。
+sed编辑器没有破坏性，它不会修改文件，除非指定-i选项，默认情况下，所有的输出行都被打印到屏幕上。</p>
+<p>这里只介绍最常用的一些用法，如果要看sed全部东西，请参考[sed参考手册]
+(<a href="http://www.gnu.org/software/sed/manual/sed.html" target="_blank" rel="noopener">http://www.gnu.org/software/sed/manual/sed.html</a>) </p>
+<h2 id="正则式"><a href="#正则式" class="headerlink" title="正则式"></a>正则式</h2><p>介绍一下正则表达式的一些最基本的东西：</p>
+<ul>
+<li><code>^</code>   表示一行的开头。如：/^#/ 以#开头的匹配。</li>
+<li><code>$</code>   表示一行的结尾。如：/}$/ 以}结尾的匹配。</li>
+<li><code>\&lt;</code>  表示词首。 如 \&lt;abc 表示以 abc 为首的詞。</li>
+<li><code>\&gt;</code>  表示词尾。 如 abc> 表示以 abc 結尾的詞。</li>
+<li><code>.</code>   表示任何单个字符。</li>
+<li><code>*</code>   表示某个字符出现了0次或多次。</li>
+<li><code>[ ]</code> 字符集合。 如：[abc]表示匹配a或b或c，还有[a-zA-Z]表示匹配所有的26个字符。如果其中有^表示反，如[^a]表示非a的字符</li>
+</ul>
+<h2 id="s命令替换"><a href="#s命令替换" class="headerlink" title="s命令替换"></a>s命令替换</h2><pre><code class="line-numbers language-bash">sed &quot;s/my/your/g&quot; test.txt     # 将my全部修改成your
+sed -i &quot;s/my/your/g&quot; test.txt  # -i选项直接修改文件
+sed &#39;s/^/#/g&#39; test.txt         # 每一行前面加注释#
+sed &#39;s/&lt;[^&gt;]*&gt;//g&#39; test.html   # 删除所有的html标签
+sed &quot;3,6s/my/your/g&quot; test.txt  # 只替换第3到第6行的文本
+sed &#39;s/old/new/1&#39; test.txt     # 只替换每行的第1个
+sed &#39;s/s/S/3g&#39; test.txt        # 只替换每行第3个及其以后的
+</code></pre>
+<h2 id="执行多次匹配"><a href="#执行多次匹配" class="headerlink" title="执行多次匹配"></a>执行多次匹配</h2><pre><code class="line-numbers language-bash"># 第1到第3行的my换成your，从第3行开始This换成That
+sed -e &#39;1,3s/my/your/g&#39; -e &#39;3,$s/This/That/g&#39; my.txt
+</code></pre>
+<p>我们可以使用&amp;来当做被匹配的变量，然后可以在被匹配项的两边加中括号：</p>
+<pre><code class="line-numbers language-bash">sed &#39;s/my/[&amp;]/g&#39; my.txt
+</code></pre>
+<h2 id="分组匹配"><a href="#分组匹配" class="headerlink" title="分组匹配"></a>分组匹配</h2><p>和python类似，使用括号来进行分组，后面可以通过\1,\2来引用分组：</p>
+<pre><code class="line-numbers language-bash">sed &#39;s/This is my \([^,]*\),.*is \(.*\)/\1:\2/g&#39; my.txt
+</code></pre>
+<h2 id="a和i命令添加行"><a href="#a和i命令添加行" class="headerlink" title="a和i命令添加行"></a>a和i命令添加行</h2><p>a命令就是append后面一行添加，i命令就是insert前面一行插入，它们是用来添加行的。如</p>
+<pre><code class="line-numbers language-bash"># 第1行前插入
+sed &quot;1 i aaaaaaaaaaaaaaaa&quot; my.txt
+sed &quot;/fish/a bbbbbbbbbbbbbbbbbbbbb&quot; my.txt
+# 最后一行添加
+sed &quot;$ a aaaaaaaaaaaaaaaa&quot; my.atxt
+# 某行后面插入多行字符串
+sed -i&#39;/bind_address/a\skip-name-resolve\nlower_case_table_names=1&#39; /etc/mysql/my.cnf
+</code></pre>
+<h2 id="c命令替换行"><a href="#c命令替换行" class="headerlink" title="c命令替换行"></a>c命令替换行</h2><p>c 命令是替换匹配行：</p>
+<pre><code class="line-numbers language-bash">sed &quot;/fish/c qqqqqqqqqqqqqqqqqqqqqqqq&quot; my.txt
+</code></pre>
+<h2 id="d命令删除行"><a href="#d命令删除行" class="headerlink" title="d命令删除行"></a>d命令删除行</h2><pre><code class="line-numbers language-bash">sed -i &#39;/fish/d&#39; my.txt
+</code></pre>
+<h2 id="p命令打印"><a href="#p命令打印" class="headerlink" title="p命令打印"></a>p命令打印</h2><p>你可以把这个命令当成grep式的命令：</p>
+<pre><code class="line-numbers language-bash">sed -n &#39;/fish/p&#39; my.txt
+# 从一个匹配行打印到另一个匹配行
+sed -n &#39;/dog/,/fish/p&#39; my.txt
+# 从第一行打印到匹配fish成功的那一行
+sed -n &#39;1,/fish/p&#39; my.txt
+</code></pre>
+<h2 id="sed更多范例"><a href="#sed更多范例" class="headerlink" title="sed更多范例"></a>sed更多范例</h2><pre><code class="line-numbers language-bash">sed &#39;/north/p&#39; datafile                      # 命令p是打印命令,默认情况下是打印所有输入行；选项-n是用于取消默认的打印操作。
+sed  -n &#39;/north/p&#39; datafile                  # 打印datafile中含有north模式的行，只打印匹配到的行。
+sed  &#39;3,$d&#39; datafile                         # 删除从第3行到最后一行的内容。
+sed  &#39;s/west/north/g&#39; datafile               # 所有行中的west替换成north.若无g,则每行的第一个west被替换。
+sed  &#39;s/[0-9][0-9]$/&amp;.5/&#39; datafile           # &amp; 它代表在查找串中匹配到的内容，这个例子中，所有两位数结尾的行后面都被加上.5
+sed  -n &#39;s/\(Mar\)got/\1ianne/p&#39; datafile    # 包含在圆括号里的模式Mar作为标签1 保存于特定的寄存器中。替换串可通过\1引用它。则Margot被替换成Marianne。
+sed &#39;s#3#88#g&#39; datafile                      # 可以设置新的分隔符为#
+sed -n &#39;/west/,/east/p&#39; datafile             # 打印west行 到 east行之间的所有行
+sed -e &#39;1,3d&#39; -e &#39;s/Mar/Apr/&#39; datafile       # -e多重编辑,先删除1~3行，然后进行替换。
+sed &#39;/Suan/r newfile &#39; datafile              # r命令是读取指定文件。如果再文件datafile 的某一行匹配到Suan，就在该行后面读入文件newfile的内容。
+sed -n &#39;/north/w newfile&#39; datafile           # w命令是写命令，将匹配的行写入newfile文件中。
+sed &#39;/north/a\ooooooooooooo&#39; datafile        # 匹配north的下一行追加一串ooooo字符。
+sed &#39;/north/i\ooooooooooooo&#39; datafile        # 匹配north的前一行插入一串ooooo字符。
+sed &#39;/north/c\ooooooooooooo&#39; datafile        # 匹配north行，将ooooo替换该行。
+sed &#39;/north/{n; s/AM/PM/;}&#39; datafile         # n 命令表示下一条命令。sed使用该命令获取输入文件的下一行，并将其读入到模式缓冲区中，任何sed命令都将应用到匹配行的下一行上。此处命令的含义是：匹配到含有north后，将输入行下移一行 然后将下一行文本中的AM替换成PM。可以认为n命令是跳跃一行。
+sed &#39;1,3y/abc/ABC/&#39; datafile                 # y 命令是一对一转换，此处是将1~3行中a-&gt;A b-&gt;B c-&gt;C转换。
+sed &#39;5q&#39; datafile                            # 打印完第五行只后，q命令让sed程序退出.
+sed &#39;/Lew/{ s/Lew/John/ ; q;} &#39; datafile     # 在某行匹配到模式 Lewis时，s表示先用John替换Lewis，然后q命令让sed程序退出。
+sed -e &#39;/north/h&#39; -e &#39;$G&#39;  datafile          # 在匹配到north行时,将该行复制到暂存缓冲区中，然后再匹配最后一行后取出暂存缓冲区的内容追加在文件尾部。
+sed -n &#39;/a/ {n;p}&#39; test.log                  # 打印出符合开头是a的记录的下一行
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/09/20/linux/sed.html">sed命令笔记</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/09/22/linux/awk.html" class="pre-post btn btn-default" title='awk命令笔记'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">awk命令笔记</span>
+        </a>
+    
+    
+        <a href="/2016/09/19/database/mysql-ha2.html" class="next-post btn btn-default" title='基于keepalived实现mysql双主'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">基于keepalived实现mysql双主</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#正则式"><span class="toc-text">正则式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#s命令替换"><span class="toc-text">s命令替换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行多次匹配"><span class="toc-text">执行多次匹配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分组匹配"><span class="toc-text">分组匹配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#a和i命令添加行"><span class="toc-text">a和i命令添加行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#c命令替换行"><span class="toc-text">c命令替换行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#d命令删除行"><span class="toc-text">d命令删除行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#p命令打印"><span class="toc-text">p命令打印</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sed更多范例"><span class="toc-text">sed更多范例</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

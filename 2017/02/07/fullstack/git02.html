@@ -1,0 +1,634 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="git,">
+
+
+    <meta name="description" content="终于要介绍git的杀手级特性分支了，这也是大部分人使用git的原因。
+其他版本控制系统如SVN等都有分支管理，但是用过之后你会发现，这些版本控制系统创建和切换分支比蜗牛还慢，
+简直让人无法忍受，结果分支功能成了摆设，大家都不去用。
+Git的分支是与众不同的，无论创建、切换和删除分支，Git在1...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>git简明教程 - 分支篇 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="git简明教程 - 分支篇">
+            
+                git简明教程 - 分支篇
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/git" title='git'>
+                        git
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/02/07</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>终于要介绍git的杀手级特性分支了，这也是大部分人使用git的原因。
+其他版本控制系统如SVN等都有分支管理，但是用过之后你会发现，这些版本控制系统创建和切换分支比蜗牛还慢，
+简直让人无法忍受，结果分支功能成了摆设，大家都不去用。
+Git的分支是与众不同的，无论创建、切换和删除分支，Git在1秒钟之内就能完成！无论你的版本库是1个文件还是1万个文件。</p>
+<h2 id="创建与合并分支"><a href="#创建与合并分支" class="headerlink" title="创建与合并分支"></a>创建与合并分支</h2><p>每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，
+在Git里，这个分支叫主分支，即master分支。HEAD严格来说不是指向提交，
+而是指向master，master才是指向提交的，所以，HEAD指向的就是当前分支。</p>
+<p>一开始的时候，master分支是一条线，Git用master指向最新的提交，再用HEAD指向master，就能确定当前分支，以及当前分支的提交点：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git04.png" alt></p>
+<p>每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。</p>
+<p>当我们创建新的分支，例如dev时，Git新建了一个指针叫dev，
+指向master相同的提交，再把HEAD指向dev，就表示当前分支在dev上：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git05.png" alt></p>
+<p>Git创建一个分支很快，就是增加一个dev指针，改改HEAD的指向。</p>
+<p>不过，从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git06.png" alt></p>
+<p>假如我们在dev上的工作完成了，就可以把dev合并到master上。Git怎么合并呢？
+最简单的方法，就是直接把master指向dev的当前提交，就完成了合并：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git07.png" alt></p>
+<p>所以Git合并分支也很快！就改改指针，工作区内容也不变。</p>
+<p>合并完分支后，甚至可以删除dev分支。删除dev分支就是把dev指针给删掉，删掉后，我们就剩下了一条master分支:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git08.png" alt></p>
+<p>下面开始实战演练一下。</p>
+<p>首先，我们创建dev分支，然后切换到dev分支:</p>
+<pre><code>[root@controller161 gitdemo]# git checkout -b dev
+Switched to a new branch &#39;dev&#39;
+</code></pre><p><code>git checkout</code>命令加上-b参数表示创建并切换，相当于以下两条命令:</p>
+<pre><code>git branch dev
+git checkout dev
+</code></pre><p>然后用<code>git branch</code>命令查看当前分支:</p>
+<pre><code>[root@controller161 gitdemo]# git branch
+* dev
+  master
+</code></pre><p><code>git branch</code>命令会列出所有分支，当前分支前面会标一个*号。</p>
+<p>然后，我们就可以在dev分支上正常提交，比如对readme.txt做个修改，加上一行:</p>
+<pre><code>hello git
+I like git very much
+add something
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>然后提交：</p>
+<pre><code>[root@controller161 gitdemo]# git add readme.txt
+[root@controller161 gitdemo]# git commit -m &quot;dev commit 1&quot;
+[dev 97e84a1] dev commit 1
+ 1 file changed, 1 insertion(+)
+</code></pre><p>现在，dev分支的工作完成，我们就可以切换回master分支:</p>
+<pre><code>[root@controller161 gitdemo]# git checkout master
+Switched to branch &#39;master&#39;
+</code></pre><p>切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！
+因为那个提交是在dev分支上，而master分支此刻的提交点并没有变:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git08.png" alt></p>
+<p>现在，我们把dev分支的工作成果合并到master分支上:</p>
+<pre><code>[root@controller161 gitdemo]# git merge dev
+Updating 240afec..97e84a1
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre><p>git merge命令用于合并指定分支到当前分支。合并后，再查看readme.txt的内容，就可以看到，和dev分支的最新提交是完全一样的</p>
+<p>合并完成后，就可以放心地删除dev分支了:</p>
+<pre><code>[root@controller161 gitdemo]# git branch -d dev
+Deleted branch dev (was 97e84a1)
+</code></pre><p>删除后，查看branch，就只剩下master分支了:</p>
+<pre><code>[root@controller161 gitdemo]# git branch
+* master
+</code></pre><p>因为创建、合并和删除分支非常快，所以Git鼓励你使用分支完成某个任务，
+合并后再删掉分支，这和直接在master分支上工作效果是一样的，但过程更安全。</p>
+<h2 id="解决冲突"><a href="#解决冲突" class="headerlink" title="解决冲突"></a>解决冲突</h2><p>冲突经常会发生，我们在不同分支上面修改了同一个文件，最后合并的时候肯定会有冲突。现在我们演示下冲突。</p>
+<p>先开一个feature1分支:</p>
+<pre><code>[root@controller161 gitdemo]# git checkout -b feature1
+Switched to a new branch &#39;feature1&#39;
+</code></pre><p>在feature1分支上面修改readme.txt如下:</p>
+<pre><code>hello git, feature1
+I like git very much
+add something
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>然后提交:</p>
+<pre><code>[root@controller161 gitdemo]# git add --all
+[root@controller161 gitdemo]# git commit -m &quot;feature1 111&quot;
+[feature1 f0e23f8] feature1 111
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre><p>切换到master分支，修改同样的文件readme.txt,内容如下:</p>
+<pre><code>hello git master
+I like git very much
+add something
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>然后也提交:</p>
+<pre><code>[root@controller161 gitdemo]# git add readme.txt
+[root@controller161 gitdemo]# git commit -m &quot;master&quot;
+[master 18c3eb0] master
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre><p>现在，master分支和feature1分支各自都分别有新的提交，变成了这样:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git10.png" alt></p>
+<p>这种情况下，Git无法执行“快速合并”，试试合并看看:</p>
+<pre><code>[root@controller161 gitdemo]# git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre><p>readme.txt文件存在冲突，必须手动解决冲突后再提交。<code>git status</code>也可以告诉我们冲突的文件:</p>
+<pre><code>[root@controller161 gitdemo]# git status
+On branch master
+You have unmerged paths.
+  (fix conflicts and run &quot;git commit&quot;)
+
+Unmerged paths:
+  (use &quot;git add &lt;file&gt;...&quot; to mark resolution)
+
+    both modified:   readme.txt
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</code></pre><p>打开readme.txt，内容变成这样:</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+hello git master
+=======
+hello git, feature1
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature1
+I like git very much
+add something
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>Git用&lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，&gt;&gt;&gt;&gt;&gt;&gt;&gt;标记出不同分支的内容，这是典型的diff冲突格式，我们修改如下后保存:</p>
+<pre><code>hello git master and feature1
+I like git very much
+add something
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>再提交:</p>
+<pre><code>[root@controller161 gitdemo]# git add readme.txt
+[root@controller161 gitdemo]# git commit -m &#39;fix confict&#39;
+[master a2c9e32] fix confict
+</code></pre><p>现在，master分支和feature1分支变成了下图所示:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git12.png" alt></p>
+<p>查看合并图:</p>
+<pre><code class="line-numbers language-bash">[root@controller161 gitdemo]# git log --graph --pretty=oneline --abbrev-commit
+*   a2c9e32 fix confict
+|\
+| * f0e23f8 feature1 111
+* | 18c3eb0 master
+|/
+* 97e84a1 dev commit 1
+* 240afec show stage work
+* 32db843 show stage work
+* 1d57c05 modify readme
+* 50f5fdc readme file
+</code></pre>
+<p>如果想保留某个分支的提交记录，删除后也有记录历史。可禁用Fast forward:</p>
+<pre><code>git merge --no-ff -m &quot;merge with no-ff&quot; dev
+</code></pre><p>本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。</p>
+<h2 id="分支策略"><a href="#分支策略" class="headerlink" title="分支策略"></a>分支策略</h2><p>在实际开发中，我们应该按照几个基本原则进行分支管理:</p>
+<p>首先，master分支应该是非常稳定的，也就是仅用来发布新版本，平时不能在上面干活；</p>
+<p>那在哪干活呢？干活都在dev分支上，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，
+再把dev分支合并到master上，在master分支发布1.0版本；</p>
+<p>你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，时不时地往dev分支上合并就可以了，类似这样:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/git121.png" alt></p>
+<h2 id="Bug分支"><a href="#Bug分支" class="headerlink" title="Bug分支"></a>Bug分支</h2><p>bug分支一般是那种时间短任务急的分支，修改完马上要合并提交的，就是临时分支。
+但是你一般都在dev分支上面工作，这时候有些工作还没有提交。</p>
+<pre><code>[root@controller161 gitdemo]# vim readme.txt
+[root@controller161 gitdemo]# git branch
+* dev
+  master
+[root@controller161 gitdemo]# git status
+On branch dev
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+    modified:   readme.txt
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</code></pre><p>并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？</p>
+<p>幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作:</p>
+<pre><code>[root@controller161 gitdemo]# git stash
+Saved working directory and index state WIP on dev: a2c9e32 fix confict
+HEAD is now at a2c9e32 fix confict
+</code></pre><p>可以放心地创建分支来修复bug，假定需要在master分支上修复，就从master创建临时分支:</p>
+<pre><code>[root@controller161 gitdemo]# git checkout master
+Switched to branch &#39;master&#39;
+[root@controller161 gitdemo]# git checkout -b issue-101
+Switched to a new branch &#39;issue-101&#39;
+</code></pre><p>现在修复bug，readme.txt修改为:</p>
+<pre><code>hello git master and feature1
+I like git very much
+add something, fix bug101
+这次加一行啦啦啦
+this is dev line
+</code></pre><p>然后提交:</p>
+<pre><code>[root@controller161 gitdemo]# git add readme.txt
+[root@controller161 gitdemo]# git commit -m &quot;fix bug101&quot;
+[issue-101 a4401b2] fix bug101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre><p>修复完成后，切换到master分支，并完成合并，最后删除issue-101分支:</p>
+<pre><code>[root@controller161 gitdemo]# git merge --no-ff -m &quot;merged bug fix 101&quot; issue-101
+Merge made by the &#39;recursive&#39; strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre><p>改完bug，是时候接着回到dev分支干活了:</p>
+<pre><code>[root@controller161 gitdemo]# git checkout dev
+Switched to branch &#39;dev&#39;
+[root@controller161 gitdemo]# git status
+On branch dev
+nothing to commit, working directory clean
+</code></pre><p>切换回来后第一件事就是把刚刚的bug分支合并:</p>
+<pre><code>git merge --no-ff -m &quot;dev-merge-m&quot; master
+</code></pre><p>工作区是干净的，刚才的工作现场存到哪去了？用git stash list命令看看:</p>
+<pre><code>[root@controller161 gitdemo]# git stash list
+stash@{0}: WIP on dev: a2c9e32 fix confict
+</code></pre><p><code>git stash pop</code>，恢复的同时把stash内容也删了（如果提示冲突，去文件手动改正）:</p>
+<pre><code>[root@controller161 gitdemo]# git stash pop
+On branch dev
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+    modified:   readme.txt
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+Dropped refs/stash@{0} (2df611a386511cc7989db79457b620b9971c08b5)
+</code></pre><p>你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令:</p>
+<pre><code>git stash apply stash@{0}
+</code></pre><p>有必要再次总结一下。</p>
+<p>master合并merge解决好的bug后，不要先把dev解印，先合并master，获取里面的bug方案后，在解印。解印时会有提示冲突，需手动改一次文件。</p>
+<ol>
+<li>在dev下正常开发中，说有1个bug要解决，首先我需要把dev分支封存stash</li>
+<li>在master下新建一个issue-101分支，解决bug，成功后</li>
+<li>在master下合并issue-101</li>
+<li>在 dev  下合并master，  这样才同步了里面的bug解决方案</li>
+<li>解开dev封印stash pop，系统自动合并 &amp; 提示有冲突，因为封存前dev写了东西，此时去文件里手动改冲突</li>
+<li>继续开发dev，最后add，commit</li>
+<li>在master下合并最后完成的dev</li>
+</ol>
+<p>代码过程如下：</p>
+<pre><code>1. $ git stash
+2. $ git checkout master
+   $ git checkout -b issue-101
+   //去文件里修bug
+   $ git add README.md
+   $ git commit -m &quot;fix-issue-101&quot;
+3. $ git checkout master
+   $ git merge --no-ff -m &quot;m-merge-issue-101&quot; issue-101
+   $ git branch -d issue-101
+4. $ git checkout dev
+   $ git merge --no-ff -m &quot;dev-merge-m&quot; master
+5. $ git stash pop
+   //提示冲突，去文件手动改正
+   Auto-merging README.md
+   CONFLICT (content): Merge conflict in README.md
+6. //继续开发 ... ... ，完成后一并提交
+   $ git add README.md
+   $ git commit -m &quot;fixconflict &amp; append something&quot;
+7. $ git checkout master
+   $ git merge --no-ff -m &quot;m-merge-dev&quot; dev
+   $ git branch -d dev
+</code></pre><p>开发一个新feature，最好新建一个分支。</p>
+<p>如果要丢弃一个没有被合并过的分支，可以通过git branch -D <name>强行删除。</name></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/02/07/fullstack/git02.html">git简明教程 - 分支篇</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/02/08/fullstack/git03.html" class="pre-post btn btn-default" title='git简明教程 - 协作篇'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">git简明教程 - 协作篇</span>
+        </a>
+    
+    
+        <a href="/2017/02/06/fullstack/git01.html" class="next-post btn btn-default" title='git简明教程 - 基础篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">git简明教程 - 基础篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建与合并分支"><span class="toc-text">创建与合并分支</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决冲突"><span class="toc-text">解决冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分支策略"><span class="toc-text">分支策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Bug分支"><span class="toc-text">Bug分支</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

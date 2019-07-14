@@ -1,0 +1,436 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="docker,">
+
+
+    <meta name="description" content="前面的实验都是在一个host中，而真实环境中肯定会有多个主机。
+容器在这些 host 中启动、运行、停止和销毁，相关容器会通过网络相互通信，无论它们是否位于相同的 host。
+对于这样一个 multi-host 环境，我们将如何高效地进行管理呢？我们面临的第一个问题是：为所有的 host 安装...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Docker每天学一点09 - 多主机管理 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Docker每天学一点09 - 多主机管理">
+            
+                Docker每天学一点09 - 多主机管理
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/docker">
+            docker
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/docker" title='docker'>
+                        docker
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/04/12</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>前面的实验都是在一个host中，而真实环境中肯定会有多个主机。
+容器在这些 host 中启动、运行、停止和销毁，相关容器会通过网络相互通信，无论它们是否位于相同的 host。</p>
+<p>对于这样一个 multi-host 环境，我们将如何高效地进行管理呢？我们面临的第一个问题是：为所有的 host 安装和配置 docker。
+如果一个个去安装肯定很麻烦又容易出错，手工方式效率低且不容易保证一致性，针对这个问题，docker 给出的解决方案是 Docker Machine。</p>
+<h2 id="安装-Docker-Machine"><a href="#安装-Docker-Machine" class="headerlink" title="安装 Docker Machine"></a>安装 Docker Machine</h2><p>用 Docker Machine 可以批量安装和配置 docker host，这个 host 可以是本地的虚拟机、物理机，也可以是公有云中的云主机。</p>
+<p>安装命令：</p>
+<pre><code>curl -L https://github.com/docker/machine/releases/download/v0.16.1/docker-machine-Linux-x86_64 &gt;/tmp/docker-machine &amp;&amp;
+chmod +x /tmp/docker-machine &amp;&amp;
+sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+</code></pre><p>下载的执行文件被放到 <code>/usr/local/bin</code> 中，执行<code>ocker-mahine version</code> 验证命令是否可用：</p>
+<pre><code>[root@ecs-hw01 ~]# docker-machine version
+docker-machine version 0.16.1, build cce350d7
+</code></pre><h2 id="配置自动补全"><a href="#配置自动补全" class="headerlink" title="配置自动补全"></a>配置自动补全</h2><p>为了得到更好的体验，我们可以安装 bash completion script，这样在 bash 能够通过 tab 键补全 docker-mahine 的子命令和参数。</p>
+<p>先安装bash-completion：<code>yum install bash-completion -y</code></p>
+<p>然后执行下面脚本下载三个bash文件，复制到<code>/etc/bash_completion.d/</code>中：</p>
+<pre><code>scripts=( docker-machine-prompt.bash docker-machine-wrapper.bash docker-machine.bash ); 
+for i in &quot;${scripts[@]}&quot;; do sudo wget https://raw.githubusercontent.com/docker/machine/v0.16.1/contrib/completion/bash/${i} -P /etc/bash_completion.d; done
+</code></pre><p>启用该功能。 在~/.bashrc中末尾添加：</p>
+<pre><code>source /etc/bash_completion.d/docker-machine-prompt.bash
+source /etc/bash_completion.d/docker-machine-wrapper.bash
+source /etc/bash_completion.d/docker-machine.bash
+PS1=&#39;[\u@\h \W$(__docker_machine_ps1)]\$ &#39;
+</code></pre><p>重新退出再登录一下bash即可。</p>
+<h2 id="创建-Machine"><a href="#创建-Machine" class="headerlink" title="创建 Machine"></a>创建 Machine</h2><p>对于 Docker Machine 来说，术语 Machine 就是运行 docker daemon 的主机。“创建 Machine” 指的就是在 host 上安装和部署 docker。
+先执行 <code>docker-machine ls</code> 查看一下当前的 machine：</p>
+<pre><code>[root@ecs-hw01 ~]# docker-machine ls
+NAME   ACTIVE   DRIVER   STATE   URL   SWARM   DOCKER   ERRORS
+</code></pre><p>当前还没有 machine，接下来我们创建第一个 machine： host1 - 192.168.1.21</p>
+<p>创建 machine 要求能够无密码登录远程主机，所以需要先通过如下命令将 ssh key 拷贝到 192.168.1.21：</p>
+<pre><code>ssh-copy-id 192.168.1.21
+</code></pre><p>一切准备就绪，执行 <code>docker-machine create</code> 命令创建 host1：</p>
+<pre><code>docker-machine create --driver generic --generic-ip-address=192.168.2.21 host1
+</code></pre><p>因为我们是往普通的 Linux 中部署 docker，所以使用 generic driver，
+其他 driver 可以参考文档 <a href="https://docs.docker.com/machine/drivers/" target="_blank" rel="noopener">https://docs.docker.com/machine/drivers/</a></p>
+<p><code>--generic-ip-address</code> 指定目标系统的 IP，并命名为 host1。</p>
+<p>过程如下：</p>
+<ol>
+<li>通过 ssh 登录到远程主机</li>
+<li>安装 docker</li>
+<li>拷贝证书</li>
+<li>配置 docker daemon</li>
+<li>启动 docker</li>
+</ol>
+<p>再次执行 <code>docker-machine ls</code>可以看到host1了。登录远程主机我们也看到docker已经安装完成，并且 hostname 已经设置为 host1。
+安装同样的方式可以安装host2。</p>
+<h2 id="管理-Machine"><a href="#管理-Machine" class="headerlink" title="管理 Machine"></a>管理 Machine</h2><p>用 docker-machine 创建 machine 的过程很简洁，非常适合多主机环境。除此之外，
+Docker Machine 也提供了一些子命令方便对 machine 进行管理。其中最常用的就是无需登录到 machine 就能执行 docker 相关操作。</p>
+<p>我们前面学过，要执行远程 docker 命令我们需要通过 -H 指定目标主机的连接字符串，比如：</p>
+<pre><code>docker -H tcp://192.168.12.100:2376 ps
+</code></pre><p>Docker Machine 则让这个过程更简单。<code>docker-machine env host1</code>显示访问 host1 需要的所有环境变量：</p>
+<p>根据提示，执行 <code>eval $(docker-machine env host1)</code> 切换到host1中。</p>
+<p>下面再介绍几个有用的 docker-machine 子命令</p>
+<p><code>docker-machine upgrade</code> 更新 machine 的 docker 到最新版本，可以批量执行：</p>
+<pre><code>docker-machine upgrade host1 host2
+</code></pre><p>不要执行stop/start/restart之类，这是对操作系统的命令。</p>
+<p><code>docker-machine scp</code> 可以在不同 machine 之间拷贝文件，比如：</p>
+<pre><code>docker-machine scp host1:/tmp/a host2:/tmp/b
+</code></pre><p>个人感觉，除了安装docker外，貌似没啥太大用出去，我还是觉得还不如去每台机器上面安装。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/04/12/docker/docker09.html">Docker每天学一点09 - 多主机管理</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/04/15/docker/docker10.html" class="pre-post btn btn-default" title='Docker每天学一点10 - 容器网络Overlay'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker每天学一点10 - 容器网络Overlay</span>
+        </a>
+    
+    
+        <a href="/2017/04/11/docker/docker08.html" class="next-post btn btn-default" title='Docker每天学一点08 - 存储'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Docker每天学一点08 - 存储</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装-Docker-Machine"><span class="toc-text">安装 Docker Machine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置自动补全"><span class="toc-text">配置自动补全</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建-Machine"><span class="toc-text">创建 Machine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#管理-Machine"><span class="toc-text">管理 Machine</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

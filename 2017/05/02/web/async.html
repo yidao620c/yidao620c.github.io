@@ -1,0 +1,510 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="ajax,">
+
+
+    <meta name="description" content="我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。
+这时候我们第一个想到的就是将这种同步请求方式转换成异步请求，然而对于不需要关心返回结果的请求这个非常简单，
+大部分情况是我们还得知道异步任务返回结果，然后调用回调函数来更新页面结果。
+目前常见...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>使用Ajax实现异步任务 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="使用Ajax实现异步任务">
+            
+                使用Ajax实现异步任务
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/web">
+            web
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/ajax" title='ajax'>
+                        ajax
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。
+这时候我们第一个想到的就是将这种同步请求方式转换成异步请求，然而对于不需要关心返回结果的请求这个非常简单，
+大部分情况是我们还得知道异步任务返回结果，然后调用回调函数来更新页面结果。</p>
+<p>目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。
+这里我只讲Ajax的两种方式，因为更好的WebSocket方式我已经单独写了一篇文章来介绍。</p>
+<p>通过一个实际例子来演示下。</p>
+<h2 id="服务器实现"><a href="#服务器实现" class="headerlink" title="服务器实现"></a>服务器实现</h2><p>这里通过一个SpringMVC项目，实现服务器长时间任务部分：</p>
+<pre><code class="line-numbers language-java">@RequestMapping(&quot;/longtime&quot;)
+    public void ajax(HttpServletRequest request, HttpServletResponse response, long timed) throws Exception {
+        PrintWriter writer = response.getWriter();
+        Random rand = new Random();
+        // 死循环 查询有无数据变化
+        while (true) {
+            Thread.sleep(300); // 休眠300毫秒，模拟处理业务等
+            int i = rand.nextInt(100); // 产生一个0-100之间的随机数
+            if (i &gt; 20 &amp;&amp; i &lt; 56) { // 如果随机数在20-56之间就视为有效数据，模拟数据发生变化
+                long responseTime = System.currentTimeMillis();
+                // 返回数据信息，请求时间、返回数据时间、耗时
+                writer.print(&quot;result: &quot; + i + &quot;, response time: &quot; + responseTime + &quot;, request time: &quot;
+                        + timed + &quot;, use time: &quot; + (responseTime - timed));
+                break; // 跳出循环，返回数据
+            } else { // 模拟没有数据变化，将休眠 hold住连接
+                Thread.sleep(1300);
+            }
+        }
+    }
+</code></pre>
+<p>服务器端在进行长连接的程序设计时，要注意以下几点：</p>
+<ol>
+<li>服务器程序对轮询的可控性。由于轮询是用死循环的方式实现的，所以在算法上要保证程序对何时退出循环有完全的控制能力，
+避免进入死循环而耗尽服务器资源。</li>
+<li>合理选择“心跳”频率。长连接必须由客户端不停地进行请求来维持，所以在客户端和服务器间保持正常的“心跳”至为关键，
+参数POLLING_LIFE应小于WEB服务器的超时时间，一般建议在10～20秒左右。也就是ajax请求中timeout: 5000参数</li>
+<li>网络因素的影响。在实际应用时，从服务器做出应答，到下一次循环的建立，是有时间延迟的，延迟时间的长短受网络传输等多种因素影响，
+在这段时间内，长连接处于暂时断开的空档，如果恰好有数据在这段时间内发生变动，服务器是无法立即进行推送的，
+所以，在算法设计上要注意解决由于延迟可能造成的数据丢失问题。</li>
+<li>服务器的性能。在长连接应用中，服务器与每个客户端实例都保持一个持久的连接，这将消耗大量服务器资源，
+特别是在一些大型应用系统中更是如此，大量并发的长连接有可能导致新的请求被阻塞甚至系统崩溃，
+所以，在进行程序设计时应特别注意算法的优化和改进，必要时还需要考虑服务器的负载均衡和集群技术。</li>
+</ol>
+<h2 id="轮训方式"><a href="#轮训方式" class="headerlink" title="轮训方式"></a>轮训方式</h2><h3 id="setTimeout和setInterval"><a href="#setTimeout和setInterval" class="headerlink" title="setTimeout和setInterval"></a>setTimeout和setInterval</h3><p>它们的定义：</p>
+<ol>
+<li>setTimeout 指定延迟后调用函数</li>
+<li>setInterval 以指定周期调用函数</li>
+</ol>
+<p>对于<code>setInterval</code>而言，如果第一个函数的执行时间特别长，在执行的过程中本应触发了许多个func怎么办，
+那么所有这些应该触发的函数都会进入队列吗？</p>
+<p>不，只要发现队列中有一个被执行的函数存在，那么其他的统统忽略。如下图，在第300毫秒和400毫秒处的回调都被抛弃，
+一旦第一个函数执行完后，接着执行队列中的第二个，即使这个函数已经“过时”很久了。</p>
+<p>还有一点，虽然你在setInterval的里指定的周期是100毫秒，但它并不能保证两个函数之间调用的间隔一定是一百毫秒。
+在上面的情况中，如果队列中的第二个函数时在第450毫秒处结束的话，在第500毫秒时，它会继续执行下一轮func，
+也就是说这之间的间隔只有50毫秒，而非周期100毫秒</p>
+<p>那如果我想保证每次执行的间隔应该怎么办？用setTimeout，比如下面的代码：</p>
+<pre><code class="line-numbers language-js">var i = 1
+var timer = setTimeout(function() {
+    alert(i++)
+    timer = setTimeout(arguments.callee, 2000)
+}, 2000)
+</code></pre>
+<p>上面的函数每2秒钟递归调用自己一次，你可以在某一次alert的时候等待任意长的时间（不按“确定”按钮），
+接下来无论你什么时候点击“确定”， 下一次执行一定离这次确定相差2秒钟的</p>
+<p>两者的清除：</p>
+<pre><code class="line-numbers language-js">t1=setTimeout(xx(),1000);
+clearTimeout(t1);
+
+t2=setInterval(yy(),1000)
+clearInteval(t2);
+</code></pre>
+<h3 id="使用setInterval轮训"><a href="#使用setInterval轮训" class="headerlink" title="使用setInterval轮训"></a>使用setInterval轮训</h3><p>客户端实现的就是用一种普通轮询的结果，比较简单。利用<code>setInterval</code>不间断的刷新来获取服务器的资源，
+这种方式的优点就是简单、及时。</p>
+<p>缺点是链接多数是无效重复的；响应的结果没有顺序（因为是异步请求，当发送的请求没有返回结果的时候，后面的请求又被发送。
+而此时如果后面的请求比前面的请求要先返回结果，那么当前面的请求返回结果数据时已经是过时无效的数据了）；
+请求多，难于维护、浪费服务器和网络资源。</p>
+<p>看看实际的轮训例子：</p>
+<pre><code class="line-numbers language-js">var count1 = 0;
+function ask1() {
+    var repeat = window.setInterval(function () {
+        $.get(&quot;${ctx}/longtime.html&quot;,
+            {&quot;timed&quot;: new Date().getTime()},
+            function (data) {
+                $(&quot;#logs&quot;).append(&quot;[data: &quot; + data + &quot; ]&lt;br/&gt;&quot;);
+                count1++;
+                if (count1 &gt;= 10) {
+                    $(&quot;#logs&quot;).append(&quot;Ajax 轮训方式 - finished!&quot;);
+                    window.clearInterval(repeat);
+                }
+            });
+    }, 3000);
+}
+</code></pre>
+<p>运行效果：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ajax01.png" alt></p>
+<p>可以发现，后面请求不会等待前面请求完，也就是也许会同时出现多个HTTP连接服务器，造成服务器资源大量浪费。</p>
+<h2 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h2><p>这种是Ajax最常见的请求方式，我们通常使用ajax异步提交请求时候就是用的这种方式：</p>
+<pre><code class="line-numbers language-js">// Ajax long polling 方式
+var count2 = 0;
+function ask2() {
+    $.ajax({
+        url: &quot;${ctx}/longtime.html&quot;,
+        data: {&quot;timed&quot;: new Date().getTime()},
+        dataType: &quot;text&quot;,
+        timeout: 5000,
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            $(&quot;#state&quot;).append(&quot;[state: &quot; + textStatus + &quot;, error: &quot; + errorThrown + &quot;]&lt;br/&gt;&quot;);
+            if (textStatus == &quot;timeout&quot;) { // 请求超时
+                ask2(); // 递归调用
+            } else {
+                // 其他错误，如网络错误等
+                ask2();
+            }
+        },
+        success: function (data, textStatus) {
+            $(&quot;#state&quot;).append(&quot;[state: &quot; + textStatus + &quot;, data:{&quot; + data + &quot;}]&lt;br/&gt;&quot;);
+            count2++;
+            if (count2 &gt;= 10) {
+                $(&quot;#state&quot;).append(&quot;Ajax long polling 方式 - finished!&quot;);
+                return;
+            }
+            if (textStatus == &quot;success&quot;) { // 请求成功
+                ask2();
+            }
+        }
+    });
+}
+</code></pre>
+<p>主要优点就是和服务器始终保持一个连接。如果当前连接请求成功后，将更新数据并且继续创建一个新的连接和服务器保持联系。
+如果连接超时或发生异常，这个时候程序也会创建一个新连接继续请求。这样就大大节省了服务器和网络资源，提高了程序的性能，
+从而也保证了程序的顺序。</p>
+<p>运行效果图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ajax02.png" alt></p>
+<p>可以发现，要么前面的运行成功，那么超时，每个时候最多有一个HTTP连接。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/02/web/async.html">使用Ajax实现异步任务</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/05/03/web/websocket.html" class="pre-post btn btn-default" title='聊一聊WebSocket'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">聊一聊WebSocket</span>
+        </a>
+    
+    
+        <a href="/2017/05/01/angular/ng01.html" class="next-post btn btn-default" title='Angular入门'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Angular入门</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器实现"><span class="toc-text">服务器实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#轮训方式"><span class="toc-text">轮训方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#setTimeout和setInterval"><span class="toc-text">setTimeout和setInterval</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用setInterval轮训"><span class="toc-text">使用setInterval轮训</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#长连接"><span class="toc-text">长连接</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

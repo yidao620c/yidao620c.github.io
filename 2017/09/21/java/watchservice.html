@@ -1,0 +1,454 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="java,">
+
+
+    <meta name="description" content="在Java 7发布的新的IO框架中，除了大家都熟知的 FileVisitor 接口外，还有个 WatchService 接口经常被人忽视掉。
+这个类可以让你实时的监控操作系统中文件的变化，包括创建、更新和删除事件。
+WatchService 用来观察被注册了的对象的变化和事件。它和Watcha...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>使用WatchService监听文件变化 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="使用WatchService监听文件变化">
+            
+                使用WatchService监听文件变化
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/java" title='java'>
+                        java
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/09/21</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在Java 7发布的新的IO框架中，除了大家都熟知的 <code>FileVisitor</code> 接口外，还有个 <code>WatchService</code> 接口经常被人忽视掉。
+这个类可以让你实时的监控操作系统中文件的变化，包括创建、更新和删除事件。</p>
+<p><code>WatchService</code> 用来观察被注册了的对象的变化和事件。它和<code>Watchable</code>两个接口的配合使用，
+WatchService类似于在观察者模式中的观察者，Watchable类似域观察者模式中的被观察者。</p>
+<p>而Java 7中的<code>java.nio.file.Path</code>类就实现了Watchable接口，这样的话，和Path类一起可实现观察者模式。</p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>要使用WatchService，首先必须创建一个实例，使用 <code>java.nio.file.FileSystems</code> 类：</p>
+<pre><code class="line-numbers language-java">WatchService watchService = FileSystems.getDefault().newWatchService();
+</code></pre>
+<p>接下来，我们初始化一个被监控文件夹的Path类：</p>
+<pre><code class="line-numbers language-java">Path path = Paths.get(&quot;pathToDir&quot;);
+</code></pre>
+<p>然后，将这个Path注册到 <code>WatchService</code> 中去：</p>
+<pre><code class="line-numbers language-java">WatchKey watchKey = path.register(
+  watchService, StandardWatchEventKinds...);
+</code></pre>
+<p>注意，注册方法第二个参数是一个可变长参数，也就是可以注册多个事件类型。</p>
+<p><code>StandardWatchEventKinds</code> 有如下四种类型：</p>
+<ol>
+<li>ENTRY_CREATE  创建事件，可是新建一个文件或重命名文件</li>
+<li>ENTRY_MODIFY  修改事件，文件内容被修改，有些系统上面文件属性被修改也会触发</li>
+<li>ENTRY_DELETE  删除事件，文件被删除或被重命名</li>
+<li>OVERFLOW      如果丢失或放弃事件时被触发，我们一般不会关注这个类型</li>
+</ol>
+<h2 id="WatchKey"><a href="#WatchKey" class="headerlink" title="WatchKey"></a>WatchKey</h2><p><code>WatchKey</code> 类代表了这个监听服务的注册，可以用它来获取事件的各个属性。一般来讲我们会通过如下方法获取这个类实例：</p>
+<pre><code class="line-numbers language-java">WatchKey watchKey = watchService.take();
+</code></pre>
+<p>这个方法会一直阻塞，知道某个事件到来。</p>
+<p>有一点非常重要的需要记住，一旦 <code>WatchKey</code> 实例通过poll或take返回后，它再也不会捕获任何事件，触发你调用reset方法：</p>
+<pre><code class="line-numbers language-java">watchKey.reset();
+</code></pre>
+<p>这样的话就能将这个 <code>WatchKey</code> 又放回到watch service队列中去，可以重新等待新的事件了。</p>
+<p>所以一般来讲这个服务代码形式会写成如下形式：</p>
+<pre><code class="line-numbers language-java">WatchKey key;
+while ((key = watchService.take()) != null) {
+    for (WatchEvent&lt;?&gt; event : key.pollEvents()) {
+        //process
+    }
+    key.reset();
+}
+</code></pre>
+<p>解释一下运行过程，take()方法会一直阻塞直到返回一个WatchKey实例，然后进入循环内部，
+pollEvents()方法会返回当前Key上面所有事件列表，我们一个个去处理这些事件。</p>
+<p>所有事件处理完成后，必须调用reset方法，让这个key重新进入监听队列。</p>
+<h2 id="一个完整例子"><a href="#一个完整例子" class="headerlink" title="一个完整例子"></a>一个完整例子</h2><p>下面通过一个完整例子演示WatchService的用法，我们监听用户家目录的文件变动，打印相应的信息。</p>
+<pre><code class="line-numbers language-java">public class DirectoryWatcherExample {
+
+    public static void main(String[] args) {
+        WatchService watchService
+          = FileSystems.getDefault().newWatchService();
+
+        Path path = Paths.get(System.getProperty(&quot;user.home&quot;));
+
+        path.register(
+          watchService, 
+            StandardWatchEventKinds.ENTRY_CREATE, 
+              StandardWatchEventKinds.ENTRY_DELETE, 
+                StandardWatchEventKinds.ENTRY_MODIFY);
+
+        WatchKey key;
+        while ((key = watchService.take()) != null) {
+            for (WatchEvent&lt;?&gt; event : key.pollEvents()) {
+                System.out.println(
+                  &quot;Event kind:&quot; + event.kind() 
+                    + &quot;. File affected: &quot; + event.context() + &quot;.&quot;);
+            }
+            key.reset();
+        }
+    }
+}
+</code></pre>
+<p>测试一下，在用户目录新建一个文件，然后重命名为<code>www.txt</code>，看看输出结果：</p>
+<pre><code>Event kind:ENTRY_CREATE. File affected: 新建文本文档.txt.
+Event kind:ENTRY_MODIFY. File affected: 新建文本文档.txt.
+Event kind:ENTRY_DELETE. File affected: 新建文本文档.txt.
+Event kind:ENTRY_CREATE. File affected: www.txt.
+</code></pre><p>上面两行是新建文件输出，可以看到产生两个事件。下面是重命名产生两个事件，一个是原文件的删除事件，一个是新文件的新建事件。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/09/21/java/watchservice.html">使用WatchService监听文件变化</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/09/30/linux/ec2.html" class="pre-post btn btn-default" title='EC2虚拟主机搭建SS'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">EC2虚拟主机搭建SS</span>
+        </a>
+    
+    
+        <a href="/2017/09/06/spring/spring-axis2.html" class="next-post btn btn-default" title='Spring集成Axis2'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Spring集成Axis2</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本使用"><span class="toc-text">基本使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#WatchKey"><span class="toc-text">WatchKey</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#一个完整例子"><span class="toc-text">一个完整例子</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

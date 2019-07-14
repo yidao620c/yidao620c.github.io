@@ -1,0 +1,660 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="AOP（面向切面编程）是Spring的两大核心功能之一，功能非常强大，为解耦提供了非常优秀的解决方案。
+现在就以springboot中aop的使用来了解一下如何使用aop。
+写几个简单的Spring RESTful服务接口方法，实现方法前面或后面打印日志。
+AOP术语定义Spring的AOP中...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 使用AOP | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 使用AOP">
+            
+                SpringBoot系列 - 使用AOP
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/24</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>AOP（面向切面编程）是Spring的两大核心功能之一，功能非常强大，为解耦提供了非常优秀的解决方案。</p>
+<p>现在就以springboot中aop的使用来了解一下如何使用aop。</p>
+<p>写几个简单的Spring RESTful服务接口方法，实现方法前面或后面打印日志。</p>
+<h2 id="AOP术语定义"><a href="#AOP术语定义" class="headerlink" title="AOP术语定义"></a>AOP术语定义</h2><p>Spring的AOP中有几个重要概念搞清楚就行</p>
+<ul>
+<li>执行点（Executepoint） - 类初始化，方法调用。</li>
+<li>连接点（Joinpoint）    - 执行点+方位的组合，可确定Joinpoint，比如类开始初始化前，类初始化后，方法调用前，方法调用后。</li>
+<li>切点（Pointcut）       - 在众多执行点中，定位感兴趣的执行点。Executepoint相当于数据库表中的记录，而Pointcut相当于查询条件。</li>
+<li>增强（Advice）         - 织入到目标类连接点上的一段程序代码。除了一段程序代码外，还拥有执行点的方位信息。</li>
+<li>目标对象（Target）     - 增强逻辑的织入目标类</li>
+<li>引介（Introduction）   - 一种特殊的增强（advice），它为类添加一些额外的属性和方法，动态为业务类添加其他接口的实现逻辑，让业务类成为这个接口的实现类。</li>
+<li>代理（Proxy）          - 一个类被AOP织入后，产生一个结果类，它便是融合了原类和增强逻辑的代理类。</li>
+<li>切面（Aspect）         - 切面由切点（Pointcut）和增强（Advice/Introduction）组成，既包括横切逻辑定义，也包括连接点定义。</li>
+</ul>
+<p>AOP工作重点：</p>
+<ol>
+<li>如何通过切点（Pointcut）和增强（Advice）定位到连接点（Jointpoint）上；</li>
+<li>如何在增强（Advice）中编写切面的代码。</li>
+</ol>
+<h2 id="添加maven依赖"><a href="#添加maven依赖" class="headerlink" title="添加maven依赖"></a>添加maven依赖</h2><pre><code class="line-numbers language-xml">
+&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;2.0.4.RELEASE&lt;/version&gt;
+&lt;/parent&gt;
+
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-aop&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;
+                &lt;executions&gt;
+                &lt;/executions&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h2 id="配置application-yml"><a href="#配置application-yml" class="headerlink" title="配置application.yml"></a>配置application.yml</h2><pre><code class="line-numbers language-yml">server.port: 8092
+</code></pre>
+<h2 id="创建Controller"><a href="#创建Controller" class="headerlink" title="创建Controller"></a>创建Controller</h2><p>没有结果返回的示例：</p>
+<pre><code class="line-numbers language-java">import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * Description:
+ */
+@RestController
+public class UserController {
+    @RequestMapping(&quot;/first&quot;)
+    public Object first() {
+        return &quot;first controller&quot;;
+    }
+
+    @RequestMapping(&quot;/doError&quot;)
+    public Object error() {
+        return 1 / 0;
+    }
+}
+</code></pre>
+<h2 id="创建切面类"><a href="#创建切面类" class="headerlink" title="创建切面类"></a>创建切面类</h2><pre><code class="line-numbers language-java">/**
+ * 日志切面
+ */
+@Aspect
+@Component
+public class LogAspect {
+    @Pointcut(&quot;execution(public * com.xncoding.aop.controller.*.*(..))&quot;)
+    public void webLog(){}
+
+    @Before(&quot;webLog()&quot;)
+    public void deBefore(JoinPoint joinPoint) throws Throwable {
+        // 接收到请求，记录请求内容
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        // 记录下请求内容
+        System.out.println(&quot;URL : &quot; + request.getRequestURL().toString());
+        System.out.println(&quot;HTTP_METHOD : &quot; + request.getMethod());
+        System.out.println(&quot;IP : &quot; + request.getRemoteAddr());
+        System.out.println(&quot;CLASS_METHOD : &quot; + joinPoint.getSignature().getDeclaringTypeName() + &quot;.&quot; + joinPoint.getSignature().getName());
+        System.out.println(&quot;ARGS : &quot; + Arrays.toString(joinPoint.getArgs()));
+
+    }
+
+    @AfterReturning(returning = &quot;ret&quot;, pointcut = &quot;webLog()&quot;)
+    public void doAfterReturning(Object ret) throws Throwable {
+        // 处理完请求，返回内容
+        System.out.println(&quot;方法的返回值 : &quot; + ret);
+    }
+
+    //后置异常通知
+    @AfterThrowing(&quot;webLog()&quot;)
+    public void throwss(JoinPoint jp){
+        System.out.println(&quot;方法异常时执行.....&quot;);
+    }
+
+    //后置最终通知,final增强，不管是抛出异常或者正常退出都会执行
+    @After(&quot;webLog()&quot;)
+    public void after(JoinPoint jp){
+        System.out.println(&quot;方法最后执行.....&quot;);
+    }
+
+    //环绕通知,环绕增强，相当于MethodInterceptor
+    @Around(&quot;webLog()&quot;)
+    public Object arround(ProceedingJoinPoint pjp) {
+        System.out.println(&quot;方法环绕start.....&quot;);
+        try {
+            Object o =  pjp.proceed();
+            System.out.println(&quot;方法环绕proceed，结果是 :&quot; + o);
+            return o;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+</code></pre>
+<h2 id="测试效果"><a href="#测试效果" class="headerlink" title="测试效果"></a>测试效果</h2><p>启动项目，执行如下mvn命令：</p>
+<pre><code>mvn spring-boot:run
+</code></pre><p>模拟正常执行的情况，访问<code>http://localhost:8092/first</code>，看控制台结果：</p>
+<pre><code>方法环绕start.....
+URL : http://localhost:8092/first
+HTTP_METHOD : GET
+IP : 0:0:0:0:0:0:0:1
+CLASS_METHOD : com.xncoding.aop.controller.UserController.first
+ARGS : []
+方法环绕proceed，结果是 :first controller
+方法最后执行.....
+方法的返回值 : first controller
+</code></pre><p>模拟出现异常时的情况，访问<code>http://localhost:8092/doError</code>，看控制台结果：</p>
+<pre><code>方法环绕start.....
+URL : http://localhost:8092/doError
+HTTP_METHOD : GET
+IP : 0:0:0:0:0:0:0:1
+CLASS_METHOD : com.xncoding.aop.controller.UserController.error
+ARGS : []
+java.lang.ArithmeticException: / by zero
+
+...中间省略...
+
+方法最后执行.....
+方法的返回值 : null
+</code></pre><p>通过上面的简单的例子，可以看到aop的执行顺序。知道了顺序后，就可以在相应的位置做切面处理了。</p>
+<h2 id="切面注解说明"><a href="#切面注解说明" class="headerlink" title="切面注解说明"></a>切面注解说明</h2><ul>
+<li>@Aspect 作用是把当前类标识为一个切面供容器读取</li>
+<li>@Pointcut 定义切点，切点方法不用任何代码，返回值是void，重要的是条件表达式</li>
+<li>@Before 标识一个前置增强方法，相当于BeforeAdvice的功能</li>
+<li>@AfterReturning 后置增强，相当于AfterReturningAdvice，方法退出时执行</li>
+<li>@AfterThrowing 异常抛出增强，相当于ThrowsAdvice</li>
+<li>@After final增强，不管是抛出异常或者正常退出都会执行</li>
+<li>@Around 环绕增强，相当于MethodInterceptor</li>
+</ul>
+<p>方法参数说明：</p>
+<p>除了@Around外，每个方法里都可以加或者不加参数JoinPoint。</p>
+<p>JoinPoint里包含了类名、被切面的方法名，参数等属性，可供读取使用。</p>
+<p>@Around参数必须为ProceedingJoinPoint，pjp.proceed相应于执行被切面的方法。</p>
+<p>@AfterReturning方法里，可以加returning = “xxx”，xxx即为在controller里方法的返回值，本例中的返回值是“first controller”。</p>
+<p>@AfterThrowing方法里，可以加throwing = “XXX”，读取异常信息，如本例中可以改为：</p>
+<pre><code class="line-numbers language-java">    //后置异常通知
+    @AfterThrowing(throwing = &quot;ex&quot;, pointcut = &quot;webLog()&quot;)
+    public void throwss(JoinPoint jp, Exception ex){
+        System.out.println(&quot;方法异常时执行.....&quot;);
+    }
+</code></pre>
+<p>一般常用的有before和afterReturn组合，或者单独使用Around，即可获取方法开始前和结束后的切面。</p>
+<h2 id="关于切点PointCut"><a href="#关于切点PointCut" class="headerlink" title="关于切点PointCut"></a>关于切点PointCut</h2><p>execution函数用于匹配方法执行的连接点，语法为：</p>
+<pre><code>execution(方法修饰符(可选)  返回类型  方法名  参数  异常模式(可选))
+</code></pre><p>参数部分允许使用通配符：</p>
+<ol>
+<li><ul>
+<li>匹配任意字符，但只能匹配一个元素</li>
+</ul>
+</li>
+<li>.. 匹配任意字符，可以匹配任意多个元素，表示类时，必须和*联合使用</li>
+<li><ul>
+<li>必须跟在类名后面，如Horseman+，表示类本身和继承或扩展指定类的所有类</li>
+</ul>
+</li>
+</ol>
+<p>除了execution()，Spring中还支持其他多个函数，这里列出名称和简单介绍</p>
+<ol>
+<li>@annotation() 表示标注了指定注解的目标类方法</li>
+<li>args() 通过目标类方法的参数类型指定切点</li>
+<li>@args() 通过目标类参数的对象类型是否标注了指定注解指定切点</li>
+<li>within() 通过类名指定，它将匹配指定类型</li>
+<li>target() 通过类名指定，同时包含所有子类</li>
+<li>@within() 匹配标注了指定注解的类及其子类，必须是在目标对象上声明这个注解，在接口上声明的对它不起作用</li>
+<li>@target() 匹配标注了指定注解的类，必须是在目标对象上声明这个注解，在接口上声明的对它不起作用</li>
+</ol>
+<p>逻辑运算符</p>
+<p>表达式可由多个切点函数通过逻辑运算组成，与(&amp;&amp;)、 或(||)、 非(!)</p>
+<p>比如<code>execution(* chop(..)) &amp;&amp; target(Horseman) 表示Horseman及其子类的chop方法</code></p>
+<h2 id="自定义注解"><a href="#自定义注解" class="headerlink" title="自定义注解"></a>自定义注解</h2><p>一般多用于某些特定的功能，我们来自定义一个注解：</p>
+<pre><code class="line-numbers language-java">@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface UserAccess {
+    String desc() default &quot;无信息&quot;;
+}
+</code></pre>
+<p>在Controller里加个方法：</p>
+<pre><code class="line-numbers language-java">@RequestMapping(&quot;/second&quot;)
+@UserAccess(desc = &quot;second&quot;)
+public Object second() {
+    return &quot;second controller&quot;;
+}
+</code></pre>
+<p>创建一个新的切面类：</p>
+<pre><code class="line-numbers language-java">
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.springframework.stereotype.Component;
+
+@Component
+@Aspect
+public class UserAccessAspect {
+
+    @Pointcut(value = &quot;@annotation(com.xncoding.aop.aspect.UserAccess)&quot;)
+    public void access() {
+
+    }
+
+    @Before(&quot;access()&quot;)
+    public void deBefore(JoinPoint joinPoint) throws Throwable {
+        System.out.println(&quot;second before&quot;);
+    }
+
+    @Around(&quot;@annotation(userAccess)&quot;)
+    public Object around(ProceedingJoinPoint pjp, UserAccess userAccess) {
+        //获取注解里的值
+        System.out.println(&quot;second around:&quot; + userAccess.desc());
+        try {
+            return pjp.proceed();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            return null;
+        }
+    }
+}
+</code></pre>
+<p>主要看一下@Around注解这里，如果需要获取在controller注解中赋给UserAccess的desc里的值，就需要这种写法，这样UserAccess参数就有值了。</p>
+<p>执行：<code>mvn spring-boot:run</code></p>
+<p>启动项目，访问<code>http://localhost:8092/second</code>，看控制台：</p>
+<pre><code>方法环绕start.....
+URL : http://localhost:8092/second
+HTTP_METHOD : GET
+IP : 0:0:0:0:0:0:0:1
+CLASS_METHOD : com.xncoding.aop.controller.UserController.second
+ARGS : []
+second around:second
+second before
+方法环绕proceed，结果是 :second controller
+方法最后执行.....
+方法的返回值 : second controller
+</code></pre><p>通知结果可以看到，两个aop切面类都工作了，顺序呢就是下面的</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/aop20.png" alt></p>
+<p>spring aop就是一个同心圆，要执行的方法为圆心，最外层的order最小。从最外层按照AOP1、AOP2的顺序依次执行doAround方法，doBefore方法。然后执行method方法，最后按照AOP2、AOP1的顺序依次执行doAfter、doAfterReturn方法。也就是说对多个AOP来说，先before的，一定后after。</p>
+<p>对于上面的例子就是，先外层的就是对所有controller的切面，内层就是自定义注解的。
+那不同的切面，顺序怎么决定呢，尤其是同格式的切面处理，譬如两个execution的情况，那spring就是随机决定哪个在外哪个在内了。</p>
+<p>所以大部分情况下，我们需要指定顺序，最简单的方式就是在Aspect切面类上加上@Order(1)注解即可，order越小最先执行，也就是位于最外层。像一些全局处理的就可以把order设小一点，具体到某个细节的就设大一点。</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-aop" target="_blank" rel="noopener">springboot-aop</a></p>
+<p><em>更新：2018年8月升级至springboot 2</em></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/24/spring/sb-aop.html">SpringBoot系列 - 使用AOP</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/26/spring/sb-transaction.html" class="pre-post btn btn-default" title='SpringBoot系列 - 声明式事务'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 声明式事务</span>
+        </a>
+    
+    
+        <a href="/2017/07/22/spring/sb-starter.html" class="next-post btn btn-default" title='SpringBoot系列 - 自己写starter'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 自己写starter</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#AOP术语定义"><span class="toc-text">AOP术语定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加maven依赖"><span class="toc-text">添加maven依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置application-yml"><span class="toc-text">配置application.yml</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建Controller"><span class="toc-text">创建Controller</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建切面类"><span class="toc-text">创建切面类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试效果"><span class="toc-text">测试效果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#切面注解说明"><span class="toc-text">切面注解说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于切点PointCut"><span class="toc-text">关于切点PointCut</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义注解"><span class="toc-text">自定义注解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

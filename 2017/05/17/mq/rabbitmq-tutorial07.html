@@ -1,0 +1,562 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="rabbitmq,">
+
+
+    <meta name="description" content="之前写过一篇 使用Ajax实现异步任务 的文章，
+介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。
+但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费，
+这里正式介绍如果通过WebSocket + RabbitMQ来优雅的实现。
+WebSock...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>RabbitMQ简易教程 - WebSocket | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="RabbitMQ简易教程 - WebSocket">
+            
+                RabbitMQ简易教程 - WebSocket
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/mq">
+            mq
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/rabbitmq" title='rabbitmq'>
+                        rabbitmq
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/17</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>之前写过一篇 <a href="https://www.xncoding.com/2017/05/02/web/async.html">使用Ajax实现异步任务</a> 的文章，
+介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。
+但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费，
+这里正式介绍如果通过<code>WebSocket</code> + <code>RabbitMQ</code>来优雅的实现。</p>
+<h2 id="WebSocket-双向通信"><a href="#WebSocket-双向通信" class="headerlink" title="WebSocket 双向通信"></a>WebSocket 双向通信</h2><p>WebSocket 是 HTML5 中一种新的通信协议，能够实现浏览器与服务器之间全双工通信。
+如果浏览器和服务端都支持 WebSocket 协议的话，该方式实现的消息推送无疑是最高效、简洁的。
+并且最新版本的 IE、Firefox、Chrome 等浏览器都已经支持 WebSocket 协议，
+Apache Tomcat 7.0.27 以后的版本也开始支持 WebSocket。</p>
+<h2 id="基于-RabbitMQ-的实时消息推送"><a href="#基于-RabbitMQ-的实时消息推送" class="headerlink" title="基于 RabbitMQ 的实时消息推送"></a>基于 RabbitMQ 的实时消息推送</h2><p>RabbitMQ 有很多第三方插件，可以在 AMQP 协议基础上做出许多扩展的应用。
+Web STOMP 插件就是基于 AMQP 之上的 STOMP 文本协议插件，
+利用 WebSocket 能够轻松实现浏览器和服务器之间的实时消息传递。</p>
+<p>首先打开<code>Web STOMP</code> 插件：</p>
+<pre><code class="line-numbers language-bash">rabbitmq-plugins enable rabbitmq_web_stomp
+</code></pre>
+<p>这里我通过一个实际的例子来演示怎样通过websocket实现异步任务的页面自动刷新。</p>
+<p>大致步骤：</p>
+<ol>
+<li>后端通过一个python程序向名字为<code>rabbitmq</code>的exchange发送消息，并设置routing key为<code>zjj</code></li>
+<li>页面通过js，创建一个自动删除的队列，并且将这个队列跟这个<code>rabbitmq</code>的exchange进行绑定，binding key为<code>zjj</code></li>
+<li>页面初始显示<code>loading...</code>，当收到消息后将内容更新为消息字符串。</li>
+</ol>
+<p>RabbitMQ Web STOMP 插件可以理解为 HTML5 WebSocket 与 STOMP 协议间的桥接，
+目的也是为了让浏览器能够使用 RabbitMQ。当 RabbitMQ 消息服务器开启了 STOMP 和 Web STOMP 插件后，浏览器端就可以轻松地使用
+WebSocket 或者 SockerJS 客户端实现与 RabbitMQ 服务器进行通信。</p>
+<p>RabbitMQ Web STOMP 是对 STOMP 协议的桥接，因此其语法也完全遵循 STOMP 协议。
+STOMP 是基于 frame 的协议，与 HTTP 的 frame 相似。
+一个 Frame 包含一个 command，一系列可选的 headers 和一个 body。
+STOMP client 的用户代理可以充当两个角色，当然也可能同时充当：
+作为生产者，通过 SEND frame 发送消息到服务器；
+作为消费者，发送 SUBCRIBE frame 到目的地并且通过 MESSAGE frame 从服务器获取消息。</p>
+<p>在 Web 页面中利用 WebSocket 使用 STOMP 协议只需要下载 <code>stomp.js</code> 即可，
+考虑到老版本的浏览器不支持 WebSocket，SockJS 则提供了 WebSocket 的模拟支持。</p>
+<p>web页面代码：</p>
+<pre><code class="line-numbers language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Echarts demo&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;../../bootstrap/css/bootstrap.min.css&quot;&gt;
+    &lt;!-- 引入 ECharts 文件 --&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;../../js/jquery-1.12.4.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;./sockjs.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/javascript&quot; src=&quot;./stomp.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;h2 style=&quot;margin-left: 15px;&quot;&gt;测试Websocket自动刷新页面状态&lt;/h2&gt;
+
+&lt;div class=&quot;row&quot; style=&quot;margin-left: 0&quot;&gt;
+    &lt;div class=&quot;col-md-3&quot; style=&quot;font-size: large&quot;&gt;
+        &lt;span&gt;状态更新：&lt;/span&gt;
+        &lt;span id=&quot;load&quot; style=&quot;color: #5bc0de&quot;&gt;loading...&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+    $(function () {
+        console.log(&#39;starting...&#39;);
+        // Stomp.js boilerplate
+        var ws;
+        if (typeof(WebSocket) === &quot;function&quot;) {
+            console.log(&#39;ws协议...&#39;);
+            ws = new WebSocket(&#39;ws://192.168.217.226:15674/ws&#39;);
+        } else {
+            console.log(&#39;http协议...&#39;);
+            ws = new SockJS(&#39;http://192.168.217.226:15674/stomp&#39;);
+        }
+        // Init Client
+        var client = Stomp.over(ws);
+        // SockJS does not support heart-beat: disable heart-beats
+        // client will send heartbeats every xxxms
+        client.heartbeat.outgoing = 0;
+        // client does not want to receive heartbeats
+        client.heartbeat.incoming = 0;
+        // Declare on_connect
+        var on_connect = function (x) {
+            client.subscribe(&quot;/exchange/rabbitmq/zjj&quot;, function (d) {
+                // update result
+                $(&quot;#load&quot;).empty().text(d.body);
+                // disconnect client
+                // when close the brower, it will be closed automatically too
+                client.disconnect(function() {
+                    console.log(&quot;See you next time!&quot;);
+                });
+            });
+        };
+        // Declare on_error
+        var on_error = function () {
+            console.log(&#39;error&#39;);
+        };
+        // Conect to RabbitMQ
+        client.connect(&#39;guest&#39;, &#39;guest&#39;, on_connect, on_error, &#39;/&#39;);
+    });
+
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>刚开始打开的效果：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb09.png" alt></p>
+<p>web页面控制台日志如下，说明已经连上了队列：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb10.png" alt></p>
+<p>同时我去看rabbitmq管理界面，发现生成了一个随机队列：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb14.png" alt></p>
+<p>后台python发送消息代码：</p>
+<p><code>`</code> python send.py
+import pika
+import sys</p>
+<p>connection = pika.BlockingConnection(pika.ConnectionParameters(host=’192.168.217.226’, port=5673))
+channel = connection.channel()</p>
+<p>channel.exchange_declare(exchange=’rabbitmq’,
+                         type=’topic’)</p>
+<p>routing_key = ‘zjj’
+message = ‘[disk.info] Hello World!333’
+channel.basic_publish(exchange=’rabbitmq’,
+                      routing_key=routing_key,
+                      body=message)
+print(“ [x] Sent %r:%r” % (routing_key, message))</p>
+<p>connection.close()</p>
+<pre><code>
+先运行后台消息发送：`python send.py`
+
+然后看看页面，变成这样了：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/rb11.png)
+
+web页面控制台情况：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/rb12.png)
+
+在看rabbitmq的管理界面：
+
+![](https://xnstatic-1253397658.file.myqcloud.com/rb13.png)
+
+可以看出，当我把websocket连接断了之后，那个queue自动删了，
+另外把页面关闭的时候websocket连接也会自动关闭。
+
+## 关于destination
+
+使用`Web STOMP`的时候，最核心的两个东西是发送和订阅消息：
+
+``` js
+// 发送消息
+client.send(destination,head,body);
+// 订阅消息
+client.subcribe(destination,callback);
+</code></pre><p>这里需要详细讲解<code>destination</code>的含义，根据使用场景的不同，主要有以下4种：</p>
+<ol>
+<li>/exchange/<exchangename></exchangename></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 一般为/exchange/<exchangename>/[/pattern] 的形式。
+该 destination 会创建一个唯一的、自动删除的随机queue，
+并根据 pattern 将该 queue 绑定到所给的 exchange，实现对该队列的消息订阅。</exchangename></p>
+<p>对于 SEND frame，destination 一般为/exchange/<exchangename>/[/routingKey] 的形式。
+这种情况下消息就会被发送到定义的 exchange 中，并且指定了 routingKey。</exchangename></p>
+<ol start="2">
+<li>/queue/<queuename></queuename></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 会定义<queuename>的共享 queue，并且实现对该队列的消息订阅。</queuename></p>
+<p>对于 SEND frame，destination 只会在第一次发送消息的时候会定义<queuename>的共享 queue。
+该消息会被发送到默认的 exchange 中，routingKey 即为<queuename>。</queuename></queuename></p>
+<ol start="3">
+<li>/amq/queue/<queuename></queuename></li>
+</ol>
+<p>这种情况下无论是 SUBCRIBE frame 还是 SEND frame 都不会产生 queue。
+但如果该 queue 不存在，SUBCRIBE frame 会报错。</p>
+<p>对于 SUBCRIBE frame，destination 会实现对队列<queuename>的消息订阅。
+对于 SEND frame，消息会通过默认的 exhcange 直接被发送到队列<queuename>中。</queuename></queuename></p>
+<ol start="4">
+<li>/topic/<topicname></topicname></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 创建出自动删除的、非持久的 queue 并根据 routingkey 为<topicname>
+绑定到 amq.topic exchange 上，同时实现对该 queue 的订阅。</topicname></p>
+<p>对于 SEND frame，消息会被发送到 amq.topic exchange 中，routingKey 为<topicname>。</topicname></p>
+<p>对于在页面发送消息的例子跟订阅类似，这里就不再演示。</p>
+<h2 id="最后建议"><a href="#最后建议" class="headerlink" title="最后建议"></a>最后建议</h2><p>WebSocket 作为 HTML5 提供的新一代客户端-服务器异步通信方法，能够轻松完成前端与后台的双向通信。
+RabbitMQ 服务提供了一个 STOMP 插件，能够实现与 WebSocket 的桥接，这样既能够实现消息的主动推送，
+同时也能够实现消息的异步处理。</p>
+<p>在传统的 Web 开发中存在许多状态变更实时性的需求，比如资源被占用后需要广播它的实时状态，
+利用本文提出的解决方案，可以方便将其推送到所有监听的客户端。
+因此在开发新的 Web 项目中，建议使用本文提出的方案替代原来 ajax 轮询或长连接刷新状态。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/17/mq/rabbitmq-tutorial07.html">RabbitMQ简易教程 - WebSocket</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/05/26/mq/rabbitmq-tutorial08.html" class="pre-post btn btn-default" title='RabbitMQ简易教程 - 并发调度'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 并发调度</span>
+        </a>
+    
+    
+        <a href="/2017/05/16/mq/rabbitmq-tutorial06.html" class="next-post btn btn-default" title='RabbitMQ简易教程 - RPC'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - RPC</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#WebSocket-双向通信"><span class="toc-text">WebSocket 双向通信</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基于-RabbitMQ-的实时消息推送"><span class="toc-text">基于 RabbitMQ 的实时消息推送</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最后建议"><span class="toc-text">最后建议</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

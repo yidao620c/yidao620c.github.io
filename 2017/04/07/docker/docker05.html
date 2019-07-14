@@ -1,0 +1,449 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="docker,">
+
+
+    <meta name="description" content="前面已经学会怎样构建镜像了，这一章介绍怎样分发镜像给多个Docker Host使用，
+可以通过复制Dockerfile、将镜像上传至公共Registry、搭建私有Registry三种方式。
+这里将后面两种方式，怎样使用公共Registry和搭建私有Registry。
+镜像命名其实就跟maven...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Docker每天学一点05 - Registry | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Docker每天学一点05 - Registry">
+            
+                Docker每天学一点05 - Registry
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/docker">
+            docker
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/docker" title='docker'>
+                        docker
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/04/07</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>前面已经学会怎样构建镜像了，这一章介绍怎样分发镜像给多个Docker Host使用，
+可以通过复制Dockerfile、将镜像上传至公共Registry、搭建私有Registry三种方式。</p>
+<p>这里将后面两种方式，怎样使用公共Registry和搭建私有Registry。</p>
+<h2 id="镜像命名"><a href="#镜像命名" class="headerlink" title="镜像命名"></a>镜像命名</h2><p>其实就跟maven库管理一样，镜像名字由两部分组成：repository 和 tag：</p>
+<pre><code>[image name] = [repository]:[tag]
+</code></pre><p>如果执行 docker build 时没有指定 tag，会使用默认值 latest。其效果相当于：</p>
+<pre><code>docker build -t ubuntu-with-vi:latest
+</code></pre><p>在实际使用中，我们最好指定版本（也就是标签tag），比如<code>httpd:2.3</code></p>
+<p>我们可以通过 docker tag 命令方便地给镜像打 tag</p>
+<pre><code>docker tag myimage-v1.9.1 myimage:1
+docker tag myimage-v1.9.1 myimage:1.9
+docker tag myimage-v1.9.1 myimage:1.9.1
+docker tag myimage-v1.9.1 myimage:latest
+</code></pre><p>当我们发布2.0版本的时候，将latest换成2.0版本：</p>
+<pre><code>docker tag myimage-v2.0.0 myimage:2
+docker tag myimage-v2.0.0 myimage:2.0
+docker tag myimage-v2.0.0 myimage:2.0.0
+docker tag myimage-v2.0.0 myimage:latest
+</code></pre><h2 id="使用公共-Registry"><a href="#使用公共-Registry" class="headerlink" title="使用公共 Registry"></a>使用公共 Registry</h2><p>保存和分发镜像的最直接方法就是使用 Docker Hub。</p>
+<p>Docker Hub 是 Docker 公司维护的公共 Registry。
+用户可以将自己的镜像保存到 Docker Hub 免费的 repository 中。
+如果不希望别人访问自己的镜像，也可以购买私有 repository。</p>
+<p>1. 首先在 <a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker Hub</a> 上面注册一个账号。</p>
+<p>2. 在 Docker Host 上登录：</p>
+<pre><code>docker login -u yidao620
+</code></pre><p>这里用的是我自己的账号，用户名为 yidao620，输入密码后登录成功。</p>
+<p>3. 修改镜像的 repository 使之与 Docker Hub 账号匹配。</p>
+<p>Docker Hub 为了区分不同用户的同名镜像，镜像的 registry 中要包含用户名，完整格式为：[username]/xxx:tag</p>
+<p>我们通过 docker tag 命令重命名镜像，我要把之前下载的httpd上传上去。</p>
+<pre><code>docker tag httpd yidao620/httpd:v1
+docker images
+</code></pre><p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker17.png" alt></p>
+<p>注：Docker 官方自己维护的镜像没有用户名，比如 httpd</p>
+<p>4. 通过 docker push 将镜像上传到 Docker Hub：</p>
+<pre><code>docker push yidao620/httpd:v1
+</code></pre><p>Docker 会上传镜像的每一层。因为 <code>yidao620/httpd:v1</code> 这个镜像实际上跟官方的 httpd 镜像一模一样，
+Docker Hub 上已经有了全部的镜像层，所以真正上传的数据很少，大概几秒就完成上传了。</p>
+<p>5. 登录 <a href="https://hub.docker.com/" target="_blank" rel="noopener">Docker Hub</a> ,在Public Repository 中就可以看到上传的镜像了。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker18.png" alt></p>
+<p>6. 这个镜像可被其他 Docker host 下载使用了。</p>
+<pre><code>docker pull yidao620/httpd:v1
+</code></pre><p>公共Registry使用很简单，接下来看看怎样搭建本地Registry。</p>
+<h2 id="搭建本地Registry"><a href="#搭建本地Registry" class="headerlink" title="搭建本地Registry"></a>搭建本地Registry</h2><p>处于安全和网络传输原因，通常企业内部不会再公共仓库上面维护的镜像，而是搭建本地Registry。</p>
+<p>1. 启动 Registry 容器，使用的镜像是<code>registry:2</code></p>
+<pre><code>docker run -d -p 5000:5000 -v /myregistry:/var/lib/registry registry:2
+</code></pre><p>解释下基本参数：</p>
+<ul>
+<li>-d 是后台启动容器。</li>
+<li>-p 将容器的 5000 端口映射到 Host 的 5000 端口。5000 是 registry 服务端口。端口映射后面讲。</li>
+<li>-v 将容器 /var/lib/registry 目录映射到 Host 的 /myregistry，用于存放镜像数据。-v 的使用后面讲。</li>
+</ul>
+<p>2. 通过 <code>docker tag</code> 重命名镜像，使之与 registry 匹配</p>
+<pre><code>docker tag yidao620/httpd:v1 localhost:5000/yidao620/httpd:v1
+</code></pre><p>我们在镜像的前面加上了运行 registry 的主机名称和端口。</p>
+<p>前面已经讨论了镜像名称由 repository 和 tag 两部分组成。
+而 repository 的完整格式为：<code>[registry-host]:[port]/[username]/xxx</code></p>
+<p>只有 Docker Hub 上的镜像可以省略 <code>[registry-host]:[port]</code> 。</p>
+<p>3. 通过 <code>docker push</code> 上传镜像至本地 Registry</p>
+<pre><code>docker push localhost:5000/yidao620/httpd:v1
+</code></pre><p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker19.png" alt></p>
+<p>4. 现在可以通过 <code>docker pull</code> 从本地Registry拉取镜像了</p>
+<pre><code>docker pull localhost:5000/yidao620/httpd:v1
+</code></pre><p>除了镜像的名称长一些（包含 registry host 和 port），使用方式完全一样。</p>
+<p>以上是搭建本地 registry 的简要步骤。当然 registry 也支持认证，https 安全传输等特性，
+具体可以参考官方文档 <a href="https://docs.docker.com/registry/configuration/" target="_blank" rel="noopener">https://docs.docker.com/registry/configuration/</a></p>
+<h2 id="删除和搜索镜像"><a href="#删除和搜索镜像" class="headerlink" title="删除和搜索镜像"></a>删除和搜索镜像</h2><p>删除镜像使用 <code>rmi</code> 命令，只能删除 host 上的镜像，不会删除 registry 的镜像。</p>
+<p>如果一个镜像对应了多个 tag，只有当最后一个 tag 被删除时，镜像才被真正删除。</p>
+<pre><code>docker rmi centos:latest
+</code></pre><p>搜索镜像使用 <code>search</code> 命令，无需打开浏览器就能搜索 Docker Hub 中的镜像：</p>
+<pre><code>docker search httpd
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/04/07/docker/docker05.html">Docker每天学一点05 - Registry</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/04/09/docker/docker06.html" class="pre-post btn btn-default" title='Docker每天学一点06 - 运行容器'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker每天学一点06 - 运行容器</span>
+        </a>
+    
+    
+        <a href="/2017/04/05/docker/docker04.html" class="next-post btn btn-default" title='Docker每天学一点04 - Dockerfile'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Docker每天学一点04 - Dockerfile</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像命名"><span class="toc-text">镜像命名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用公共-Registry"><span class="toc-text">使用公共 Registry</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#搭建本地Registry"><span class="toc-text">搭建本地Registry</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除和搜索镜像"><span class="toc-text">删除和搜索镜像</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

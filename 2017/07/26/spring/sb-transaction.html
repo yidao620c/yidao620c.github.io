@@ -1,0 +1,662 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="所有数据访问技术都有事务机制，这些技术提供了API来开启事务、提交事务完成数据操作，
+或者在发生错误的时候回滚数据。
+Spring采用统一的机制来处理不同的数据访问技术的事务，
+Spring的事务提供一个PlatformTransactionManager的接口，不同的数据访问技术使用不同的接...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 声明式事务 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 声明式事务">
+            
+                SpringBoot系列 - 声明式事务
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/26</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>所有数据访问技术都有事务机制，这些技术提供了API来开启事务、提交事务完成数据操作，
+或者在发生错误的时候回滚数据。</p>
+<p>Spring采用统一的机制来处理不同的数据访问技术的事务，
+Spring的事务提供一个<code>PlatformTransactionManager</code>的接口，不同的数据访问技术使用不同的接口实现。</p>
+<table>
+<thead>
+<tr>
+<th>Data Tech</th>
+<th>实现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDBC</td>
+<td>DataSourceTransactionManager</td>
+</tr>
+<tr>
+<td>JPA</td>
+<td>JPATransactionManager</td>
+</tr>
+<tr>
+<td>Hibernate</td>
+<td>HibernateTransactionManager</td>
+</tr>
+<tr>
+<td>JDO</td>
+<td>JDOTransactionManager</td>
+</tr>
+<tr>
+<td>分布式事务</td>
+<td>JtaTransactionManager</td>
+</tr>
+</tbody>
+</table>
+<p>而得益于SpringBoot的自动配置机制，为我们自动开启了声明式事务支持，
+我们无需添加注解<code>@EnableTransactionManagement</code> </p>
+<h2 id="事务基础"><a href="#事务基础" class="headerlink" title="事务基础"></a>事务基础</h2><p>Spring提供一个@EnableTransactionManagement注解在配置类上开启声明式事务支持，
+自动扫描加了@Transactional注解的类和方法，加入事务支持。</p>
+<p>这里重点讲下@Transactional注解的几个属性</p>
+<p><strong>propagation</strong></p>
+<p>事务的传播机制，主要有以下几种，默认是REQUIRED：</p>
+<ol>
+<li>REQUIRED      - 方法A调用时候没有事务新建一个事务，在方法A中调用方法B，将使用相同的事务，如果方法B发生异常需要回滚，整个事务回滚。</li>
+<li>REQUIRES_NEW  - 方法A调用方法B时，无论是否存在事务都开启一个新事务，这样B方法异常不会导致A的数据回滚。</li>
+<li>NESTED        - 和REQUIRES_NEW类似，但是只支持JDBC，不支持JPA或Hibernate</li>
+<li>SUPPORTS      - 方法调用时有事务就用事务，没事务就不用事务</li>
+<li>NOT_SUPPORTED - 强制方法不在事务中执行，若有事务，在方法调用到结束阶段先挂起事务。</li>
+<li>NEVER         - 强制不能有事务，若有事务就抛出异常</li>
+<li>MANDATORY     - 强制必须有事务，如果没有事务就抛出异常</li>
+</ol>
+<p><strong>isolation</strong></p>
+<p>事务的隔离级别，决定了事务的完整性，主要一下几种，默认是DEFAULT：</p>
+<ol>
+<li>READ_UNCOMMITTED  - A事务修改记录但没提交，B事务可读取到修改后的值。可导致脏读、不可重复读、幻读。</li>
+<li>READ_COMMITTED    - A事务修改并提交后，B事务才能读取到修改后的值，阻止了脏读，但可能导致不可重复读和幻读。</li>
+<li>REPEATABLE_READ   - A事务读取了一条记录，B事务将不能修改这条记录，阻止脏读和不可重复读，但是可能出现幻读。</li>
+<li>SERIALIZABLE      - 事务是顺序执行的，可避免所有缺陷，但是开销很大。</li>
+<li>DEFAULT           - 使用当前数据库默认隔离级别，入Oracle、SQL Server是READ_COMMITTED，MySQL是REPEATABLE_READ</li>
+</ol>
+<p><strong>timeout</strong></p>
+<p>事务过期时间，默认是当前数据库默认事务过期时间。</p>
+<p><strong>readOnly</strong></p>
+<p>指定是否为只读事务，默认是false</p>
+<p>如果你一次执行单条查询语句，则没有必要启用事务支持，数据库默认支持SQL执行期间的读一致性；</p>
+<p>如果你一次执行多条查询语句，例如统计查询，报表查询，在这种场景下，多条查询SQL必须保证整体的读一致性，
+否则，在前条SQL查询之后，后条SQL查询之前，数据被其他用户改变，则该次整体的统计查询将会出现读数据不一致的状态，
+此时，应该启用只读事务支持。 </p>
+<p>只读事务与读写事务区别：</p>
+<p>对于只读查询，可以指定事务类型为readonly，即只读事务。由于只读事务不存在数据的修改，
+因此数据库将会为只读事务提供一些优化手段，例如Oracle对于只读事务，不启动回滚段，不记录回滚log。</p>
+<p><strong>rollbackFor</strong></p>
+<p>指定哪些异常可以导致事务回滚，默认是Throwable的子类</p>
+<p><strong>noRollbackFor</strong></p>
+<p>执行哪些异常不可用引起事务回滚，默认是Throwable的子类</p>
+<h2 id="实战篇"><a href="#实战篇" class="headerlink" title="实战篇"></a>实战篇</h2><p>实际项目中，使用SpringBoot的默认配置就已经足够满足我们的需求了。
+本篇将通过几个例子来演示如何使用@Transactional注解，在出现异常时候回滚或不回滚数据。</p>
+<p>使用我最喜欢的DAO技术就是MyBatis进行数据访问，使用druid数据库连接池，
+另外配合mybatis-plus，实现数据访问层。</p>
+<p>引入依赖：</p>
+<pre><code class="line-numbers language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;version&gt;${mysql-connector.version}&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;druid&lt;/artifactId&gt;
+    &lt;version&gt;${druid.version}&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;!-- MyBatis plus增强和springboot的集成--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatis-plus&lt;/artifactId&gt;
+    &lt;version&gt;${mybatis-plus.version}&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+    &lt;artifactId&gt;mybatisplus-spring-boot-starter&lt;/artifactId&gt;
+    &lt;version&gt;${mybatisplus-spring-boot-starter.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>配置数据库连接：</p>
+<pre><code class="line-numbers language-yml">###################  spring配置  ###################
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://123.207.66.156:3306/test?useSSL=false&amp;autoReconnect=true&amp;tinyInt1isBit=false&amp;useUnicode=true&amp;characterEncoding=utf8
+    username: mysql
+    password: xxxxx
+</code></pre>
+<p>然后增加mybatis个性化配置：</p>
+<pre><code class="line-numbers language-yml">###################  mybatis-plus配置  ###################
+mybatis-plus:
+  mapper-locations: classpath*:com/xncoding/trans/dao/repository/mapping/*.xml
+  typeAliasesPackage: &gt;
+    com.xncoding.trans.dao.entity
+  global-config:
+    id-type: 0  # 0:数据库ID自增   1:用户输入id  2:全局唯一id(IdWorker)  3:全局唯一ID(uuid)
+    db-column-underline: false
+    refresh-mapper: true
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true #配置的缓存的全局开关
+    lazyLoadingEnabled: true #延时加载的开关
+    multipleResultSetsEnabled: true #开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
+</code></pre>
+<p>增加实体类User：</p>
+<pre><code class="line-numbers language-java">@TableName(value = &quot;t_user&quot;)
+public class User extends Model&lt;User&gt; {
+    /**
+     * 主键ID
+     */
+    @TableId(value=&quot;id&quot;, type= IdType.AUTO)
+    private Integer id;
+
+    private String username;
+
+    private String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    protected Serializable pkVal() {
+        return this.id;
+    }
+}
+</code></pre>
+<p>增加UserMapper类：</p>
+<pre><code class="line-numbers language-java">public interface UserMapper extends BaseMapper&lt;User&gt; {
+}
+</code></pre>
+<p>增加Mybatis配置类：</p>
+<pre><code class="line-numbers language-java">@Configuration
+@EnableTransactionManagement(order = 2)
+@MapperScan(basePackages = {&quot;com.xncoding.trans.dao.repository&quot;})
+public class MybatisPlusConfig {
+
+    @Resource
+    private DruidProperties druidProperties;
+
+    /**
+     * 单数据源连接池配置
+     */
+    @Bean
+    public DruidDataSource singleDatasource() {
+        DruidDataSource dataSource = new DruidDataSource();
+        druidProperties.config(dataSource);
+        return dataSource;
+    }
+}
+</code></pre>
+<p>定义Service，并注入UserMapper：</p>
+<pre><code class="line-numbers language-java">@Service
+public class UserService {
+    @Resource
+    private UserMapper userMapper;
+}
+</code></pre>
+<p>增加Controller，注入Service，定义几个url来做测试用：</p>
+<pre><code class="line-numbers language-java">@RestController
+public class UserController {
+    @Resource
+    private UserService userService;
+}
+</code></pre>
+<p>到此为止项目初始化完成，可以在Service中添加方法进行声明式事务测试了。</p>
+<h2 id="异常回滚"><a href="#异常回滚" class="headerlink" title="异常回滚"></a>异常回滚</h2><p>@Transactional注解可以放到类也可以放到方法上，如果放到类上面会对所有public方法添加注解，
+不过你仍然可以在方法上面加这个注解，会覆盖类上面声明的事务注解。</p>
+<p>先实验一个抛出异常会回滚的方法：</p>
+<pre><code class="line-numbers language-java"> /**
+  * 增删改要写 ReadOnly=false 为可写
+  * @param user 用户
+  */
+ @Transactional(readOnly = false)
+ public void updateUserError(User user) {
+     userMapper.updateById(user);
+     errMethod(); // 执行一个会抛出异常的方法
+ }
+
+ private void errMethod() {
+     System.out.println(&quot;error&quot;);
+     throw new RuntimeException(&quot;runtime&quot;);
+ }
+</code></pre>
+<p>然后在Controller里面添加一个url调用此方法：</p>
+<pre><code class="line-numbers language-java">@RequestMapping(&quot;/errorUpdate&quot;)
+    public Object first() {
+        User user = new User();
+        user.setId(1);
+        user.setUsername(&quot;admin&quot;);
+        user.setPassword(&quot;admin&quot;);
+        userService.updateUserError(user);
+        return &quot;first controller&quot;;
+    }
+}
+</code></pre>
+<p>数据库里面先插入一条数据：<code>1|admin|123</code></p>
+<p>启动应用后访问地址：<code>http://localhost:8092/errorUpdate</code></p>
+<p>控制台打印异常：</p>
+<pre><code>Caused by: java.lang.RuntimeException: runtime
+    at com.xncoding.trans.service.UserService.errMethod(UserService.java:32) ~[classes/:na]
+    at com.xncoding.trans.service.UserService.updateUserError(UserService.java:27) ~[classes/:na]
+</code></pre><p>查看数据库中记录：<code>1|admin|123</code>，没有变动，说明回滚成功。</p>
+<h2 id="异常不会滚"><a href="#异常不会滚" class="headerlink" title="异常不会滚"></a>异常不会滚</h2><p>你还可以指定特定异常不回滚，比如自定义一个MyException，抛出这个异常不回滚。</p>
+<pre><code class="line-numbers language-java">public class MyException extends RuntimeException {
+    public MyException() {
+        super();
+    }
+    public MyException(String runtime) {
+        super(runtime);
+    }
+}
+</code></pre>
+<p>然后通过指定这个异常不回滚：</p>
+<pre><code class="line-numbers language-java">@Transactional(readOnly = false, noRollbackFor = {MyException.class})
+public void updateUserError2(User user) {
+    userMapper.updateById(user);
+    errMethod2(); // 执行一个会抛出自定义异常的方法
+}
+
+private void errMethod2() {
+    System.out.println(&quot;error&quot;);
+    throw new MyException(&quot;runtime&quot;);
+}
+</code></pre>
+<p>然后再定义一个url来验证：</p>
+<pre><code class="line-numbers language-java">@RequestMapping(&quot;/errorUpdate2&quot;)
+public Object second() {
+    User user = new User();
+    user.setId(1);
+    user.setUsername(&quot;admin&quot;);
+    user.setPassword(&quot;admin&quot;);
+    userService.updateUserError(user);
+    return &quot;second controller&quot;;
+}
+</code></pre>
+<p>重启服务器，访问地址：<code>http://localhost:8092/errorUpdate2</code></p>
+<p>控制台仍然报异常：</p>
+<pre><code>Caused by: com.xncoding.trans.exception.MyException: runtime
+    at com.xncoding.trans.service.UserService.errMethod2(UserService.java:43) ~[classes/:na]
+    at com.xncoding.trans.service.UserService.updateUserError2(UserService.java:34) ~[classes/:na]
+</code></pre><p>看看数据库中记录：<code>1|admin|admin</code>，更改成功，说明抛出这个MyException异常后并不会回滚。</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-transaction" target="_blank" rel="noopener">springboot-transaction</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/26/spring/sb-transaction.html">SpringBoot系列 - 声明式事务</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/28/spring/sb-cache.html" class="pre-post btn btn-default" title='SpringBoot系列 - 缓存'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 缓存</span>
+        </a>
+    
+    
+        <a href="/2017/07/24/spring/sb-aop.html" class="next-post btn btn-default" title='SpringBoot系列 - 使用AOP'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 使用AOP</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#事务基础"><span class="toc-text">事务基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实战篇"><span class="toc-text">实战篇</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异常回滚"><span class="toc-text">异常回滚</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#异常不会滚"><span class="toc-text">异常不会滚</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

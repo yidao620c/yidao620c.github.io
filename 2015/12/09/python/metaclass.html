@@ -1,0 +1,531 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="python核心,">
+
+
+    <meta name="description" content="动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是运行时动态创建的。我们在hello.py模块里定义一个Hello的
+当Python解释器载入hello模块时，就会依次执行该模块的所有语句，执行结果就是动态创建出一个Hello的class对象。
+我们说class的定义是运...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>python核心 - 元类 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="python核心 - 元类">
+            
+                python核心 - 元类
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/python核心" title='python核心'>
+                        python核心
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/12/09</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是运行时动态创建的。我们在hello.py模块里定义一个Hello的
+当Python解释器载入hello模块时，就会依次执行该模块的所有语句，执行结果就是动态创建出一个Hello的class对象。</p>
+<p>我们说class的定义是运行时动态创建的，而创建class的方法就是使用type()函数。</p>
+<p>type()函数既可以返回一个对象的类型，又可以创建出新的类型。</p>
+<h3 id="type函数"><a href="#type函数" class="headerlink" title="type函数"></a>type函数</h3><p>比如，我们可以通过type()函数创建出Hello类，而无需通过class Hello(object)…的定义：</p>
+<pre><code class="line-numbers language-python">
+def fn(self, name=&#39;world&#39;): # 先定义函数
+    print(&#39;Hello, %s.&#39; % name)
+
+if __name__ == &#39;__main__&#39;:
+    Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn)) # 创建Hello class
+    h = Hello()
+    h.hello()
+    print(type(Hello))
+    print(type(h))
+
+</code></pre>
+<p>要创建一个class对象，type()函数依次传入3个参数：</p>
+<ol>
+<li>class的名称；</li>
+<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
+<li>class的方法名称与函数绑定，这里我们把函数fn绑定到方法名hello上。</li>
+</ol>
+<p>通过type()函数创建的类和直接写class是完全一样的，
+因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用type()函数创建出class。</p>
+<h3 id="metaclass"><a href="#metaclass" class="headerlink" title="metaclass"></a>metaclass</h3><p>除了使用type()动态创建类以外，要控制类的创建行为，还可以使用metaclass。</p>
+<p>metaclass，直译为元类，简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
+<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
+<p>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。
+正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</p>
+<p>来个例子，定义一个metaclass将我们自己定义的MyList增加一个add方法。</p>
+<p>定义ListMetaclass，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
+<pre><code class="line-numbers language-python"># metaclass是类的模板，所以必须从`type`类型派生：
+class ListMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
+</code></pre>
+<p>有了ListMetaclass，我们在定义类的时候还要指示使用ListMetaclass来定制类，传入关键字参数metaclass：</p>
+<pre><code class="line-numbers language-python">class MyList(list, metaclass=ListMetaclass):
+    pass
+
+# 下面测试下
+L = MyList()
+L.add(1)
+print(L)
+</code></pre>
+<p>当我们传入关键字参数metaclass时，魔术就生效了，它指示Python解释器在创建MyList时，
+要通过ListMetaclass.<strong>new</strong>()来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
+<p><strong>new</strong>()方法接收到的参数依次是：</p>
+<ol>
+<li>当前准备创建的类对象；</li>
+<li>类的名字；</li>
+<li>类继承的父类集合；</li>
+<li>类的方法集合。</li>
+</ol>
+<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？
+正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
+<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。让我们来尝试编写一个ORM框架。</p>
+<pre><code class="line-numbers language-python">class User(Model):
+    # 定义类的属性到列的映射：
+    id = IntegerField(&#39;id&#39;)
+    name = StringField(&#39;username&#39;)
+    email = StringField(&#39;email&#39;)
+    password = StringField(&#39;password&#39;)
+
+# 创建一个实例：
+u = User(id=12345, name=&#39;Michael&#39;, email=&#39;test@orm.org&#39;, password=&#39;my-pwd&#39;)
+# 保存到数据库：
+u.save()
+</code></pre>
+<p>其中，父类Model和属性类型StringField、IntegerField是由ORM框架提供的，
+剩下的魔术方法比如save()全部由metaclass自动完成。虽然metaclass的编写会比较复杂，但ORM的使用者用起来却异常简单。</p>
+<p>现在，我们就按上面的接口来实现该ORM。</p>
+<p>首先来定义Field类，它负责保存数据库表的字段名和字段类型：</p>
+<pre><code class="line-numbers language-python">class Field(object):
+    def __init__(self, name, column_type):
+        self.name = name
+        self.column_type = column_type
+
+    def __str__(self):
+        return &#39;&lt;%s:%s&gt;&#39; % (self.__class__.__name__, self.name)
+</code></pre>
+<p>在Field的基础上，进一步定义各种类型的Field，比如StringField，IntegerField等等：</p>
+<pre><code class="line-numbers language-python">class StringField(Field):
+    def __init__(self, name):
+        super(StringField, self).__init__(name, &#39;varchar(100)&#39;)
+
+class IntegerField(Field):
+    def __init__(self, name):
+        super(IntegerField, self).__init__(name, &#39;bigint&#39;)
+</code></pre>
+<p>下一步，就是编写最复杂的ModelMetaclass了：</p>
+<pre><code class="line-numbers language-python">class ModelMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        if name==&#39;Model&#39;:
+            return type.__new__(cls, name, bases, attrs)
+        print(&#39;Found model: %s&#39; % name)
+        mappings = dict()
+        for k, v in attrs.items():
+            if isinstance(v, Field):
+                print(&#39;Found mapping: %s ==&gt; %s&#39; % (k, v))
+                mappings[k] = v
+        for k in mappings.keys():
+            attrs.pop(k)
+        attrs[&#39;__mappings__&#39;] = mappings # 保存属性和列的映射关系
+        attrs[&#39;__table__&#39;] = name # 假设表名和类名一致
+        return type.__new__(cls, name, bases, attrs)
+</code></pre>
+<p>基类Model：</p>
+<pre><code class="line-numbers language-python">class Model(dict, metaclass=ModelMetaclass):
+    def __init__(self, **kw):
+        super(Model, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r&quot;&#39;Model&#39; object has no attribute &#39;%s&#39;&quot; % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def save(self):
+        fields = []
+        params = []
+        args = []
+        for k, v in self.__mappings__.items():
+            fields.append(v.name)
+            params.append(&#39;?&#39;)
+            args.append(getattr(self, k, None))
+        sql = &#39;insert into %s (%s) values (%s)&#39; % (self.__table__, &#39;,&#39;.join(fields), &#39;,&#39;.join(params))
+        print(&#39;SQL: %s&#39; % sql)
+        print(&#39;ARGS: %s&#39; % str(args))
+</code></pre>
+<p>当用户定义一个class User(Model)时，Python解释器首先在当前类User的定义中查找metaclass，
+如果没有找到，就继续在父类Model中查找metaclass，找到了，
+就使用Model中定义的metaclass的ModelMetaclass来创建User类，
+也就是说，metaclass可以隐式地继承到子类，但子类自己却感觉不到。</p>
+<p>在ModelMetaclass中，一共做了几件事情：</p>
+<ol>
+<li>排除掉对Model类的修改；</li>
+<li>在当前类（比如User）中查找定义的类的所有属性，如果找到一个Field属性，就把它保存到一个<strong>mappings</strong>的dict中，
+同时从类属性中删除该Field属性，否则，容易造成运行时错误（实例的属性会遮盖类的同名属性）；</li>
+<li>把表名保存到<strong>table</strong>中，这里简化为表名默认为类名。</li>
+</ol>
+<p>我们实现了save()方法，把一个实例保存到数据库中。因为有表名，属性到字段的映射和属性值的集合，就可以构造出INSERT语句。</p>
+<pre><code class="line-numbers language-python">u = User(id=12345, name=&#39;Michael&#39;, email=&#39;test@orm.org&#39;, password=&#39;my-pwd&#39;)
+u.save()
+</code></pre>
+<p>可以看到，save()方法已经打印出了可执行的SQL语句，以及参数列表，只需要真正连接到数据库，执行该SQL语句，就可以完成真正的功能。</p>
+<p>不到100行代码，我们就通过metaclass实现了一个精简的ORM框架。</p>
+<p>metaclass是Python中非常具有魔术性的对象，它可以改变类创建时的行为。这种强大的功能使用起来务必小心。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/12/09/python/metaclass.html">python核心 - 元类</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/12/12/python/regexp.html" class="pre-post btn btn-default" title='python核心 - 正则表达式'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">python核心 - 正则表达式</span>
+        </a>
+    
+    
+        <a href="/2015/12/06/python/oop.html" class="next-post btn btn-default" title='python核心 - 面向对象编程'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">python核心 - 面向对象编程</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#type函数"><span class="toc-text">type函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#metaclass"><span class="toc-text">metaclass</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

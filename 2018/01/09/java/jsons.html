@@ -1,0 +1,721 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="json,">
+
+
+    <meta name="description" content="上一篇介绍了Java性能测试框架JMH的使用方法，本篇通过JMH来测试一下Java中几种常见的JSON解析库的性能。
+每次都在网上看到别人说什么某某库性能是如何如何的好，碾压其他的库。但是百闻不如一见，只有自己亲手测试过的才是最值得相信的。
+JSON不管是在Web开发还是服务器开发中是相当常见...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Java几种常用JSON库性能比较 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Java几种常用JSON库性能比较">
+            
+                Java几种常用JSON库性能比较
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/json" title='json'>
+                        json
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/01/09</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>上一篇介绍了Java性能测试框架JMH的使用方法，本篇通过JMH来测试一下Java中几种常见的JSON解析库的性能。
+每次都在网上看到别人说什么某某库性能是如何如何的好，碾压其他的库。但是百闻不如一见，只有自己亲手测试过的才是最值得相信的。</p>
+<p>JSON不管是在Web开发还是服务器开发中是相当常见的数据传输格式，一般情况我们对于JSON解析构造的性能并不需要过于关心，除非是在性能要求比较高的系统。</p>
+<p>目前对于Java开源的JSON类库有很多种，下面我们取4个常用的JSON库进行性能测试对比，
+同时根据测试结果分析如果根据实际应用场景选择最合适的JSON库。</p>
+<p>这4个JSON类库分别为：Gson，FastJson，Jackson，Json-lib。</p>
+<h2 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h2><p>选择一个合适的JSON库要从多个方面进行考虑：</p>
+<ol>
+<li>字符串解析成JSON性能</li>
+<li>字符串解析成JavaBean性能</li>
+<li>JavaBean构造JSON性能</li>
+<li>集合构造JSON性能</li>
+<li>易用性</li>
+</ol>
+<p>先简单介绍下四个类库的身份背景</p>
+<h3 id="Gson"><a href="#Gson" class="headerlink" title="Gson"></a>Gson</h3><p>项目地址：<a href="https://github.com/google/gson" target="_blank" rel="noopener">https://github.com/google/gson</a></p>
+<p>Gson是目前功能最全的Json解析神器，Gson当初是为因应Google公司内部需求而由Google自行研发而来，但自从在2008年五月公开发布第一版后已被许多公司或用户应用。
+Gson的应用主要为toJson与fromJson两个转换函数，无依赖，不需要例外额外的jar，能够直接跑在JDK上。
+在使用这种对象转换之前，需先创建好对象的类型以及其成员才能成功的将JSON字符串成功转换成相对应的对象。
+类里面只要有get和set方法，Gson完全可以实现复杂类型的json到bean或bean到json的转换，是JSON解析的神器。</p>
+<h3 id="FastJson"><a href="#FastJson" class="headerlink" title="FastJson"></a>FastJson</h3><p>项目地址：<a href="https://github.com/alibaba/fastjson" target="_blank" rel="noopener">https://github.com/alibaba/fastjson</a></p>
+<p>Fastjson是一个Java语言编写的高性能的JSON处理器,由阿里巴巴公司开发。无依赖，不需要例外额外的jar，能够直接跑在JDK上。
+FastJson在复杂类型的Bean转换Json上会出现一些问题，可能会出现引用的类型，导致Json转换出错，需要制定引用。
+FastJson采用独创的算法，将parse的速度提升到极致，超过所有json库。</p>
+<h3 id="Jackson"><a href="#Jackson" class="headerlink" title="Jackson"></a>Jackson</h3><p>项目地址：<a href="https://github.com/FasterXML/jackson" target="_blank" rel="noopener">https://github.com/FasterXML/jackson</a></p>
+<p>Jackson是当前用的比较广泛的，用来序列化和反序列化json的Java开源框架。Jackson社区相对比较活跃，更新速度也比较快，
+从Github中的统计来看，Jackson是最流行的json解析器之一，Spring MVC的默认json解析器便是Jackson。</p>
+<p>Jackson优点很多：</p>
+<ol>
+<li>Jackson 所依赖的jar包较少，简单易用。</li>
+<li>与其他 Java 的 json 的框架 Gson 等相比，Jackson 解析大的 json 文件速度比较快。</li>
+<li>Jackson 运行时占用内存比较低，性能比较好</li>
+<li>Jackson 有灵活的 API，可以很容易进行扩展和定制。</li>
+</ol>
+<p>目前最新版本是2.9.4，Jackson 的核心模块由三部分组成：</p>
+<ol>
+<li>jackson-core 核心包，提供基于”流模式”解析的相关 API，它包括 JsonPaser 和 JsonGenerator。Jackson 内部实现正是通过高性能的流模式 API 的 JsonGenerator 和 JsonParser 来生成和解析 json。</li>
+<li>jackson-annotations 注解包，提供标准注解功能；</li>
+<li>jackson-databind 数据绑定包，提供基于”对象绑定” 解析的相关 API（ ObjectMapper ）和”树模型” 解析的相关 API（JsonNode）；基于”对象绑定” 解析的 API 和”树模型”解析的 API 依赖基于”流模式”解析的 API。</li>
+</ol>
+<p>为什么Jackson的介绍这么长啊？因为它也是本人的最爱。</p>
+<h3 id="Json-lib"><a href="#Json-lib" class="headerlink" title="Json-lib"></a>Json-lib</h3><p>项目地址：<a href="http://json-lib.sourceforge.net/index.html" target="_blank" rel="noopener">http://json-lib.sourceforge.net/index.html</a></p>
+<p>json-lib最开始的也是应用最广泛的json解析工具，json-lib 不好的地方确实是依赖于很多第三方包，对于复杂类型的转换，json-lib对于json转换成bean还有缺陷，
+比如一个类里面会出现另一个类的list或者map集合，json-lib从json到bean的转换就会出现问题。json-lib在功能和性能上面都不能满足现在互联网化的需求。</p>
+<h2 id="编写性能测试"><a href="#编写性能测试" class="headerlink" title="编写性能测试"></a>编写性能测试</h2><p>接下来开始编写这四个库的性能测试代码。</p>
+<h3 id="添加maven依赖"><a href="#添加maven依赖" class="headerlink" title="添加maven依赖"></a>添加maven依赖</h3><p>当然首先是添加四个库的maven依赖，公平起见，我全部使用它们最新的版本：</p>
+<pre><code class="line-numbers language-xml">&lt;!-- Json libs--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;net.sf.json-lib&lt;/groupId&gt;
+    &lt;artifactId&gt;json-lib&lt;/artifactId&gt;
+    &lt;version&gt;2.4&lt;/version&gt;
+    &lt;classifier&gt;jdk15&lt;/classifier&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.google.code.gson&lt;/groupId&gt;
+    &lt;artifactId&gt;gson&lt;/artifactId&gt;
+    &lt;version&gt;2.8.2&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
+    &lt;version&gt;1.2.46&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+    &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;version&gt;2.9.4&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+    &lt;artifactId&gt;jackson-annotations&lt;/artifactId&gt;
+    &lt;version&gt;2.9.4&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="四个库的工具类"><a href="#四个库的工具类" class="headerlink" title="四个库的工具类"></a>四个库的工具类</h3><p><code>`</code>java FastJsonUtil.java
+public class FastJsonUtil {
+    public static String bean2Json(Object obj) {
+        return JSON.toJSONString(obj);
+    }</p>
+<pre><code>public static &lt;T&gt; T json2Bean(String jsonStr, Class&lt;T&gt; objClass) {
+    return JSON.parseObject(jsonStr, objClass);
+}
+</code></pre><p>}</p>
+<pre><code>
+```java GsonUtil.java
+public class GsonUtil {
+    private static Gson gson = new GsonBuilder().create();
+
+    public static String bean2Json(Object obj) {
+        return gson.toJson(obj);
+    }
+
+    public static &lt;T&gt; T json2Bean(String jsonStr, Class&lt;T&gt; objClass) {
+        return gson.fromJson(jsonStr, objClass);
+    }
+
+    public static String jsonFormatter(String uglyJsonStr) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonParser jp = new JsonParser();
+        JsonElement je = jp.parse(uglyJsonStr);
+        return gson.toJson(je);
+    }
+}
+</code></pre><p><code>`</code>java JacksonUtil.java
+public class JacksonUtil {
+    private static ObjectMapper mapper = new ObjectMapper();</p>
+<pre><code>public static String bean2Json(Object obj) {
+    try {
+        return mapper.writeValueAsString(obj);
+    } catch (JsonProcessingException e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+
+public static &lt;T&gt; T json2Bean(String jsonStr, Class&lt;T&gt; objClass) {
+    try {
+        return mapper.readValue(jsonStr, objClass);
+    } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+</code></pre><p>}</p>
+<pre><code>
+```java JsonLibUtil.java
+public class JsonLibUtil {
+
+    public static String bean2Json(Object obj) {
+        JSONObject jsonObject = JSONObject.fromObject(obj);
+        return jsonObject.toString();
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;T&gt; T json2Bean(String jsonStr, Class&lt;T&gt; objClass) {
+        return (T) JSONObject.toBean(JSONObject.fromObject(jsonStr), objClass);
+    }
+}
+</code></pre><h3 id="准备Model类"><a href="#准备Model类" class="headerlink" title="准备Model类"></a>准备Model类</h3><p>这里我写一个简单的Person类，同时属性有Date、List、Map和自定义的类FullName，最大程度模拟真实场景。</p>
+<pre><code class="line-numbers language-java">public class Person {
+    private String name;
+    private FullName fullName;
+    private int age;
+    private Date birthday;
+    private List&lt;String&gt; hobbies;
+    private Map&lt;String, String&gt; clothes;
+    private List&lt;Person&gt; friends;
+
+    // getter/setter省略
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder(&quot;Person [name=&quot; + name + &quot;, fullName=&quot; + fullName + &quot;, age=&quot;
+                + age + &quot;, birthday=&quot; + birthday + &quot;, hobbies=&quot; + hobbies
+                + &quot;, clothes=&quot; + clothes + &quot;]\n&quot;);
+        if (friends != null) {
+            str.append(&quot;Friends:\n&quot;);
+            for (Person f : friends) {
+                str.append(&quot;\t&quot;).append(f);
+            }
+        }
+        return str.toString();
+    }
+
+}
+</code></pre>
+<pre><code class="line-numbers language-java">public class FullName {
+    private String firstName;
+    private String middleName;
+    private String lastName;
+
+    public FullName() {
+    }
+
+    public FullName(String firstName, String middleName, String lastName) {
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+    }
+
+    // 省略getter和setter
+
+    @Override
+    public String toString() {
+        return &quot;[firstName=&quot; + firstName + &quot;, middleName=&quot;
+                + middleName + &quot;, lastName=&quot; + lastName + &quot;]&quot;;
+    }
+}
+</code></pre>
+<h3 id="JSON序列化性能基准测试"><a href="#JSON序列化性能基准测试" class="headerlink" title="JSON序列化性能基准测试"></a>JSON序列化性能基准测试</h3><pre><code class="line-numbers language-java">@BenchmarkMode(Mode.SingleShotTime)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@State(Scope.Benchmark)
+public class JsonSerializeBenchmark {
+    /**
+     * 序列化次数参数
+     */
+    @Param({&quot;1000&quot;, &quot;10000&quot;, &quot;100000&quot;})
+    private int count;
+
+    private Person p;
+
+    public static void main(String[] args) throws Exception {
+        Options opt = new OptionsBuilder()
+                .include(JsonSerializeBenchmark.class.getSimpleName())
+                .forks(1)
+                .warmupIterations(0)
+                .build();
+        Collection&lt;RunResult&gt; results =  new Runner(opt).run();
+        ResultExporter.exportResult(&quot;JSON序列化性能&quot;, results, &quot;count&quot;, &quot;秒&quot;);
+    }
+
+    @Benchmark
+    public void JsonLib() {
+        for (int i = 0; i &lt; count; i++) {
+            JsonLibUtil.bean2Json(p);
+        }
+    }
+
+    @Benchmark
+    public void Gson() {
+        for (int i = 0; i &lt; count; i++) {
+            GsonUtil.bean2Json(p);
+        }
+    }
+
+    @Benchmark
+    public void FastJson() {
+        for (int i = 0; i &lt; count; i++) {
+            FastJsonUtil.bean2Json(p);
+        }
+    }
+
+    @Benchmark
+    public void Jackson() {
+        for (int i = 0; i &lt; count; i++) {
+            JacksonUtil.bean2Json(p);
+        }
+    }
+
+    @Setup
+    public void prepare() {
+        List&lt;Person&gt; friends=new ArrayList&lt;Person&gt;();
+        friends.add(createAPerson(&quot;小明&quot;,null));
+        friends.add(createAPerson(&quot;Tony&quot;,null));
+        friends.add(createAPerson(&quot;陈小二&quot;,null));
+        p=createAPerson(&quot;邵同学&quot;,friends);
+    }
+
+    @TearDown
+    public void shutdown() {
+    }
+
+    private Person createAPerson(String name,List&lt;Person&gt; friends) {
+        Person newPerson=new Person();
+        newPerson.setName(name);
+        newPerson.setFullName(new FullName(&quot;zjj_first&quot;, &quot;zjj_middle&quot;, &quot;zjj_last&quot;));
+        newPerson.setAge(24);
+        List&lt;String&gt; hobbies=new ArrayList&lt;String&gt;();
+        hobbies.add(&quot;篮球&quot;);
+        hobbies.add(&quot;游泳&quot;);
+        hobbies.add(&quot;coding&quot;);
+        newPerson.setHobbies(hobbies);
+        Map&lt;String,String&gt; clothes=new HashMap&lt;String, String&gt;();
+        clothes.put(&quot;coat&quot;, &quot;Nike&quot;);
+        clothes.put(&quot;trousers&quot;, &quot;adidas&quot;);
+        clothes.put(&quot;shoes&quot;, &quot;安踏&quot;);
+        newPerson.setClothes(clothes);
+        newPerson.setFriends(friends);
+        return newPerson;
+    }
+}
+
+</code></pre>
+<p>说明一下，上面的代码中</p>
+<pre><code>ResultExporter.exportResult(&quot;JSON序列化性能&quot;, results, &quot;count&quot;, &quot;秒&quot;);
+</code></pre><p>这个是我自己编写的将性能测试报告数据填充至Echarts图，然后导出png图片的方法，具体代码我就不贴了，参考我的github源码。</p>
+<p>执行后的结果图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jsons01.png" alt></p>
+<p>从上面的测试结果可以看出，序列化次数比较小的时候，Gson性能最好，当不断增加的时候到了100000，Gson明细弱于Jackson和FastJson，
+这时候FastJson性能是真的牛，另外还可以看到不管数量少还是多，Jackson一直表现优异。而那个Json-lib简直就是来搞笑的。^_^</p>
+<h3 id="JSON反序列化性能基准测试"><a href="#JSON反序列化性能基准测试" class="headerlink" title="JSON反序列化性能基准测试"></a>JSON反序列化性能基准测试</h3><pre><code class="line-numbers language-java">@BenchmarkMode(Mode.SingleShotTime)
+@OutputTimeUnit(TimeUnit.SECONDS)
+@State(Scope.Benchmark)
+public class JsonDeserializeBenchmark {
+    /**
+     * 反序列化次数参数
+     */
+    @Param({&quot;1000&quot;, &quot;10000&quot;, &quot;100000&quot;})
+    private int count;
+
+    private String jsonStr;
+
+    public static void main(String[] args) throws Exception {
+        Options opt = new OptionsBuilder()
+                .include(JsonDeserializeBenchmark.class.getSimpleName())
+                .forks(1)
+                .warmupIterations(0)
+                .build();
+        Collection&lt;RunResult&gt; results =  new Runner(opt).run();
+        ResultExporter.exportResult(&quot;JSON反序列化性能&quot;, results, &quot;count&quot;, &quot;秒&quot;);
+    }
+
+    @Benchmark
+    public void JsonLib() {
+        for (int i = 0; i &lt; count; i++) {
+            JsonLibUtil.json2Bean(jsonStr, Person.class);
+        }
+    }
+
+    @Benchmark
+    public void Gson() {
+        for (int i = 0; i &lt; count; i++) {
+            GsonUtil.json2Bean(jsonStr, Person.class);
+        }
+    }
+
+    @Benchmark
+    public void FastJson() {
+        for (int i = 0; i &lt; count; i++) {
+            FastJsonUtil.json2Bean(jsonStr, Person.class);
+        }
+    }
+
+    @Benchmark
+    public void Jackson() {
+        for (int i = 0; i &lt; count; i++) {
+            JacksonUtil.json2Bean(jsonStr, Person.class);
+        }
+    }
+
+    @Setup
+    public void prepare() {
+        jsonStr=&quot;{\&quot;name\&quot;:\&quot;邵同学\&quot;,\&quot;fullName\&quot;:{\&quot;firstName\&quot;:\&quot;zjj_first\&quot;,\&quot;middleName\&quot;:\&quot;zjj_middle\&quot;,\&quot;lastName\&quot;:\&quot;zjj_last\&quot;},\&quot;age\&quot;:24,\&quot;birthday\&quot;:null,\&quot;hobbies\&quot;:[\&quot;篮球\&quot;,\&quot;游泳\&quot;,\&quot;coding\&quot;],\&quot;clothes\&quot;:{\&quot;shoes\&quot;:\&quot;安踏\&quot;,\&quot;trousers\&quot;:\&quot;adidas\&quot;,\&quot;coat\&quot;:\&quot;Nike\&quot;},\&quot;friends\&quot;:[{\&quot;name\&quot;:\&quot;小明\&quot;,\&quot;fullName\&quot;:{\&quot;firstName\&quot;:\&quot;xxx_first\&quot;,\&quot;middleName\&quot;:\&quot;xxx_middle\&quot;,\&quot;lastName\&quot;:\&quot;xxx_last\&quot;},\&quot;age\&quot;:24,\&quot;birthday\&quot;:null,\&quot;hobbies\&quot;:[\&quot;篮球\&quot;,\&quot;游泳\&quot;,\&quot;coding\&quot;],\&quot;clothes\&quot;:{\&quot;shoes\&quot;:\&quot;安踏\&quot;,\&quot;trousers\&quot;:\&quot;adidas\&quot;,\&quot;coat\&quot;:\&quot;Nike\&quot;},\&quot;friends\&quot;:null},{\&quot;name\&quot;:\&quot;Tony\&quot;,\&quot;fullName\&quot;:{\&quot;firstName\&quot;:\&quot;xxx_first\&quot;,\&quot;middleName\&quot;:\&quot;xxx_middle\&quot;,\&quot;lastName\&quot;:\&quot;xxx_last\&quot;},\&quot;age\&quot;:24,\&quot;birthday\&quot;:null,\&quot;hobbies\&quot;:[\&quot;篮球\&quot;,\&quot;游泳\&quot;,\&quot;coding\&quot;],\&quot;clothes\&quot;:{\&quot;shoes\&quot;:\&quot;安踏\&quot;,\&quot;trousers\&quot;:\&quot;adidas\&quot;,\&quot;coat\&quot;:\&quot;Nike\&quot;},\&quot;friends\&quot;:null},{\&quot;name\&quot;:\&quot;陈小二\&quot;,\&quot;fullName\&quot;:{\&quot;firstName\&quot;:\&quot;xxx_first\&quot;,\&quot;middleName\&quot;:\&quot;xxx_middle\&quot;,\&quot;lastName\&quot;:\&quot;xxx_last\&quot;},\&quot;age\&quot;:24,\&quot;birthday\&quot;:null,\&quot;hobbies\&quot;:[\&quot;篮球\&quot;,\&quot;游泳\&quot;,\&quot;coding\&quot;],\&quot;clothes\&quot;:{\&quot;shoes\&quot;:\&quot;安踏\&quot;,\&quot;trousers\&quot;:\&quot;adidas\&quot;,\&quot;coat\&quot;:\&quot;Nike\&quot;},\&quot;friends\&quot;:null}]}&quot;;
+    }
+
+    @TearDown
+    public void shutdown() {
+    }
+}
+</code></pre>
+<p>执行后的结果图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jsons02.png" alt></p>
+<p>从上面的测试结果可以看出，反序列化的时候，Gson、Jackson和FastJson区别不大，性能都很优异，而那个Json-lib还是来继续搞笑的。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/01/09/java/jsons.html">Java几种常用JSON库性能比较</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/01/27/tool/maven-central.html" class="pre-post btn btn-default" title='发布Maven构件到中央仓库'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">发布Maven构件到中央仓库</span>
+        </a>
+    
+    
+        <a href="/2018/01/07/java/jmh.html" class="next-post btn btn-default" title='Java微基准测试框架JMH'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Java微基准测试框架JMH</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#简单介绍"><span class="toc-text">简单介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Gson"><span class="toc-text">Gson</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FastJson"><span class="toc-text">FastJson</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Jackson"><span class="toc-text">Jackson</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Json-lib"><span class="toc-text">Json-lib</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写性能测试"><span class="toc-text">编写性能测试</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#添加maven依赖"><span class="toc-text">添加maven依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四个库的工具类"><span class="toc-text">四个库的工具类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#准备Model类"><span class="toc-text">准备Model类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON序列化性能基准测试"><span class="toc-text">JSON序列化性能基准测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON反序列化性能基准测试"><span class="toc-text">JSON反序列化性能基准测试</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

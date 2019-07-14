@@ -1,0 +1,610 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="Hibernate与MyBatis都是流行的持久层开发框架，前一遍介绍了怎样在SpringBoot中集成MyBatis，本篇来介绍如何集成Hibernate作为DAO层。
+Hibernate 是一个高性能的对象/关系映射（ORM）持久化存储和查询的服务，不仅负责从Java类到数据库表的映射
+（...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 集成Hibernate | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 集成Hibernate">
+            
+                SpringBoot系列 - 集成Hibernate
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/03</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Hibernate与MyBatis都是流行的持久层开发框架，前一遍介绍了怎样在SpringBoot中集成MyBatis，本篇来介绍如何集成Hibernate作为DAO层。</p>
+<p>Hibernate 是一个高性能的对象/关系映射（ORM）持久化存储和查询的服务，不仅负责从Java类到数据库表的映射
+（还包括从Java数据类型到SQL数据类型的映射），还提供了面向对象的数据查询检索机制，从而极大地缩短了手动处理SQL和JDBC上的开发时间。
+同时，Hibernate还实现了JPA规范，在SpringBoot中，JPA的默认实现就是使用的Hibernate。</p>
+<h2 id="JPA和Hibernate"><a href="#JPA和Hibernate" class="headerlink" title="JPA和Hibernate"></a>JPA和Hibernate</h2><p>在讲解如何在SpringBoot中使用Hibernate框架之前，先要弄清几个基本概念以及它们之间的关系。</p>
+<ol>
+<li>JPA</li>
+<li>Hibernate</li>
+<li>Spring Data</li>
+<li>Spring Data JPA</li>
+</ol>
+<h3 id="JPA"><a href="#JPA" class="headerlink" title="JPA"></a>JPA</h3><p>JPA(Java Persistence API)是Sun官方提出的Java持久化规范，它为Java开发人员提供了一种对象/关系映射工具来管理Java应用中的关系数据。</p>
+<p>上面已经描述很清楚了，JPA是一种规范和标准，也就是类似于Java中的接口，由Sun公司官方定义，但是并没有指定谁来实现。</p>
+<p>现在几个主要的JPA实现技术有Hibernate、EclipseLink、OpenJPA等。</p>
+<h3 id="Hibernate"><a href="#Hibernate" class="headerlink" title="Hibernate"></a>Hibernate</h3><p>Hibernate是一个开放源代码的对象关系映射框架，它对JDBC进行了非常轻量级的对象封装，它将POJO与数据库表建立映射关系，是一个全自动的ORM框架。
+Hibernate可以自动生成SQL语句、自动执行，从而使得Java程序员可以随心所欲的使用对象编程思维来操纵数据库。</p>
+<p>实际上，JPA规范制定过程中就是借鉴了Hibernate等这些开源的持久框架，也就是说Hibernate的出现比JPA还要早些。</p>
+<p>在Hibernate中使用的注解就是JPA注解，Hibernate实现了JPA规范。</p>
+<h3 id="Spring-Data"><a href="#Spring-Data" class="headerlink" title="Spring Data"></a>Spring Data</h3><p>Spring Data是一个用于简化数据库访问，并支持云服务的开源框架。其主要目标是使得数据库的访问变得方便快捷，
+并支持map-reduce框架和云计算数据服务。此外，它还支持基于关系型数据库的数据服务，如Oracle RAC等。</p>
+<p>所以Spring Data本身就是一个开源的框架。</p>
+<h3 id="Spring-Data-JPA"><a href="#Spring-Data-JPA" class="headerlink" title="Spring Data JPA"></a>Spring Data JPA</h3><p>上面说过Spring Data是一个开源框架，在这个框架中Spring Data JPA只是这个框架中的一个模块。</p>
+<p>它可以极大的简化JPA的写法，可以在几乎不用写实现的情况下，实现对数据的访问和操作。除了CRUD外，还包括如分页、排序等一些常用的功能。</p>
+<p>好了，现在你应该对这些概念有一个基本认识了，接下来进入正题，演示如何在SpringBoot中使用Hibernate。</p>
+<h2 id="maven依赖"><a href="#maven依赖" class="headerlink" title="maven依赖"></a>maven依赖</h2><p>第一步添加maven依赖：</p>
+<pre><code class="line-numbers language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;mysql&lt;/groupId&gt;
+    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;version&gt;${mysql-connector.version}&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+    &lt;artifactId&gt;druid&lt;/artifactId&gt;
+    &lt;version&gt;${druid.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>注意，使用mysql数据库来演示的话还要添加数据库驱动包，另外还添加了druid连接池。</p>
+<h2 id="准备数据库"><a href="#准备数据库" class="headerlink" title="准备数据库"></a>准备数据库</h2><p>如何安装mysql，配置用户名和密码之类我就不在这里讲了，请自行google。</p>
+<p>下面是我的schema.sql文件，创建一个pos数据库，并创建一个article表，插入几条初始数据：</p>
+<pre><code class="line-numbers language-sql">-- Dumping database structure for concretepage
+CREATE DATABASE IF NOT EXISTS `pos` default charset utf8 COLLATE utf8_general_ci;
+SET FOREIGN_KEY_CHECKS=0;
+USE `pos`;
+-- Dumping structure for table concretepage.articles
+CREATE TABLE IF NOT EXISTS `articles` (
+  `article_id` int(5) NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) NOT NULL,
+  `category` varchar(100) NOT NULL,
+  PRIMARY KEY (`article_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT=&#39;文章表&#39;;
+
+-- Dumping data for table concretepage.articles: ~3 rows (approximately)
+INSERT INTO `articles` (`article_id`, `title`, `category`) VALUES
+    (1, &#39;Java Concurrency&#39;, &#39;Java&#39;),
+    (2, &#39;Hibernate HQL &#39;, &#39;Hibernate&#39;),
+    (3, &#39;Spring MVC with Hibernate&#39;, &#39;Spring&#39;);
+
+</code></pre>
+<p>注意，Hibernate可以根据实体类自动创建表，本篇我不介绍这个功能，还是手动创建表结构。</p>
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><p>数据库创建好后，修改application.yml配置文件，新增如下数据库连接配置：</p>
+<pre><code class="line-numbers language-yml">###################  spring配置  ###################
+spring:
+  profiles:
+    active: dev
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        new_generator_mappings: false
+        format_sql: true
+  datasource:
+      url: jdbc:mysql://127.0.0.1:3306/pos?serverTimezone=UTC&amp;useSSL=false&amp;autoReconnect=true&amp;tinyInt1isBit=false&amp;useUnicode=true&amp;characterEncoding=utf8
+      username: root
+      password: 123456
+</code></pre>
+<h2 id="实体类"><a href="#实体类" class="headerlink" title="实体类"></a>实体类</h2><p>article表对应的实体类如下：</p>
+<pre><code class="line-numbers language-java">@Entity
+@Table(name = &quot;articles&quot;)
+public class Article implements Serializable {
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = &quot;article_id&quot;)
+    private int articleId;
+    @Column(name = &quot;title&quot;)
+    private String title;
+    @Column(name = &quot;category&quot;)
+    private String category;
+
+    // 省略getter/setter
+}
+</code></pre>
+<h2 id="DAO设计"><a href="#DAO设计" class="headerlink" title="DAO设计"></a>DAO设计</h2><p>先创建一个DAO的接口类：</p>
+<pre><code class="line-numbers language-java">public interface IArticleDAO {
+    List&lt;Article&gt; getAllArticles();
+
+    Article getArticleById(int articleId);
+
+    void addArticle(Article article);
+
+    void updateArticle(Article article);
+
+    void deleteArticle(int articleId);
+
+    boolean articleExists(String title, String category);
+}
+</code></pre>
+<p>然后写一个实现类，在这类中注入<code>EntityManager</code></p>
+<pre><code class="line-numbers language-java">@Repository
+public class ArticleDAO implements IArticleDAO {
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Override
+    public Article getArticleById(int articleId) {
+        return entityManager.find(Article.class, articleId);
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public List&lt;Article&gt; getAllArticles() {
+        String hql = &quot;FROM Article as atcl ORDER BY atcl.articleId&quot;;
+        return (List&lt;Article&gt;) entityManager.createQuery(hql).getResultList();
+    }
+
+    @Override
+    public void addArticle(Article article) {
+        entityManager.persist(article);
+    }
+
+    @Override
+    public void updateArticle(Article article) {
+        Article artcl = getArticleById(article.getArticleId());
+        artcl.setTitle(article.getTitle());
+        artcl.setCategory(article.getCategory());
+        entityManager.flush();
+    }
+
+    @Override
+    public void deleteArticle(int articleId) {
+        entityManager.remove(getArticleById(articleId));
+    }
+
+    @Override
+    public boolean articleExists(String title, String category) {
+        String hql = &quot;FROM Article as atcl WHERE atcl.title = ? and atcl.category = ?&quot;;
+        int count = entityManager.createQuery(hql).setParameter(0, title)
+                .setParameter(1, category).getResultList().size();
+        return count &gt; 0;
+    }
+}
+</code></pre>
+<h2 id="业务Service"><a href="#业务Service" class="headerlink" title="业务Service"></a>业务Service</h2><p>编写业务逻辑Service类，注入DAO类：</p>
+<pre><code class="line-numbers language-java">@Service
+public class ArticleService {
+
+    @Resource
+    private IArticleDAO articleDAO;
+
+    public Article getArticleById(int articleId) {
+        Article obj = articleDAO.getArticleById(articleId);
+        return obj;
+    }
+
+    public List&lt;Article&gt; getAllArticles() {
+        return articleDAO.getAllArticles();
+    }
+
+    public synchronized boolean addArticle(Article article) {
+        if (articleDAO.articleExists(article.getTitle(), article.getCategory())) {
+            return false;
+        } else {
+            articleDAO.addArticle(article);
+            return true;
+        }
+    }
+
+    public void updateArticle(Article article) {
+        articleDAO.updateArticle(article);
+    }
+
+    public void deleteArticle(int articleId) {
+        articleDAO.deleteArticle(articleId);
+    }
+}
+</code></pre>
+<h2 id="编写测试用例"><a href="#编写测试用例" class="headerlink" title="编写测试用例"></a>编写测试用例</h2><p>OK，一切写完后，就来编写我们的测试用例：</p>
+<pre><code class="line-numbers language-java">@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ApplicationTests {
+    private static final Logger log = LoggerFactory.getLogger(ApplicationTests.class);
+
+    @Resource
+    private ArticleService articleService;
+
+    /**
+     * 测试增删改查
+     */
+    @Test
+    public void test() {
+        Article article = articleService.getArticleById(1);
+        assertThat(article.getTitle(), is(&quot;Java Concurrency&quot;));
+
+        List&lt;Article&gt; list = articleService.getAllArticles();
+        assertThat(list, notNullValue());
+        assertThat(list.size(), is(3));
+
+        boolean flag = articleService.addArticle(article);
+        assertThat(flag, is(false));
+
+        article.setTitle(&quot;Python Concurrency&quot;);
+        articleService.updateArticle(article);
+        Article article1 = articleService.getArticleById(1);
+        assertThat(article1.getTitle(), is(&quot;Python Concurrency&quot;));
+
+
+        articleService.deleteArticle(1);
+        Article article2 = articleService.getArticleById(1);
+        assertThat(article2, nullValue());
+    }
+}
+</code></pre>
+<p>上面先查询id=1的文章，看看标题是否为<code>Java Concurrency</code>，然后查询所有文章列表，之后更新文章标题后再次查询看看是否更新成功。
+最后删除这篇文章，再次查询结果为null。</p>
+<p>运行结果green bar，测试通过。</p>
+<p>更多Hibernate相关文档，请参考 <a href="http://hibernate.org/" target="_blank" rel="noopener">官网</a> 。</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-hibernate" target="_blank" rel="noopener">springboot-hibernate</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/03/spring/sb-hibernate.html">SpringBoot系列 - 集成Hibernate</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/04/spring/sb-mongodb.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成MongoDB'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成MongoDB</span>
+        </a>
+    
+    
+        <a href="/2017/07/02/spring/sb-mybatis.html" class="next-post btn btn-default" title='SpringBoot系列 - 集成MyBatis'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成MyBatis</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#JPA和Hibernate"><span class="toc-text">JPA和Hibernate</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JPA"><span class="toc-text">JPA</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Hibernate"><span class="toc-text">Hibernate</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Data"><span class="toc-text">Spring Data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Spring-Data-JPA"><span class="toc-text">Spring Data JPA</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#maven依赖"><span class="toc-text">maven依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#准备数据库"><span class="toc-text">准备数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改配置文件"><span class="toc-text">修改配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实体类"><span class="toc-text">实体类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#DAO设计"><span class="toc-text">DAO设计</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#业务Service"><span class="toc-text">业务Service</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写测试用例"><span class="toc-text">编写测试用例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="python,pyenv,">
+
+
+    <meta name="description" content="以前一直使用virtualenv来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。
+而pyenv可以帮到我。
+pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚，
+通过在PATH最前面插入shims来决定应用使用的...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>使用pyenv创建多版本python环境 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="使用pyenv创建多版本python环境">
+            
+                使用pyenv创建多版本python环境
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/python" title='python'>
+                        python
+                    </a>
+                
+                    <a href="/tags/pyenv" title='pyenv'>
+                        pyenv
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/05/09</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>以前一直使用<code>virtualenv</code>来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。
+而<a href="https://github.com/pyenv/pyenv" target="_blank" rel="noopener">pyenv</a>可以帮到我。</p>
+<p>pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚，
+通过在PATH最前面插入<code>shims</code>来决定应用使用的python版本，从而将你的命令传递给正确的python程序。</p>
+<p>我的系统环境是CentOS7.2</p>
+<h2 id="理解Shims"><a href="#理解Shims" class="headerlink" title="理解Shims"></a>理解Shims</h2><p>pyenv会在你的PATH最前面插入一个<code>shims</code>目录:</p>
+<pre><code>$(pyenv root)/shims:/usr/local/bin:/usr/bin:/bin
+</code></pre><p>通过一个<code>rehashing</code>操作就可以在该目录匹配所有已经安装的不同版本的python命令，比如<code>python</code>, <code>pip</code>等。
+所有对Python可执行文件的查找都会首先被这个shims路径截获，后面的设置就不生效了。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>推荐自动安装（保证系统上面先安装git）:</p>
+<pre><code class="line-numbers language-bash">curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+</code></pre>
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><p>编辑<code>~/.bash_profile</code>，最后面加入:</p>
+<pre><code class="line-numbers language-bash">export PYENV_ROOT=&quot;$HOME/.pyenv&quot;
+export PATH=&quot;$PYENV_ROOT/bin:$PATH&quot;
+eval &quot;$(pyenv init -)&quot;
+eval &quot;$(pyenv virtualenv-init -)&quot;
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+</code></pre>
+<p>重启 shell:</p>
+<pre><code class="line-numbers language-bash">exec $SHELL
+</code></pre>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><ol>
+<li><code>pyenv versions</code> – 查看系统当前安装的python列表</li>
+<li><code>pyenv version</code>  – 查看系统当前使用的python版本</li>
+<li><code>pyenv install -v 3.5.3</code> – 安装python</li>
+<li><code>pyenv uninstall 2.7.13</code> – 卸载python</li>
+<li><code>pyenv rehash</code> – 为所有已安装的可执行文件（如：~/.pyenv/versions/bin/）创建shims，
+因此每当你增删了Python版本或带有可执行文件的包（如 pip）以后，都应该执行一次本命令）</li>
+</ol>
+<h2 id="版本切换"><a href="#版本切换" class="headerlink" title="版本切换"></a>版本切换</h2><ol>
+<li><code>pyenv global 3.5.3</code> – 设置全局的Python版本，通过将版本号写入<code>~/.pyenv/version</code>文件的方式</li>
+<li><code>pyenv local 2.7.13</code> – 设置面向程序的本地版本，通过将版本号写入当前目录下的<code>.python-version</code>文件的方式。
+通过这种方式设置的Python版本优先级较global高。</li>
+<li><code>pyenv shell 2.7.13</code> - 设置面向shell的Python版本，通过设置当前shell的<code>PYENV_VERSION</code>环境变量的方式</li>
+</ol>
+<p>优先级: shell &gt; local &gt; global</p>
+<h2 id="卸载pyenv"><a href="#卸载pyenv" class="headerlink" title="卸载pyenv"></a>卸载pyenv</h2><ol>
+<li>禁用pyenv很简单，只需要在<code>~/.bash_profile</code>中的<code>pyenv init</code>那行删了即可。</li>
+<li>完全移除pyenv，先执行上面第1步，然后删了pyenv的根目录: <code>rm -rf $(pyenv root)</code></li>
+</ol>
+<h2 id="插件pyenv-virtualenv"><a href="#插件pyenv-virtualenv" class="headerlink" title="插件pyenv-virtualenv"></a>插件pyenv-virtualenv</h2><p>官网地址: <a href="https://github.com/pyenv/pyenv-virtualenv" target="_blank" rel="noopener">https://github.com/pyenv/pyenv-virtualenv</a></p>
+<p>使用自动安装pyenv后，它会自动安装部分插件，通过<code>pyenv-virtualenv</code>插件可以很好的和<code>virtualenv</code>结合</p>
+<p>另外，一个可选配置是在<code>~/.bash_profile</code>最后添加:</p>
+<pre><code>eval &quot;$(pyenv virtualenv-init -)&quot;
+</code></pre><p>可以实现自动激活虚拟环境，这个特性非常有用建议都加上。</p>
+<ol>
+<li>创建虚拟环境: <code>pyenv virtualenv 2.7.13 virtual-env-2.7.13</code>，默认使用当前环境python版本。
+在文件夹<code>$(pyenv root)/versions/my-virtual-env-2.7.13</code>中创建一个基于Python 2.7.13的虚拟环境。</li>
+<li>列出虚拟环境: <code>pyenv virtualenvs</code>，对每个virtualenv显示2个, 短的只是个链接，那个<code>*</code>表示当前激活的。</li>
+<li>激活虚拟环境: <code>pyenv activate virtual-env-2.7.13</code></li>
+<li>退出虚拟环境: <code>pyenv deactivate</code></li>
+<li>删除虚拟环境: <code>pyenv uninstall virtual-env-2.7.13</code></li>
+</ol>
+<p>如果<code>eval &quot;$(pyenv virtualenv-init -)&quot;</code>写在你的shell配置中(比如上面的~/.bash_profile),
+那么当<code>pyenv-virtualenv</code>进入/离开某个含有<code>.python-version</code>目录时会自动激活/退出虚拟环境。</p>
+<p>场景使用流程:</p>
+<pre><code class="line-numbers language-bash"># 先创建一个虚拟环境
+pyenv versions
+pyenv virtualenv 2.7.13 virtual-env-2.7.13
+# 进入某个目录比如/root/work/flask-demo
+pyenv local virtual-env-2.7.13
+# 然后再不需要去手动激活了
+</code></pre>
+<p>使用pyenv来管理多版本的python命令，使用pyenv-virtualenv插件来管理多版本python包环境。爽歪歪~</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/05/09/python/pyenv.html">使用pyenv创建多版本python环境</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/05/20/python/pyfunny.html" class="pre-post btn btn-default" title='一些有趣的python技巧'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">一些有趣的python技巧</span>
+        </a>
+    
+    
+        <a href="/2016/04/30/python/django-deploy.html" class="next-post btn btn-default" title='CentOS7上使用mod_wsgi部署Django'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CentOS7上使用mod_wsgi部署Django</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#理解Shims"><span class="toc-text">理解Shims</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#环境变量"><span class="toc-text">环境变量</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常用命令"><span class="toc-text">常用命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#版本切换"><span class="toc-text">版本切换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#卸载pyenv"><span class="toc-text">卸载pyenv</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#插件pyenv-virtualenv"><span class="toc-text">插件pyenv-virtualenv</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

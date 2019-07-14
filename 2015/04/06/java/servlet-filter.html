@@ -1,0 +1,730 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="servlet,">
+
+
+    <meta name="description" content="在写一个springmvc项目中想对用户的请求进行拦截，只有登录用户才能访问资源。
+这时候可以使用到SpringMVC的拦截器Intercepter，但是这个只能局限在SpringMVC中使用，
+如果想更加通用一点，最好使用Servlet Filter实现这个需求。
+本文将通过几个实际的例子展...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>servlet filter详解 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="servlet filter详解">
+            
+                servlet filter详解
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/servlet" title='servlet'>
+                        servlet
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/04/06</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在写一个springmvc项目中想对用户的请求进行拦截，只有登录用户才能访问资源。
+这时候可以使用到SpringMVC的拦截器Intercepter，但是这个只能局限在SpringMVC中使用，
+如果想更加通用一点，最好使用Servlet Filter实现这个需求。</p>
+<p>本文将通过几个实际的例子展示下Servlet中的Filter的使用。</p>
+<h3 id="我们为什么需要使用Filter？"><a href="#我们为什么需要使用Filter？" class="headerlink" title="我们为什么需要使用Filter？"></a>我们为什么需要使用Filter？</h3><p>通常我们会使用session来保存登录用户的信息，通过从session中取出保存的属性值来判断用户是否登录，
+但是如果我们有大量的请求方法，每个人方法中都这样去判断就会有很多重复代码，将来我们想改动下逻辑，
+那得改动所有的请求方法实现，所以这个是不可取的。</p>
+<p>这时候就是使用Servlet Filter的时候了，它是可插拔的，对于普通的action方法来讲是透明的。
+它会在执行其他方法之前或将结果返回给客户端之前来执行其他逻辑。</p>
+<p>以下几种场景下我们会使用到Servlet Filter：</p>
+<ul>
+<li>将请求的参数写入日志文件</li>
+<li>对于资源的访问进行统一的授权与验证</li>
+<li>在请求到达实际Servlet之前格式化请求内容或请求头</li>
+<li>压缩返回数据后发送给客户端</li>
+<li>修改返回内容，增加一些cookie、header等信息</li>
+</ul>
+<p>前面提到过，Servlet是可插拔的，可以通过在web.xml中配置是否使用。如果我们定义了多个Filter，就会形成一个过滤器链。
+通过实现接口javax.servlet.Filter来创建一个过过滤器。</p>
+<h3 id="Filter接口"><a href="#Filter接口" class="headerlink" title="Filter接口"></a>Filter接口</h3><p>Filter接口包含了三个跟生命周期有关的方法，并且由Servlet容器来管理。它们分别是：</p>
+<pre><code class="line-numbers language-java">void init(FilterConfig paramFilterConfig)
+</code></pre>
+<p>当容器初始化这个Filter的时候被调用，并且只会被调用一次。因此在这个方法里面我们可以初始化一些资源。
+FilterConfig会被容器用来给Filter提供初始化参数以及Servlet Context对象。
+我们可以在这个方法中抛出ServletException异常。</p>
+<pre><code class="line-numbers language-java">doFilter(ServletRequest paramServletRequest, ServletResponse paramServletResponse, FilterChain paramFilterChain)
+</code></pre>
+<p>这个方法在每次执行过滤的时候被调用，request和response被作为参数传递进来，
+FilterChain表示过滤器链，这是典型的责任链模式的实现例子。</p>
+<pre><code class="line-numbers language-java">void destroy()
+</code></pre>
+<p>这个方法再容器卸载掉filter的时候被调用。因此我们可以在里面将filter使用到的一些资源给释放掉。</p>
+<h3 id="WebFilter注解"><a href="#WebFilter注解" class="headerlink" title="WebFilter注解"></a>WebFilter注解</h3><p>在Servlet3.0中引入了注解javax.servlet.annotation.WebFilter。无需配置，简单实用，
+不过如果你需要经常改动Filter逻辑的话，还是建议你在web.xml文件中配置，因为代码中修改后必须重写编译发布才能生效。</p>
+<h3 id="web-xml中的Filter配置详解"><a href="#web-xml中的Filter配置详解" class="headerlink" title="web.xml中的Filter配置详解"></a>web.xml中的Filter配置详解</h3><p>像下面这样声明一个filter：</p>
+<pre><code class="line-numbers language-xml">&lt;filter&gt;
+  &lt;filter-name&gt;RequestLoggingFilter&lt;/filter-name&gt; &lt;!-- mandatory --&gt;
+  &lt;filter-class&gt;com.journaldev.servlet.filters.RequestLoggingFilter&lt;/filter-class&gt; &lt;!-- mandatory --&gt;
+  &lt;init-param&gt; &lt;!-- optional --&gt;
+  &lt;param-name&gt;test&lt;/param-name&gt;
+  &lt;param-value&gt;testValue&lt;/param-value&gt;
+  &lt;/init-param&gt;
+&lt;/filter&gt;
+</code></pre>
+<p>然后定义一个mapping：</p>
+<pre><code class="line-numbers language-xml">&lt;filter-mapping&gt;
+  &lt;filter-name&gt;RequestLoggingFilter&lt;/filter-name&gt; &lt;!-- 必填 --&gt;
+  &lt;url-pattern&gt;/*&lt;/url-pattern&gt; &lt;!-- url-pattern 或 servlet-name必须指定至少一个 --&gt;
+  &lt;servlet-name&gt;LoginServlet&lt;/servlet-name&gt;
+  &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+&lt;/filter-mapping&gt;
+</code></pre>
+<h3 id="日志和登录验证的filter示例"><a href="#日志和登录验证的filter示例" class="headerlink" title="日志和登录验证的filter示例"></a>日志和登录验证的filter示例</h3><p>下面是login.html页面：</p>
+<pre><code class="line-numbers language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;US-ASCII&quot;&gt;
+&lt;title&gt;Login Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form action=&quot;LoginServlet&quot; method=&quot;post&quot;&gt;
+Username: &lt;input type=&quot;text&quot; name=&quot;user&quot;&gt;
+&lt;br&gt;
+Password: &lt;input type=&quot;password&quot; name=&quot;pwd&quot;&gt;
+&lt;br&gt;
+&lt;input type=&quot;submit&quot; value=&quot;Login&quot;&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>LoginServlet负责验证客户端是否已经登录：
+<code>`</code> java LoginServlet.java
+package com.journaldev.servlet.session;</p>
+<p>import java.io.IOException;
+import java.io.PrintWriter;</p>
+<p>import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;</p>
+<p>/**</p>
+<ul>
+<li><p>Servlet implementation class LoginServlet
+*/
+@WebServlet(“/LoginServlet”)
+public class LoginServlet extends HttpServlet {
+ private static final long serialVersionUID = 1L;
+ private final String userID = “admin”;
+ private final String password = “password”;</p>
+<p> protected void doPost(HttpServletRequest request,</p>
+<pre><code>     HttpServletResponse response) throws ServletException, IOException {
+
+ // get request parameters for userID and password
+ String user = request.getParameter(&quot;user&quot;);
+ String pwd = request.getParameter(&quot;pwd&quot;);
+
+ if(userID.equals(user) &amp;&amp; password.equals(pwd)){
+     HttpSession session = request.getSession();
+     session.setAttribute(&quot;user&quot;, &quot;Pankaj&quot;);
+     //setting session to expiry in 30 mins
+     session.setMaxInactiveInterval(30*60);
+     Cookie userName = new Cookie(&quot;user&quot;, user);
+     userName.setMaxAge(30*60);
+     response.addCookie(userName);
+     response.sendRedirect(&quot;LoginSuccess.jsp&quot;);
+ }else{
+     RequestDispatcher rd = getServletContext().getRequestDispatcher(&quot;/login.html&quot;);
+     PrintWriter out= response.getWriter();
+     out.println(&quot;&lt;font color=red&gt;Either user name or password is wrong.&lt;/font&gt;&quot;);
+     rd.include(request, response);
+ }
+</code></pre><p> }
+}</p>
+<pre><code>验证通过后跳转到LoginSuccess.jsp：
+``` jsp LoginSuccess.jsp
+&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=US-ASCII&quot;
+ pageEncoding=&quot;US-ASCII&quot;%&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=US-ASCII&quot;&gt;
+&lt;title&gt;Login Success Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;%
+//allow access only if session exists
+String user = (String) session.getAttribute(&quot;user&quot;);
+String userName = null;
+String sessionID = null;
+Cookie[] cookies = request.getCookies();
+if(cookies !=null){
+for(Cookie cookie : cookies){
+ if(cookie.getName().equals(&quot;user&quot;)) userName = cookie.getValue();
+ if(cookie.getName().equals(&quot;JSESSIONID&quot;)) sessionID = cookie.getValue();
+}
+}
+%&gt;
+&lt;h3&gt;Hi &lt;%=userName %&gt;, Login successful. Your Session ID=&lt;%=sessionID %&gt;&lt;/h3&gt;
+&lt;br&gt;
+User=&lt;%=user %&gt;
+&lt;br&gt;
+&lt;a href=&quot;CheckoutPage.jsp&quot;&gt;Checkout Page&lt;/a&gt;
+&lt;form action=&quot;LogoutServlet&quot; method=&quot;post&quot;&gt;
+&lt;input type=&quot;submit&quot; value=&quot;Logout&quot; &gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>退出时我们并不需要进行验证，退出页面为：
+<code>jsp CheckoutPage.jsp
+&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=US-ASCII&quot;
+ pageEncoding=&quot;US-ASCII&quot;%&gt;
+&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=US-ASCII&quot;&gt;
+&lt;title&gt;Login Success Page&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;%
+String userName = null;
+String sessionID = null;
+Cookie[] cookies = request.getCookies();
+if(cookies !=null){
+for(Cookie cookie : cookies){
+ if(cookie.getName().equals(&quot;user&quot;)) userName = cookie.getValue();
+}
+}
+%&gt;
+&lt;h3&gt;Hi &lt;%=userName %&gt;, do the checkout.&lt;/h3&gt;
+&lt;br&gt;
+&lt;form action=&quot;LogoutServlet&quot; method=&quot;post&quot;&gt;
+&lt;input type=&quot;submit&quot; value=&quot;Logout&quot; &gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code>
+LogoutServlet在用户点击退出按钮时执行：
+<code>`</code> java LogoutServlet.java
+package com.journaldev.servlet.session;</p>
+</li>
+</ul>
+<p>import java.io.IOException;</p>
+<p>import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;</p>
+<p>/**</p>
+<ul>
+<li><p>Servlet implementation class LogoutServlet
+*/
+@WebServlet(“/LogoutServlet”)
+public class LogoutServlet extends HttpServlet {
+ private static final long serialVersionUID = 1L;</p>
+<p> protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {</p>
+<pre><code> response.setContentType(&quot;text/html&quot;);
+ Cookie[] cookies = request.getCookies();
+ if(cookies != null){
+ for(Cookie cookie : cookies){
+     if(cookie.getName().equals(&quot;JSESSIONID&quot;)){
+         System.out.println(&quot;JSESSIONID=&quot;+cookie.getValue());
+         break;
+     }
+ }
+ }
+ //invalidate the session if exists
+ HttpSession session = request.getSession(false);
+ System.out.println(&quot;User=&quot;+session.getAttribute(&quot;user&quot;));
+ if(session != null){
+     session.invalidate();
+ }
+ response.sendRedirect(&quot;login.html&quot;);
+</code></pre><p> }</p>
+</li>
+</ul>
+<p>} </p>
+<pre><code>现在我们来创建日志和登录认证的两个filter：
+``` java RequestLoggingFilter.java
+package com.journaldev.servlet.filters;
+
+import java.io.IOException;
+import java.util.Enumeration;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+/**
+ * Servlet Filter implementation class RequestLoggingFilter
+ */
+@WebFilter(&quot;/RequestLoggingFilter&quot;)
+public class RequestLoggingFilter implements Filter {
+
+    private ServletContext context;
+
+    public void init(FilterConfig fConfig) throws ServletException {
+        this.context = fConfig.getServletContext();
+        this.context.log(&quot;RequestLoggingFilter initialized&quot;);
+    }
+
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest req = (HttpServletRequest) request;
+        Enumeration&lt;String&gt; params = req.getParameterNames();
+        while(params.hasMoreElements()){
+            String name = params.nextElement();
+            String value = request.getParameter(name);
+            this.context.log(req.getRemoteAddr() + &quot;::Request Params::{&quot;+name+&quot;=&quot;+value+&quot;}&quot;);
+        }
+
+        Cookie[] cookies = req.getCookies();
+        if(cookies != null){
+            for(Cookie cookie : cookies){
+                this.context.log(req.getRemoteAddr() + &quot;::Cookie::{&quot;+cookie.getName()+&quot;,&quot;+cookie.getValue()+&quot;}&quot;);
+            }
+        }
+        // pass the request along the filter chain
+        chain.doFilter(request, response);
+    }
+
+    public void destroy() {
+        //we can close resources here
+    }
+
+}
+</code></pre><p>然后是另一个Filter：
+<code>`</code> java AuthenticationFilter.java
+package com.journaldev.servlet.filters;</p>
+<p>import java.io.IOException;</p>
+<p>import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;</p>
+<p>@WebFilter(“/AuthenticationFilter”)
+public class AuthenticationFilter implements Filter {</p>
+<pre><code>private ServletContext context;
+
+public void init(FilterConfig fConfig) throws ServletException {
+    this.context = fConfig.getServletContext();
+    this.context.log(&quot;AuthenticationFilter initialized&quot;);
+}
+
+public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
+
+    String uri = req.getRequestURI();
+    this.context.log(&quot;Requested Resource::&quot;+uri);
+
+    HttpSession session = req.getSession(false);
+
+    if(session == null &amp;&amp; !(uri.endsWith(&quot;html&quot;) || uri.endsWith(&quot;LoginServlet&quot;))){
+        this.context.log(&quot;Unauthorized access request&quot;);
+        res.sendRedirect(&quot;login.html&quot;);
+    }else{
+        // pass the request along the filter chain
+        chain.doFilter(request, response);
+    }
+}
+
+public void destroy() {
+    //close any resources here
+}
+</code></pre><p>}</p>
+<pre><code>注意我们并不会对任何静态html页面或LoginServlet进行验证，下面我们在web.xml文件中配置：
+``` xml
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot; version=&quot;3.0&quot;&gt;
+  &lt;display-name&gt;ServletFilterExample&lt;/display-name&gt;
+  &lt;welcome-file-list&gt;
+    &lt;welcome-file&gt;login.html&lt;/welcome-file&gt;
+  &lt;/welcome-file-list&gt;
+
+  &lt;filter&gt;
+    &lt;filter-name&gt;RequestLoggingFilter&lt;/filter-name&gt;
+    &lt;filter-class&gt;com.journaldev.servlet.filters.RequestLoggingFilter&lt;/filter-class&gt;
+  &lt;/filter&gt;
+  &lt;filter&gt;
+    &lt;filter-name&gt;AuthenticationFilter&lt;/filter-name&gt;
+    &lt;filter-class&gt;com.journaldev.servlet.filters.AuthenticationFilter&lt;/filter-class&gt;
+  &lt;/filter&gt;
+
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;RequestLoggingFilter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+    &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+  &lt;/filter-mapping&gt;
+  &lt;filter-mapping&gt;
+    &lt;filter-name&gt;AuthenticationFilter&lt;/filter-name&gt;
+    &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+  &lt;/filter-mapping&gt;
+&lt;/web-app&gt;
+</code></pre><p>接下来我们试验下效果。此处省略88个字……</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/04/06/java/servlet-filter.html">servlet filter详解</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/04/13/linux/centos-yum.html" class="pre-post btn btn-default" title='centos6更新yum源'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">centos6更新yum源</span>
+        </a>
+    
+    
+        <a href="/2015/03/28/java/sitemesh.html" class="next-post btn btn-default" title='SiteMesh使用笔记'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SiteMesh使用笔记</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#我们为什么需要使用Filter？"><span class="toc-text">我们为什么需要使用Filter？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Filter接口"><span class="toc-text">Filter接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#WebFilter注解"><span class="toc-text">WebFilter注解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web-xml中的Filter配置详解"><span class="toc-text">web.xml中的Filter配置详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#日志和登录验证的filter示例"><span class="toc-text">日志和登录验证的filter示例</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="docker,">
+
+
+    <meta name="description" content="Docker 为容器提供了两种存放数据的资源：
+
+由 storage driver 管理的镜像层和容器层。
+Data Volume
+
+接下来分别介绍下这两种存储方式。
+storage driver在镜像章节我们学习到 Docker 镜像的分层结构：
+
+容器由最上面一个可写的容器层，以及若干只读...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Docker每天学一点08 - 存储 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Docker每天学一点08 - 存储">
+            
+                Docker每天学一点08 - 存储
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/docker">
+            docker
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/docker" title='docker'>
+                        docker
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/04/11</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Docker 为容器提供了两种存放数据的资源：</p>
+<ol>
+<li>由 storage driver 管理的镜像层和容器层。</li>
+<li>Data Volume</li>
+</ol>
+<p>接下来分别介绍下这两种存储方式。</p>
+<h2 id="storage-driver"><a href="#storage-driver" class="headerlink" title="storage driver"></a>storage driver</h2><p>在镜像章节我们学习到 Docker 镜像的分层结构：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker33.png" alt></p>
+<p>容器由最上面一个可写的容器层，以及若干只读的镜像层组成，容器的数据就存放在这些层中。这样的分层结构最大的特性是 Copy-on-Write：</p>
+<ol>
+<li>新数据会直接存放在最上面的容器层。</li>
+<li>修改现有数据会先从镜像层将数据复制到容器层，修改后的数据直接保存在容器层中，镜像层保持不变。</li>
+<li>如果多个层中有命名相同的文件，用户只能看到最上面那层中的文件。</li>
+</ol>
+<p>分层结构使镜像和容器的创建、共享以及分发变得非常高效，而这些都要归功于 Docker storage driver。
+正是 storage driver 实现了多层数据的堆叠并为用户提供一个单一的合并之后的统一视图。</p>
+<p>Docker 安装时会根据当前系统的配置选择默认的 driver。默认 driver 具有最好的稳定性，因为默认 driver 在发行版上经过了严格的测试。</p>
+<p>运行docker info查看 CentOS 7 的默认 driver：</p>
+<pre><code>[root@VM_22_2_centos docker]# docker info
+Containers: 3
+ Running: 3
+ Paused: 0
+ Stopped: 0
+Images: 17
+Server Version: 18.03.0-ce
+Storage Driver: devicemapper
+</code></pre><p>可见CentOS 7的默认driver是devicemapper</p>
+<p>对于某些容器，直接将数据放在由 storage driver 维护的层中是很好的选择，比如那些无状态的应用。
+无状态意味着容器没有需要持久化的数据，随时可以从镜像直接创建。</p>
+<p>比如 busybox，它是一个工具箱，我们启动 busybox 是为了执行诸如 wget，ping 之类的命令，不需要保存数据供以后使用，
+使用完直接退出，容器删除时存放在容器层中的工作数据也一起被删除，这没问题，下次再启动新容器即可。</p>
+<p>对于大部分容器而言，都有持久化数据的需求，容器启动时需要加载已有的数据，容器销毁时希望保留产生的新数据，也就是说，这类容器是有状态的。
+这就要用到 Docker 的另一种存储机制：Data Volume</p>
+<h2 id="Data-Volume"><a href="#Data-Volume" class="headerlink" title="Data Volume"></a>Data Volume</h2><p>Data Volume 本质上是 Docker Host 文件系统中的目录或文件，有以下几个特点：</p>
+<ol>
+<li>Data Volume 是目录或文件，而非没有格式化的磁盘（块设备）。</li>
+<li>容器可以读写 volume 中的数据。</li>
+<li>volume 数据可以被永久的保存，即使使用它的容器已经销毁。</li>
+</ol>
+<p>docker 提供了两种类型的 volume：bind mount 和 docker managed volume。</p>
+<p><strong>bind mount</strong></p>
+<p>bind mount 是将 host 上已存在的目录或文件 mount 到容器。</p>
+<p>例如 docker host 上有目录 /opt/htdocs ：</p>
+<pre><code>[root@VM_22_2_centos docker]# cat /opt/htdocs/index.html 
+&lt;h1&gt;Hi, Girl.&lt;/h1&gt;
+</code></pre><p>然后通过 -v 参数将这个目录mount到httpd容器：</p>
+<pre><code>[root@VM_22_2_centos docker]# docker run -d -p 8080:80 -v /opt/htdocs:/usr/local/apache2/htdocs httpd
+9ee8a32d718345e2e60496eb3ad93d95a7a933646cb0fd8c65b3af4fd71853ba
+</code></pre><p>注意，在主机上面是没有容器的目录的<code>/usr/local/apache2/htdocs</code></p>
+<pre><code>[root@VM_22_2_centos docker]# ll /usr/local/apache2/htdocs
+ls: cannot access /usr/local/apache2/htdocs: No such file or directory
+</code></pre><p>-v 的格式为 <code>&lt;host path&gt;:&lt;container path&gt;</code></p>
+<p><code>/usr/local/apache2/htdocs</code> 就是 apache server 存放静态文件的地方。由于之前在容器中 <code>/usr/local/apache2/htdocs</code> 已经存在，
+原有数据会被隐藏起来，取而代之的是 host上目录 <code>/opt/htdocs/</code> 中的数据，这与 linux mount 命令的行为是一致的。</p>
+<pre><code>[root@VM_22_2_centos docker]# curl localhost:8080
+&lt;h1&gt;Hi, Girl.&lt;/h1&gt;
+[root@VM_22_2_centos docker]# 
+</code></pre><p>curl 显示当前主页确实是 /opt/htdocs/index.html 中的内容。更新一下，看是否能生效：</p>
+<pre><code>[root@VM_22_2_centos docker]# echo &quot;updated index page&quot; &gt; /opt/htdocs/index.html 
+[root@VM_22_2_centos docker]# curl localhost:8080
+updated index page
+[root@VM_22_2_centos docker]#
+</code></pre><p>host 中的修改确实生效了，bind mount 可以让 host 与容器共享数据。这在管理上是非常方便的。</p>
+<p>除了 bind mount 目录，还可以单独指定一个文件。</p>
+<pre><code>docker run -d -p 80:80 -v ~/htdocs/index.html:/usr/local/apache2/htdocs/new_index.html httpd
+</code></pre><p>使用 bind mount 单个文件的场景是：只需要向容器添加文件，不希望覆盖整个目录。
+在上面的例子中，我们将 html 文件加到 apache 中，同时也保留了容器原有的数据。
+使用单一文件有一点要注意：host 中的源文件必须要存在，不然会当作一个新目录 bind mount 给容器。</p>
+<p>mount point 有很多应用场景，比如我们可以将源代码目录 mount 到容器中，在 host 中修改代码就能看到应用的实时效果。
+再比如将 mysql 容器的数据放在 bind mount 里，这样 host 可以方便地备份和迁移数据。</p>
+<p>bind mount 的使用直观高效，易于理解，但它也有不足的地方：bind mount 需要指定 host 文件系统的特定路径，这就限制了容器的可移植性，
+当需要将容器迁移到其他 host，而该 host 没有要 mount 的数据或者数据不在相同的路径时，操作会失败。</p>
+<p>备注：这种方式的共享用来主机和容器共享，非常适合开发阶段。</p>
+<p>移植性更好的方式是 docker managed volume，就是接下来我要讲解的。</p>
+<p><strong>docker managed volume</strong></p>
+<p>docker managed volume 与 bind mount 在使用上的最大区别是不需要指定 mount 源，指明 mount point 就行了。还是以 httpd 容器为例：</p>
+<pre><code>docker run -d -p 8080:80 -v /usr/local/apache2/htdocs httpd
+</code></pre><p>每当容器申请 <code>docker managed volume</code> 时，docker 都会在<code>/var/lib/docker/volumes</code> 下生成一个目录，这个目录就是 mount 源。
+volume 的内容跟容器中原有 <code>/usr/local/apache2/htdocs</code>目录里面内容完全一样，这是怎么回事呢？</p>
+<p>这是因为：如果 mount point 指向的是已有目录，原有数据会被复制到 volume 中。</p>
+<p>此时的 <code>/usr/local/apache2/htdocs</code> 已经不再是由 storage driver 管理的层数据了，它已经是一个 data volume。
+我们可以像 bind mount 一样对数据进行操作。</p>
+<p>docker managed volume 的创建过程：</p>
+<ol>
+<li>容器启动时，简单的告诉 docker “我需要一个 volume 存放数据，帮我 mount 到目录 /abc”。</li>
+<li>docker 在<code>/var/lib/docker/volumes</code> 中生成一个随机目录作为 mount 源。</li>
+<li>如果容器中的目录 /abc 已经存在，则将其中的数据复制到 mount 源，</li>
+<li>将 volume mount 到 /abc</li>
+</ol>
+<h2 id="volume-container"><a href="#volume-container" class="headerlink" title="volume container"></a>volume container</h2><p>volume container（数据卷容器） 是专门为其他容器提供 volume 的容器。它提供的卷可以是 bind mount，也可以是 docker managed volume。</p>
+<p>接下来我创建一个volume container试试看：</p>
+<pre><code>[root@VM_22_2_centos docker]# docker create --name vc_data \
+&gt; -v /opt/htdocs:/usr/local/apache2/htdocs \
+&gt; -v /other/useful/tools \
+&gt; busybox
+f9960d7960fce345c983e77435b38a8044f4805b2ce2682d86e09dc2fbc0e350
+</code></pre><p>我们将容器命名为 vc_data（vc 是 volume container 的缩写）。注意这里执行的是 docker create 命令，
+这是因为 volume container 的作用只是提供数据，它本身不需要处于运行状态。容器 mount 了两个 volume：</p>
+<ol>
+<li>bind mount，存放 web server 的静态文件。</li>
+<li>docker managed volume，存放一些实用工具（当然现在是空的，这里只是做个示例）。</li>
+</ol>
+<p>通过 <code>docker inspect vc_data</code> 可以查看到这两个 volume</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker34.png" alt></p>
+<p>其他容器可以通过 <code>--volumes-from</code> 使用 vc_data 这个 volume container。下面我启动三个httpd的容器，并共享这个存储容器：</p>
+<pre><code>[root@VM_22_2_centos docker]# docker run --name web1 -d -p 80 --volumes-from vc_data httpd 
+55dca74022ac8409282249dd7603671c4dad21fbfdabe2b7f63a68fd1a872e18
+[root@VM_22_2_centos docker]# docker run --name web2 -d -p 80 --volumes-from vc_data httpd 
+6408133e7237dc0ea1d1c273b228c0bae5b3a0ccf1035ba3bd6fb3c13216cb14
+[root@VM_22_2_centos docker]# docker run --name web3 -d -p 80 --volumes-from vc_data httpd 
+86a3b71c8d057fd52a3c31206129c5732352d6f4750b1160b75c82c158534b4f
+</code></pre><p>验证一下数据共享的效果：</p>
+<pre><code>[root@VM_22_2_centos docker]# echo &quot;this content is from a volume containner&quot; &gt; /opt/htdocs/index.html 
+[root@VM_22_2_centos docker]# curl 127.0.0.1:32770
+this content is from a volume containner
+[root@VM_22_2_centos docker]# curl 127.0.0.1:32769
+this content is from a volume containner
+[root@VM_22_2_centos docker]# curl 127.0.0.1:32768
+this content is from a volume containner
+</code></pre><p>可见，三个容器已经成功共享了 volume container 中的 volume。</p>
+<p>总结一下 volume container 的特点：</p>
+<ol>
+<li>与 bind mount 相比，不必为每一个容器指定 host path，所有 path 都在 volume container 中定义好了，
+容器只需与 volume container 关联，实现了容器与 host 的解耦。</li>
+<li>使用 volume container 的容器其 mount point 是一致的，有利于配置的规范和标准化，但也带来一定的局限，使用时需要综合考虑。</li>
+</ol>
+<h2 id="data-packed-volume-container"><a href="#data-packed-volume-container" class="headerlink" title="data-packed volume container"></a>data-packed volume container</h2><p>上面讨论的volume container 的数据归根到底还是在 host 里，有没有办法将数据完全放到 volume container 中，同时又能与其他容器共享呢？</p>
+<p>当然可以，通常我们称这种容器为 data-packed volume container。其原理是将数据打包到镜像中，然后通过 docker managed volume 共享。</p>
+<p>我们用下面的 Dockfile 构建镜像：</p>
+<pre><code>FROM busybox:lastest
+ADD htdocs /usr/local/apache2/htdocs
+VOLUME /usr/local/apache2/htdocs
+</code></pre><p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker35.png" alt></p>
+<p>ADD 将静态文件目录<code>htdocs</code>复制到容器目录 <code>/usr/local/apache2/htdocs</code></p>
+<p>VOLUME 的作用与 -v 等效，用来创建 docker managed volume，mount point 为 <code>/usr/local/apache2/htdocs</code>，
+因为这个目录就是 ADD 添加的目录，所以会将已有数据拷贝到 volume 中。</p>
+<p>先删除之前的vc_data，然后用新镜像创建 data-packed volume container：</p>
+<pre><code>[root@VM_22_2_centos docker]# docker rm vc_data
+[root@VM_22_2_centos docker]# docker create --name vc_data datapacked
+301cbcff7e654a8923e1ab2ea543d4f3d9e80bdb37e1c821990dc09914585318
+[root@VM_22_2_centos docker]# docker run -d -p 80 --volumes-from vc_data httpd
+56598537f816e10d6b7a88eb942291761e2eeb4e004615b39cfcf3c326ea06cf
+[root@VM_22_2_centos docker]# docker ps
+CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                                                                 NAMES
+56598537f816        httpd               &quot;httpd-foreground&quot;     8 seconds ago       Up 6 seconds        0.0.0.0:32771-&gt;80/tcp                                                 zealous_leakey
+[root@VM_22_2_centos docker]# curl 127.0.0.1:32771
+this content is from a volume containner
+</code></pre><p>容器能够正确读取 volume 中的数据。data-packed volume container 是自包含的，不依赖 host 提供数据，具有很强的移植性，
+非常适合<strong>只使用</strong>静态数据的场景，比如应用的配置信息、web server 的静态文件等。对于开发和生产环境中有不同的配置文件的时候很方便。</p>
+<h2 id="volume-生命周期"><a href="#volume-生命周期" class="headerlink" title="volume 生命周期"></a>volume 生命周期</h2><p>最后一节讨论如何备份、恢复、迁移和销毁 data volume。</p>
+<p><strong>备份</strong></p>
+<p>因为 volume 实际上是 host 文件系统中的目录和文件，所以 volume 的备份实际上是对文件系统的备份。</p>
+<p><strong>恢复</strong></p>
+<p>volume 的恢复也很简单，如果数据损坏了，直接用之前备份的数据拷贝到value的源目录可以了。</p>
+<p><strong>迁移</strong></p>
+<p>如果我们想使用更新版本的镜像启动容器，这就涉及到数据迁移，方法是：</p>
+<ol>
+<li>docker stop 当前 Registry 容器。</li>
+<li>启动新版本容器并 mount 原有 volume。</li>
+</ol>
+<pre><code>docker run -d -p 5000:5000 -v /myregistry:/var/lib/registry registry:latest
+</code></pre><p>当然，在启用新容器前要确保新版本的默认数据路径是否发生变化。</p>
+<p><strong>销毁</strong></p>
+<p>可以删除不再需要的 volume，但一定要确保知道自己正在做什么，volume 删除后数据是找不回来的。</p>
+<ul>
+<li>docker 不会销毁 bind mount，删除数据的工作只能由 host 负责。</li>
+<li>对于 docker managed volume，在执行 docker rm 删除容器时可以带上 -v 参数，</li>
+</ul>
+<p>docker 会将容器使用到的 volume 一并删除，但前提是没有其他容器 mount 该 volume，目的是保护数据，非常合理。</p>
+<p>如果想批量删除孤儿 volume，可以执行：</p>
+<pre><code>docker volume rm $(docker volume ls -q)
+</code></pre><p>这章我们学习的只是单个 docker host 中的存储方案。而跨主机存储也是一个重要的主题，当然也更复杂，我们会在容器进阶技术章节详细讨论。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/04/11/docker/docker08.html">Docker每天学一点08 - 存储</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/04/12/docker/docker09.html" class="pre-post btn btn-default" title='Docker每天学一点09 - 多主机管理'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker每天学一点09 - 多主机管理</span>
+        </a>
+    
+    
+        <a href="/2017/04/10/docker/docker07.html" class="next-post btn btn-default" title='Docker每天学一点07 - 单主机网络'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Docker每天学一点07 - 单主机网络</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#storage-driver"><span class="toc-text">storage driver</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Data-Volume"><span class="toc-text">Data Volume</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volume-container"><span class="toc-text">volume container</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#data-packed-volume-container"><span class="toc-text">data-packed volume container</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volume-生命周期"><span class="toc-text">volume 生命周期</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

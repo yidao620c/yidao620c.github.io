@@ -1,0 +1,569 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="算法,">
+
+
+    <meta name="description" content="我们将谜题定义为：包含一个初始位置，一个目标位置，以及用于判断是否是有效移动的规则集。
+规则集包含两部分：计算从指定位置开始的所有合法移动，以及每次移动的结果位置。
+Java抽象下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口，
+我们可以写一个简单的串行求解程序...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>利用递归算法并行化解决谜题框架 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="利用递归算法并行化解决谜题框架">
+            
+                利用递归算法并行化解决谜题框架
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/算法之美">
+            算法之美
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/算法" title='算法'>
+                        算法
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/04/14</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>我们将谜题定义为：包含一个初始位置，一个目标位置，以及用于判断是否是有效移动的规则集。</p>
+<p>规则集包含两部分：计算从指定位置开始的所有合法移动，以及每次移动的结果位置。</p>
+<h3 id="Java抽象"><a href="#Java抽象" class="headerlink" title="Java抽象"></a>Java抽象</h3><p>下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口，
+我们可以写一个简单的串行求解程序，该程序将在谜题空间Puzzle Space中查找，
+直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M代表一步</p>
+<pre><code class="line-numbers language-java">/** 表示 搬箱子 之类谜题的抽象类*/
+public interface Puzzle&lt;P, M&gt; {
+    P initialPosition();
+
+    boolean isGoal(P position);
+
+    Set&lt;M&gt; legalMoves(P position);
+
+    P move(P position, M move);
+}
+</code></pre>
+<p>下面的PuzzleNode代表通过一系列的移动到达的一个位置，其中保存了到达该位置的移动以及前一个Node。
+只要沿着PuzzleNode链接逐步回溯，就可以重新构建出达到当前位置的移动序列。</p>
+<pre><code class="line-numbers language-java">/** 用于谜题解决框架的链接节点 */
+@Immutable
+public class PuzzleNode&lt;P, M&gt; {
+    final P pos;
+    final M move;
+    final PuzzleNode&lt;P, M&gt; prev;
+
+    public PuzzleNode(P pos, M move, PuzzleNode&lt;P, M&gt; prev) {
+        this.pos = pos;
+        this.move = move;
+        this.prev = prev;
+    }
+
+    List&lt;M&gt; asMoveList() {
+        List&lt;M&gt; solution = new LinkedList&lt;M&gt;();
+        for (PuzzleNode&lt;P, M&gt; n = this; n.move != null; n = n.prev)
+            solution.add(0, n.move);
+        return solution;
+    }
+}
+</code></pre>
+<p>下面的SequentialPuzzleSolver给出了谜题框架的串行解决方案，它在谜题空间中执行深度优先搜索，
+当找到解答方案，不一定是最短的解决方案，结束搜索。</p>
+<pre><code class="line-numbers language-java">/** 串行的谜题解答器*/
+public class SequentialPuzzleSolver&lt;P, M&gt; {
+    private final Puzzle&lt;P, M&gt; puzzle;
+    private final Set&lt;P&gt; seen = new HashSet&lt;P&gt;();
+
+    public SequentialPuzzleSolver(Puzzle&lt;P, M&gt; puzzle) {
+        this.puzzle = puzzle;
+    }
+
+    public List&lt;M&gt; solve() {
+        P pos = puzzle.initialPosition();
+        return search(new PuzzleNode&lt;P, M&gt;(pos, null, null));
+    }
+
+    private List&lt;M&gt; search(PuzzleNode&lt;P, M&gt; node) {
+        if (!seen.contains(node.pos)) {
+            seen.add(node.pos);
+            if (puzzle.isGoal(node.pos))
+                return node.asMoveList();
+            for (M move : puzzle.legalMoves(node.pos)) {
+                P pos = puzzle.move(node.pos, move);
+                PuzzleNode&lt;P, M&gt; child = new PuzzleNode&lt;P, M&gt;(pos, move, node);
+                List&lt;M&gt; result = search(child);
+                if (result != null)
+                    return result;
+            }
+        }
+        return null;
+    }
+}
+</code></pre>
+<h3 id="并行方案"><a href="#并行方案" class="headerlink" title="并行方案"></a>并行方案</h3><p>接下来我们给出并行解决方案，ConcurrentPuzzleSolver中使用了一个内部类SolverTask，
+这个类扩展了PuzzleNode并实现了Runnable。大多数工作都是在run中完成的：首先计算下一步肯能到达的所有位置，
+并去掉已经到达的位置，然后判断（这个任务或者其他某个任务）是否已经成功完成，最后将尚未搜索过的位置提交给Executor。</p>
+<pre><code class="line-numbers language-java">public class ConcurrentPuzzleSolver&lt;P, M&gt; {
+    private final Puzzle&lt;P, M&gt; puzzle;
+    private final ExecutorService exec;
+    private final ConcurrentMap&lt;P, Boolean&gt; seen;
+    protected final ValueLatch&lt;PuzzleNode&lt;P, M&gt;&gt; solution = new ValueLatch&lt;PuzzleNode&lt;P, M&gt;&gt;();
+
+    public ConcurrentPuzzleSolver(Puzzle&lt;P, M&gt; puzzle) {
+        this.puzzle = puzzle;
+        this.exec = initThreadPool();
+        this.seen = new ConcurrentHashMap&lt;P, Boolean&gt;();
+        if (exec instanceof ThreadPoolExecutor) {
+            ThreadPoolExecutor tpe = (ThreadPoolExecutor) exec;
+            tpe.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        }
+    }
+
+    private ExecutorService initThreadPool() {
+        return Executors.newCachedThreadPool();
+    }
+
+    public List&lt;M&gt; solve() throws InterruptedException {
+        try {
+            P p = puzzle.initialPosition();
+            exec.execute(newTask(p, null, null));
+            // block until solution found
+            PuzzleNode&lt;P, M&gt; solnPuzzleNode = solution.getValue();
+            return (solnPuzzleNode == null) ? null : solnPuzzleNode.asMoveList();
+        } finally {
+            exec.shutdown();
+        }
+    }
+
+    protected Runnable newTask(P p, M m, PuzzleNode&lt;P, M&gt; n) {
+        return new SolverTask(p, m, n);
+    }
+
+    protected class SolverTask extends PuzzleNode&lt;P, M&gt; implements Runnable {
+        SolverTask(P pos, M move, PuzzleNode&lt;P, M&gt; prev) {
+            super(pos, move, prev);
+        }
+
+        public void run() {
+            if (solution.isSet() || seen.putIfAbsent(pos, true) != null)
+                return; // already solved or seen this position
+            if (puzzle.isGoal(pos))
+                solution.setValue(this);
+            else
+                for (M m : puzzle.legalMoves(pos))
+                    exec.execute(newTask(puzzle.move(pos, m), m, this));
+        }
+    }
+}
+
+@ThreadSafe
+public class ValueLatch&lt;T&gt; {
+    @GuardedBy(&quot;this&quot;)
+    private T value = null;
+    private final CountDownLatch done = new CountDownLatch(1);
+
+    public boolean isSet() {
+        return (done.getCount() == 0);
+    }
+
+    public synchronized void setValue(T newValue) {
+        if (!isSet()) {
+            value = newValue;
+            done.countDown();
+        }
+    }
+
+    public T getValue() throws InterruptedException {
+        done.await();
+        synchronized (this) {
+            return value;
+        }
+    }
+}
+</code></pre>
+<h3 id="算法原理"><a href="#算法原理" class="headerlink" title="算法原理"></a>算法原理</h3><p>比较串行和并行算法可知：并发方法引入了一种新形式的限制并去掉了一种原有的限制，新的限制在这个问题域中更合适。
+串行版本的程序执行深度优先搜索，因此搜索过程将受限于栈的大小。并发版本程序执行广度优先搜索，因此不会受到栈大小的限制。</p>
+<p>第一个找到解答的线程还会关闭Executor，从而阻止接受显得任务。
+要避免处理RejectedExecutionException（等待队列满员或者是Executor关闭后提交的任务），
+需要将拒绝执行处理器设置为DiscardPolicy 。</p>
+<p>如果不存在解答，那么ConcurrentPuzzleSolver就会永远的等待下去，getSolution一直阻塞下去。
+通过记录活动任务数量，当该值为零时将解答设置为null，如下：</p>
+<pre><code class="line-numbers language-java">public class PuzzleSolver&lt;P, M&gt; extends ConcurrentPuzzleSolver&lt;P, M&gt; {
+    PuzzleSolver(Puzzle&lt;P, M&gt; puzzle) {
+        super(puzzle);
+    }
+
+    private final AtomicInteger taskCount = new AtomicInteger(0);
+
+    protected Runnable newTask(P p, M m, PuzzleNode&lt;P, M&gt; n) {
+        return new CountingSolverTask(p, m, n);
+    }
+
+    class CountingSolverTask extends SolverTask {
+        CountingSolverTask(P pos, M move, PuzzleNode&lt;P, M&gt; prev) {
+            super(pos, move, prev);
+            taskCount.incrementAndGet();
+        }
+
+        public void run() {
+            try {
+                super.run();
+            } finally {
+                if (taskCount.decrementAndGet() == 0)
+                    solution.setValue(null);
+            }
+        }
+    }
+}
+</code></pre>
+<p>另外，还可以将ValueLatch设置为限时的，将getValue使用await的限时版实现，
+那么就可以指定多少时间内搜索结果，搜不到就超时中断。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/04/14/algorithm/concurrent-recursive.html">利用递归算法并行化解决谜题框架</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/04/15/algorithm/eight-queens.html" class="pre-post btn btn-default" title='回溯法解决八皇后问题'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">回溯法解决八皇后问题</span>
+        </a>
+    
+    
+        <a href="/2015/04/13/linux/centos-yum.html" class="next-post btn btn-default" title='centos6更新yum源'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">centos6更新yum源</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java抽象"><span class="toc-text">Java抽象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#并行方案"><span class="toc-text">并行方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#算法原理"><span class="toc-text">算法原理</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

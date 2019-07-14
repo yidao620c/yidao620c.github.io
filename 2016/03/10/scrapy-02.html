@@ -1,0 +1,562 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="这篇文章我们通过一个比较完整的例子来教你使用Scrapy，我选择爬取虎嗅网首页的新闻列表。
+这里我们将完成如下几个步骤：
+
+创建一个新的Scrapy工程
+定义你所需要要抽取的Item对象
+编写一个spider来爬取某个网站并提取出所有的Item对象
+编写一个Item Pipline来存储提取出...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记02- 完整示例 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记02- 完整示例">
+            
+                Scrapy笔记02- 完整示例
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/03/10</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>这篇文章我们通过一个比较完整的例子来教你使用Scrapy，我选择爬取<a href="http://www.huxiu.com/" target="_blank" rel="noopener">虎嗅网首页</a>的新闻列表。</p>
+<p>这里我们将完成如下几个步骤：</p>
+<ul>
+<li>创建一个新的Scrapy工程</li>
+<li>定义你所需要要抽取的Item对象</li>
+<li>编写一个spider来爬取某个网站并提取出所有的Item对象</li>
+<li>编写一个Item Pipline来存储提取出来的Item对象</li>
+</ul>
+<p>Scrapy使用Python语言编写，如果你对这门语言还不熟，请先去学习下基本知识。</p>
+<h2 id="创建Scrapy工程"><a href="#创建Scrapy工程" class="headerlink" title="创建Scrapy工程"></a>创建Scrapy工程</h2><p>在任何你喜欢的目录执行如下命令</p>
+<pre><code class="line-numbers language-bash">scrapy startproject coolscrapy
+</code></pre>
+<p>将会创建coolscrapy文件夹，其目录结构如下：</p>
+<pre><code>coolscrapy/
+    scrapy.cfg            # 部署配置文件
+
+    coolscrapy/           # Python模块，你所有的代码都放这里面
+        __init__.py
+
+        items.py          # Item定义文件
+
+        pipelines.py      # pipelines定义文件
+
+        settings.py       # 配置文件
+
+        spiders/          # 所有爬虫spider都放这个文件夹下面
+            __init__.py
+            ...
+</code></pre><h2 id="定义我们的Item"><a href="#定义我们的Item" class="headerlink" title="定义我们的Item"></a>定义我们的Item</h2><p>我们通过创建一个scrapy.Item类，并定义它的类型为scrapy.Field的属性，
+我们准备将虎嗅网新闻列表的名称、链接地址和摘要爬取下来。</p>
+<pre><code class="line-numbers language-python">import scrapy
+
+class HuxiuItem(scrapy.Item):
+    title = scrapy.Field()    # 标题
+    link = scrapy.Field()     # 链接
+    desc = scrapy.Field()     # 简述
+    posttime = scrapy.Field() # 发布时间
+</code></pre>
+<p>也许你觉得定义这个Item有点麻烦，但是定义完之后你可以得到许多好处，这样你就可以使用Scrapy中其他有用的组件和帮助类。</p>
+<h2 id="第一个Spider"><a href="#第一个Spider" class="headerlink" title="第一个Spider"></a>第一个Spider</h2><p>蜘蛛就是你定义的一些类，Scrapy使用它们来从一个domain（或domain组）爬取信息。
+在蜘蛛类中定义了一个初始化的URL下载列表，以及怎样跟踪链接，如何解析页面内容来提取Item。</p>
+<p>定义一个Spider，只需继承<code>scrapy.Spider</code>类并定于一些属性：</p>
+<ul>
+<li>name: Spider名称，必须是唯一的</li>
+<li>start_urls: 初始化下载链接URL</li>
+<li>parse(): 用来解析下载后的Response对象，该对象也是这个方法的唯一参数。
+它负责解析返回页面数据并提取出相应的Item（返回Item对象），还有其他合法的链接URL（返回Request对象）。</li>
+</ul>
+<p>我们在coolscrapy/spiders文件夹下面新建<code>huxiu_spider.py</code>，内容如下：
+<code>`</code> python huxiu_spider.py</p>
+<p>#!/usr/bin/env python</p>
+<h1 id="encoding-utf-8"><a href="#encoding-utf-8" class="headerlink" title="-- encoding: utf-8 --"></a>-<em>- encoding: utf-8 -</em>-</h1><p>“””
+Topic: sample
+Desc :
+“””
+from coolscrapy.items import HuxiuItem
+import scrapy</p>
+<p>class HuxiuSpider(scrapy.Spider):
+    name = “huxiu”
+    allowed_domains = [“huxiu.com”]
+    start_urls = [
+        “<a href="http://www.huxiu.com/index.php&quot;" target="_blank" rel="noopener">http://www.huxiu.com/index.php&quot;</a>
+    ]</p>
+<pre><code>def parse(self, response):
+    for sel in response.xpath(&#39;//div[@class=&quot;mod-info-flow&quot;]/div/div[@class=&quot;mob-ctt&quot;]&#39;):
+        item = HuxiuItem()
+        item[&#39;title&#39;] = sel.xpath(&#39;h3/a/text()&#39;)[0].extract()
+        item[&#39;link&#39;] = sel.xpath(&#39;h3/a/@href&#39;)[0].extract()
+        url = response.urljoin(item[&#39;link&#39;])
+        item[&#39;desc&#39;] = sel.xpath(&#39;div[@class=&quot;mob-sub&quot;]/text()&#39;)[0].extract()
+        print(item[&#39;title&#39;],item[&#39;link&#39;],item[&#39;desc&#39;])
+</code></pre><pre><code>
+## 运行爬虫
+在根目录执行下面的命令，其中huxiu是你定义的spider名字：
+</code></pre><p>scrapy crawl huxiu</p>
+<pre><code>如果一切正常，应该可以打印出每一个新闻
+
+## 处理链接
+如果想继续跟踪每个新闻链接进去，看看它的详细内容的话，那么可以在parse()方法中返回一个Request对象，
+然后注册一个回调函数来解析新闻详情。
+
+``` python
+from coolscrapy.items import HuxiuItem
+import scrapy
+
+class HuxiuSpider(scrapy.Spider):
+    name = &quot;huxiu&quot;
+    allowed_domains = [&quot;huxiu.com&quot;]
+    start_urls = [
+        &quot;http://www.huxiu.com/index.php&quot;
+    ]
+
+    def parse(self, response):
+        for sel in response.xpath(&#39;//div[@class=&quot;mod-info-flow&quot;]/div/div[@class=&quot;mob-ctt&quot;]&#39;):
+            item = HuxiuItem()
+            item[&#39;title&#39;] = sel.xpath(&#39;h3/a/text()&#39;)[0].extract()
+            item[&#39;link&#39;] = sel.xpath(&#39;h3/a/@href&#39;)[0].extract()
+            url = response.urljoin(item[&#39;link&#39;])
+            item[&#39;desc&#39;] = sel.xpath(&#39;div[@class=&quot;mob-sub&quot;]/text()&#39;)[0].extract()
+            # print(item[&#39;title&#39;],item[&#39;link&#39;],item[&#39;desc&#39;])
+            yield scrapy.Request(url, callback=self.parse_article)
+
+    def parse_article(self, response):
+        detail = response.xpath(&#39;//div[@class=&quot;article-wrap&quot;]&#39;)
+        item = HuxiuItem()
+        item[&#39;title&#39;] = detail.xpath(&#39;h1/text()&#39;)[0].extract()
+        item[&#39;link&#39;] = response.url
+        item[&#39;posttime&#39;] = detail.xpath(
+            &#39;div[@class=&quot;article-author&quot;]/span[@class=&quot;article-time&quot;]/text()&#39;)[0].extract()
+        print(item[&#39;title&#39;],item[&#39;link&#39;],item[&#39;posttime&#39;])
+        yield item
+</code></pre><p>现在parse只提取感兴趣的链接，然后将链接内容解析交给另外的方法去处理了。
+你可以基于这个构建更加复杂的爬虫程序了。</p>
+<h2 id="导出抓取数据"><a href="#导出抓取数据" class="headerlink" title="导出抓取数据"></a>导出抓取数据</h2><p>最简单的保存抓取数据的方式是使用json格式的文件保存在本地，像下面这样运行：</p>
+<pre><code class="line-numbers language-bash">scrapy crawl huxiu -o items.json
+</code></pre>
+<p>在演示的小系统里面这种方式足够了。不过如果你要构建复杂的爬虫系统，
+最好自己编写<a href="http://doc.scrapy.org/en/latest/topics/item-pipeline.html#topics-item-pipeline" target="_blank" rel="noopener">Item Pipeline</a>。</p>
+<h2 id="保存数据到数据库"><a href="#保存数据到数据库" class="headerlink" title="保存数据到数据库"></a>保存数据到数据库</h2><p>上面我们介绍了可以将抓取的Item导出为json格式的文件，不过最常见的做法还是编写Pipeline将其存储到数据库中。
+我们在<code>coolscrapy/pipelines.py</code>定义</p>
+<pre><code class="line-numbers language-python"># -*- coding: utf-8 -*-
+import datetime
+import redis
+import json
+import logging
+from contextlib import contextmanager
+
+from scrapy import signals
+from scrapy.exporters import JsonItemExporter
+from scrapy.pipelines.images import ImagesPipeline
+from scrapy.exceptions import DropItem
+from sqlalchemy.orm import sessionmaker
+from coolscrapy.models import News, db_connect, create_news_table, Article
+
+
+class ArticleDataBasePipeline(object):
+    &quot;&quot;&quot;保存文章到数据库&quot;&quot;&quot;
+
+    def __init__(self):
+        engine = db_connect()
+        create_news_table(engine)
+        self.Session = sessionmaker(bind=engine)
+
+    def open_spider(self, spider):
+        &quot;&quot;&quot;This method is called when the spider is opened.&quot;&quot;&quot;
+        pass
+
+    def process_item(self, item, spider):
+        a = Article(url=item[&quot;url&quot;],
+                    title=item[&quot;title&quot;].encode(&quot;utf-8&quot;),
+                    publish_time=item[&quot;publish_time&quot;].encode(&quot;utf-8&quot;),
+                    body=item[&quot;body&quot;].encode(&quot;utf-8&quot;),
+                    source_site=item[&quot;source_site&quot;].encode(&quot;utf-8&quot;))
+        with session_scope(self.Session) as session:
+            session.add(a)
+
+    def close_spider(self, spider):
+        pass
+</code></pre>
+<p>上面我使用了python中的SQLAlchemy来保存数据库，这个是一个非常优秀的ORM库，
+我写了篇关于它的<a href="https://www.xncoding.com/2016/03/07/python/sqlalchemy.html">入门教程</a>，可以参考下。</p>
+<p>然后在<code>setting.py</code>中配置这个Pipeline，还有数据库链接等信息：</p>
+<pre><code class="line-numbers language-python">ITEM_PIPELINES = {
+    &#39;coolscrapy.pipelines.ArticleDataBasePipeline&#39;: 5,
+}
+
+# linux pip install MySQL-python
+DATABASE = {&#39;drivername&#39;: &#39;mysql&#39;,
+            &#39;host&#39;: &#39;192.168.203.95&#39;,
+            &#39;port&#39;: &#39;3306&#39;,
+            &#39;username&#39;: &#39;root&#39;,
+            &#39;password&#39;: &#39;mysql&#39;,
+            &#39;database&#39;: &#39;spider&#39;,
+            &#39;query&#39;: {&#39;charset&#39;: &#39;utf8&#39;@@
+</code></pre>
+<p>再次运行爬虫</p>
+<pre><code class="line-numbers language-bash">scrapy crawl huxiu
+</code></pre>
+<p>那么所有新闻的文章都存储到数据库中去了。</p>
+<h2 id="下一步"><a href="#下一步" class="headerlink" title="下一步"></a>下一步</h2><p>本章只是带你领略了scrapy最基本的功能，还有很多高级特性没有讲到。接下来会通过多个例子向你展示scrapy的其他特性，然后再深入讲述每个特性。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/03/10/scrapy-02.html">Scrapy笔记02- 完整示例</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/03/12/scrapy-03.html" class="pre-post btn btn-default" title='Scrapy笔记03- Spider详解'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记03- Spider详解</span>
+        </a>
+    
+    
+        <a href="/2016/03/08/scrapy-01.html" class="next-post btn btn-default" title='Scrapy笔记01- 入门篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记01- 入门篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建Scrapy工程"><span class="toc-text">创建Scrapy工程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#定义我们的Item"><span class="toc-text">定义我们的Item</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#第一个Spider"><span class="toc-text">第一个Spider</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#encoding-utf-8"><span class="toc-text">-- encoding: utf-8 --</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#导出抓取数据"><span class="toc-text">导出抓取数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#保存数据到数据库"><span class="toc-text">保存数据到数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#下一步"><span class="toc-text">下一步</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

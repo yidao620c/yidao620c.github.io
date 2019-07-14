@@ -1,0 +1,562 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="oauth,">
+
+
+    <meta name="description" content="OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表），
+而无需将用户名和密码提供给第三方应用。
+OAuth允许用户提供一个令牌，而不是用户名和密码来访问他们存放在特定服务提供者的数据。
+每一个令牌授权一个特定的网站（例如，...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>简单介绍OAuth2.0的授权流程 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="简单介绍OAuth2.0的授权流程">
+            
+                简单介绍OAuth2.0的授权流程
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/oauth" title='oauth'>
+                        oauth
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/03/29</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表），
+而无需将用户名和密码提供给第三方应用。</p>
+<p>OAuth允许用户提供一个令牌，而不是用户名和密码来访问他们存放在特定服务提供者的数据。
+每一个令牌授权一个特定的网站（例如，视频编辑网站)在特定的时段（例如，接下来的2小时内）内访问特定的资源（例如仅仅是某一相册中的视频）。
+这样，OAuth让用户可以授权第三方网站访问他们存储在另外服务提供者的某些特定信息，而非所有内容。</p>
+<p>目前最新版本是OAuth 2.0，这里我通过用户使用 github 登录在我的博客网站上留言为例，简述 OAuth 2.0 的运作流程。</p>
+<h2 id="名词定义"><a href="#名词定义" class="headerlink" title="名词定义"></a>名词定义</h2><p>在详细讲解OAuth 2.0之前，需要了解几个专用名词：</p>
+<ol>
+<li>Third-party application：第三方应用程序，本文中又称”客户端”（client），这里是我的博客网站。</li>
+<li>HTTP service：HTTP服务提供商，本文中简称”服务提供商”，这里是GitHub。</li>
+<li>Resource Owner：资源所有者，本文中又称”用户”（user），这里是想要留言的用户。</li>
+<li>User Agent：用户代理，本文中就是指浏览器。</li>
+<li>Authorization server：认证服务器，即服务提供商专门用来处理认证的服务器。</li>
+<li>Resource server：资源服务器，即服务提供商存放用户生成的资源的服务器。它与认证服务器，可以是同一台服务器，也可以是不同的服务器。</li>
+</ol>
+<h2 id="客户端的授权模式"><a href="#客户端的授权模式" class="headerlink" title="客户端的授权模式"></a>客户端的授权模式</h2><p>客户端必须得到用户的授权（authorization grant），才能获得令牌（access token）。OAuth 2.0定义了四种授权方式：</p>
+<ul>
+<li>授权码模式（authorization code）</li>
+<li>简化模式（implicit）</li>
+<li>密码模式（resource owner password credentials）</li>
+<li>客户端模式（client credentials）</li>
+</ul>
+<p>本篇只介绍最常用、功能最完整、流程最严密的授权模式，也就是授权码模式（authorization code）。</p>
+<h2 id="授权码模式详细步骤"><a href="#授权码模式详细步骤" class="headerlink" title="授权码模式详细步骤"></a>授权码模式详细步骤</h2><ol>
+<li>用户访问客户端，后者将前者导向认证服务器。</li>
+<li>用户选择是否给予客户端授权。如果选”否”，整个授权流程结束。</li>
+<li>假设用户给予授权，认证服务器将用户导向客户端事先指定的”重定向URI”（redirection URI），同时附上一个授权码。</li>
+<li>客户端收到授权码，附上早先的”重定向URI”，向认证服务器申请令牌。这一步是在客户端的后台的服务器上完成的，对用户不可见。</li>
+<li>认证服务器核对了授权码和”重定向URI”，确认无误后，向客户端发送访问令牌（access token）和更新令牌（refresh token）。</li>
+</ol>
+<h3 id="第1步详解"><a href="#第1步详解" class="headerlink" title="第1步详解"></a>第1步详解</h3><p>用户访问客户端，后者将前者导向认证服务器。</p>
+<p>客户端申请认证的URI，包含以下参数：</p>
+<ul>
+<li>response_type：表示授权类型，必选项，此处的值固定为”code”</li>
+<li>client_id：表示客户端的ID，必选项</li>
+<li>redirect_uri：表示重定向URI，可选项</li>
+<li>scope：表示申请的权限范围，可选项</li>
+<li>state：表示客户端的当前状态，可以指定任意值（最好是随机字符串），认证服务器会原封不动地返回这个值，可防止CSRF攻击</li>
+</ul>
+<p>下面是一个例子：</p>
+<pre><code>GET /authorize?response_type=code&amp;client_id=s6BhdRkqt3&amp;state=xyz
+        &amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+Host: server.example.com
+</code></pre><h3 id="第2步详解"><a href="#第2步详解" class="headerlink" title="第2步详解"></a>第2步详解</h3><p>用户选择是否给予客户端授权。如果选”否”，整个授权流程结束。</p>
+<p>这一步其实就是引导用户登录认证服务器，查看获取的权限列表，点击同意授权按钮。
+比如某个博客网站使用了畅言评论，它支持微信、QQ登录：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/oauth01.png" alt></p>
+<p>我点击QQ登录后会跳出这个确认窗口（如果你没有登录QQ这里还需要输入账号和密码登录）：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/oauth02.png" alt></p>
+<p>可以查看到畅言评论将获得的权限列表，你还可以选择哪些权限不让它获取，点击头像后授权成功。</p>
+<h3 id="第3步详解"><a href="#第3步详解" class="headerlink" title="第3步详解"></a>第3步详解</h3><p>假设用户给予授权，认证服务器将用户导向客户端事先指定的”重定向URI”（redirection URI），同时附上一个授权码。</p>
+<p>服务器回应客户端的URI，包含以下参数：</p>
+<ul>
+<li>code：表示授权码，必选项。该码的有效期应该很短，通常设为10分钟，客户端只能使用该码一次，
+否则会被授权服务器拒绝。该码与客户端ID和重定向URI，是一一对应关系。</li>
+<li>state：如果客户端的请求中包含这个参数，认证服务器的回应也必须一模一样包含这个参数。</li>
+</ul>
+<p>下面是一个例子：</p>
+<pre><code>HTTP/1.1 302 Found
+Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA
+          &amp;state=xyz
+</code></pre><h3 id="第4步详解"><a href="#第4步详解" class="headerlink" title="第4步详解"></a>第4步详解</h3><p>客户端收到授权码，附上早先的”重定向URI”，向认证服务器申请令牌。这一步是在客户端的后台的服务器上完成的，对用户不可见。</p>
+<p>客户端向认证服务器申请令牌的HTTP请求，包含以下参数：</p>
+<ul>
+<li>grant_type：表示使用的授权模式，必选项，此处的值固定为”authorization_code”。</li>
+<li>code：表示上一步获得的授权码，必选项。</li>
+<li>redirect_uri：表示重定向URI，必选项，且必须与A步骤中的该参数值保持一致。</li>
+<li>client_id：表示客户端ID，必选项。</li>
+<li>client_secret: 表示客户端密钥，必选项。</li>
+</ul>
+<p>下面是一个例子：</p>
+<pre><code>POST /token HTTP/1.1
+Host: server.example.com
+Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW
+Content-Type: application/json
+
+params = {
+  grant_type: &quot;authorization_code&quot;,
+  code: &quot;SplxlOBeZQQYbYS6WxSbIA&quot;,
+  client_id: &quot;s6BhdRkqt3&quot;,
+  client_secret: &quot;xxx&quot;,
+  redirect_uri: &quot;https://client.example.com/cb&quot;
+}
+</code></pre><h3 id="第5步详解"><a href="#第5步详解" class="headerlink" title="第5步详解"></a>第5步详解</h3><p>认证服务器核对了授权码和”重定向URI”，确认无误后，向客户端发送访问令牌（access token）和更新令牌（refresh token）。</p>
+<p>认证服务器发送的HTTP回复，包含以下内容：</p>
+<ul>
+<li>access_token：表示访问令牌，必选项。</li>
+<li>token_type：表示令牌类型，该值大小写不敏感，必选项，可以是bearer类型或mac类型。</li>
+<li>expires_in：表示过期时间，单位为秒。如果省略该参数，必须其他方式设置过期时间。</li>
+<li>refresh_token：表示更新令牌，用来获取下一次的访问令牌，可选项。</li>
+<li>scope：表示权限范围，如果与客户端申请的范围一致，此项可省略。</li>
+</ul>
+<p>下面是一个例子：</p>
+<pre><code> HTTP/1.1 200 OK
+ Content-Type: application/json;charset=UTF-8
+ Cache-Control: no-store
+ Pragma: no-cache
+
+ {
+   &quot;access_token&quot;:&quot;2YotnFZFEjr1zCsicMWpAA&quot;,
+   &quot;token_type&quot;:&quot;bearer&quot;,
+   &quot;expires_in&quot;:3600,
+   &quot;refresh_token&quot;:&quot;tGzv3JOkF0XG5Qx2TlKWIA&quot;,
+   &quot;example_parameter&quot;:&quot;example_value&quot;
+ }
+</code></pre><p>从上面代码可以看到，相关参数使用JSON格式发送（Content-Type: application/json）。
+此外，HTTP头信息中明确指定不得缓存。</p>
+<h2 id="场景介绍"><a href="#场景介绍" class="headerlink" title="场景介绍"></a>场景介绍</h2><p>假如我有一个网站，你是我网站上的访客，看了文章想留言表示「朕已阅」，留言时发现有这个网站的帐号才能够留言，
+此时给了你两个选择：</p>
+<ul>
+<li>一个是在我的网站上注册拥有一个新账户，然后用注册的用户名来留言；</li>
+<li>一个是使用 github 帐号登录，使用你的 github 用户名来留言。</li>
+</ul>
+<p>前者你觉得过于繁琐，于是惯性地点击了 github 登录按钮，此时 OAuth 认证流程就开始了。</p>
+<p>需要明确的是，即使用户刚登录过 github，我的网站也不可能向 github 发一个什么请求便能够拿到访客信息，这显然是不安全的。
+就算用户允许你获取他在 github 上的信息，github 为了保障用户信息安全，也不会让你随意获取。
+所以操作之前，我的网站与 github 之间需要要有一个协商。</p>
+<h2 id="网站和-Github-之间的协商"><a href="#网站和-Github-之间的协商" class="headerlink" title="网站和 Github 之间的协商"></a>网站和 Github 之间的协商</h2><p>Github 会对用户的权限做分类，比如读取仓库信息的权限、写入仓库的权限、读取用户信息的权限、修改用户信息的权限等等。
+如果我想获取用户的信息，Github 会要求我，先在它的平台上注册一个应用，在申请的时候标明需要获取用户信息的哪些权限，
+用多少就申请多少，并且在申请的时候填写你的网站域名，Github 只允许在这个域名中获取用户信息。</p>
+<p>此时我的网站已经和 Github 之间达成了共识，Github 也给我发了两张门票，
+一张门票叫做 Client Id，另一张门票叫做 Client Secret。</p>
+<h2 id="用户和-Github-之间的协商"><a href="#用户和-Github-之间的协商" class="headerlink" title="用户和 Github 之间的协商"></a>用户和 Github 之间的协商</h2><p>用户进入我的网站，点击 github 登录按钮的时候，我的网站会把上面拿到的 Client Id 交给用户，让他进入到 Github 的授权页面，
+Github 看到了用户手中的门票，就知道这是我的网站让他过来的，于是它就把我的网站想要获取的权限摆出来，并询问用户是否允许我获取这些权限。</p>
+<pre><code>// 用户登录 github，协商
+GET //github.com/login/oauth/authorize
+// 协商凭证
+params = {
+  client_id: &quot;xxxx&quot;,
+  redirect_uri: &quot;http://my-website.com&quot;
+}
+</code></pre><p>如果用户觉得我的网站要的权限太多，或者压根就不想我知道他这些信息，选择了拒绝的话，整个 OAuth 2.0 的认证就结束了，认证也以失败告终。
+如果用户觉得 OK，在授权页面点击了确认授权后，页面会跳转到我预先设定的 redirect_uri 并附带一个盖了章的门票 code：</p>
+<pre><code>// 协商成功后带着盖了章的 code
+Location: http://my-website.com?code=xxx
+</code></pre><p>这个时候，用户和 Github 之间的协商就已经完成，Github 也会在自己的系统中记录这次协商，
+表示该用户已经允许在我的网站访问上直接操作和使用他的部分资源。</p>
+<h2 id="告诉-Github-我的网站要来拜访了"><a href="#告诉-Github-我的网站要来拜访了" class="headerlink" title="告诉 Github 我的网站要来拜访了"></a>告诉 Github 我的网站要来拜访了</h2><p>第二步中，我们已经拿到了盖过章的门票 code，但这个 code 只能表明，用户允许我的网站从 github 上获取该用户的数据，
+如果我直接拿这个 code 去 github 访问数据一定会被拒绝，因为任何人都可以持有 code，github 并不知道 code 持有方就是我本人。</p>
+<p>还记得之前申请应用的时候 github 给我的两张门票么，Client Id 在上一步中已经用过了，接下来轮到另一张门票 Client Secret：</p>
+<pre><code>// 网站和 github 之间的协商
+POST //github.com/login/oauth/access_token
+// 协商凭证包括 github 给用户盖的章和 github 发给我的门票
+params = {
+  code: &quot;xxx&quot;,
+  client_id: &quot;xxx&quot;,
+  client_secret: &quot;xxx&quot;,
+  redirect_uri: &quot;http://my-website.com&quot;
+}
+</code></pre><p>拿着用户盖过章的 code 和能够标识个人身份的 client_id、client_secret 去拜访 github，拿到最后的绿卡 access_token：</p>
+<pre><code>// 拿到最后的绿卡
+response = {
+  access_token: &quot;e72e16c7e42f292c6912e7710c838347ae178b4a&quot;
+  scope: &quot;user,gist&quot;
+  token_type: &quot;bearer&quot;,
+  refresh_token: &quot;xxxx&quot;
+}
+</code></pre><h2 id="用户开始使用-github-帐号在我的页面上留言"><a href="#用户开始使用-github-帐号在我的页面上留言" class="headerlink" title="用户开始使用 github 帐号在我的页面上留言"></a>用户开始使用 github 帐号在我的页面上留言</h2><pre><code>// 访问用户数据
+GET //api.github.com/user?access_token=e72e16c7e42f292c6912e7710c838347ae178b4a
+</code></pre><p>上一步 github 已经把最后的绿卡 access_token 给我了，通过 github 提供的 API 加绿卡就能够访问用户的信息了，
+能获取用户的哪些权限在 response 中也给了明确的说明，scope 为 user 和 gist，也就是只能获取 user 组和 gist 组两个小组的权限，
+user 组中就包含了用户的名字和邮箱等信息了：</p>
+<pre><code>// 告诉我用户的名字和邮箱
+response = {
+  username: &quot;barretlee&quot;,
+  email: &quot;barret.china@gmail.com&quot;
+}
+</code></pre><p>整个 OAuth2 流程在这里也基本完成了，文章中的表述很粗糙，比如 access_token 这个绿卡是有过期时间的，
+如果过期了需要使用 refresh_token 重新签证。重点是让读者理解整个流程，
+细节部分可以阅读 <a href="http://www.rfcreader.com/#rfc6749" target="_blank" rel="noopener">RFC6749 文档</a>。</p>
+<h2 id="OpenID协议"><a href="#OpenID协议" class="headerlink" title="OpenID协议"></a>OpenID协议</h2><p>本文最后顺便提一下这个OpenID协议，以及跟OAuth协议的区别。简而言之，OAuth关注的是authorization授权，
+即：“用户能做什么”，而OpenID侧重的是authentication认证，即：“用户是谁”。</p>
+<p>也许你每次去一个网站都得申请一个用户名和密码，要记住这么多的用户名和密码真是麻烦，
+OpenID就是基于解决这类问题而提出的一个国际标准，用于打通各大网站之间的用户体系。
+你可以使用某一网站的帐号去登录另一网站，只要这些网站都是实现了OpenID的服务。
+目前，google，yahoo，flickr等都支持OpenID服务。2009年2月初，facebook也宣布加入OpenId基金会。</p>
+<p>OpenID官方网站 <a href="http://openid.net" target="_blank" rel="noopener">http://openid.net</a> 。官方首页介绍说：OpenID是一个单一的免费的数字身份标识。
+使用它，你就可以登录你经常登录的网站。OpenID系统的身份认证是通过URI来认证用户身份。</p>
+<p>OpenID常见的应用场景：某用户试图登录一个外部网站。与提交用户名和密码的方式不同，他只提交了属于自己的一个URL，
+例如：<code>http://johnsmith.example.com/</code> 。这个URL即指向用户的OpenID认证服务器，同时又是用户的身份标识。
+因此外部网站使用此URL便可以找到用户的认证服务器，并询问认证服务器：“该用户声称他拥有此URL。而这个URL说明了你负责认证工作，
+那么请告诉我，该用户能否访问我的站点？”。 认证服务器将提示用户登入认证系统，并询问用户是否允许和外部网站进行认证。
+如果用户同意的话，那么认证服务器将通知外部网站——用户已经通过认证。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/03/29/security/oauth2.html">简单介绍OAuth2.0的授权流程</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/04/01/docker/docker01.html" class="pre-post btn btn-default" title='Docker每天学一点01 - 入门'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker每天学一点01 - 入门</span>
+        </a>
+    
+    
+        <a href="/2017/03/27/fullstack/jenkins04.html" class="next-post btn btn-default" title='Jenkins持续集成 - 高级特性'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Jenkins持续集成 - 高级特性</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#名词定义"><span class="toc-text">名词定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端的授权模式"><span class="toc-text">客户端的授权模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#授权码模式详细步骤"><span class="toc-text">授权码模式详细步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#第1步详解"><span class="toc-text">第1步详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#第2步详解"><span class="toc-text">第2步详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#第3步详解"><span class="toc-text">第3步详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#第4步详解"><span class="toc-text">第4步详解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#第5步详解"><span class="toc-text">第5步详解</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#场景介绍"><span class="toc-text">场景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#网站和-Github-之间的协商"><span class="toc-text">网站和 Github 之间的协商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户和-Github-之间的协商"><span class="toc-text">用户和 Github 之间的协商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#告诉-Github-我的网站要来拜访了"><span class="toc-text">告诉 Github 我的网站要来拜访了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户开始使用-github-帐号在我的页面上留言"><span class="toc-text">用户开始使用 github 帐号在我的页面上留言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OpenID协议"><span class="toc-text">OpenID协议</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

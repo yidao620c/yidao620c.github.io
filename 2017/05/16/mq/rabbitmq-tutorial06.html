@@ -1,0 +1,493 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="rabbitmq,">
+
+
+    <meta name="description" content="在教程第二篇里面我们学习了如何实现一个任务队列，异步方式去处理那些比较耗时的任务。
+但是如果我们需要调用一个远程主机上面的方法，并且等待它的执行结果呢？
+这种模式我们通常将它称为远程方法调用（RPC）。
+这一篇我们将利用RabbitMQ来构建一个RPC服务，服务器上面有一个可返回斐波拉契数的函...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>RabbitMQ简易教程 - RPC | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="RabbitMQ简易教程 - RPC">
+            
+                RabbitMQ简易教程 - RPC
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/mq">
+            mq
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/rabbitmq" title='rabbitmq'>
+                        rabbitmq
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/16</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在教程第二篇里面我们学习了如何实现一个任务队列，异步方式去处理那些比较耗时的任务。
+但是如果我们需要调用一个远程主机上面的方法，并且等待它的执行结果呢？
+这种模式我们通常将它称为远程方法调用（RPC）。</p>
+<p>这一篇我们将利用RabbitMQ来构建一个RPC服务，服务器上面有一个可返回斐波拉契数的函数。
+客户端通过rpc调用来获取结果。 </p>
+<h2 id="客户端接口"><a href="#客户端接口" class="headerlink" title="客户端接口"></a>客户端接口</h2><p>为了演示的方便，我在客户端创建一个简单的类，里面有个<code>call</code>方法，它会发送一个rpc请求并等待执行的返回结果。</p>
+<p>使用它的方式如下：</p>
+<pre><code class="line-numbers language-python">fibonacci_rpc = FibonacciRpcClient()
+result = fibonacci_rpc.call(4)
+print(&quot;fib(4) is %r&quot; % result)
+</code></pre>
+<h2 id="回调队列"><a href="#回调队列" class="headerlink" title="回调队列"></a>回调队列</h2><p>使用RabbitMQ实现RPC原理很简单，客户端使用消息的方式发送方法名和参数，服务器将结果也作为消息回传回来，
+那么这时候就需要另外一个队列来接受返回的消息，这里可指定回调队列。</p>
+<pre><code class="line-numbers language-python">result = channel.queue_declare(exclusive=True)
+callback_queue = result.method.queue
+
+channel.basic_publish(exchange=&#39;&#39;,
+                      routing_key=&#39;rpc_queue&#39;,
+                      properties=pika.BasicProperties(
+                            reply_to = callback_queue,
+                            ),
+                      body=request)
+
+# ... and some code to read a response message from the callback_queue ...
+</code></pre>
+<h2 id="Correlation-id"><a href="#Correlation-id" class="headerlink" title="Correlation id"></a>Correlation id</h2><p>上面的例子每一次的RPC请求都会创建一个新的回调队列，这个很浪费资源。
+不过我们现在可以通过<code>Correlation id</code>，也就是关联id来对每个客户端只创建唯一的回调队列。
+每次请求带上这个关联id，当获取返回值时候比较关联id，一致的说明是这个请求的返回消息就接受，不一致的忽略这个消息。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>一次RPC调用流程大致如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb08.png" alt></p>
+<ol>
+<li>客户端启动时候，创建一个匿名的排他回调队列</li>
+<li>每一次的RPC请求，客户端发送的消息都会带两个属性：<code>reply_to</code>(回调队列)和correlation_id</li>
+<li>请求发送至<code>rpc_queue</code>队列</li>
+<li>RPC服务器订阅这个<code>rpc_queue</code>队列，收到消息就执行然后返回结果，使用<code>reply_to</code>指定的回调队列。</li>
+<li>客户端等待回调队列的数据返回，当收到消息后，检查<code>correlation_id</code>属性，如果一致就返回结果。</li>
+</ol>
+<h2 id="最终代码"><a href="#最终代码" class="headerlink" title="最终代码"></a>最终代码</h2><p>RPC服务器：</p>
+<p><code>`</code> python rpc_server.py
+import pika</p>
+<p>connection = pika.BlockingConnection(pika.ConnectionParameters(host=’192.168.217.161’, port=5673))</p>
+<p>channel = connection.channel()</p>
+<p>channel.queue_declare(queue=’rpc_queue’)</p>
+<p>def fib(n):
+    if n == 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fib(n - 1) + fib(n - 2)</p>
+<p>def on_request(ch, method, props, body):
+    n = int(body)</p>
+<pre><code>print(&quot; [.] fib(%s)&quot; % n)
+response = fib(n)
+
+ch.basic_publish(exchange=&#39;&#39;,
+                 routing_key=props.reply_to,
+                 properties=pika.BasicProperties(correlation_id=props.correlation_id),
+                 body=str(response))
+ch.basic_ack(delivery_tag=method.delivery_tag)
+</code></pre><p>channel.basic_qos(prefetch_count=1)
+channel.basic_consume(on_request, queue=’rpc_queue’)</p>
+<p>print(“ [x] Awaiting RPC requests”)
+channel.start_consuming()</p>
+<pre><code>
+客户端调用：
+``` python rpc_client.py
+import pika
+import uuid
+
+
+class FibonacciRpcClient(object):
+    def __init__(self):
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+
+        self.channel = self.connection.channel()
+
+        result = self.channel.queue_declare(exclusive=True)
+        self.callback_queue = result.method.queue
+
+        self.channel.basic_consume(self.on_response, no_ack=True,
+                                   queue=self.callback_queue)
+
+    def on_response(self, ch, method, props, body):
+        if self.corr_id == props.correlation_id:
+            self.response = body
+
+    def call(self, n):
+        self.response = None
+        self.corr_id = str(uuid.uuid4())
+        self.channel.basic_publish(exchange=&#39;&#39;,
+                                   routing_key=&#39;rpc_queue&#39;,
+                                   properties=pika.BasicProperties(
+                                       reply_to=self.callback_queue,
+                                       correlation_id=self.corr_id,
+                                   ),
+                                   body=str(n))
+        while self.response is None:
+            self.connection.process_data_events()
+        return int(self.response)
+
+
+fibonacci_rpc = FibonacciRpcClient()
+
+print(&quot; [x] Requesting fib(30)&quot;)
+response = fibonacci_rpc.call(30)
+print(&quot; [.] Got %r&quot; % response)
+</code></pre><p>演示效果</p>
+<p>rpc_server.py</p>
+<pre><code> [x] Awaiting RPC requests
+ [.] fib(30)
+</code></pre><p>rpc_client.py</p>
+<pre><code> [x] Requesting fib(30)
+ [.] Got 832040
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/16/mq/rabbitmq-tutorial06.html">RabbitMQ简易教程 - RPC</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/05/17/mq/rabbitmq-tutorial07.html" class="pre-post btn btn-default" title='RabbitMQ简易教程 - WebSocket'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - WebSocket</span>
+        </a>
+    
+    
+        <a href="/2017/05/15/mq/rabbitmq-tutorial05.html" class="next-post btn btn-default" title='RabbitMQ简易教程 - 主题'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 主题</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端接口"><span class="toc-text">客户端接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#回调队列"><span class="toc-text">回调队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Correlation-id"><span class="toc-text">Correlation id</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最终代码"><span class="toc-text">最终代码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

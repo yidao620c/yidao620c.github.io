@@ -1,0 +1,569 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="form,">
+
+
+    <meta name="description" content="在平时开发中，如果网速比较慢的情况下，用户提交表单后，发现服务器半天都没有响应，
+那么用户可能会以为是自己没有提交表单，就会再点击提交按钮重复提交表单，我们在开发中必须防止表单重复提交。
+重复提交的几个场景场景一
+在网络延迟的情况下让用户有时间点击多次submit按钮导致表单重复提交
+场景二
+...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>防止表单重复提交 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="防止表单重复提交">
+            
+                防止表单重复提交
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/web">
+            web
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/form" title='form'>
+                        form
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/07/29</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在平时开发中，如果网速比较慢的情况下，用户提交表单后，发现服务器半天都没有响应，
+那么用户可能会以为是自己没有提交表单，就会再点击提交按钮重复提交表单，我们在开发中必须防止表单重复提交。</p>
+<h2 id="重复提交的几个场景"><a href="#重复提交的几个场景" class="headerlink" title="重复提交的几个场景"></a>重复提交的几个场景</h2><p><strong>场景一</strong></p>
+<p>在网络延迟的情况下让用户有时间点击多次submit按钮导致表单重复提交</p>
+<p><strong>场景二</strong></p>
+<p>表单提交后用户点击【刷新】按钮导致表单重复提交，点击浏览器的刷新按钮，
+就是把浏览器上次做的事情再做一次，因为这样也会导致表单重复提交。</p>
+<p><strong>场景三</strong></p>
+<p>用户提交表单后，使用浏览器【后退】按钮重复之前的操作，导致重复提交表单。</p>
+<h2 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h2><h3 id="JavaScript方案"><a href="#JavaScript方案" class="headerlink" title="JavaScript方案"></a>JavaScript方案</h3><p>针对【场景一】，可通过页面前端的JavaScript方案来解决重复提交问题。</p>
+<p>可通过javascript来防止表单重复提交，表单提交之后，
+将提交按钮设置为不可用，让用户没有机会点击第二次提交按钮，代码如下：</p>
+<pre><code class="line-numbers language-js">function dosubmit(){
+    //获取表单提交按钮
+    var btnSubmit = document.getElementById(&quot;submit&quot;);
+    //将表单提交按钮设置为不可用，这样就可以避免用户再次点击提交按钮
+    btnSubmit.disabled= &quot;disabled&quot;;
+    //返回true让表单可以正常提交
+    return true;
+}
+</code></pre>
+<h3 id="Session方案"><a href="#Session方案" class="headerlink" title="Session方案"></a>Session方案</h3><p>对于【场景二】和【场景三】导致表单重复提交的问题，既然客户端无法解决，
+那么就在服务器端解决，在服务器端解决就需要用到session了。</p>
+<p>具体的做法：在服务器端生成一个唯一的随机标识号，专业术语称为Token(令牌)，同时在当前用户的Session域中保存这个Token。
+然后将Token发送到客户端的Form表单中，在Form表单中使用隐藏域来存储这个Token，
+表单提交的时候连同这个Token一起提交到服务器端，然后在服务器端判断客户端提交上来的Token与服务器端生成的Token是否一致，
+如果不一致，那就是重复提交了，此时服务器端就可以不处理重复提交的表单。如果相同则处理表单提交，
+处理完后清除当前用户的Session域中存储的标识号。</p>
+<p>在下列情况下，服务器程序将拒绝处理用户提交的表单请求：</p>
+<ol>
+<li>存储Session域中的Token(令牌)与表单提交的Token(令牌)不同。</li>
+<li>当前用户的Session中不存在Token(令牌)。</li>
+<li>用户提交的表单数据中没有Token(令牌)。</li>
+</ol>
+<p>具体的例子：</p>
+<p>1.创建FormServlet，用于生成Token(令牌)和跳转到form.jsp页面</p>
+<pre><code class="line-numbers language-java">package xdp.gacl.session;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class FormServlet extends HttpServlet {
+    private static final long serialVersionUID = -884689940866074733L;
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String token = TokenProccessor.getInstance().makeToken();//创建令牌
+        System.out.println(&quot;在FormServlet中生成的token：&quot;+token);
+        request.getSession().setAttribute(&quot;token&quot;, token);  //在服务器使用session保存token(令牌)
+        request.getRequestDispatcher(&quot;/form.jsp&quot;).forward(request, response);//跳转到form.jsp页面
+    }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+</code></pre>
+<p>生成Token的工具类TokenProccessor：</p>
+<pre><code class="line-numbers language-java">package xdp.gacl.session;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Random;
+import sun.misc.BASE64Encoder;
+
+public class TokenProccessor {
+
+    /*
+     *单例设计模式（保证类的对象在内存中只有一个）
+     *1、把类的构造函数私有
+     *2、自己创建一个类的对象
+     *3、对外提供一个公共的方法，返回类的对象
+     */
+    private TokenProccessor(){}
+
+    private static final TokenProccessor instance = new TokenProccessor();
+
+    /**
+     * 返回类的对象
+     * @return
+     */
+    public static TokenProccessor getInstance(){
+        return instance;
+    }
+
+    /**
+     * 生成Token
+     * Token：Nv6RRuGEVvmGjB+jimI/gw==
+     * @return
+     */
+    public String makeToken(){  //checkException
+        //  7346734837483  834u938493493849384  43434384
+        String token = (System.currentTimeMillis() + new Random().nextInt(999999999)) + &quot;&quot;;
+        //数据指纹   128位长   16个字节  md5
+        try {
+            MessageDigest md = MessageDigest.getInstance(&quot;md5&quot;);
+            byte md5[] =  md.digest(token.getBytes());
+            //base64编码--任意二进制编码明文字符   adfsdfsdfsf
+            BASE64Encoder encoder = new BASE64Encoder();
+            return encoder.encode(md5);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+</code></pre>
+<p>2.在form.jsp中使用隐藏域来存储Token(令牌)</p>
+<pre><code class="line-numbers language-jsp">&lt;%@ page language=&quot;java&quot; import=&quot;java.util.*&quot; pageEncoding=&quot;UTF-8&quot;%&gt;
+&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;form表单&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;form action=&quot;${pageContext.request.contextPath}/servlet/DoFormServlet&quot; method=&quot;post&quot;&gt;
+        &lt;%--使用EL表达式取出存储在session中的token--%&gt;
+        &lt;input type=&quot;hidden&quot; name=&quot;token&quot; value=&quot;${token}&quot;/&gt; 
+        用户名：&lt;input type=&quot;text&quot; name=&quot;username&quot;&gt; 
+        &lt;input type=&quot;submit&quot; value=&quot;提交&quot;&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>3.DoFormServlet处理表单提交</p>
+<pre><code class="line-numbers language-java">package xdp.gacl.session;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class DoFormServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+                throws ServletException, IOException {
+
+            boolean b = isRepeatSubmit(request);//判断用户是否是重复提交
+            if(b==true){
+                System.out.println(&quot;请不要重复提交&quot;);
+                return;
+            }
+            request.getSession().removeAttribute(&quot;token&quot;);//移除session中的token
+            System.out.println(&quot;处理用户提交请求！！&quot;);
+        }
+
+        /**
+         * 判断客户端提交上来的令牌和服务器端生成的令牌是否一致
+         * @param request
+         * @return 
+         *         true 用户重复提交了表单 
+         *         false 用户没有重复提交表单
+         */
+        private boolean isRepeatSubmit(HttpServletRequest request) {
+            String client_token = request.getParameter(&quot;token&quot;);
+            //1、如果用户提交的表单数据中没有token，则用户是重复提交了表单
+            if(client_token==null){
+                return true;
+            }
+            //取出存储在Session中的token
+            String server_token = (String) request.getSession().getAttribute(&quot;token&quot;);
+            //2、如果当前用户的Session中不存在Token(令牌)，则用户是重复提交了表单
+            if(server_token==null){
+                return true;
+            }
+            //3、存储在Session中的Token(令牌)与表单提交的Token(令牌)不同，则用户是重复提交了表单
+            if(!client_token.equals(server_token)){
+                return true;
+            }
+
+            return false;
+        }
+
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+</code></pre>
+<h3 id="使用Post-Redirect-Get模式"><a href="#使用Post-Redirect-Get模式" class="headerlink" title="使用Post/Redirect/Get模式"></a>使用Post/Redirect/Get模式</h3><p>针对【场景二】和【场景三】，除了使用Session方案，还有一种方案可以实现。
+这就是所谓的 <a href="http://www.theserverside.com/news/1365146/Redirect-After-Post" target="_blank" rel="noopener">Post-Redirect-Get (PRG)模式</a>。</p>
+<p>简言之，当用户提交了表单后，你去执行一个客户端的重定向，转到提交成功信息页面。
+这能避免用户按F5导致的重复提交，而其也不会出现浏览器表单重复提交的警告，也能消除按浏览器前进和后退按导致的同样问题。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/07/29/web/form.html">防止表单重复提交</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/09/02/python/vagrant.html" class="pre-post btn btn-default" title='Vagrant创建虚拟化开发环境'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Vagrant创建虚拟化开发环境</span>
+        </a>
+    
+    
+        <a href="/2016/07/26/security/sql-inject.html" class="next-post btn btn-default" title='SQL注入攻击介绍'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SQL注入攻击介绍</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#重复提交的几个场景"><span class="toc-text">重复提交的几个场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#解决办法"><span class="toc-text">解决办法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JavaScript方案"><span class="toc-text">JavaScript方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Session方案"><span class="toc-text">Session方案</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用Post-Redirect-Get模式"><span class="toc-text">使用Post/Redirect/Get模式</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="memcached,">
+
+
+    <meta name="description" content="下载memcached与libevent的安装文件：
+memcached下载地址：memcached-1.4.15.tar.gz
+libevent下载地址：libevent-2.0.21-stable.tar.gz
+具体安装步骤安装libevent
+由于memcached依赖于libevent...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>linux上安装memcached | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="linux上安装memcached">
+            
+                linux上安装memcached
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/cache">
+            cache
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/memcached" title='memcached'>
+                        memcached
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/04/16</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>下载memcached与libevent的安装文件：</p>
+<p>memcached下载地址：<a href="http://memcached.googlecode.com/files/memcached-1.4.15.tar.gz" target="_blank" rel="noopener">memcached-1.4.15.tar.gz</a></p>
+<p>libevent下载地址：<a href="https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz" target="_blank" rel="noopener">libevent-2.0.21-stable.tar.gz</a></p>
+<h3 id="具体安装步骤"><a href="#具体安装步骤" class="headerlink" title="具体安装步骤"></a>具体安装步骤</h3><h4 id="安装libevent"><a href="#安装libevent" class="headerlink" title="安装libevent"></a>安装libevent</h4><ol>
+<li>由于memcached依赖于libevent，因此需要安装libevent。由于linux系统可能默认已经安装libevent，执行命令：<pre><code class="line-numbers language-bash">rpm -qa|grep libevent 
+</code></pre>
+</li>
+<li>查看系统是否带有该安装软件，如果有执行命令:<pre><code class="line-numbers language-bash"># 由于系统自带的版本旧，忽略依赖删除
+rpm -e libevent-1.4.13-4.el6.x86_64 –nodeps
+</code></pre>
+</li>
+<li>安装libevent命令：<pre><code class="line-numbers language-bash">tar zxvf libevent-2.0.21-stable.tar.gz
+cd libevent-2.0.21-stable
+./configure --prefix=/usr/local/libevent
+make
+make install
+</code></pre>
+至此libevent安装完毕；</li>
+</ol>
+<h4 id="安装memcached"><a href="#安装memcached" class="headerlink" title="安装memcached"></a>安装memcached</h4><pre><code class="line-numbers language-bash">tar zxvf memcached-1.4.2.tar.gz
+cd memcached-memcached-1.4.2
+./configure --prefix=/usr/local/memcached --with-libevent=
+/usr/local/libevent/
+make
+make install
+</code></pre>
+<p>至此memcached安装完毕；</p>
+<h4 id="可能存在的错误以及解决方案"><a href="#可能存在的错误以及解决方案" class="headerlink" title="可能存在的错误以及解决方案"></a>可能存在的错误以及解决方案</h4><p>如果出现客户端连接不上memcached的情况，请将防火墙关闭或将防火墙中的memcached端口（11211端口）打开。</p>
+<h4 id="启动memcached"><a href="#启动memcached" class="headerlink" title="启动memcached"></a>启动memcached</h4><p>打开一个终端，输入以下命令：</p>
+<pre><code class="line-numbers language-bash">/usr/local/memcached/bin/memcached -d -m 256 -u root -p 11211 -c 1024 –P /tmp/memcached.pid
+</code></pre>
+<p>启动参数说明：</p>
+<pre><code>-d 选项是启动一个守护进程。
+-u root 表示启动memcached的用户为root。
+-m 是分配给Memcache使用的内存数量，单位是MB，默认64MB。
+-M return error on memory exhausted (rather than removing items)。
+-u 是运行Memcache的用户，如果当前为root 的话，需要使用此参数指定用户。
+-p 是设置Memcache的TCP监听的端口，最好是1024以上的端口。
+-c 选项是最大运行的并发连接数，默认是1024。
+-P 是设置保存Memcache的pid文件。
+</code></pre><p>另外还有个更详细的参数说明：</p>
+<pre><code>memcached 1.4.2
+-p &lt;num监听的TCP端口(默认: 11211)
+-U &lt;num监听的UDP端口(默认: 11211, 0表示不监听)
+-s &lt;file用于监听的UNIX套接字路径（禁用网络支持）
+-a &lt;maskUNIX套接字访问掩码，八进制数字（默认：0700）
+-l &lt;ip_addr监听的IP地址。（默认：INADDR_ANY，所有地址）
+-d 作为守护进程来运行。
+-r 最大核心文件限制。
+-u &lt;username设定进程所属用户。（只有root用户可以使用这个参数）
+-m &lt;num单个数据项的最大可用内存，以MB为单位。（默认：64MB）
+-M 内存用光时报错。（不会删除数据）
+-c &lt;num最大并发连接数。（默认：1024）
+-k 锁定所有内存页。注意你可以锁定的内存上限。
+试图分配更多内存会失败的，所以留意启动守护进程时所用的用户可分配的内存上限。
+（不是前面的 -u &lt;username参数；在sh下，使用命令&quot;ulimit -S -l NUM_KB&quot;来设置。）
+-v 提示信息（在事件循环中打印错误/警告信息。）
+-vv 详细信息（还打印客户端命令/响应）
+-vvv 超详细信息（还打印内部状态的变化）
+-h 打印这个帮助信息并退出。
+-i 打印memcached和libevent的许可。
+-P &lt;file保存进程ID到指定文件，只有在使用 -d 选项的时候才有意义。
+-f &lt;factor块大小增长因子。（默认：1.25）
+-n &lt;bytes分配给key+value+flags的最小空间（默认：48）
+-L 尝试使用大内存页（如果可用的话）。提高内存页尺寸可以减少&quot;页表缓冲（TLB）&quot;丢失次数，提高运行效率。
+为了从操作系统获得大内存页，memcached会把全部数据项分配到一个大区块。
+-D &lt;char使用 &lt;char作为前缀和ID的分隔符。
+这个用于按前缀获得状态报告。默认是&quot;:&quot;（冒号）。
+如果指定了这个参数，则状态收集会自动开启；如果没指定，则需要用命令&quot;stats detail on&quot;来开启。
+-t &lt;num使用的线程数（默认：4）
+-R 每个连接可处理的最大请求数。
+-C 禁用CAS。
+-b 设置后台日志队列的长度（默认：1024）
+-B 绑定协议 - 可能值：ascii,binary,auto（默认）
+-I 重写每个数据页尺寸。调整数据项最大尺寸。
+</code></pre><p>也可以启动多个守护进程，但是端口不能重复</p>
+<h4 id="查看memcached启动命令："><a href="#查看memcached启动命令：" class="headerlink" title="查看memcached启动命令："></a>查看memcached启动命令：</h4><pre><code class="line-numbers language-bash">ps aux|grep memcached
+</code></pre>
+<h4 id="停止memcached"><a href="#停止memcached" class="headerlink" title="停止memcached"></a>停止memcached</h4><p>打开一个终端，输入以下命令：</p>
+<pre><code class="line-numbers language-bash">ps -ef | grep memcached或者上面的ps命令也行，第二个字段为PID，比如10068
+</code></pre>
+<p>输入一下命令终止memcached服务：</p>
+<pre><code class="line-numbers language-bash">kill -9 10068
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/04/16/cache/memcached-install.html">linux上安装memcached</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/04/18/algorithm/sort-search.html" class="pre-post btn btn-default" title='快速排序和二分查找'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">快速排序和二分查找</span>
+        </a>
+    
+    
+        <a href="/2015/04/15/algorithm/eight-queens.html" class="next-post btn btn-default" title='回溯法解决八皇后问题'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">回溯法解决八皇后问题</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#具体安装步骤"><span class="toc-text">具体安装步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#安装libevent"><span class="toc-text">安装libevent</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#安装memcached"><span class="toc-text">安装memcached</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#可能存在的错误以及解决方案"><span class="toc-text">可能存在的错误以及解决方案</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#启动memcached"><span class="toc-text">启动memcached</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#查看memcached启动命令："><span class="toc-text">查看memcached启动命令：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#停止memcached"><span class="toc-text">停止memcached</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

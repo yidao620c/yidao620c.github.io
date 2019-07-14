@@ -1,0 +1,718 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="sphinx,readthedocs,">
+
+
+    <meta name="description" content="Read the Docs是一个在线文档托管服务，
+你可以从各种版本控制系统中导入文档，如果你使用webhooks，
+那么每次提交代码后可以自动构建并上传至readthedocs网站，非常方便。
+一般来讲，这个非常适合写软件文档以及编写一些教程、电子书之类。对于一些一两篇文章就能写清楚的可以记...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>使用ReadtheDocs托管文档 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="使用ReadtheDocs托管文档">
+            
+                使用ReadtheDocs托管文档
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/sphinx" title='sphinx'>
+                        sphinx
+                    </a>
+                
+                    <a href="/tags/readthedocs" title='readthedocs'>
+                        readthedocs
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/01/22</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p><a href="https://readthedocs.org/" target="_blank" rel="noopener">Read the Docs</a>是一个在线文档托管服务，
+你可以从各种版本控制系统中导入文档，如果你使用<a href="http://docs.readthedocs.io/en/latest/webhooks.html" target="_blank" rel="noopener">webhooks</a>，
+那么每次提交代码后可以自动构建并上传至readthedocs网站，非常方便。</p>
+<p>一般来讲，这个非常适合写软件文档以及编写一些教程、电子书之类。对于一些一两篇文章就能写清楚的可以记笔记或写博客，
+但是如果要写成一个系列的，不如写成一本书的形式，更美观，也更系统。</p>
+<p>现有的写电子书的方式，有以下几个解决方案，优劣势也很明显：</p>
+<ul>
+<li>写博客，跟散文堆在一起，不便索引。</li>
+<li>GitHub Wiki，适合做知识整理，但排版一般，不方便查看。</li>
+<li>GitBook，样式不好看，访问速度慢。</li>
+</ul>
+<p>经过比较最后锁定Sphinx + GitHub + ReadtheDocs 作为文档写作工具，用 Sphinx 生成文档，GitHub 托管文档，再导入到 ReadtheDocs。</p>
+<h2 id="Sphinx"><a href="#Sphinx" class="headerlink" title="Sphinx"></a>Sphinx</h2><p>Sphinx是一个基于Python的文档生成项目，最早只是用来生成 Python 官方文档，随着工具的完善，
+越来越多的知名的项目也用他来生成文档，甚至完全可以用他来写书采用了reStructuredText作为文档写作语言,
+不过也可以通过模块支持其他格式，待会我会介绍怎样支持MarkDown格式。</p>
+<h3 id="安装Sphinx"><a href="#安装Sphinx" class="headerlink" title="安装Sphinx:"></a>安装Sphinx:</h3><pre><code class="line-numbers language-bash">pip install sphinx sphinx-autobuild sphinx_rtd_theme
+</code></pre>
+<p>这一步时间会安装很多python依赖，耐心等等..</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化:"></a>初始化:</h3><pre><code class="line-numbers language-bash"># 创建文档根目录
+mkdir -p /root/work/scrapy-cookbook
+cd scrapy-cookbook/
+# 可以回车按默认配置来写
+sphinx-quickstart
+</code></pre>
+<p>下面是我填写的，其他基本上默认即可：</p>
+<blockquote>
+<p>Separate source and build directories (y/n) [n]:y
+Project name: scrapy-cookbook
+Author name(s): Xiong Neng
+Project version []: 0.2
+Project release [1.0]: 0.2.2
+Project language [en]: zh_CN</p>
+</blockquote>
+<p>安装软件tree查看目录树结构：</p>
+<pre><code class="line-numbers language-bash">yum install tree
+</code></pre>
+<p>然后运行 <code>tree -C .</code> 查看生成的sphinx结构:</p>
+<pre><code>.
+├── build
+├── make.bat
+├── Makefile
+└── source
+    ├── conf.py
+    ├── index.rst
+    ├── _static
+    └── _templates
+</code></pre><p>添加一篇文章，在source目录下新建hello.rst，内容如下:</p>
+<pre><code>hello,world
+=============
+</code></pre><p><code>index.rst</code> 修改如下:</p>
+<pre><code>Contents:
+.. toctree::
+   :maxdepth: 2
+
+   hello
+</code></pre><h3 id="更改主题-sphinx-rtd-theme"><a href="#更改主题-sphinx-rtd-theme" class="headerlink" title="更改主题 sphinx_rtd_theme"></a>更改主题 sphinx_rtd_theme</h3><p>更改source/conf.py:</p>
+<pre><code class="line-numbers language-python">import sphinx_rtd_theme
+html_theme = &quot;sphinx_rtd_theme&quot;
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+</code></pre>
+<h3 id="预览效果"><a href="#预览效果" class="headerlink" title="预览效果"></a>预览效果</h3><p>然后在更目录执行<code>make html</code>，进入<code>build/html</code>目录后用浏览器打开<code>index.html</code>
+<img src="https://xnstatic-1253397658.file.myqcloud.com/rtd01.png" alt></p>
+<p>toctree 支持多级目录,比如要想将python.rst,java.rst笔记在不同的目录,toctree这样设置:</p>
+<pre><code>Contents:
+
+.. toctree::
+
+   python/python
+   swift/swift
+
+</code></pre><p>注意中间的空行</p>
+<h2 id="支持markdown编写"><a href="#支持markdown编写" class="headerlink" title="支持markdown编写"></a>支持markdown编写</h2><p>通过<a href="https://recommonmark.readthedocs.io/en/latest/" target="_blank" rel="noopener">recommonmark</a> 来支持markdown</p>
+<pre><code class="line-numbers language-bash">pip install recommonmark
+</code></pre>
+<p>然后更改conf.py:</p>
+<pre><code class="line-numbers language-python">from recommonmark.parser import CommonMarkParser
+source_parsers = {
+    &#39;.md&#39;: CommonMarkParser,
+}
+source_suffix = [&#39;.rst&#39;, &#39;.md&#39;]
+</code></pre>
+<h3 id="AutoStructify"><a href="#AutoStructify" class="headerlink" title="AutoStructify"></a>AutoStructify</h3><p>如果想使用高级功能，可以添加AutoStructify配置，在<code>conf.py</code>中添加:</p>
+<pre><code class="line-numbers language-python"># At top on conf.py (with other import statements)
+import recommonmark
+from recommonmark.transform import AutoStructify
+
+# At the bottom of conf.py
+def setup(app):
+    app.add_config_value(&#39;recommonmark_config&#39;, {
+            &#39;url_resolver&#39;: lambda url: github_doc_root + url,
+            &#39;auto_toc_tree_section&#39;: &#39;Contents&#39;,
+            }, True)
+    app.add_transform(AutoStructify)
+</code></pre>
+<p>网上有个详细配置: <a href="https://github.com/rtfd/recommonmark/blob/master/docs/conf.py" target="_blank" rel="noopener">https://github.com/rtfd/recommonmark/blob/master/docs/conf.py</a></p>
+<p>然后修改刚刚的<code>hello.rst</code>，改用熟悉的<code>hello.md</code>编写:</p>
+<pre><code class="line-numbers language-md">
+## hello world
+
+### test markdown
+
+</code></pre>
+<p>再次运行<code>make html</code>后看效果，跟前面一样。</p>
+<h2 id="GitHub托管"><a href="#GitHub托管" class="headerlink" title="GitHub托管"></a>GitHub托管</h2><p>一般的做法是将文档托管到版本控制系统比如github上面，push源码后自动构建发布到readthedoc上面，
+这样既有版本控制好处，又能自动发布到readthedoc，实在是太方便了。</p>
+<p>先在GitHub创建一个仓库名字叫scrapy-cookbook，
+然后在本地.gitignore文件中添加<code>build/</code>目录，初始化git，commit后，添加远程仓库。</p>
+<p>具体几个步骤非常简单，参考官方文档：<a href="https://github.com/rtfd/readthedocs.org" target="_blank" rel="noopener">https://github.com/rtfd/readthedocs.org</a>:</p>
+<ol>
+<li>在Read the Docs上面注册一个账号</li>
+<li>登陆后点击 “Import”.</li>
+<li>给该文档项目填写一个名字比如 “scrapy-cookbook”, 并添加你在GitHub上面的工程HTTPS链接, 选择仓库类型为Git</li>
+<li>其他项目根据自己的需要填写后点击 “Create”，创建完后会自动去激活Webhooks，不用再去GitHub设置</li>
+<li>一切搞定，从此只要你往这个仓库push代码，readthedoc上面的文档就会自动更新.</li>
+</ol>
+<p>注：在创建read the docs项目时候，语言选择”Simplified Chinese”</p>
+<p>在构建过程中出现任何问题，都可以登录readthedoc找到项目中的”构建”页查看构建历史，点击任何一条查看详细日志:
+<img src="https://xnstatic-1253397658.file.myqcloud.com/rtd02.png" alt></p>
+<p>我将自己以前博客里面的关于scrapy的文章都迁移至readthedoc，现在看看效果：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/rtd03.png" alt></p>
+<h2 id="生成PDF"><a href="#生成PDF" class="headerlink" title="生成PDF"></a>生成PDF</h2><p>首先要安装TeX Live，CentOS 7的yum库中的TeX Live版本比较老，所以直接安装官网上的版本。</p>
+<p>在<a href="http://tug.org/texlive/acquire-netinstall.html" target="_blank" rel="noopener">官网页面</a>
+下载安装包<a href="http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz" target="_blank" rel="noopener">install-tl-unx.tar.gz</a></p>
+<p>如果先安装依赖包：</p>
+<pre><code class="line-numbers language-bash">yum install perl-Digest-MD5
+</code></pre>
+<p>然后解压缩安装：</p>
+<pre><code class="line-numbers language-bash">tar zxf install-tl-unx.tar.gz
+cd install-tl-*
+./install-tl  # install-tl-windows on Windows
+[... messages omitted ...]
+Enter command: i
+[... when done, see below for post-install ...]
+</code></pre>
+<p>安装时间会比较长，我这里安装大概要50分钟左右，请耐心等待…</p>
+<p>安装完后配置PATH，在<code>/etc/profile</code>后面添加:</p>
+<pre><code class="line-numbers language-bash">export PATH=/usr/local/texlive/2016/bin/x86_64-linux:$PATH
+</code></pre>
+<p>注意上面的路径改成你自己正确的路径，然后执行<code>source /etc/profile</code>即可</p>
+<p>如果要生成中文PDF，还需要确认安装了东亚语言包和字体包</p>
+<pre><code class="line-numbers language-bash">yum -y install fontconfig ttmkfdir
+# /usr/share目录就可以看到fonts和fontconfig目录
+# 首先在/usr/share/fonts目录下新建一个目录chinese：
+cd /usr/share/fonts
+mkdir chinese
+# 紧接着需要修改chinese目录的权限：
+chmod -R 755 /usr/share/fonts/chinese
+# 从C:/Windows/Fonts目录复制你想要的字体到chinese文件夹
+# msyh.ttf msyhbd.ttf simhei.ttf simsun.ttc wqy-microhei.ttc YaHeiConsolas.ttf
+ttmkfdir -e /usr/share/X11/fonts/encodings/encodings.dir
+vi /etc/fonts/fonts.conf
+&lt;!-- Font directory list --&gt;
+&lt;dir&gt;/usr/share/fonts&lt;/dir&gt;
+&lt;dir&gt;/usr/share/fonts/chinese&lt;/dir&gt;
+
+fc-cache
+fc-list :zh
+</code></pre>
+<p>要用XeLaTeX 取代 pdflatex，我們需要修改<code>conf.py</code>:</p>
+<pre><code class="line-numbers language-python"># 注：在生成html的时候这句话要注释
+latex_engine = &#39;xelatex&#39;
+</code></pre>
+<p>然后执行：</p>
+<pre><code class="line-numbers language-bash">make clean
+make latexpdf
+</code></pre>
+<p>完成之后在<code>build/latex</code>目录中即可找到生成的pdf文件了。</p>
+<ol>
+<li>ReadTheDocs可以自动生成中文PDF，但ReadTheDocs服务器里的TeXLive版本太老，
+导致只能使用pdflatex而不能使用xelatex编译，再加上服务器上中文字体的限制，
+所以生成的PDF效果较差，故不采用ReadTheDocs生成的PDF</li>
+<li>本地安装TeXLive 2016，用xelatex编译，可生成更好效果的PDF，目前的策略是在本地生成PDF。</li>
+</ol>
+<h2 id="生成繁体PDF"><a href="#生成繁体PDF" class="headerlink" title="生成繁体PDF"></a>生成繁体PDF</h2><p>先安装opencc</p>
+<pre><code class="line-numbers language-basn">wget https://github.com/BYVoid/OpenCC/archive/master.zip
+unzip master.zip
+yum install -y cmake gcc gcc-c++ doxygen
+cd OpenCC-master
+make &amp;&amp; make install
+ln -s /usr/lib/libopencc.so.2 /usr/lib64/libopencc.so.2
+</code></pre>
+<p>写一个shell脚本来转换源码：</p>
+<pre><code class="line-numbers language-bash">#!/bin/bash
+# 将某个文件夹所有文件简体转换成繁体字
+
+curdir=`pwd`
+file_dir=${curdir}/$1
+for f in $(find $file_dir -type f); do
+    #echo $f
+    opencc -i &quot;${f}&quot; -o &quot;${f}_&quot;
+    mv -f &quot;${f}_&quot; &quot;${f}&quot;
+done
+</code></pre>
+<p>简体转繁体</p>
+<pre><code class="line-numbers language-bash">./stot.sh scrapy-cookbook/source/
+</code></pre>
+<p>然后上面的生成PDF步骤不变。</p>
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p><strong>build的时候出现错误：! Package inputenc Error: Unicode char 我 (U+6211)</strong></p>
+<p>解决办法，在<code>conf.py</code>中添加:</p>
+<pre><code class="line-numbers language-python">latex_elements={# The paper size (&#39;letterpaper&#39; or &#39;a4paper&#39;).
+&#39;papersize&#39;:&#39;a4paper&#39;,# The font size (&#39;10pt&#39;, &#39;11pt&#39; or &#39;12pt&#39;).
+&#39;pointsize&#39;:&#39;12pt&#39;,&#39;classoptions&#39;:&#39;,oneside&#39;,&#39;babel&#39;:&#39;&#39;,#必須
+&#39;inputenc&#39;:&#39;&#39;,#必須
+&#39;utf8extra&#39;:&#39;&#39;,#必須
+# Additional stuff for the LaTeX preamble.
+&#39;preamble&#39;: r&quot;&quot;&quot;
+\usepackage{xeCJK}
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+\setCJKmainfont{WenQuanYi Micro Hei}
+\setCJKmonofont[Scale=0.9]{WenQuanYi Micro Hei Mono}
+\setCJKfamilyfont{song}{WenQuanYi Micro Hei}
+\setCJKfamilyfont{sf}{WenQuanYi Micro Hei}
+\XeTeXlinebreaklocale &quot;zh&quot;
+\XeTeXlinebreakskip = 0pt plus 1pt
+&quot;&quot;&quot;}
+</code></pre>
+<hr>
+<p><strong>WARNING: Pygments lexer name u’python run.py’ is not known</strong></p>
+<p>解决办法，写代码的时候别用’’’python run.py这样的格式，不支持</p>
+<hr>
+<p><strong>WARNING: nonlocal image URI found</strong></p>
+<p>解决办法，更改conf.py</p>
+<pre><code class="line-numbers language-python">import sphinx.environment
+from docutils.utils import get_source_line
+
+def _warn_node(self, msg, node, **kwargs):
+    if not msg.startswith(&#39;nonlocal image URI found:&#39;):
+        self._warnfunc(msg, &#39;%s:%s&#39; % get_source_line(node), **kwargs)
+
+sphinx.environment.BuildEnvironment.warn_node = _warn_node
+</code></pre>
+<hr>
+<p><strong>生成的PDF文件中图片不能显示的问题</strong></p>
+<p>解决办法，因为文章里面引用的是外部图片链接，导致不能显示图片，
+将图片下载到source/images目录，然后改链接为相对路径。</p>
+<p>如要居中显示图片，使用:</p>
+<pre><code>&lt;center&gt;![scrapy架构图](/images/scrapy.png)&lt;/center&gt;
+</code></pre><hr>
+<p><strong>自动生成标题问题</strong></p>
+<p>修改<code>conf.py</code>将manual改成howto</p>
+<pre><code>latex_documents = [
+    (master_doc, &#39;scrapy-cookbook.tex&#39;, u&#39;scrapy-cookbook Documentation&#39;,
+     u&#39;Xiong Neng&#39;, &#39;howto&#39;),
+]
+</code></pre><hr>
+<p><strong>图片覆盖文字的问题</strong></p>
+<p>养成一个好习惯就是新增图片一定要空一行</p>
+<pre><code class="line-numbers language-md">one line
+
+![scrapy架构图](/images/scrapy.png)
+
+two line
+</code></pre>
+<hr>
+<p><strong>生成的pdf文件中，每个章节都多了一层编号</strong></p>
+<p>我猜测这个问题的原因是sphinx将rst转为LaTex文件，再转为PDF的。sphinx生成的LaTex文件中，
+使用了\Section标记段落，默认情况下\Section是自动编号的章节，而\Section*才是不带自动编号的。</p>
+<p>为了解决这个问题，需要手工编辑sphinx生成的python3-cookbook.tex</p>
+<pre><code class="line-numbers language-bash">cd build/latex/
+vi scrapy-cookbook.tex
+</code></pre>
+<p>在<code>\setcounter{tocdepth}{2}</code>下增加一行<code>\setcounter{secnumdepth}{-2}</code></p>
+<p>这行代码关闭了章节编号的计数器，这样生成的PDF就是目录正确且章节不带自动编号。
+请注意别乱动里面的东西，删除一个空行也不行。</p>
+<p>然后执行命令：</p>
+<pre><code class="line-numbers language-bash">xelatex scrapy-cookbook.tex
+</code></pre>
+<p>这时候生成的pdf文件就是正常格式的了。如果一次执行不成功就再执行一次，很奇怪的事情。</p>
+<p>具体原理解释参见<a href="http://liam0205.me/2015/04/10/how-to-list-unnumbered-section-in-the-table-of-contents/" target="_blank" rel="noopener">http://liam0205.me/2015/04/10/how-to-list-unnumbered-section-in-the-table-of-contents/</a></p>
+<hr>
+<p><strong>优化PDF显示</strong></p>
+<p>这个参考 <a href="https://github.com/yidao620c/python3-cookbook/issues/108" target="_blank" rel="noopener">https://github.com/yidao620c/python3-cookbook/issues/108</a></p>
+<p>编辑tex文件，在导言区的内容如下：</p>
+<pre><code>前面省略...
+\title{《Python Cookbook》第三版}
+\date{Dec 09, 2017}
+\release{3.0.0}
+\author{熊能}
+\newcommand{\sphinxlogo}{\vbox{@@
+\renewcommand{\releasename}{Release}
+\makeindex
+
+% 隐藏原目录名
+\renewcommand{\contentsname}{}
+
+% 在 section 前插入分页
+\usepackage{titlesec}
+\newcommand{\sectionbreak}{\clearpage}
+
+% 章节编号只编号到 subsection
+\newcommand\normalsecnumdepth{\setcounter{secnumdepth}{2@@
+
+% 所有层次章节都不编号
+\newcommand\specialsecnumdepth{\setcounter{secnumdepth}{-2@@  
+
+% toc 到 subsection
+\newcommand\normaltocdepth{
+    \setcounter{tocdepth}{2}
+    \addtocontents{toc}{\setcounter{tocdepth}{2@@
+}
+
+% toc 到 section
+\newcommand\specialtocdepth{
+    \setcounter{tocdepth}{1}
+    \addtocontents{toc}{\setcounter{tocdepth}{1@@
+}
+
+\begin{document}
+
+\maketitle
+\specialsecnumdepth
+\specialtocdepth
+\renewcommand{\contentsname}{}
+\section{目录}
+\vspace{-36pt}
+\sphinxtableofcontents
+\phantomsection\label{\detokenize{index::doc@@
+
+
+\section{版权}
+\label{\detokenize{copyright::doc@@\label{\detokenize{copyright:copyright@@\label{\detokenize{copyright:python-cookbook-3rd-edition-documentation@@
+\begin{DUlineblock}{0em}
+\item[] 书名：    《Python Cookbook》3rd Edition
+\item[] 作者：     David Beazley, Brian K. Jones
+...
+</code></pre><p>在 <code>\section{第一章：数据结构和算法}</code> 前插入</p>
+<pre><code>\normaltocdepth
+</code></pre><p>在 <code>\section{附录A}</code> 前插入</p>
+<pre><code>\specialtocdepth
+</code></pre><p>另外执行下面命令，删除每个章节多余的Contents和下面的一行空格：</p>
+<pre><code class="line-numbers language-bash">sed -i &#39;/Contents:/,+1 d&#39; python3-cookbook.tex
+</code></pre>
+<p>再次运行生成命令即可(最好执行2次)：</p>
+<pre><code>xelatex python3-cookbook.tex
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/01/22/fullstack/readthedoc.html">使用ReadtheDocs托管文档</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/02/06/fullstack/git01.html" class="pre-post btn btn-default" title='git简明教程 - 基础篇'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">git简明教程 - 基础篇</span>
+        </a>
+    
+    
+        <a href="/2017/01/20/python/uwsgi.html" class="next-post btn btn-default" title='Nginx+uWSGI部署Python Web应用'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Nginx+uWSGI部署Python Web应用</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sphinx"><span class="toc-text">Sphinx</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装Sphinx"><span class="toc-text">安装Sphinx:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#初始化"><span class="toc-text">初始化:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更改主题-sphinx-rtd-theme"><span class="toc-text">更改主题 sphinx_rtd_theme</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#预览效果"><span class="toc-text">预览效果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#支持markdown编写"><span class="toc-text">支持markdown编写</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AutoStructify"><span class="toc-text">AutoStructify</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub托管"><span class="toc-text">GitHub托管</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成PDF"><span class="toc-text">生成PDF</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成繁体PDF"><span class="toc-text">生成繁体PDF</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FAQ"><span class="toc-text">FAQ</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,685 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="在互联网场景下，尤其 2C 端大流量场景下，需要将一些经常展现和不会频繁变更的数据，存放在存取速率更快的地方。
+缓存就是一个存储器，在技术选型中，常用 Redis 作为缓存数据库。缓存主要是在获取资源方便性能优化的关键方面。
+如果使用Redis缓存技术，SpringBoot中有两种方式实现缓存...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - Redis数据库 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - Redis数据库">
+            
+                SpringBoot系列 - Redis数据库
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/30</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在互联网场景下，尤其 2C 端大流量场景下，需要将一些经常展现和不会频繁变更的数据，存放在存取速率更快的地方。
+缓存就是一个存储器，在技术选型中，常用 Redis 作为缓存数据库。缓存主要是在获取资源方便性能优化的关键方面。</p>
+<p>如果使用Redis缓存技术，SpringBoot中有两种方式实现缓存，一个是上一篇中通过CacheManager实现，
+不过这个是对于简单的缓存场景，而更为强大的是通过<code>RedisTemplate</code>来直接操作Redis数据库实现缓存。</p>
+<p>Redis 是一个高性能的 key-value 数据库。GitHub 地址：<a href="https://github.com/antirez/redis" target="_blank" rel="noopener">https://github.com/antirez/redis</a> 。</p>
+<p>Github 是这么描述的：</p>
+<p>Redis is an in-memory database that persists on disk. The data model is key-value, 
+but many different kind of values are supported: Strings, Lists, Sets, Sorted Sets, Hashes, HyperLogLogs, Bitmaps.</p>
+<p>缓存的应用场景有哪些呢？</p>
+<p>比如常见的电商场景，根据商品 ID 获取商品信息时，店铺信息和商品详情信息就可以缓存在 Redis，直接从 Redis 获取。
+减少了去数据库查询的次数。但会出现新的问题，就是如何对缓存进行更新？这就是下面要讲的。</p>
+<h2 id="缓存更新策略"><a href="#缓存更新策略" class="headerlink" title="缓存更新策略"></a>缓存更新策略</h2><p>参考<a href="http://coolshell.cn/articles/17416.html" target="_blank" rel="noopener">《缓存更新的套路》</a> ，缓存更新的模式有四种：</p>
+<ol>
+<li>Cache aside</li>
+<li>Read through</li>
+<li>Write through</li>
+<li>Write behind caching</li>
+</ol>
+<p>这里我们使用的是 Cache Aside 策略，从三个维度：</p>
+<ul>
+<li>失效：应用程序先从cache取数据，没有得到，则从数据库中取数据，成功后，放到缓存中。</li>
+<li>命中：应用程序从cache中取数据，取到后返回。</li>
+<li>更新：先把数据存到数据库中，成功后，再让缓存失效。</li>
+</ul>
+<p>大致流程如下：</p>
+<p>获取商品详情举例</p>
+<ol>
+<li>从商品 Cache 中获取商品详情，如果存在，则返回获取 Cache 数据返回。</li>
+<li>如果不存在，则从商品 DB 中获取。获取成功后，将数据存到 Cache 中。则下次获取商品详情，就可以从 Cache 就可以得到商品详情数据。</li>
+<li>从商品 DB 中更新或者删除商品详情成功后，则从缓存中删除对应商品的详情缓存</li>
+</ol>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/sb-redis01.png" alt></p>
+<h2 id="添加maven依赖"><a href="#添加maven依赖" class="headerlink" title="添加maven依赖"></a>添加maven依赖</h2><p>这里仍然是MyBatis做数据库DAO操作，Redis做缓存操作。</p>
+<p>SpringBoot 2开始默认的Redis客户端实现是Lettuce，同时你需要添加commons-pool2的依赖。</p>
+<pre><code class="line-numbers language-xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.commons&lt;/groupId&gt;
+        &lt;artifactId&gt;commons-pool2&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-core&lt;/artifactId&gt;
+        &lt;version&gt;${jackson-databind-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+        &lt;version&gt;${jackson-databind-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.fasterxml.jackson.core&lt;/groupId&gt;
+        &lt;artifactId&gt;jackson-annotations&lt;/artifactId&gt;
+        &lt;version&gt;${jackson-databind-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+        &lt;exclusions&gt;
+            &lt;exclusion&gt;
+                &lt;groupId&gt;com.vaadin.external.google&lt;/groupId&gt;
+                &lt;artifactId&gt;android-json&lt;/artifactId&gt;
+            &lt;/exclusion&gt;
+        &lt;/exclusions&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;mysql&lt;/groupId&gt;
+        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+        &lt;version&gt;${mysql-connector.version}&lt;/version&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+        &lt;artifactId&gt;druid&lt;/artifactId&gt;
+        &lt;version&gt;${druid.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;!-- MyBatis plus增强和springboot的集成--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+        &lt;artifactId&gt;mybatis-plus&lt;/artifactId&gt;
+        &lt;version&gt;${mybatis-plus.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+        &lt;artifactId&gt;mybatisplus-spring-boot-starter&lt;/artifactId&gt;
+        &lt;version&gt;${mybatisplus-spring-boot-starter.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<p>注意上面我添加了Jackson的依赖，后面要用到。</p>
+<h3 id="配置application-yml"><a href="#配置application-yml" class="headerlink" title="配置application.yml"></a>配置application.yml</h3><p>增加 Redis 相关配置</p>
+<pre><code class="line-numbers language-yml">spring:
+  cache:
+    type: REDIS
+    redis:
+      cache-null-values: false
+      time-to-live: 600000ms
+      use-key-prefix: true
+    cache-names: userCache,allUsersCache
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    lettuce:
+      shutdown-timeout: 200ms
+      pool:
+        max-active: 7
+        max-idle: 7
+        min-idle: 2
+        max-wait: -1ms
+</code></pre>
+<p>对应的配置类：</p>
+<p><code>org.springframework.boot.autoconfigure.data.redis.RedisProperties</code></p>
+<h2 id="添加配置类"><a href="#添加配置类" class="headerlink" title="添加配置类"></a>添加配置类</h2><p>这里自定义RedisTemplate的配置类，主要是想使用Jackson替换默认的序列化机制：</p>
+<pre><code class="line-numbers language-java">@Configuration
+public class RedisConfig {
+    /**
+     * redisTemplate 默认使用JDK的序列化机制, 存储二进制字节码, 所以自定义序列化类
+     * @param redisConnectionFactory redis连接工厂类
+     * @return RedisTemplate
+     */
+    @Bean
+    public RedisTemplate&lt;Object, Object&gt; redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate&lt;Object, Object&gt; redisTemplate = new RedisTemplate&lt;&gt;();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+
+        // 使用Jackson2JsonRedisSerialize 替换默认序列化
+        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+
+        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+
+        // 设置value的序列化规则和 key的序列化规则
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
+}
+</code></pre>
+<h2 id="使用演示"><a href="#使用演示" class="headerlink" title="使用演示"></a>使用演示</h2><p>MyBatis实现的DAO层，以及User实体类我就不贴在这里了，只贴Service核心增删改查操作：</p>
+<pre><code class="line-numbers language-java">@Service
+@Transactional
+public class UserService {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    private RedisTemplate&lt;String, User&gt; redisTemplate;
+
+
+    /**
+     * 创建用户
+     * 不会对缓存做任何操作
+     */
+    public void createUser(User user) {
+        logger.info(&quot;创建用户start...&quot;);
+        userMapper.insert(user);
+    }
+
+    /**
+     * 获取用户信息
+     * 如果缓存存在，从缓存中获取城市信息
+     * 如果缓存不存在，从 DB 中获取城市信息，然后插入缓存
+     *
+     * @param id 用户ID
+     * @return 用户
+     */
+    public User getById(int id) {
+        logger.info(&quot;获取用户start...&quot;);
+        // 从缓存中获取用户信息
+        String key = &quot;user_&quot; + id;
+        ValueOperations&lt;String, User&gt; operations = redisTemplate.opsForValue();
+
+        // 缓存存在
+        boolean hasKey = redisTemplate.hasKey(key);
+        if (hasKey) {
+            User user = operations.get(key);
+            logger.info(&quot;从缓存中获取了用户 id = &quot; + id);
+            return user;
+        }
+        // 缓存不存在，从 DB 中获取
+        User user = userMapper.selectById(id);
+        // 插入缓存
+        operations.set(key, user, 10, TimeUnit.SECONDS);
+
+        return user;
+    }
+
+    /**
+     * 更新用户
+     * 如果缓存存在，删除
+     * 如果缓存不存在，不操作
+     *
+     * @param user 用户
+     */
+    public void updateUser(User user) {
+        logger.info(&quot;更新用户start...&quot;);
+        userMapper.updateById(user);
+        int userId = user.getId();
+        // 缓存存在，删除缓存
+        String key = &quot;user_&quot; + userId;
+        boolean hasKey = redisTemplate.hasKey(key);
+        if (hasKey) {
+            redisTemplate.delete(key);
+            logger.info(&quot;更新用户时候，从缓存中删除用户 &gt;&gt; &quot; + userId);
+        }
+    }
+
+    /**
+     * 删除用户
+     * 如果缓存中存在，删除
+     */
+    public void deleteById(int id) {
+        logger.info(&quot;删除用户start...&quot;);
+        userMapper.deleteById(id);
+
+        // 缓存存在，删除缓存
+        String key = &quot;user_&quot; + id;
+        boolean hasKey = redisTemplate.hasKey(key);
+        if (hasKey) {
+            redisTemplate.delete(key);
+            logger.info(&quot;删除用户时候，从缓存中删除用户 &gt;&gt; &quot; + id);
+        }
+    }
+
+}
+</code></pre>
+<p>RedisTemplate 封装了 RedisConnection，具有连接管理，序列化和 Redis 操作等功能。
+还有专门针对 String 的模板对象 StringRedisTemplate。</p>
+<p>Redis 操作视图接口类用的是 ValueOperations，对应的是 Redis String/Value 操作。</p>
+<p>还有其他的操作视图，ListOperations、SetOperations、ZSetOperations 和 HashOperations 。
+ValueOperations 插入缓存是可以设置失效时间，这里设置的失效时间是 10 s。</p>
+<p>然后写个测试类测试运行看看效果：</p>
+<pre><code class="line-numbers language-java">@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
+@Transactional
+public class UserServiceTest {
+    @Autowired
+    private UserService userService;
+    @Test
+    public void testCache() {
+        int id = new Random().nextInt(1000);
+        User user = new User(id, &quot;admin&quot;, &quot;admin&quot;);
+        userService.createUser(user);
+        User user1 = userService.getById(id); // 第1次访问
+        assertEquals(user1.getPassword(), &quot;admin&quot;);
+        User user2 = userService.getById(id); // 第2次访问
+        assertEquals(user2.getPassword(), &quot;admin&quot;);
+        user.setPassword(&quot;123456&quot;);
+        userService.updateUser(user);
+        User user3 = userService.getById(id); // 第3次访问
+        assertEquals(user3.getPassword(), &quot;123456&quot;);
+        userService.deleteById(id);
+        assertNull(userService.getById(id));
+    }
+}
+</code></pre>
+<p>运行SpringBoot集成测试，查看日志如下：</p>
+<pre><code>创建用户start...
+==&gt;  Preparing: INSERT INTO t_user ( id, username, `password` ) VALUES ( ?, ?, ? )
+==&gt; Parameters: 89(Integer), admin(String), admin(String)
+&lt;==    Updates: 1
+获取用户start...
+Starting without optional epoll library
+Starting without optional kqueue library
+==&gt;  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==&gt; Parameters: 89(Integer)
+&lt;==      Total: 1
+获取用户start...
+从缓存中获取了用户 id = 89
+更新用户start...
+==&gt;  Preparing: UPDATE t_user SET username=?, `password`=? WHERE id=?
+==&gt; Parameters: admin(String), 123456(String), 89(Integer)
+&lt;==    Updates: 1
+更新用户时候，从缓存中删除用户 &gt;&gt; 89
+获取用户start...
+==&gt;  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==&gt; Parameters: 89(Integer)
+&lt;==      Total: 1
+删除用户start...
+==&gt;  Preparing: DELETE FROM t_user WHERE id=?
+==&gt; Parameters: 89(Integer)
+&lt;==    Updates: 1
+更新用户时候，从缓存中删除用户 &gt;&gt; 89
+获取用户start...
+==&gt;  Preparing: SELECT id AS id,username,`password` FROM t_user WHERE id=?
+==&gt; Parameters: 89(Integer)
+&lt;==      Total: 0
+Rolled back transaction for test: [DefaultTestContext@6e20b53a testClass = UserServiceTest
+Closing org.springframework.context.annotation.AnnotationConfigApplicationContext@503f91c3
+{dataSource-1} closed
+</code></pre><p>可以看出第一次取的时候，缓存未命中，会从DB中取数据，而第2次取的时候缓存命中直接从缓存中取出来。
+后面不管是更新和删除，都会从缓存中删除。再去取的时候缓存未命中，从DB中取最新的。</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-redis" target="_blank" rel="noopener">springboot-redis</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/30/spring/sb-redis.html">SpringBoot系列 - Redis数据库</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/08/01/spring/sb-batch.html" class="pre-post btn btn-default" title='SpringBoot系列 - 批处理'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 批处理</span>
+        </a>
+    
+    
+        <a href="/2017/07/28/spring/sb-cache.html" class="next-post btn btn-default" title='SpringBoot系列 - 缓存'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 缓存</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#缓存更新策略"><span class="toc-text">缓存更新策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加maven依赖"><span class="toc-text">添加maven依赖</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#配置application-yml"><span class="toc-text">配置application.yml</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加配置类"><span class="toc-text">添加配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用演示"><span class="toc-text">使用演示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

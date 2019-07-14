@@ -1,0 +1,615 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="hadoop,">
+
+
+    <meta name="description" content="操作系统：CentOS 6.5 64位
+在linux环境安装Hadoop之前，我们需要使用到ssh，所以要先安装ssh，并且创建一个hadoop用户
+备注： 下面所有的命令中，以#开头的表示是root用户，以$开头的是普通用户
+安装SSH先切换到root用户，执行下列步骤
+rpm -qa |g...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>centos6上安装Hadoop和HBase | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="centos6上安装Hadoop和HBase">
+            
+                centos6上安装Hadoop和HBase
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/hadoop" title='hadoop'>
+                        hadoop
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/05/27</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>操作系统：CentOS 6.5 64位</p>
+<p>在linux环境安装Hadoop之前，我们需要使用到ssh，所以要先安装ssh，并且创建一个hadoop用户</p>
+<p><strong>备注：</strong> 下面所有的命令中，以#开头的表示是root用户，以$开头的是普通用户</p>
+<h3 id="安装SSH"><a href="#安装SSH" class="headerlink" title="安装SSH"></a>安装SSH</h3><p>先切换到root用户，执行下列步骤</p>
+<pre><code class="line-numbers language-bash">rpm -qa |grep ssh  #检查是否装了SSH包
+yum install openssh-server  #安装ssh
+chkconfig --list sshd #检查SSHD是否设置为开机启动
+chkconfig --level 2345 sshd on  #如果没设置启动就设置下.
+service sshd restart  #重新启动
+</code></pre>
+<h3 id="创建hadoop用户"><a href="#创建hadoop用户" class="headerlink" title="创建hadoop用户"></a>创建hadoop用户</h3><pre><code class="line-numbers language-bash">$ su
+password:
+# useradd hadoop
+# passwd hadoop
+New passwd:
+Retype new passwd
+</code></pre>
+<h3 id="生成pub-key"><a href="#生成pub-key" class="headerlink" title="生成pub-key"></a>生成pub-key</h3><p>切换到hadoop用户后，执行</p>
+<pre><code class="line-numbers language-bash">$ ssh-keygen -t rsa
+$ cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+$ chmod 0600 ~/.ssh/authorized_keys
+</code></pre>
+<p>然后确认下是否能正常使用ssh连接</p>
+<pre><code class="line-numbers language-bash">ssh localhost
+</code></pre>
+<h3 id="安装JDK1-7"><a href="#安装JDK1-7" class="headerlink" title="安装JDK1.7"></a>安装JDK1.7</h3><p>进入oracle官网<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html" target="_blank" rel="noopener">http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html</a></p>
+<p>下载jdk-7u79-linux-x64.gz，然后执行：</p>
+<pre><code class="line-numbers language-bash">$ tar zxf jdk-7u79-linux-x64.gz
+$ ls
+jdk1.7.0_79 jdk-7u79-linux-x64.gz
+$ su
+password:
+# mv jdk1.7.0_79 /usr/local/
+# exit
+</code></pre>
+<p>打开~/.bashrc文件，写入JAVA_HOME环境变量</p>
+<pre><code class="line-numbers language-bash">export JAVA_HOME=/usr/local/jdk1.7.0_79
+export PATH= $PATH:$JAVA_HOME/bin
+</code></pre>
+<p>保存刷新下：<code>$ source ~/.bashrc</code></p>
+<p>切换到root用户，然后执行下面的语句确保JDK版本更改完成</p>
+<pre><code># alternatives --install /usr/bin/java java /usr/local/jdk1.7.0_79/bin/java 2
+# alternatives --install /usr/bin/javac javac /usr/local/jdk1.7.0_79/bin/javac 2
+# alternatives --install /usr/bin/jar jar /usr/local/jdk1.7.0_79/bin/jar 2
+# alternatives --set java /usr/local/jdk1.7.0_79/bin/java
+# alternatives --set javac /usr/local/jdk1.7.0_79/bin/javac
+# alternatives --set jar /usr/local/jdk1.7.0_79/bin/jar
+</code></pre><p>最后执行下：<code>java -version</code>看看是不是已经成功安装了JDK7</p>
+<h3 id="安装配置Hadoop"><a href="#安装配置Hadoop" class="headerlink" title="安装配置Hadoop"></a>安装配置Hadoop</h3><h4 id="下载Hadoophadoop2-6-0"><a href="#下载Hadoophadoop2-6-0" class="headerlink" title="下载Hadoophadoop2.6.0"></a>下载Hadoophadoop2.6.0</h4><p>下载地址：<a href="http://apache.fayea.com/hadoop/common/stable/hadoop-2.6.0.tar.gz" target="_blank" rel="noopener">http://apache.fayea.com/hadoop/common/stable/hadoop-2.6.0.tar.gz</a></p>
+<pre><code>$ su
+password:
+# cd /usr/local
+# wget http://apache.fayea.com/hadoop/common/stable/hadoop-2.6.0.tar.gz
+# tar xzf hadoop-2.6.0.tar.gz
+# mv hadoop-2.6.0 hadoop
+# exit
+</code></pre><p>hadoop有很多种模式，本篇我们演示的是伪分布式模式，包括后面的HBase也选择这种模式。</p>
+<h4 id="配置Hadoop环境"><a href="#配置Hadoop环境" class="headerlink" title="配置Hadoop环境"></a>配置Hadoop环境</h4><p>第一步，配置环境变量</p>
+<p>打开~/.bashrc文件，写入如下内容</p>
+<pre><code class="line-numbers language-bash">export HADOOP_HOME=/usr/local/hadoop
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native
+export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin
+export HADOOP_INSTALL=$HADOOP_HOME
+</code></pre>
+<p>然后应用设置</p>
+<pre><code class="line-numbers language-bash">$ source ~/.bashrc
+</code></pre>
+<p>第二步，hadoop配置文件</p>
+<p>hadoop的配置文件都放在”$HADOOP_HOME/etc/hadoop”目录中，
+你可以根据自己的需要来修改它们。</p>
+<p>在此之前，还需要修改下hadoop-env.sh，更改其中的JAVA_HOME变量</p>
+<pre><code class="line-numbers language-bash">vim /usr/local/hadoop/etc/hadoop/hadoop-env.sh
+</code></pre>
+<p>然后修改JAVA_HOME为真实的目录</p>
+<pre><code class="line-numbers language-bash">export JAVA_HOME=/usr/local/jdk1.7.0_79
+</code></pre>
+<p>接下来我们去到hadoop的配置文件目录</p>
+<pre><code>$ cd $HADOOP_HOME/etc/hadoop
+``` bash
+1\. 首先打开core-site.xml，写入如下配置
+
+``` xml
+&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;
+        &lt;value&gt;/usr/local/hadoop/tmp&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;fs.defaultFS&lt;/name&gt;
+        &lt;value&gt;hdfs://localhost:9000&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre><p>2. 然后打开hdfs-site.xml，写入如下配置</p>
+<pre><code class="line-numbers language-xml">&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.replication&lt;/name&gt;
+        &lt;value&gt;1&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.name.dir&lt;/name&gt;
+        &lt;value&gt;file:///home/hadoop/hadoopinfra/hdfs/namenode&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.data.dir&lt;/name&gt;
+        &lt;value&gt;file:///home/hadoop/hadoopinfra/hdfs/datanode&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;dfs.permissions&lt;/name&gt;
+        &lt;value&gt;false&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>上面的文件夹需要我们手动来创建，那么我们创建下就行了</p>
+<pre><code class="line-numbers language-bash">$ mkdir -p /home/hadoop/hadoopinfra/hdfs/namenode
+$ mkdir -p /home/hadoop/hadoopinfra/hdfs/datanode
+</code></pre>
+<p>3. 然后打开yarn-site.xml文件，写入如下配置</p>
+<pre><code class="line-numbers language-xml">&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+        &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.resourcemanager.scheduler.address&lt;/name&gt;
+        &lt;value&gt;localhost:54313&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<p>4. 配置mapred-site.xml，先重命名</p>
+<pre><code class="line-numbers language-bash">$ cp mapred-site.xml.template mapred-site.xml
+</code></pre>
+<p>打开mapred-site.xml文件，写入如下配置</p>
+<pre><code class="line-numbers language-xml">&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;
+        &lt;value&gt;mapreduce_shuffle&lt;/value&gt;
+    &lt;/property&gt;
+&lt;/configuration&gt;
+</code></pre>
+<h4 id="确认Hadoop的安装"><a href="#确认Hadoop的安装" class="headerlink" title="确认Hadoop的安装"></a>确认Hadoop的安装</h4><p>1. NameNode确认</p>
+<pre><code>$ cd ~
+$ hdfs namenode -format
+</code></pre><p>结果应该类似下面</p>
+<pre><code>STARTUP_MSG: Starting NameNode
+STARTUP_MSG:   host = centos00/127.0.0.1
+STARTUP_MSG:   args = [-format]
+STARTUP_MSG:   version = 2.6.0
+...
+/************************************************************
+SHUTDOWN_MSG: Shutting down NameNode at centos00/127.0.0.1
+************************************************************/
+</code></pre><p>2. Hadoop dfs确认</p>
+<pre><code>$ start-dfs.sh
+</code></pre><p>结果应该类似下面</p>
+<pre><code>Starting namenodes on [localhost]
+localhost: starting namenode, logging to ....out
+localhost: starting datanode, logging to ....out
+Starting secondary namenodes [0.0.0.0]
+The authenticity of host &#39;0.0.0.0 (0.0.0.0)&#39; can&#39;t be established.
+RSA key fingerprint is fd:01:fc:f2:53:a0:58:8e:96:9c:5f:f2:6e:5b:69:1a.
+Are you sure you want to continue connecting (yes/no)? yes
+0.0.0.0: Warning: Permanently added &#39;0.0.0.0&#39; (RSA) to the list of known hosts.
+0.0.0.0: starting secondarynamenode, logging to ...
+</code></pre><p>3. Yarn Srcipt确认</p>
+<pre><code>$ start-yarn.sh
+</code></pre><p>结果应该类似下面这样</p>
+<pre><code>starting yarn daemons
+starting resourcemanager, logging to ....out
+localhost: starting nodemanager, logging to ....out
+</code></pre><p>4. 浏览器访问Hadoop</p>
+<p>默认访问Hadoop的端口是50070，在浏览器中打开链接<a href="http://localhost:50070" target="_blank" rel="noopener">http://localhost:50070</a>来访问Hadoop服务。</p>
+<p>5. 浏览器确认应用集群</p>
+<p>默认访问应用集群的端口号是8088，在浏览器中打开链接<a href="http://localhost:8088" target="_blank" rel="noopener">http://localhost:8088</a>来确认下。</p>
+<h3 id="安装HBase"><a href="#安装HBase" class="headerlink" title="安装HBase"></a>安装HBase</h3><p>你可以在三种模式下安装HBase：单机模式、伪分布式模式、全分布式模式。
+下面我们演示在伪分布式模式下HBase的安装和配置。</p>
+<h4 id="下载HBase"><a href="#下载HBase" class="headerlink" title="下载HBase"></a>下载HBase</h4><pre><code>$ su
+# cd /usr/local/
+# wget http://apache.fayea.com/hbase/hbase-0.98.12/hbase-0.98.12-hadoop2-bin.tar.gz
+# tar -zxvf hbase-0.98.12-hadoop2-bin.tar.gz
+# mv hbase-0.98.12-hadoop2 hbase
+# chown -R hadoop:hadoop /usr/local/hbase
+</code></pre><h4 id="配置hbase-site-xml"><a href="#配置hbase-site-xml" class="headerlink" title="配置hbase-site.xml"></a>配置hbase-site.xml</h4><pre><code>su hadoop
+$ cd /usr/local/hbase/conf
+</code></pre><p>然后打开hbase-env.sh文件，修改如下</p>
+<pre><code>export JAVA_HOME=/usr/local/jdk1.7.0_79
+</code></pre><p>修改hbase-site.xml文件，如下</p>
+<pre><code class="line-numbers language-xml">&lt;property&gt;
+    &lt;name&gt;hbase.rootdir&lt;/name&gt;
+    &lt;value&gt;hdfs://localhost:9000/hbase&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+    &lt;name&gt;hbase.zookeeper.property.dataDir&lt;/name&gt;
+    &lt;value&gt;/home/hadoop/zookeeper&lt;/value&gt;
+&lt;/property&gt;
+
+&lt;property&gt;
+    &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+</code></pre>
+<p>编辑/etc/profile，增加HBASE_HOME环境变量</p>
+<pre><code>export HBASE_HOME=/usr/local/hbase
+export PATH=$PATH:$HBASE_HOME/bin
+</code></pre><p>应用更改。</p>
+<pre><code>source /etc/profile
+</code></pre><p>OK，现在为止，HBase的安装和配置都已经完成了。</p>
+<p>现在你可以通过执行start-hbase.sh来启动HBase</p>
+<pre><code>$ cd /usr/local/hbase/bin
+$ ./start-hbase.sh
+</code></pre><p>然后执行<code>jps</code>命令应该可以看到HMaster和HRegionServer这两个进程。类似下面</p>
+<pre><code>10941 DataNode
+13744 HQuorumPeer
+14207 Jps
+11126 SecondaryNameNode
+11276 ResourceManager
+10840 NameNode
+13843 HMaster
+10016 HRegionServer
+11378 NodeManager
+</code></pre><p>如果没有看到，可以查看日志<code>/usr/local/hbase/logs/hbase-hadoop-master-xx.log</code></p>
+<h4 id="在HDFS中检查HBase目录"><a href="#在HDFS中检查HBase目录" class="headerlink" title="在HDFS中检查HBase目录"></a>在HDFS中检查HBase目录</h4><p>HBase会在HDFS中创建自己的目录，在hadoop目录下面执行：</p>
+<pre><code>$ ./bin/hadoop fs -ls /hbase
+</code></pre><p>显示如下</p>
+<pre><code>drwxr-xr-x   - hadoop supergroup          0 2015-04-24 16:06 /hbase/.tmp
+drwxr-xr-x   - hadoop supergroup          0 2015-04-24 16:06 /hbase/WALs
+drwxr-xr-x   - hadoop supergroup          0 2015-04-24 16:06 /hbase/data
+-rw-r--r--   1 hadoop supergroup         42 2015-04-24 16:06 /hbase/hbase.id
+-rw-r--r--   1 hadoop supergroup          7 2015-04-24 16:06 /hbase/hbase.version
+drwxr-xr-x   - hadoop supergroup          0 2015-04-24 16:06 /hbase/oldWALs
+</code></pre><p>那么恭喜你，配置成功了！</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/05/27/java/hadoop-hbase.html">centos6上安装Hadoop和HBase</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/06/01/algorithm/pirate.html" class="pre-post btn btn-default" title='海盗分金'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">海盗分金</span>
+        </a>
+    
+    
+        <a href="/2015/05/22/fullstack/yaml.html" class="next-post btn btn-default" title='yaml入门笔记'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">yaml入门笔记</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装SSH"><span class="toc-text">安装SSH</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建hadoop用户"><span class="toc-text">创建hadoop用户</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#生成pub-key"><span class="toc-text">生成pub-key</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装JDK1-7"><span class="toc-text">安装JDK1.7</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装配置Hadoop"><span class="toc-text">安装配置Hadoop</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#下载Hadoophadoop2-6-0"><span class="toc-text">下载Hadoophadoop2.6.0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置Hadoop环境"><span class="toc-text">配置Hadoop环境</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#确认Hadoop的安装"><span class="toc-text">确认Hadoop的安装</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装HBase"><span class="toc-text">安装HBase</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#下载HBase"><span class="toc-text">下载HBase</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#配置hbase-site-xml"><span class="toc-text">配置hbase-site.xml</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#在HDFS中检查HBase目录"><span class="toc-text">在HDFS中检查HBase目录</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

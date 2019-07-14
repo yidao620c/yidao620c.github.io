@@ -1,0 +1,794 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="python核心,">
+
+
+    <meta name="description" content="现在是多核和并发时代，所以不管什么语言都要支持这个特性。并发是看上去同时执行，并行是在多核上同时执行。
+我们先解释下线程和进程。简单来说，一个任务就是一个进程（Process）。
+在一个进程内部，要同时干多件事，就需要同时运行多个进程内的“子任务”，这些子任务就叫线程（Thread）
+线程是最...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>python核心 - 并发编程 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="python核心 - 并发编程">
+            
+                python核心 - 并发编程
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/python核心" title='python核心'>
+                        python核心
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/12/18</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>现在是多核和并发时代，所以不管什么语言都要支持这个特性。并发是看上去同时执行，并行是在多核上同时执行。</p>
+<p>我们先解释下线程和进程。简单来说，一个任务就是一个进程（Process）。
+在一个进程内部，要同时干多件事，就需要同时运行多个进程内的“子任务”，这些子任务就叫线程（Thread）</p>
+<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，
+完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
+<p>多进程和多线程的程序涉及到同步、数据共享的问题，编写起来更复杂。</p>
+<p>python中实现并发方式有下面几种：</p>
+<ol>
+<li>多进程模式</li>
+<li>多线程模式</li>
+<li>多进程+多线程模式</li>
+<li>协程模式</li>
+</ol>
+<h3 id="fork函数"><a href="#fork函数" class="headerlink" title="fork函数"></a>fork函数</h3><p>我们先要讲一下fork()函数，这个函数只在Unix/Linux/Max上有效，在Windows系统上无效。</p>
+<p>一般的函数调用都是一次调用一次返回，而这个特殊的fork()函数调用一次返回两次。
+子进程永远返回0，而父进程返回子进程ID</p>
+<pre><code class="line-numbers language-python">import os
+
+print(&#39;Process (%s) start...&#39; % os.getpid())
+pid = os.fork()
+if pid==0:
+    print(&#39;I am child process (%s) and my parent is %s.&#39; % (os.getpid(), os.getppid()))
+else:
+    print(&#39;I (%s) just created a child process (%s).&#39; % (os.getpid(), pid))
+
+</code></pre>
+<h3 id="threading"><a href="#threading" class="headerlink" title="threading"></a>threading</h3><p>编写跨平台的并发程序就不能直接使用上面的fork函数了。</p>
+<p>Python主要通过标准库中的threading包来实现多线程。并且Python的线程是真正的Posix Thread，而不是模拟出来的线程</p>
+<p>启动一个线程就是把一个函数传入并创建Thread实例，然后调用start()开始执行，如果要同时修改全局共享变量，需要线程锁：</p>
+<pre><code class="line-numbers language-python">import time, threading
+
+# 假定这是你的银行存款:
+balance = 0
+lock = threading.Lock()
+
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
+
+def run_thread(n):
+    for i in range(100000):
+        # 先要获取锁:
+        lock.acquire()
+        try:
+            # 放心地改吧:
+            change_it(n)
+        finally:
+            # 改完了一定要释放锁:
+            lock.release()
+
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print(balance)
+</code></pre>
+<p>另外还可以通过OOP方式创建线程，其实就是定义一个类继承thread.Threading类，内部覆盖run()方法即可。</p>
+<p>如果要管理多个线程，还可以使用线程池方式：</p>
+<pre><code class="line-numbers language-python">from multiprocessing.dummy import Pool as ThreadPool
+import time,random
+
+def hello(str):
+    time.sleep(2)
+    print(str)
+    return str
+
+def print_result(request, result):
+    print(&quot;the result is %s %r&quot; % (request.requestID, result))
+
+data = [random.randint(1,10) for i in range(20)]
+# Make the Pool of workers
+pool = ThreadPool(6)
+# Open the urls in their own threads
+# and return the results
+results = pool.map(hello, data)
+# callback
+results = pool.map_async(hello, data, chunksize=None, callback=callback)
+# apply
+result = pool.apply(hello, data[0])
+result = pool.apply_async(hello, data[0], callback=callback)
+
+#close the pool and wait for the work to finish
+pool.close()
+pool.join()
+</code></pre>
+<p>这里还得提一下Python中的GIL锁（Global Interpreter Lock），在多核机器上面，无论开启多少个线程同时执行，
+只可能会占用一个CPU，因为GIL锁是CPython这个解释器定义的。所以多线程程序不要指望能利用多核，不过不用担心，我们可以用多进程方式。</p>
+<h3 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal</h3><p>多线程下我们应该尽量使用局部变量，但是局部变量在函数多次调用的时候，传递起来很麻烦。</p>
+<pre><code class="line-numbers language-python">def process_student(name):
+    std = Student(name)
+    # std是局部变量，但是每个函数都要用它，因此必须传进去：
+    do_task_1(std)
+    do_task_2(std)
+
+def do_task_1(std):
+    do_subtask_1(std)
+    do_subtask_2(std)
+
+def do_task_2(std):
+    do_subtask_2(std)
+    do_subtask_2(std)
+</code></pre>
+<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的Student对象，不能共享。</p>
+<p>最好的方法是用一个全局dict存放所有的Student对象，然后以thread自身作为key获得线程对应的Student对象。
+ThreadLocal应运而生，不用查找dict，ThreadLocal帮你自动做这件事：</p>
+<pre><code class="line-numbers language-python">import threading
+
+# 创建全局ThreadLocal对象:
+local_school = threading.local()
+
+def process_student():
+    # 获取当前线程关联的student:
+    std = local_school.student
+    print(&#39;Hello, %s (in %s)&#39; % (std, threading.current_thread().name))
+
+def process_thread(name):
+    # 绑定ThreadLocal的student:
+    local_school.student = name
+    process_student()
+
+t1 = threading.Thread(target= process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
+t2 = threading.Thread(target= process_thread, args=(&#39;Bob&#39;,), name=&#39;Thread-B&#39;)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+<p>全局变量local_school就是一个ThreadLocal对象，每个Thread对它都可以读写student属性，但互不影响。
+你可以把local_school看成全局变量，但每个属性如local_school.student都是线程的局部变量，
+可以任意读写而互不干扰，也不用管理锁的问题，ThreadLocal内部会处理。</p>
+<p>ThreadLocal最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，
+这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</p>
+<h3 id="subprocess"><a href="#subprocess" class="headerlink" title="subprocess"></a>subprocess</h3><p>一个进程可以fork一个子进程，并让这个子进程exec另外一个程序。要编写扩平台的多进程程序，就不能直接使用fork。
+在Python中，我们通过标准库中的subprocess包来fork一个子进程，并运行一个外部的程序。</p>
+<pre><code class="line-numbers language-python"># 执行基本系统命令
+ret = subprocess.call(&#39;ls -l&#39;, shell=True)
+
+# 静默执行基本系统命令
+ret = subprocess.call(&#39;rf -f *.java&#39;, shell=True,
+                      stdout=open(&#39;/dev/null&#39;))
+
+# 执行命令，但是捕捉输出
+p = subprocess.Popen(&#39;ls -l&#39;, shell=True,
+                     stdout=subprocess.PIPE)
+out = p.stdout.read()
+
+# 执行命令，但是发送输入和接受输出
+p = subprocess.Popen(&#39;wc&#39;, shell=True, stdin=subprocess.PIPE,
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+out, err = p.communicate(&#39;.&#39;)
+
+# 创建两个子进程，通过管道通信，实现命令&quot;ls -l | wc&quot;
+p1 = subprocess.Popen(&#39;ls -l&#39;, stdout=subprocess.PIPE)
+p2 = subprocess.Popen(&#39;wc&#39;, stdin=p1.stdout, stdout=subprocess.PIPE)
+p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+stdout, stderr = p2.communicate()
+return p2.returncode, stdout, stderr
+</code></pre>
+<p>通过使用subprocess包，我们可以运行外部程序。这极大的拓展了Python的功能。
+如果你已经了解了操作系统的某些应用，你可以从Python中直接调用该应用(而不是完全依赖Python)，
+并将应用的结果输出给Python，并让Python继续处理。shell的功能(比如利用文本流连接各个应用)，就可以在Python中实现。</p>
+<h3 id="multiprocessing"><a href="#multiprocessing" class="headerlink" title="multiprocessing"></a>multiprocessing</h3><p>使用subprocess包来创建子进程，有两个很大的局限性：</p>
+<ol>
+<li>我们只能让subprocess运行外部的程序，而不是运行一个Python脚本内部编写的函数</li>
+<li>进程间只通过管道进行通信</li>
+</ol>
+<p>以上限制了我们将subprocess包应用到更广泛的多进程任务。
+这样的比较实际是不公平的，因为subprocessing本身就是设计成为一个shell，而不是一个多进程管理包。</p>
+<p><code>multiprocessing</code>包是Python中的多进程管理包。它可以利用<code>multiprocessing.Process</code>对象来创建一个进程，
+该进程可以运行在Python程序内部编写的函数。该Process对象与Thread对象的用法相同，也有<code>start()</code>, <code>run()</code>, <code>join()</code>的方法。
+此外<code>multiprocessing</code>包中也有<code>Lock/Event/Semaphore/Condition</code>类
+(这些对象可以像多线程那样，通过参数传递给各个进程)，用以同步进程，其用法与threading包中的同名类一致。
+所以，multiprocessing的很大一部份与threading使用同一套API，只不过换到了多进程的情境。</p>
+<p>使用multiprocessing的API的时候，有几点需要注意：</p>
+<ol>
+<li>在UNIX平台上，当某个进程终结之后，该进程需要被其父进程调用wait，否则进程成为僵尸进程(Zombie)。
+所以，有必要对每个Process对象调用join()方法 (实际上等同于wait)。对于多线程来说，由于只有一个进程，所以不存在此必要性。</li>
+<li><code>multiprocessing</code>提供了threading包中没有的IPC(比如Pipe和Queue)，效率上更高。应优先考虑Pipe和Queue</li>
+<li>多进程应该避免共享资源，比如全局变量或者传递参数</li>
+</ol>
+<p>下面演示下它的基本用法：</p>
+<pre><code class="line-numbers language-python">from multiprocessing import Process
+import os
+
+# 子进程要执行的代码
+def run_proc(name):
+    print(&#39;Run child process %s (%s)...&#39; % (name, os.getpid()))
+
+if __name__==&#39;__main__&#39;:
+    print(&#39;Parent process %s.&#39; % os.getpid())
+    p = Process(target=run_proc, args=(&#39;test&#39;,))
+    print(&#39;Process will start.&#39;)
+    p.start()
+    # join()方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。
+    p.join()
+    print(&#39;Process end.&#39;)
+</code></pre>
+<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
+<pre><code class="line-numbers language-python">from multiprocessing import Pool
+import os, time, random
+
+def long_time_task(name):
+    print(&#39;Run task %s (%s)...&#39; % (name, os.getpid()))
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print(&#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start)))
+
+if __name__==&#39;__main__&#39;:
+    print(&#39;Parent process %s.&#39; % os.getpid())
+    # Pool默认的大小时CUP核心数，这个是有意这样设计的
+    p = Pool()
+    for i in range(5):
+        p.apply_async(long_time_task, args=(i,))
+    print(&#39;Waiting for all subprocesses done...&#39;)
+    # 对Pool对象调用join()方法会等待所有子进程执行完毕，
+    # 调用join()之前必须先调用close()，调用close()之后就不能继续添加新的Process了。
+    p.close()
+    p.join()
+    print(&#39;All subprocesses done.&#39;)
+</code></pre>
+<p>对Pool对象调用join()方法会等待所有子进程执行完毕，调用join()之前必须先调用close()，
+调用close()之后就不能继续添加新的Process了</p>
+<h3 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a>进程间通信</h3><p>multiprocessing包中有Pipe类和Queue类来分别支持管道和消息队列这两种IPC机制。</p>
+<h4 id="Pipe方式"><a href="#Pipe方式" class="headerlink" title="Pipe方式"></a>Pipe方式</h4><p>Pipe可以是单向(half-duplex)，也可以是双向(duplex)。mutiprocessing.Pipe(duplex=False)创建单向管道，
+一个进程从PIPE一端输入对象，然后被PIPE另一端的进程接收。</p>
+<pre><code class="line-numbers language-python">import multiprocessing as mul
+
+def proc1(pipe):
+    pipe.send(&#39;hello&#39;)
+    print(&#39;proc1 rec:&#39;, pipe.recv())
+
+def proc2(pipe):
+    print(&#39;proc2 rec:&#39;, pipe.recv())
+    pipe.send(&#39;hello, too&#39;)
+
+# Build a pipe
+pipe = mul.Pipe()
+# Pass an end of the pipe to process 1
+p1 = mul.Process(target=proc1, args=(pipe[0],))
+# Pass the other end of the pipe to process 2
+p2 = mul.Process(target=proc2, args=(pipe[1],))
+p1.start()
+p2.start()
+p1.join()
+p2.join()
+</code></pre>
+<p>这里的Pipe是双向的。</p>
+<p>Pipe对象建立的时候，返回一个含有两个元素的表，每个元素代表Pipe的一端(Connection对象)。
+我们对Pipe的某一端调用send()方法来传送对象，在另一端使用recv()来接收。</p>
+<p>下面一个程序演示如何使用一个PIPE来获取<code>multiprocessing.Process</code>进程返回值，让人也可以通过Queue来达到同样效果。</p>
+<pre><code class="line-numbers language-python">import multiprocessing
+
+def worker(procnum, send_end):
+    &#39;&#39;&#39;worker function&#39;&#39;&#39;
+    result = str(procnum) + &#39; represent!&#39;
+    print(result)
+    send_end.send(result)
+
+def main():
+    jobs = []
+    pipe_list = []
+    for i in range(5):
+        # 单向管道返回的是(接受端，发送端)
+        recv_end , send_end = multiprocessing.Pipe(False)
+        p = multiprocessing.Process(target=worker, args=(i, send_end))
+        jobs.append(p)
+        pipe_list.append(recv_end)
+        p.start()
+
+    for proc in jobs:
+        proc.join()
+    result_list = [x.recv() for x in pipe_list]
+    print(result_list)
+    for x in pipe_list:
+        x.close()
+
+if __name__ == &#39;__main__&#39;:
+    main()
+</code></pre>
+<h4 id="Queue方式"><a href="#Queue方式" class="headerlink" title="Queue方式"></a>Queue方式</h4><p>Queue与Pipe相类似，都是先进先出的结构。但Queue允许多个进程放入，多个进程从队列取出对象。
+Queue使用mutiprocessing.Queue(maxsize)创建，maxsize表示队列中可以存放对象的最大数量。</p>
+<pre><code class="line-numbers language-python">from multiprocessing import Process, Queue
+import os, time, random
+
+# 写数据进程执行的代码:
+def write(q):
+    for value in [&#39;A&#39;, &#39;B&#39;, &#39;C&#39;]:
+        print(&#39;Put %s to queue...&#39; % value)
+        q.put(value)
+        time.sleep(random.random())
+
+# 读数据进程执行的代码:
+def read(q):
+    while True:
+        value = q.get(True)
+        print(&#39;Get %s from queue.&#39; % value)
+
+if __name__ == &#39;__main__&#39;:
+    # 父进程创建Queue，并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write, args=(q,))
+    pr = Process(target=read, args=(q,))
+    # 启动子进程pw，写入:
+    pw.start()
+    # 启动子进程pr，读取:
+    pr.start()
+    # 等待pw结束:
+    pw.join()
+    # pr进程里是死循环，无法等待其结束，只能强行终止:
+    pr.terminate()
+</code></pre>
+<h4 id="共享变量方式"><a href="#共享变量方式" class="headerlink" title="共享变量方式"></a>共享变量方式</h4><p>几个进程之间的都拥有自己独立的命名空间和地址空间，无法通过一些全局变量来实现，
+<code>multiprocessing</code>提供了一些特殊的函数来实现共享变量：</p>
+<p><strong><code>Value</code>,<code>Array</code>的方式</strong></p>
+<pre><code class="line-numbers language-python">from multiprocessing import Process,Value,Array
+def f(n,a):
+    n.value = 3.1415926
+    for i in range(len(a)):
+            a[i] = -a[i]
+if __name__ == &quot;__main__&quot;:
+    num = Value(&#39;d&#39;,0.0)
+    arr = Array(&#39;i&#39;,range(10))
+    p = Process(target=f,args=(num,arr))
+    p.start()
+    p.join()
+    print num.value
+    print arr[:]
+</code></pre>
+<p><code>Value()</code>和<code>Array()</code>都有两个参数第一个参数代表存放的值的类型，第二个参数代表其值。</p>
+<p><strong>Manager的方式</strong>
+这个方式支持的类型更多，灵活性更大，但是速度要慢于<code>Value</code>, <code>Array</code></p>
+<pre><code class="line-numbers language-python">from multiprocessing import Process,Manager
+def f(d,l):
+    d[1] = &#39;1&#39;
+    d[&#39;2&#39;] = 2
+    d[0.25] = None
+    l.reverse()
+if __name__ == &quot;__main__&quot;:
+    manager = Manager()
+    d = manager.dict()
+    l = manager.list(range(10))
+    p = Process(target=f,args=(d,l))
+    p.start()
+    p.join()
+    print d
+    print l
+</code></pre>
+<h3 id="异步I-O"><a href="#异步I-O" class="headerlink" title="异步I/O"></a>异步I/O</h3><p>考虑到CPU和IO之间巨大的速度差异，一个任务在执行的过程中大部分时间都在等待IO操作，
+单进程单线程模型会导致别的任务无法并行执行，因此，我们才需要多进程模型或者多线程模型来支持多任务并发执行。</p>
+<p>现代操作系统对IO操作已经做了巨大的改进，最大的特点就是支持异步IO。如果充分利用操作系统提供的异步IO支持，
+就可以用单进程单线程模型来执行多任务，这种全新的模型称为事件驱动模型，Nginx就是支持异步IO的Web服务器，
+它在单核CPU上采用单进程模型就可以高效地支持多任务。在多核CPU上，可以运行多个进程（数量与CPU核心数相同），
+充分利用多核CPU。由于系统总的进程数量十分有限，因此操作系统调度非常高效。用异步IO编程模型来实现多任务是一个主要的趋势。</p>
+<p>对应到Python语言，单进程的异步编程模型称为协程，有了协程的支持，就可以基于事件驱动编写高效的多任务程序。
+python语言通过yield关键字来支持协程，而第三方框架gevent则是一个非常优秀的协程框架。</p>
+<h3 id="并发方式总结"><a href="#并发方式总结" class="headerlink" title="并发方式总结"></a>并发方式总结</h3><h4 id="线程（Thread）"><a href="#线程（Thread）" class="headerlink" title="线程（Thread）"></a>线程（Thread）</h4><pre><code class="line-numbers language-python">import threading
+class worker(threading.Thread):
+    def __init__(self):
+        pass
+    def run():
+        &quot;&quot;&quot;thread worker function&quot;&quot;&quot;
+        print &#39;Worker&#39;
+
+t = worker()
+t.start()
+</code></pre>
+<h4 id="进程（Process）"><a href="#进程（Process）" class="headerlink" title="进程（Process）"></a>进程（Process）</h4><pre><code class="line-numbers language-python">from multiprocessing import Process
+
+def worker():
+    &quot;&quot;&quot;thread worker function&quot;&quot;&quot;
+    print &#39;Worker&#39;
+p = Process(target=worker)
+p.start()
+p.join()
+</code></pre>
+<p>由于线程共享相同的地址空间和内存，所以线程之间的通信是非常容易的，然而进程之间的通信就要复杂一些了。
+常见的进程间通信有，管道，消息队列，Socket接口（TCP/IP）等等。</p>
+<p>Python的mutliprocess模块提供了封装好的管道和队列，可以方便的在进程间传递消息。</p>
+<p>Python进程间的同步使用锁，这一点喝线程是一样的。</p>
+<p>另外，Python还提供了进程池Pool对象，可以方便的管理和控制线程。</p>
+<h4 id="远程分布式主机-（Distributed-Node）"><a href="#远程分布式主机-（Distributed-Node）" class="headerlink" title="远程分布式主机 （Distributed Node）"></a>远程分布式主机 （Distributed Node）</h4><p>随着大数据时代的到临，摩尔定理在单机上似乎已经失去了效果，数据的计算和处理需要分布式的计算机网络来运行，
+程序并行的运行在多个主机节点上，已经是现在的软件架构所必需考虑的问题。</p>
+<p>远程主机间的进程间通信有几种常见的方式:</p>
+<ul>
+<li>TCP／IP</li>
+<li>远程方法调用 Remote Function Call，Python下有一个开源的实现<a href="http://rpyc.readthedocs.org/" target="_blank" rel="noopener">RPyC</a></li>
+<li>远程对象 Remote Object</li>
+<li>消息队列 Message Queue</li>
+</ul>
+<p>其中用的最多的还是消息队列，常见的支持Python接口的消息机制有：</p>
+<ul>
+<li><a href="http://www.rabbitmq.com/" target="_blank" rel="noopener">RabbitMQ</a></li>
+<li><a href="http://zguide.zeromq.org/" target="_blank" rel="noopener">ZeroMQ</a></li>
+<li><a href="http://kafka.apache.org/" target="_blank" rel="noopener">Kafka</a></li>
+</ul>
+<h4 id="协程（Pseudo－Thread）"><a href="#协程（Pseudo－Thread）" class="headerlink" title="协程（Pseudo－Thread）"></a>协程（Pseudo－Thread）</h4><p>协程看上去像是线程，使用的接口类似线程接口，但是实际使用非线程的方式，对应的线程开销也不存的。</p>
+<p>eventlet，gevent和concurence都是基于greenlet提供并发的。</p>
+<p>gevent和eventlet类似:</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent import socket
+urls = [&#39;www.google.com&#39;, &#39;www.example.com&#39;, &#39;www.python.org&#39;]
+jobs = [gevent.spawn(socket.gethostbyname, url) for url in urls]
+gevent.joinall(jobs, timeout=2)
+
+print [job.value for job in jobs]
+</code></pre>
+<p>对于IO密集型的任务，使用多线程，或者是多进程都可以有效的提高程序的效率，
+而使用伪线程性能提升非常显著，eventlet比没有并发的情况下，响应时间从9秒提高到0.03秒。
+同时eventlet／gevent提供了非阻塞的异步调用模式，非常方便。
+这里推荐使用线程或者协程，因为在响应时间类似的情况下，线程和协程消耗的资源更少。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/12/18/python/concurrent.html">python核心 - 并发编程</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/12/20/python/io.html" class="pre-post btn btn-default" title='python核心 - IO编程'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">python核心 - IO编程</span>
+        </a>
+    
+    
+        <a href="/2015/12/16/python/datetime.html" class="next-post btn btn-default" title='python核心 - 日期和时间'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">python核心 - 日期和时间</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#fork函数"><span class="toc-text">fork函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#threading"><span class="toc-text">threading</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ThreadLocal"><span class="toc-text">ThreadLocal</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#subprocess"><span class="toc-text">subprocess</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#multiprocessing"><span class="toc-text">multiprocessing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程间通信"><span class="toc-text">进程间通信</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Pipe方式"><span class="toc-text">Pipe方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Queue方式"><span class="toc-text">Queue方式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#共享变量方式"><span class="toc-text">共享变量方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步I-O"><span class="toc-text">异步I/O</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#并发方式总结"><span class="toc-text">并发方式总结</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#线程（Thread）"><span class="toc-text">线程（Thread）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#进程（Process）"><span class="toc-text">进程（Process）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程分布式主机-（Distributed-Node）"><span class="toc-text">远程分布式主机 （Distributed Node）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#协程（Pseudo－Thread）"><span class="toc-text">协程（Pseudo－Thread）</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

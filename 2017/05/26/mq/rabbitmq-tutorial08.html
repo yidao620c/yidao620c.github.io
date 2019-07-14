@@ -1,0 +1,552 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="rabbitmq,">
+
+
+    <meta name="description" content="RabbitMQ任务调度默认是阻塞的，使用pika中的channel.start_consuming()的时候，
+每次收到一条消息后会顺序执行完回调函数，发送ACK的确认消息，然后再执行下一条消息。
+虽然说可同时接受多条消息，但是并不能同时处理这多条消息，那么需要自己在代码里面实现任务的并发调...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>RabbitMQ简易教程 - 并发调度 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="RabbitMQ简易教程 - 并发调度">
+            
+                RabbitMQ简易教程 - 并发调度
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/mq">
+            mq
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/rabbitmq" title='rabbitmq'>
+                        rabbitmq
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/26</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>RabbitMQ任务调度默认是阻塞的，使用pika中的<code>channel.start_consuming()</code>的时候，
+每次收到一条消息后会顺序执行完回调函数，发送ACK的确认消息，然后再执行下一条消息。
+虽然说可同时接受多条消息，但是并不能同时处理这多条消息，那么需要自己在代码里面实现任务的并发调度。</p>
+<p>在Python里面实现并发方式多种多样，有多线程、多进程、多协程方式，我演示下如何实现。</p>
+<h2 id="默认方式"><a href="#默认方式" class="headerlink" title="默认方式"></a>默认方式</h2><p>我先使用默认方式看看是否阻塞，消费者处理消息的回调函数中，我特定使用<code>time.sleep(5)</code>来模拟长时间任务。
+设置<code>channel.basic_qos(prefetch_count=2)</code>可控制一次可接受几条消息，这里是2条。</p>
+<p>生产者代码（后面的都不变），直接复制的前面教程的代码：</p>
+<pre><code class="line-numbers language-python">import pika
+import sys
+
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.exchange_declare(exchange=&#39;topic_logs&#39;,
+                         type=&#39;topic&#39;)
+
+routing_key = &#39;disk.error&#39;
+message = &#39;[disk.error] Hello World! 111111&#39;
+channel.basic_publish(exchange=&#39;topic_logs&#39;,
+                      routing_key=routing_key,
+                      body=message)
+
+print(&quot; [x] Sent %r:%r&quot; % (routing_key, message))
+
+routing_key = &#39;disk.error&#39;
+message = &#39;[disk.error] Hello World! 222222&#39;
+channel.basic_publish(exchange=&#39;topic_logs&#39;,
+                      routing_key=routing_key,
+                      body=message)
+
+print(&quot; [x] Sent %r:%r&quot; % (routing_key, message))
+
+
+routing_key = &#39;disk.warning&#39;
+message = &#39;[disk.warning] Hello World! 333333&#39;
+channel.basic_publish(exchange=&#39;topic_logs&#39;,
+                      routing_key=routing_key,
+                      body=message)
+print(&quot; [x] Sent %r:%r&quot; % (routing_key, message))
+
+
+connection.close()
+</code></pre>
+<p>消费者代码：</p>
+<pre><code class="line-numbers language-python">import pika
+import time
+import datetime
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.exchange_declare(exchange=&#39;topic_logs&#39;,
+                         type=&#39;topic&#39;)
+
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
+
+binding_keys = [&#39;disk.error&#39;, &#39;disk.warning&#39;]
+
+for binding_key in binding_keys:
+    channel.queue_bind(exchange=&#39;topic_logs&#39;,
+                       queue=queue_name,
+                       routing_key=binding_key)
+
+print(&#39; [*] Waiting for logs. To exit press CTRL+C&#39;)
+
+def test(ch, method, body):
+    print(&quot;%s [x] Received %r&quot; % (datetime.datetime.now(), body,))
+    time.sleep(5)
+    print(&quot;%s [x] Finished %r&quot; % (datetime.datetime.now(), body,))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
+def callback(ch, method, properties, body):
+    test(ch, method, body)
+
+channel.basic_qos(prefetch_count=2)  # 并发的数量
+channel.basic_consume(callback,
+                      queue=queue_name)
+channel.start_consuming()
+
+</code></pre>
+<p>运行结果：</p>
+<pre><code> [*] Waiting for logs. To exit press CTRL+C
+2017-05-26 11:04:46.977268 [x] Received b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:04:51.987554 [x] Finished b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:04:51.988555 [x] Received b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:04:56.988841 [x] Finished b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:04:56.989841 [x] Received b&#39;[disk.warning] Hello World! 333333&#39;
+2017-05-26 11:05:02.001127 [x] Finished b&#39;[disk.warning] Hello World! 333333&#39;
+</code></pre><p>可以看出，虽然我将消息接收设置成2，但是每次只能处理1条消息。</p>
+<h2 id="多线程方式"><a href="#多线程方式" class="headerlink" title="多线程方式"></a>多线程方式</h2><p>下面用多线程方式实现并发，消费者代码如下：</p>
+<pre><code class="line-numbers language-python">import pika
+import time
+import datetime
+import threading
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.exchange_declare(exchange=&#39;topic_logs&#39;,
+                         type=&#39;topic&#39;)
+
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
+
+binding_keys = [&#39;disk.error&#39;, &#39;disk.warning&#39;]
+
+for binding_key in binding_keys:
+    channel.queue_bind(exchange=&#39;topic_logs&#39;,
+                       queue=queue_name,
+                       routing_key=binding_key)
+
+print(&#39; [*] Waiting for logs. To exit press CTRL+C&#39;)
+
+def test(ch, method, body):
+    print(&quot;%s [x] Received %r&quot; % (datetime.datetime.now(), body,))
+    time.sleep(5)
+    print(&quot;%s [x] Finished %r&quot; % (datetime.datetime.now(), body,))
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
+def callback(ch, method, properties, body):
+    t = threading.Thread(target=test, args=(ch, method, body))
+    t.start()
+
+channel.basic_qos(prefetch_count=2)  # 并发的数量
+channel.basic_consume(callback,
+                      queue=queue_name)
+channel.start_consuming()
+</code></pre>
+<p>运行结果：</p>
+<pre><code> [*] Waiting for logs. To exit press CTRL+C
+2017-05-26 11:07:58.486085 [x] Received b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:07:58.487085 [x] Received b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:08:03.486371 [x] Finished b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:08:03.487371 [x] Finished b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:08:03.489371 [x] Received b&#39;[disk.warning] Hello World! 333333&#39;
+2017-05-26 11:08:08.489657 [x] Finished b&#39;[disk.warning] Hello World! 333333&#39;
+</code></pre><p>很明显可以同时处理两条消息了。</p>
+<h2 id="多进程方式"><a href="#多进程方式" class="headerlink" title="多进程方式"></a>多进程方式</h2><p>下面用多进程方式实现并发（注意多进程只能在Linux中使用），消费者代码如下，我只写差异部分，其他跟上面多线程一样：</p>
+<pre><code class="line-numbers language-python">from multiprocessing import Process
+
+def callback(ch, method, properties, body):
+    t=Process(target=test,args=(ch,method,body))
+    t.start()
+</code></pre>
+<p>运行结果和多线程类似</p>
+<h2 id="协程方式"><a href="#协程方式" class="headerlink" title="协程方式"></a>协程方式</h2><p>利用gevent协程模式，比多线程更加高效，这个是我推荐的方式：</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent import monkey; monkey.patch_all()
+
+def callback(ch, method, properties, body):
+    # 协程启动，没有调用join，因为rabbitmq本身是阻塞的,可以不用join
+    gevent.spawn(test, ch, method, body)
+</code></pre>
+<p>运行结果：</p>
+<pre><code> [*] Waiting for logs. To exit press CTRL+C
+2017-05-26 11:13:53.637398 [x] Received b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:13:53.637398 [x] Received b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:13:58.637684 [x] Finished b&#39;[disk.error] Hello World! 222222&#39;
+2017-05-26 11:13:58.637684 [x] Finished b&#39;[disk.error] Hello World! 111111&#39;
+2017-05-26 11:13:58.638684 [x] Received b&#39;[disk.warning] Hello World! 333333&#39;
+2017-05-26 11:14:03.638970 [x] Finished b&#39;[disk.warning] Hello World! 333333&#39;
+</code></pre><h2 id="Celery"><a href="#Celery" class="headerlink" title="Celery"></a>Celery</h2><p>对于简单的任务调度使用gevent就可以满足了，如果是大型复杂的系统需要任务调度，
+可以考虑使用Celery这个框架。</p>
+<p>Celery(芹菜)是一个异步任务队列/基于分布式消息传递的作业队列。它侧重于实时操作，但对调度支持也很好。
+使用Python编写，但该协议可以在任何语言实现。它也可以与其他语言通过webhooks实现。</p>
+<p>它的基本工作就是管理分配任务到不同的服务器，并且取得结果。至于说服务器之间是如何进行通信的？
+这个Celery本身不能解决。所以，RabbitMQ作为一个消息队列管理工具被引入到和Celery集成，
+负责处理服务器之间的通信任务。</p>
+<p>现在的Celery早已增加了一些对Redis,MongoDB之类的支持。原因是RabbitMQ尽管足够强大，
+但对于一些相对简单的业务环境来说可能太多（复杂）了一些。这样用户可以有多一些的选择。</p>
+<p>官方集成RabbitMQ的文档：<a href="http://docs.celeryproject.org/en/latest/getting-started/brokers/rabbitmq.html" target="_blank" rel="noopener">http://docs.celeryproject.org/en/latest/getting-started/brokers/rabbitmq.html</a></p>
+<p>我这里就不讲怎样使用Celery了，后续有时间再弄个教程出来。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/26/mq/rabbitmq-tutorial08.html">RabbitMQ简易教程 - 并发调度</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/06/09/web/swagger.html" class="pre-post btn btn-default" title='使用Swagger生成RESTful API文档'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">使用Swagger生成RESTful API文档</span>
+        </a>
+    
+    
+        <a href="/2017/05/17/mq/rabbitmq-tutorial07.html" class="next-post btn btn-default" title='RabbitMQ简易教程 - WebSocket'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - WebSocket</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#默认方式"><span class="toc-text">默认方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多线程方式"><span class="toc-text">多线程方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多进程方式"><span class="toc-text">多进程方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#协程方式"><span class="toc-text">协程方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Celery"><span class="toc-text">Celery</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="vagrant,">
+
+
+    <meta name="description" content="作为一名开发者，是否经常抱怨环境问题，某个bug只出现在你的环境下面，找了很久才找到原来是一个很小的环境差异导致。
+Vagrant可以非常容易的配置一个统一的可复制、可移植的分布式开发环境，
+在VirtualBox、VMware、AWS或其他provider平台上，
+借助provisionin...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Vagrant创建虚拟化开发环境 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Vagrant创建虚拟化开发环境">
+            
+                Vagrant创建虚拟化开发环境
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/vagrant" title='vagrant'>
+                        vagrant
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/09/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>作为一名开发者，是否经常抱怨环境问题，某个bug只出现在你的环境下面，找了很久才找到原来是一个很小的环境差异导致。
+Vagrant可以非常容易的配置一个统一的可复制、可移植的分布式开发环境，
+在VirtualBox、VMware、AWS或<a href="https://www.vagrantup.com/docs/providers/" target="_blank" rel="noopener">其他provider</a>平台上，
+借助<a href="https://www.vagrantup.com/docs/provisioning/" target="_blank" rel="noopener">provisioning工具</a>，
+比如shell脚本、Ansible、Chef等自动在各个机器上面安装和配置好软件。</p>
+<p>只需要一个Vagrantfile，别人就能基于它创建统一的环境，不管你的工作机器是Linux、Mac OS 还是Windows系统，
+最后创建的虚拟机环境都是一样的。官网：<a href="https://www.vagrantup.com/" target="_blank" rel="noopener">https://www.vagrantup.com/</a> </p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>直接去<a href="https://www.vagrantup.com/downloads.html" target="_blank" rel="noopener">下载页面</a>下载对应版本，
+或者通过yum、apt安装最新的随你便。总是安装过程太简单不解释了，我的是Ubuntu16.04 LTS 64-bit版本，选择使用apt安装的。</p>
+<pre><code class="line-numbers language-bash">sudo apt-get install virtualbox
+sudo apt-get install vagrant
+</code></pre>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>这里我们使用Virtualbox这个默认的provider来演示，先安装Virtualbox和Vagrant后。</p>
+<pre><code class="line-numbers language-bash">$ vagrant init hashicorp/precise64
+$ vagrant up
+</code></pre>
+<p>这条命令会自动去下载一个box并将它加进来，然后基于这个box创建并启动虚拟机。
+这样你就在virtualbox里面安装好了一个Ubuntu 12.04 LTS 64-bit的系统。通过<code>vagrant ssh</code>可登陆进去看看。</p>
+<h3 id="初始化工程"><a href="#初始化工程" class="headerlink" title="初始化工程"></a>初始化工程</h3><p>创建任何vagrant工程的第一步就是创建一个<a href="https://www.vagrantup.com/docs/vagrantfile/" target="_blank" rel="noopener">Vagrantfile</a>。
+这个文件有两个作用：</p>
+<ul>
+<li>决定你项目的根目录，很多配置项路径都是相对于这个根目录的</li>
+<li>描述机器操作系统类型和需要的资源，以及需要安装在机器上面的所有软件</li>
+</ul>
+<p>通过在某个目录下使用<code>vagrant init</code>可初始化一个项目</p>
+<pre><code class="line-numbers language-bash">$ mkdir vagrant_getting_started
+$ cd vagrant_getting_started
+$ vagrant init
+</code></pre>
+<p>一般都会将这个Vagrantfile放入版本控制系统，这样其他人都能拿到这个文件，基于它来创建相同的环境。</p>
+<h3 id="Boxes"><a href="#Boxes" class="headerlink" title="Boxes"></a>Boxes</h3><p>并不需要每次都从来开始构建一个系统，Vagrant可使用一个基础镜像来快速克隆一个虚拟机，这个基础镜像就叫“box”。
+在生成初始化Vagrantfile后第一步就是指定Box。</p>
+<p>如果你按照之前步骤运行过，那么你已经安装了一个box了，下面的步骤就不需要了。</p>
+<pre><code class="line-numbers language-bash">$ vagrant box add hashicorp/precise64
+</code></pre>
+<p>这条命令会从 <a href="https://atlas.hashicorp.com/boxes/search" target="_blank" rel="noopener">HashiCorp’s Atlas box catalog</a> 下载名字叫“hashicorp/precise64”的box并加进来。你还能从本地文件、自定义URL来加入一个box。</p>
+<p>当我们把box加入vagrant之后，接下来需要在Vagrantfile中指定要使用它，你还可以指定版本，下载URL等等：</p>
+<pre><code>Vagrant.configure(&quot;2&quot;) do |config|
+  config.vm.box = &quot;hashicorp/precise64&quot;
+  config.vm.box_version = &quot;1.1.0&quot;
+  config.vm.box_url = &quot;http://files.vagrantup.com/precise64.box&quot;
+end
+</code></pre><h3 id="启动并访问"><a href="#启动并访问" class="headerlink" title="启动并访问"></a>启动并访问</h3><p>通过如下命令启动vagrant环境：</p>
+<pre><code class="line-numbers language-bash">$ vagrant up
+</code></pre>
+<p>ssh登录：</p>
+<pre><code class="line-numbers language-bash">$ vagrant ssh
+</code></pre>
+<p>进入之后你别去执行 <code>rm -rf /</code> 这个命令就行，因为vagrant虚拟机和你的宿主机共享了一个文件夹/vagrant。</p>
+<p>关闭虚拟机环境</p>
+<pre><code class="line-numbers language-bash">$ vagrant halt
+</code></pre>
+<p>销毁vagrant：</p>
+<pre><code class="line-numbers language-bash">$ vagrant destroy
+</code></pre>
+<p>彻底移除box：</p>
+<pre><code class="line-numbers language-bash">$ vagrant box remove
+</code></pre>
+<h3 id="同步文件夹"><a href="#同步文件夹" class="headerlink" title="同步文件夹"></a>同步文件夹</h3><p>Vagrant可以自动帮你同步宿主机和虚拟机的文件夹。
+宿主机的文件夹是你的项目根目录，也就是Vagrantfile文件所在目录；
+虚拟机的同步目录默认是/vagrant目录。这样你就能在自己宿主机上使用喜欢的编辑器或开发工具进行开发了，不需要考虑同步问题。</p>
+<h3 id="Provision"><a href="#Provision" class="headerlink" title="Provision"></a>Provision</h3><p>先解释下名词。在Vagrant里面有两个重要概念，一个是Provision，一个是Provider</p>
+<ul>
+<li>Provision：远程配置和安装工具，通过它来通过ssh来完成远程虚拟机的各个软件安装和配置，比如shell、Ansible、Chef</li>
+<li>Provider：用来创建虚拟机并为其提供环境和基础设施，比如VirtualBox、VMware、AWS或<a href="https://www.vagrantup.com/docs/providers/" target="_blank" rel="noopener">其他provider</a>平台</li>
+</ul>
+<p>通过之前的步骤，你已经有了一个远程环境。现在我要在这个机器上跑web服务，那么需要安装和启动apache软件。这里我选用shell脚本来作为我的provision，在项目根目录创建一个bootstrap.sh：</p>
+<pre><code class="line-numbers language-bash">#!/usr/bin/env bash
+
+apt-get update
+apt-get install -y apache2
+if ! [ -L /var/www ]; then
+  rm -rf /var/www
+  ln -fs /vagrant /var/www
+fi
+</code></pre>
+<p>然后，在项目根目录新加一个html文件夹，里面增加index.html，写点内容进去。然后配置Vagrantfile来使用它：</p>
+<pre><code class="line-numbers language-bash">Vagrant.configure(&quot;2&quot;) do |config|
+  config.vm.box = &quot;hashicorp/precise64&quot;
+  config.vm.provision :shell, path: &quot;bootstrap.sh&quot;
+end
+</code></pre>
+<p>再次运行 <code>vagrant up</code> 来初始化和启动你的虚拟机，要是虚拟机之前已经启动过了，只需要执行</p>
+<pre><code class="line-numbers language-bash">vagrant reload --provision
+</code></pre>
+<p>便可很快的重新启动机器，注：Vagrant只在up的第一次执行provisioners。所以要加强制执行参数–provision</p>
+<p>ssh登录后看看apache是不是已经正常工作了：</p>
+<pre><code class="line-numbers language-bash">$ vagrant ssh
+...
+vagrant@precise64:~$ wget -qO- 127.0.0.1
+</code></pre>
+<h3 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h3><p>上面的服务只能在本机访问，外面访问不了。这里我们再设置下端口转发即可让外面的机器也能访问这个web服务。
+编辑Vagrantfile：</p>
+<pre><code>Vagrant.configure(&quot;2&quot;) do |config|
+  config.vm.box = &quot;hashicorp/precise64&quot;
+  config.vm.provision :shell, path: &quot;bootstrap.sh&quot;
+  config.vm.network :forwarded_port, guest: 80, host: 4567
+end
+</code></pre><p>运行<code>vagrant reload</code> 或者 <code>vagrant up</code> (取决于你虚拟机是否已经启动了)，然后在你的宿主机上面访问：<a href="http://127.0.0.1:4567" target="_blank" rel="noopener">http://127.0.0.1:4567</a></p>
+<p>Vagrant还能配置更多的网络，允许你访问客户机静态的IP，或者将客户机桥接到一个已经存在的网络上。详情见<a href="https://www.vagrantup.com/docs/networking/" target="_blank" rel="noopener">networking</a></p>
+<h3 id="结束方式"><a href="#结束方式" class="headerlink" title="结束方式"></a>结束方式</h3><p>如果你暂时不用这个虚拟机了，有三种处理方式。</p>
+<ol>
+<li>挂起命令<code>vagrant suspend</code>，会保存当前运行状态，不过需要更多磁盘空间</li>
+<li>关机命令<code>vagrant halt</code>，相对于正常的虚拟机关机</li>
+<li>销毁命令<code>vagrant destroy</code>，清掉所有的虚拟机资源和磁盘空间</li>
+</ol>
+<h3 id="重新构建"><a href="#重新构建" class="headerlink" title="重新构建"></a>重新构建</h3><p>任何时候只需运行<code>$ vagrant up</code>命令即可重新构建你的环境</p>
+<h3 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h3><p>ubuntu16.04里面，ssh连接超时的解决方案：</p>
+<pre><code>vboxmanage modifyvm winstore_node001 --cableconnected1 on
+</code></pre><p>对应在Vagrantfile里面的修正：</p>
+<pre><code>vb.customize [&#39;modifyvm&#39;, :id, &quot;--cableconnected1&quot; ,&quot;on&quot;]
+</code></pre><h3 id="接下来"><a href="#接下来" class="headerlink" title="接下来"></a>接下来</h3><p>恭喜你已经入门Vagrant，还有很多好玩的主题呢：</p>
+<ul>
+<li><a href="https://www.vagrantup.com/docs/virtualbox/" target="_blank" rel="noopener">虚拟机的配置</a></li>
+<li><a href="https://www.vagrantup.com/docs/plugins/" target="_blank" rel="noopener">插件</a></li>
+<li><a href="https://www.vagrantup.com/docs/synced-folders/" target="_blank" rel="noopener">自定义同步文件夹</a></li>
+<li><a href="https://www.vagrantup.com/docs/provisioning/" target="_blank" rel="noopener">使用Ansible、Chef作为Provision</a></li>
+</ul>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/09/02/python/vagrant.html">Vagrant创建虚拟化开发环境</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/09/05/python/jinja2.html" class="pre-post btn btn-default" title='jinja2模板'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">jinja2模板</span>
+        </a>
+    
+    
+        <a href="/2016/07/29/web/form.html" class="next-post btn btn-default" title='防止表单重复提交'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">防止表单重复提交</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#初始化"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#初始化工程"><span class="toc-text">初始化工程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Boxes"><span class="toc-text">Boxes</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动并访问"><span class="toc-text">启动并访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#同步文件夹"><span class="toc-text">同步文件夹</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Provision"><span class="toc-text">Provision</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#网络"><span class="toc-text">网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#结束方式"><span class="toc-text">结束方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重新构建"><span class="toc-text">重新构建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#FAQ"><span class="toc-text">FAQ</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#接下来"><span class="toc-text">接下来</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

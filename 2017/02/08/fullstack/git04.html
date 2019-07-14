@@ -1,0 +1,541 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="git,">
+
+
+    <meta name="description" content="在实际使用git的过程中，我发现最常遇到的就是撤销，git里面有reset、checkout、revert来帮助我们撤回修改。
+但是这几个命令有时候不是很好理解，虽然我在第一篇里面已经讲解过撤销，但是我还是想用专门用一篇来详细讲解如何撤销版本和文件。
+之前只是讲了几个简单的命令教你怎么撤销，但...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>git简明教程 - 撤销篇 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="git简明教程 - 撤销篇">
+            
+                git简明教程 - 撤销篇
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/git" title='git'>
+                        git
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/02/08</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>在实际使用git的过程中，我发现最常遇到的就是撤销，git里面有reset、checkout、revert来帮助我们撤回修改。
+但是这几个命令有时候不是很好理解，虽然我在第一篇里面已经讲解过撤销，但是我还是想用专门用一篇来详细讲解如何撤销版本和文件。</p>
+<p>之前只是讲了几个简单的命令教你怎么撤销，但是其中的原理如果你不懂的话就不会很好的使用这几个命令。
+参考《Pro Git》第2版本中的重置揭密部分，为大家揭开撤销的原理和神秘面纱。</p>
+<h2 id="三棵树"><a href="#三棵树" class="headerlink" title="三棵树"></a>三棵树</h2><p>理解 reset 和 checkout 的最简方法，就是以 Git 的思维框架（将其作为内容管理器）来管理三棵不同的树</p>
+<table>
+<thead>
+<tr>
+<th>树</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HEAD</td>
+<td>上一次提交的快照，下一次提交的父结点</td>
+</tr>
+<tr>
+<td>Index</td>
+<td>预期的下一次提交的快照</td>
+</tr>
+<tr>
+<td>Working Directory</td>
+<td>沙盒</td>
+</tr>
+</tbody>
+</table>
+<p>Git 主要的目的是通过操纵这三棵树来以更加连续的状态记录项目的快照，有时候也称为<code>工作目录</code>，<code>缓存区</code>和<code>提交历史</code>。
+不管什么叫法其实意思都一样，你心里得记住这三个东东。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git60.png" alt></p>
+<p><code>reset</code>、<code>checkout</code> 和 <code>revert</code>都可以作用于commit层面，并且<code>reset</code>、<code>checkout</code>还能作用于文件层面。</p>
+<h2 id="commit层面"><a href="#commit层面" class="headerlink" title="commit层面"></a>commit层面</h2><p>你传给 <code>git reset</code> 和 <code>git checkout</code> 的参数决定了它们的作用域。如果你没有包含文件路径，这些操作对所有提交生效。</p>
+<h3 id="Reset"><a href="#Reset" class="headerlink" title="Reset"></a>Reset</h3><p>在提交层面上，reset 将一个分支的末端指向另一个提交。这可以用来移除当前分支的一些提交。
+比如，下面这两条命令让 hotfix 分支向后回退了两个提交。</p>
+<pre><code>git checkout hotfix
+git reset HEAD~2
+</code></pre><p>hotfix 分支末端的两个提交现在变成了悬挂提交。也就是说，下次 Git 执行垃圾回收的时候，这两个提交会被删除。
+换句话说，如果你想扔掉这两个提交，你可以这么做。reset 操作如下图所示：</p>
+<p>reset之前：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git61.png" alt></p>
+<p>reset之后：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git62.png" alt></p>
+<p>如果你的更改还没有共享给别人，git reset 是撤销这些更改的简单方法。
+当你开发一个功能的时候发现「糟糕，我做了什么？我应该重新来过！」时，reset 就像是 go-to 命令一样。</p>
+<p>除了在当前分支上操作，你还可以通过传入这些标记来修改你的缓存区或工作目录：</p>
+<ul>
+<li>–soft – 缓存区和工作目录都不会被改变</li>
+<li>–mixed – 默认选项。缓存区和你指定的提交同步，但工作目录不受影响</li>
+<li>–hard – 缓存区和工作目录都同步到你指定的提交</li>
+</ul>
+<p>当你传入 HEAD 以外的其他提交的时候要格外小心，因为 reset 操作会重写当前分支的历史。
+正如 rebase 黄金法则所说的，在公共分支上这样做可能会引起严重的后果。</p>
+<h3 id="Checkout"><a href="#Checkout" class="headerlink" title="Checkout"></a>Checkout</h3><p>你应该已经非常熟悉提交层面的 <code>git checkout</code>。当传入分支名时，可以切换到那个分支。</p>
+<pre><code>git checkout hotfix
+</code></pre><p>上面这个命令做的不过是将HEAD移到一个新的分支，然后更新工作目录和缓冲区。因为这可能会覆盖本地的修改，
+Git 强制你提交或者暂存工作目录中的所有更改，不然在 checkout 的时候这些更改都会丢失，所以这个命令是很安全的。
+和 <code>git reset</code> 不一样的是，<code>git checkout</code> 没有移动这些分支。</p>
+<p>除了分支之外，你还可以传入提交的引用来 checkout 到任意的提交。这和 checkout 到另一个分支是完全一样的：把 HEAD 移动到特定的提交。
+比如，下面这个命令会 checkout 到当前提交的祖父提交。</p>
+<pre><code>git checkout HEAD~2
+</code></pre><p><img src="https://xnstatic-1253397658.file.myqcloud.com/git63.png" alt></p>
+<p>这对于快速查看项目旧版本来说非常有用。但如果你当前的 HEAD 没有任何分支引用，那么这会造成 HEAD 分离。这是非常危险的，如果你接着添加新的提交，
+然后切换到别的分支之后就没办法回到之前添加的这些提交。因此，在为分离的 HEAD 添加新的提交的时候你应该创建一个新的分支。</p>
+<p>在IDEA里面，有个<code>Checkout Revision</code>实际上就是调用的命令<code>git checkout revision</code>，回退到某个版本，但是如果你在上面进行修改了提交会报错：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git64.png" alt></p>
+<p>提示的很清楚，就是这是一个游离状态的HEAD指针提交，如果你非要这么做很可能后面会丢掉这个更改，最好能创建一个分支后再提交。</p>
+<h3 id="Revert"><a href="#Revert" class="headerlink" title="Revert"></a>Revert</h3><p>Revert 撤销一个提交的同时会创建一个新的提交。这是一个安全的方法，因为它不会重写提交历史。比如，下面的命令会找出倒数第二个提交，
+然后创建一个新的提交来撤销这些更改，然后把这个提交加入项目中。</p>
+<pre><code>git checkout hotfix
+git revert HEAD~2
+</code></pre><p>如下图所示</p>
+<p>revert之前：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git65.png" alt></p>
+<p>revert之后：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git66.png" alt></p>
+<p>相比 <code>git reset</code>，它不会改变现在的提交历史。因此，<code>git revert</code> 可以用在公共分支上，<code>git reset</code> 应该用在私有分支上。</p>
+<p>就像 <code>git checkout</code> 一样，<code>git revert</code> 也有可能会重写文件。所以，Git 会在你执行 revert 之前要求你提交或者暂存你工作目录中的更改。</p>
+<h2 id="文件层面"><a href="#文件层面" class="headerlink" title="文件层面"></a>文件层面</h2><p><code>git reset</code> 和 <code>git checkout</code> 命令也接受文件路径作为参数。这时它的行为就大为不同了。它不会作用于整份提交，参数将它限制于特定文件</p>
+<h3 id="Reset-1"><a href="#Reset-1" class="headerlink" title="Reset"></a>Reset</h3><p>当检测到文件路径时，<code>git reset</code> 将缓存区同步到你指定的那个提交。下面这个命令会将倒数第二个提交中的 foo.py 加入到缓存区中，供下一个提交使用。</p>
+<pre><code>git reset HEAD~2 foo.py
+</code></pre><p>和提交层面的 <code>git reset</code> 一样，通常我们使用HEAD而不是某个特定的提交。
+运行 <code>git reset HEAD foo.py</code> 会将当前对 foo.py 文件的修改部分从缓存区中移除出去，而不会影响工作目录中对 foo.py 的更改。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git67.png" alt></p>
+<p>注意：<code>--soft</code>、<code>--mixed</code> 和 <code>--hard</code> 对文件层面的 <code>git reset</code> 毫无作用，因为缓存区中的文件一定会变化，而工作目录中的文件一定不变。</p>
+<h3 id="Checkout-1"><a href="#Checkout-1" class="headerlink" title="Checkout"></a>Checkout</h3><p>Checkout 一个文件和带文件路径 <code>git reset</code> 非常像，它除了会更新缓存区外，同时它还会更新工作区文件。
+不像提交层面的 checkout 命令，它不会移动 HEAD引用，也就是你不会切换到别的分支上去。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/git68.png" alt></p>
+<p>比如，下面这个命令将工作目录和缓存区中的 foo.py 同步到了倒数第二个提交中的 foo.py</p>
+<pre><code>git checkout HEAD~2 foo.py
+</code></pre><p>和提交层面相同的是，它可以用来检查项目的旧版本，但作用域被限制到了特定文件。</p>
+<p>这个命令通常和 HEAD 一起使用。比如 <code>git checkout HEAD foo.py</code> 等同于舍弃 foo.py 没有提交的更改。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>希望你现在熟悉并理解了 <code>reset</code>、<code>checkout</code> 和 <code>revert</code> 命令，你可能还是会有点困惑，毕竟不太可能记住不同调用的所有规则。</p>
+<p>下面的速查表列出了命令对树的影响。 <code>HEAD</code> 一列中的 <code>REF</code> 表示该命令移动了 HEAD 指向的分支引用，而<code>HEAD</code> 则表示只移动了 HEAD 自身。
+特别注意 <code>Safe?</code> 一列 - 如果它标记为 NO，那么运行该命令之前请考虑一下。</p>
+<table>
+<thead>
+<tr>
+<th>撤销</th>
+<th>HEAD</th>
+<th>Index</th>
+<th>WorkDir</th>
+<th>Safe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Commit Level</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>reset –soft [commit]</td>
+<td>REF</td>
+<td>NO</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>reset [commit]</td>
+<td>REF</td>
+<td>YES</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>reset –hard [commit]</td>
+<td>REF</td>
+<td>YES</td>
+<td>YES</td>
+<td>NO</td>
+</tr>
+<tr>
+<td>checkout [commit]</td>
+<td>HEAD</td>
+<td>YES</td>
+<td>YES</td>
+<td>YES</td>
+</tr>
+<tr>
+<td><strong>File Level</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>reset (commit) [file]</td>
+<td>NO</td>
+<td>YES</td>
+<td>NO</td>
+<td>YES</td>
+</tr>
+<tr>
+<td>checkout (commit) [file]</td>
+<td>NO</td>
+<td>YES</td>
+<td>YES</td>
+<td>NO</td>
+</tr>
+</tbody>
+</table>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/02/08/fullstack/git04.html">git简明教程 - 撤销篇</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/02/09/fullstack/github.html" class="pre-post btn btn-default" title='GitHub的一些好玩的技巧'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">GitHub的一些好玩的技巧</span>
+        </a>
+    
+    
+        <a href="/2017/02/08/fullstack/git03.html" class="next-post btn btn-default" title='git简明教程 - 协作篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">git简明教程 - 协作篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#三棵树"><span class="toc-text">三棵树</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#commit层面"><span class="toc-text">commit层面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Reset"><span class="toc-text">Reset</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Checkout"><span class="toc-text">Checkout</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Revert"><span class="toc-text">Revert</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件层面"><span class="toc-text">文件层面</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Reset-1"><span class="toc-text">Reset</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Checkout-1"><span class="toc-text">Checkout</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

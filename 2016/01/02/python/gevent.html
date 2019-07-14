@@ -1,0 +1,886 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="gevent,">
+
+
+    <meta name="description" content="一般将coroutine称之为协程（或微线程，也有称纤程的）。
+我在python并发编程那篇文章已经详细讲解了进程Process和线程Thread的用法，
+很早就想再写一篇专门讲解coroutine以及相关的优秀库gevent。
+目前常见的coroutine应用都是网络程序中，所以我们先来看看...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>浅谈coroutine和gevent | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="浅谈coroutine和gevent">
+            
+                浅谈coroutine和gevent
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/gevent" title='gevent'>
+                        gevent
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/01/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>一般将coroutine称之为协程（或微线程，也有称纤程的）。
+我在python并发编程那篇文章已经详细讲解了进程Process和线程Thread的用法，
+很早就想再写一篇专门讲解coroutine以及相关的优秀库gevent。</p>
+<p>目前常见的coroutine应用都是网络程序中，所以我们先来看看各种不同的网络框架模型，
+然后再介绍coroutine就会比较理解了。<a id="more"></a></p>
+<h2 id="不同网络模型"><a href="#不同网络模型" class="headerlink" title="不同网络模型"></a>不同网络模型</h2><h3 id="阻塞式单进程"><a href="#阻塞式单进程" class="headerlink" title="阻塞式单进程"></a>阻塞式单进程</h3><p>这样的网络程序最简单，一个进程一个循环处理网络请求，当然性能也是最差的。
+现在服务器采用这种模型的基本看不到了。</p>
+<h3 id="阻塞式多进程"><a href="#阻塞式多进程" class="headerlink" title="阻塞式多进程"></a>阻塞式多进程</h3><p>每个请求开一个进程去处理，这样就能同时处理多个请求了，
+不过缺点就是当请求数变大时CPU花在进程切换开销巨大，效率低下。</p>
+<h3 id="非阻塞式事件驱动"><a href="#非阻塞式事件驱动" class="headerlink" title="非阻塞式事件驱动"></a>非阻塞式事件驱动</h3><p>也是多进程，不过使用一个主进程循环来检查是否有网络I/O事件发生，再来决定怎样处理。
+省去了上下文切换、进程复制等成本，也不会有死锁、竞争的发生。
+不过缺点是没有阻塞式进程直观，<a href="https://twistedmatrix.com/trac/" target="_blank" rel="noopener">Twisted</a>就是这样的网络框架。</p>
+<h3 id="非阻塞式Coroutine"><a href="#非阻塞式Coroutine" class="headerlink" title="非阻塞式Coroutine"></a>非阻塞式Coroutine</h3><p>有没有可能既有事件驱动的好处，又有阻塞式编程的直观的模型呢？答案也行就是我要讲的coroutine了。
+基本上它的本质也是事件驱动，只在单一循环上面检查事件的发生，但是加上了coroutine的概念。
+<a href="http://www.gevent.org/" target="_blank" rel="noopener">gevent</a>就是这种框架的代表。</p>
+<h2 id="Coroutine"><a href="#Coroutine" class="headerlink" title="Coroutine"></a>Coroutine</h2><p>简单来讲，coroutine就是允许你暂时中断之后再继续执行的程序。事实上，python最基础的coroutine就是生成器。</p>
+<pre><code class="line-numbers language-python">#!/usr/bin/env python
+# -*- coding: utf8 -*-
+
+def foo():
+    for i in range(10):
+        # 暂时返回一个值，并将控制权交出去
+        yield i
+        print(u&#39;foo: 控制权又回到我手上了，叫我大笨蛋&#39;)
+
+bar = foo()
+# 执行coroutine
+print(next(bar))
+print(u&#39;main: 现在控制权在我手上，啦啦啦&#39;)
+print(&#39;main:hello baby!&#39;)
+# 回到刚刚foo这个coroutine中断的地方继续执行
+print(next(bar))
+print(u&#39;main: 老大我又来了&#39;)
+print(next(bar))
+</code></pre>
+<p>执行结果：</p>
+<pre><code>0
+main: 现在控制权在我手上，啦啦啦
+main:hello baby!
+foo: 控制权又回到我手上了，叫我大笨蛋
+1
+main: 老大我又来了
+foo: 控制权又回到我手上了，叫我大笨蛋
+2
+</code></pre><p>看到没有，我们的foo在执行过程中被中断又继续了好几回。
+你刚开始可能觉得这样做没什么好处呀，thread的上下文切换不是也可以暂停再继续么。
+其实重点在于：</p>
+<ul>
+<li>thread之间需要context-switch，而且成本很高，但coroutine没有任何上下文切换</li>
+<li>可轻松生成大量的coroutine，基本没什么开销</li>
+<li>所有的coroutine全部都在一个线程中完成</li>
+<li>thread的切换基本靠OS来觉得该执行哪个，而coroutine是自己控制。</li>
+</ul>
+<h2 id="Gevent"><a href="#Gevent" class="headerlink" title="Gevent"></a>Gevent</h2><p>优秀的第三方库gevent就是基于coroutine的Python网络库，
+它用到Greenlet提供的，封装了libevent事件循环的高层同步API，它的coroutine是由Greenlet负责生成的。</p>
+<p>事实上程序写的跟普通的阻塞式程序一样，但它千真万确是异步的，这是它神奇的地方，我们来看实际的例子:</p>
+<pre><code class="line-numbers language-python">&quot;&quot;&quot;Spawn multiple workers and wait for them to complete&quot;&quot;&quot;
+
+urls = [&#39;http://www.gevent.org/&#39;, &#39;http://www.baidu.com&#39;, &#39;http://www.python.org&#39;]
+
+import gevent
+from gevent import monkey
+
+# patches stdlib (including socket and ssl modules) to cooperate with other greenlets
+monkey.patch_all()
+
+import urllib2
+
+def print_head(url):
+    print（&#39;Starting %s&#39; % url）
+    data = urllib2.urlopen(url).read()
+    print（&#39;%s: %s bytes: %r&#39; % (url, len(data), data[:50])）
+
+jobs = [gevent.spawn(print_head, url) for url in urls]
+
+gevent.joinall(jobs)
+</code></pre>
+<p>写起来非常简单，不过里面有一句<code>monkey.patch_all()</code>会让人有点疑惑。
+也就是猴子补丁，因为python内置的各种函数库和IO库一般都是阻塞式的，比如<code>sleep()</code>就会当前进程，
+而monkey就是负责将这些阻塞函数全部取代替换成gevent中相应的异步函数。</p>
+<p>gevent打了monkey patch之后会设置python相应的模块设置成非阻塞，
+然后在内部实现epoll的机制，一旦调用非阻塞的IO(比如recv)都会立刻返回，
+并且设置一个回调函数，这个回调函数用于切换到当前子coroutine，
+设置好回掉函数之后就把控制权返回给主coroutine，主coroutine继续调度。
+一旦网络I/O准备就绪，epoll会触发之前设置的回调函数，从而引发主coroutine切换到子coroutine，做相应的操作。</p>
+<p><code>joinall()</code>的意思是等待列表中所有coroutine完成后再返回。</p>
+<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>gevent里面的上下文切换是非常平滑的。在下面的例子程序中，我们可以看到两个上下文通过调用 gevent.sleep()来互相切换。</p>
+<pre><code class="line-numbers language-python">import gevent
+
+def foo():
+    print(&#39;Running in foo&#39;)
+    gevent.sleep(0)
+    print(&#39;Explicit context switch to foo again&#39;)
+
+def bar():
+    print(&#39;Explicit context to bar&#39;)
+    gevent.sleep(0)
+    print(&#39;Implicit context switch back to bar&#39;)
+
+gevent.joinall([
+    gevent.spawn(foo),
+    gevent.spawn(bar),
+])
+</code></pre>
+<p>接下来一个例子中可以看到gevent是安排各个任务的执行的：</p>
+<pre><code class="line-numbers language-python">import gevent
+import random
+
+def task(pid):
+    &quot;&quot;&quot;
+    Some non-deterministic task
+    &quot;&quot;&quot;
+    gevent.sleep(random.randint(0,2)*0.001)
+    print(&#39;Task&#39;, pid, &#39;done&#39;)
+
+def synchronous():
+    for i in range(1,10):
+        task(i)
+
+def asynchronous():
+    threads = [gevent.spawn(task, i) for i in xrange(10)]
+    gevent.joinall(threads)
+
+print(&#39;Synchronous:&#39;)
+synchronous()
+
+print(&#39;Asynchronous:&#39;)
+asynchronous()
+</code></pre>
+<p>在同步的情况下，任务是按顺序执行的，在执行各个任务的时候会阻塞主线程。</p>
+<p>而 <code>gevent.spawn</code> 的重要功能就是封装了greenlet里面的函数。
+初始化的greenlet放在了threads这个list里面，
+被传递给了 <code>gevent.joinall</code> 这个函数，它会阻塞当前的程序来执行所有的greenlet。</p>
+<p>在异步执行的情况下，所有任务的执行顺序是完全随机的。每一个greenlet的都不会阻塞其他greenlet的执行。</p>
+<h3 id="生成greenlet"><a href="#生成greenlet" class="headerlink" title="生成greenlet"></a>生成greenlet</h3><p>上面我们通过<code>gevent.spawn</code>来包装了对于greenlet的生成，
+另外我们还能可以通过创建Greenlet的子类，并且重写 _run 方法来实现：</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent import Greenlet
+
+class MyGreenlet(Greenlet):
+
+    def __init__(self, message, n):
+        Greenlet.__init__(self)
+        self.message = message
+        self.n = n
+
+    def _run(self):
+        print(self.message)
+        gevent.sleep(self.n)
+
+g = MyGreenlet(&quot;Hi there!&quot;, 3)
+g.start()
+g.join()
+</code></pre>
+<h3 id="Greenlet-的状态"><a href="#Greenlet-的状态" class="headerlink" title="Greenlet 的状态"></a>Greenlet 的状态</h3><p>greenlet在执行的时候也会出错。Greenlet有可能会无法抛出异常，停止失败，或者消耗了太多的系统资源。</p>
+<p>greenlet的内部状态通常是一个依赖时间的参数。greenlet有一些标记来让你能够监控greenlet的状态</p>
+<ul>
+<li>started – 标志greenlet是否已经启动</li>
+<li>ready – 标志greenlet是否已经被终止</li>
+<li>successful() – 标志greenlet是否已经被终止，并且没有抛出异常</li>
+<li>value – 由greenlet返回的值</li>
+<li>exception – 在greenlet里面没有被捕获的异常</li>
+</ul>
+<pre><code class="line-numbers language-python">import gevent
+
+def win():
+    return &#39;You win!&#39;
+
+def fail():
+    raise Exception(&#39;You fail at failing.&#39;)
+
+winner = gevent.spawn(win)
+loser = gevent.spawn(fail)
+
+print(winner.started) # True
+print(loser.started)  # True
+
+# Exceptions raised in the Greenlet, stay inside the Greenlet.
+try:
+    gevent.joinall([winner, loser])
+except Exception as e:
+    print(&#39;This will never be reached&#39;)
+
+print(winner.value) # &#39;You win!&#39;
+print(loser.value)  # None
+
+print(winner.ready()) # True
+print(loser.ready())  # True
+
+print(winner.successful()) # True
+print(loser.successful())  # False
+
+# The exception raised in fail, will not propogate outside the
+# greenlet. A stack trace will be printed to stdout but it
+# will not unwind the stack of the parent.
+
+print(loser.exception)
+</code></pre>
+<h3 id="终止程序"><a href="#终止程序" class="headerlink" title="终止程序"></a>终止程序</h3><p>在主程序收到一个SIGQUIT 之后会阻塞程序的执行让Greenlet无法继续执行。
+这会导致僵尸进程的产生，需要在操作系统中将这些僵尸进程清除掉。</p>
+<pre><code class="line-numbers language-python">import gevent
+import signal
+
+def run_forever():
+    gevent.sleep(1000)
+
+if __name__ == &#39;__main__&#39;:
+    gevent.signal(signal.SIGQUIT, gevent.shutdown)
+    thread = gevent.spawn(run_forever)
+    thread.join()
+</code></pre>
+<h3 id="超时"><a href="#超时" class="headerlink" title="超时"></a>超时</h3><p>在gevent中支持对于coroutine的超时控制，还能使用<code>with</code>上下文，示例：</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent import Timeout
+
+time_to_wait = 5 # seconds
+
+class TooLong(Exception):
+    pass
+
+with Timeout(time_to_wait, TooLong):
+    gevent.sleep(10)
+
+</code></pre>
+<h3 id="猴子补丁"><a href="#猴子补丁" class="headerlink" title="猴子补丁"></a>猴子补丁</h3><p>现在这是gevent里面的一个难点。下面一个例子里可能看到 <code>monkey.patch_socket()`</code> 能够在运行时里面修改基础库socket：</p>
+<pre><code class="line-numbers language-python">import socket
+print(socket.socket)
+
+print &quot;After monkey patch&quot;
+from gevent import monkey
+monkey.patch_socket()
+
+print(socket.socket)
+
+import select
+print(select.select)
+monkey.patch_select()
+print &quot;After monkey patch&quot;
+print(select.select)
+</code></pre>
+<p>Python的运行时里面允许能够大部分的对象都是可以修改的，包括模块，类和方法。这通常是一个坏主意，
+然而在极端的情况下，当有一个库需要加入一些Python基本的功能的时候，monkey patch就能派上用场了。
+在上面的例子里，gevent能够改变基础库里的一些使用IO阻塞模型的库比如socket，ssl，threading等等并且把它们改成协程的执行方式。</p>
+<h3 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h3><p>有时候我们还需要在多个greenlet直接进行通信，比如某些操作的同步。事件(event)是一个在Greenlet之间异步通信的形式。</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.event import Event
+
+&#39;&#39;&#39;
+Illustrates the use of events
+&#39;&#39;&#39;
+
+evt = Event()
+
+def setter():
+    &#39;&#39;&#39;After 3 seconds, wake all threads waiting on the value of evt&#39;&#39;&#39;
+    print(&#39;A: Hey wait for me, I have to do something&#39;)
+    gevent.sleep(3)
+    print(&quot;Ok, I&#39;m done&quot;)
+    evt.set()
+
+def waiter():
+    &#39;&#39;&#39;After 3 seconds the get call will unblock&#39;&#39;&#39;
+    print(&quot;I&#39;ll wait for you&quot;)
+    evt.wait()  # blocking
+    print(&quot;It&#39;s about time&quot;)
+
+def main():
+    gevent.joinall([
+        gevent.spawn(setter),
+        gevent.spawn(waiter),
+        gevent.spawn(waiter),
+        gevent.spawn(waiter),
+    ])
+
+if __name__ == &#39;__main__&#39;:
+    main()
+
+</code></pre>
+<p>事件对象的一个扩展是AsyncResult，它允许你在唤醒调用上附加一个值。
+它有时也被称作是future或defered，因为它持有一个指向将来任意时间可设置为任何值的引用。</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.event import AsyncResult
+a = AsyncResult()
+
+def setter():
+    &quot;&quot;&quot;
+    After 3 seconds set the result of a.
+    &quot;&quot;&quot;
+    gevent.sleep(3)
+    a.set(&#39;Hello!&#39;)
+
+def waiter():
+    &quot;&quot;&quot;
+    After 3 seconds the get call will unblock after the setter
+    puts a value into the AsyncResult.
+    &quot;&quot;&quot;
+    print(a.get())
+
+gevent.joinall([
+    gevent.spawn(setter),
+    gevent.spawn(waiter),
+])
+</code></pre>
+<h3 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h3><p>队列是一个排序的数据集合，它有常见的put / get操作，但是它是以在Greenlet之间可以安全操作的方式来实现的。</p>
+<p>举例来说，如果一个Greenlet从队列中取出一项，此项就不会被同时执行的其它Greenlet再取到了。</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.queue import Queue
+
+tasks = Queue()
+
+def worker(n):
+    while not tasks.empty():
+        task = tasks.get()
+        print(&#39;Worker %s got task %s&#39; % (n, task))
+        gevent.sleep(0)
+
+    print(&#39;Quitting time!&#39;)
+
+def boss():
+    for i in range(1,25):
+        tasks.put_nowait(i)
+
+gevent.spawn(boss).join()
+
+gevent.joinall([
+    gevent.spawn(worker, &#39;steve&#39;),
+    gevent.spawn(worker, &#39;john&#39;),
+    gevent.spawn(worker, &#39;nancy&#39;),
+])
+</code></pre>
+<p>如果需要，队列也可以阻塞在put或get操作上。</p>
+<p>put和get操作都有非阻塞的版本，put_nowait和get_nowait不会阻塞，
+然而在操作不能完成时抛出<code>gevent.queue.Empty</code>或<code>gevent.queue.Full</code>异常。</p>
+<p>我们让boss与多个worker同时运行，并限制了queue不能放入多于3个元素：</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.queue import Queue, Empty
+
+tasks = Queue(maxsize=3)
+
+def worker(n):
+    try:
+        while True:
+            task = tasks.get(timeout=1) # decrements queue size by 1
+            print(&#39;Worker %s got task %s&#39; % (n, task))
+            gevent.sleep(0)
+    except Empty:
+        print(&#39;Quitting time!&#39;)
+
+def boss():
+    &quot;&quot;&quot;
+    Boss will wait to hand out work until a individual worker is
+    free since the maxsize of the task queue is 3.
+    &quot;&quot;&quot;
+
+    for i in xrange(1,10):
+        tasks.put(i)
+    print(&#39;Assigned all work in iteration 1&#39;)
+
+    for i in xrange(10,20):
+        tasks.put(i)
+    print(&#39;Assigned all work in iteration 2&#39;)
+
+gevent.joinall([
+    gevent.spawn(boss),
+    gevent.spawn(worker, &#39;steve&#39;),
+    gevent.spawn(worker, &#39;john&#39;),
+    gevent.spawn(worker, &#39;bob&#39;),
+])
+</code></pre>
+<h3 id="组和池"><a href="#组和池" class="headerlink" title="组和池"></a>组和池</h3><p>组(group)是一个运行中greenlet的集合，集合中的greenlet像一个组一样会被共同管理和调度。
+它也兼饰了像Python的multiprocessing库那样的平行调度器的角色:</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.pool import Group
+
+def talk(msg):
+    for i in xrange(3):
+        print(msg)
+
+g1 = gevent.spawn(talk, &#39;bar&#39;)
+g2 = gevent.spawn(talk, &#39;foo&#39;)
+g3 = gevent.spawn(talk, &#39;fizz&#39;)
+
+group = Group()
+group.add(g1)
+group.add(g2)
+group.join()
+
+group.add(g3)
+group.join()
+</code></pre>
+<p>池(pool)是一个为处理数量变化并且需要限制并发的greenlet而设计的结构。
+在需要并行地做很多受限于网络和IO的任务时常常需要用到它。</p>
+<p>当构造gevent驱动的服务时，经常会将围绕一个池结构的整个服务作为中心。一个例子就是在各个socket上轮询的类。</p>
+<pre><code class="line-numbers language-python">from gevent.pool import Pool
+
+class SocketPool(object):
+
+    def __init__(self):
+        self.pool = Pool(1000)
+        self.pool.start()
+
+    def listen(self, socket):
+        while True:
+            socket.recv()
+
+    def add_handler(self, socket):
+        if self.pool.full():
+            raise Exception(&quot;At maximum pool size&quot;)
+        else:
+            self.pool.spawn(self.listen, socket)
+
+    def shutdown(self):
+        self.pool.kill()
+</code></pre>
+<h3 id="锁和信号量"><a href="#锁和信号量" class="headerlink" title="锁和信号量"></a>锁和信号量</h3><p>信号量是一个允许greenlet相互合作，限制并发访问或运行的低层次的同步原语。信号量有两个方法，acquire和release。
+在信号量是否已经被acquire或release，和拥有资源的数量之间不同，被称为此信号量的范围 (the bound of the semaphore)。
+如果一个信号量的范围已经降低到0，它会阻塞acquire操作直到另一个已经获得信号量的greenlet作出释放。</p>
+<pre><code class="line-numbers language-python">from gevent import sleep
+from gevent.pool import Pool
+from gevent.coros import BoundedSemaphore
+
+sem = BoundedSemaphore(2)
+
+def worker1(n):
+    sem.acquire()
+    print(&#39;Worker %i acquired semaphore&#39; % n)
+    sleep(0)
+    sem.release()
+    print(&#39;Worker %i released semaphore&#39; % n)
+
+def worker2(n):
+    with sem:
+        print(&#39;Worker %i acquired semaphore&#39; % n)
+        sleep(0)
+    print(&#39;Worker %i released semaphore&#39; % n)
+
+pool = Pool()
+pool.map(worker1, xrange(0,2))
+pool.map(worker2, xrange(3,6))
+</code></pre>
+<p>范围为1的信号量也称为锁(lock)，它向单个greenlet提供了互斥访问。信号量和锁常常用来保证资源只在程序上下文被单次使用。</p>
+<h3 id="子进程"><a href="#子进程" class="headerlink" title="子进程"></a>子进程</h3><p>自gevent 1.0起，<code>gevent.subprocess</code>，一个Python subprocess模块的修补版本已经添加，它支持协作式的等待子进程。</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.subprocess import Popen, PIPE
+
+def cron():
+    while True:
+        print(&quot;cron&quot;)
+        gevent.sleep(0.2)
+
+g = gevent.spawn(cron)
+sub = Popen([&#39;sleep 1; uname&#39;], stdout=PIPE, shell=True)
+out, err = sub.communicate()
+g.kill()
+print(out.rstrip())
+</code></pre>
+<h3 id="actor模型"><a href="#actor模型" class="headerlink" title="actor模型"></a>actor模型</h3><p>actor模型是一个由于Erlang变得普及的更高层的并发模型。简单的说它的主要思想就是许多个独立的Actor，
+每个Actor有一个可以从其它Actor接收消息的收件箱。Actor内部的主循环遍历它收到的消息，并根据它期望的行为来采取行动。</p>
+<p>Gevent没有原生的Actor类型，但在一个子类化的Greenlet内使用队列，我们可以定义一个非常简单的。</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.queue import Queue
+
+class Actor(gevent.Greenlet):
+
+    def __init__(self):
+        self.inbox = Queue()
+        Greenlet.__init__(self)
+
+    def receive(self, message):
+        &quot;&quot;&quot;
+        Define in your subclass.
+        &quot;&quot;&quot;
+        raise NotImplemented()
+
+    def _run(self):
+        self.running = True
+
+        while self.running:
+            message = self.inbox.get()
+            self.receive(message)
+</code></pre>
+<p>接下来使用这个actor的例子：</p>
+<pre><code class="line-numbers language-python">import gevent
+from gevent.queue import Queue
+from gevent import Greenlet
+
+class Pinger(Actor):
+    def receive(self, message):
+        print(message)
+        pong.inbox.put(&#39;ping&#39;)
+        gevent.sleep(0)
+
+class Ponger(Actor):
+    def receive(self, message):
+        print(message)
+        ping.inbox.put(&#39;pong&#39;)
+        gevent.sleep(0)
+
+ping = Pinger()
+pong = Ponger()
+
+ping.start()
+pong.start()
+
+ping.inbox.put(&#39;start&#39;)
+gevent.joinall([ping, pong])
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/01/02/python/gevent.html">浅谈coroutine和gevent</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/03/06/hexo.html" class="pre-post btn btn-default" title='使用hexo搭建github博客'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">使用hexo搭建github博客</span>
+        </a>
+    
+    
+        <a href="/2015/12/30/python/web.html" class="next-post btn btn-default" title='python核心 - web开发'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">python核心 - web开发</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#不同网络模型"><span class="toc-text">不同网络模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞式单进程"><span class="toc-text">阻塞式单进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞式多进程"><span class="toc-text">阻塞式多进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#非阻塞式事件驱动"><span class="toc-text">非阻塞式事件驱动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#非阻塞式Coroutine"><span class="toc-text">非阻塞式Coroutine</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Coroutine"><span class="toc-text">Coroutine</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Gevent"><span class="toc-text">Gevent</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#上下文切换"><span class="toc-text">上下文切换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#生成greenlet"><span class="toc-text">生成greenlet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Greenlet-的状态"><span class="toc-text">Greenlet 的状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#终止程序"><span class="toc-text">终止程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#超时"><span class="toc-text">超时</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#猴子补丁"><span class="toc-text">猴子补丁</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#事件"><span class="toc-text">事件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#队列"><span class="toc-text">队列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#组和池"><span class="toc-text">组和池</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#锁和信号量"><span class="toc-text">锁和信号量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#子进程"><span class="toc-text">子进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#actor模型"><span class="toc-text">actor模型</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

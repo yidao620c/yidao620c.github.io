@@ -1,0 +1,530 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="CAS,">
+
+
+    <meta name="description" content="如果每个Web应用有自己的登录界面，不想使用Cas服务器的登录界面。也不需要改动Cas服务器去适配各种客户端登录界面需求。
+那么可以通过使用Restful API的方式进行SSO认证，这是最佳实践。
+系统架构统一使用 SpringBoot+Meven，app1 和 app2 内容一致。
+
+
+
+...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CAS教程 - Restful API方式实现SSO | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CAS教程 - Restful API方式实现SSO">
+            
+                CAS教程 - Restful API方式实现SSO
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/CAS" title='CAS'>
+                        CAS
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2019/01/15</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>如果每个Web应用有自己的登录界面，不想使用Cas服务器的登录界面。也不需要改动Cas服务器去适配各种客户端登录界面需求。
+那么可以通过使用Restful API的方式进行SSO认证，这是最佳实践。</p>
+<h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>统一使用 SpringBoot+Meven，app1 和 app2 内容一致。</p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>域名</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cas-app1</td>
+<td><a href="http://app1.com:8181/fire" target="_blank" rel="noopener">http://app1.com:8181/fire</a></td>
+<td>客户端1[cas-client在此]</td>
+</tr>
+<tr>
+<td>cas-app2</td>
+<td><a href="http://app2.com:8282/water" target="_blank" rel="noopener">http://app2.com:8282/water</a></td>
+<td>客户端2[cas-client在此]</td>
+</tr>
+<tr>
+<td>sso-server</td>
+<td><a href="http://sso.server.com:8889/sso" target="_blank" rel="noopener">http://sso.server.com:8889/sso</a></td>
+<td>自定义SSO服务，管理单点登录的用户</td>
+</tr>
+<tr>
+<td>cas-server-rest</td>
+<td><a href="http://cas.server.com:8484/cas" target="_blank" rel="noopener">http://cas.server.com:8484/cas</a></td>
+<td>CAS-Server</td>
+</tr>
+</tbody>
+</table>
+<p>本地hosts文件配置如下:</p>
+<pre><code>127.0.0.1    cas.server.com
+127.0.0.1    sso.server.com
+127.0.0.1    app1.com
+127.0.0.1    app2.com
+</code></pre><p>其实是将cas-server中的TGT管理，单独使用自定义的sso-server进行管理了，这种架构推荐的最佳方式。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190317-01.jpg" alt></p>
+<h2 id="操作流程"><a href="#操作流程" class="headerlink" title="操作流程"></a>操作流程</h2><ol>
+<li>用户访问受限资源 <a href="http://app1.com:8181/fire/books.html" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html</a> </li>
+<li>由于未登录，跳转自定义的登录界面 <a href="http://app1.com:8181/fire/login.html?service=http%3A%2F%2Fapp1.com%3A8181%2Ffire%2Fbooks.html" target="_blank" rel="noopener">http://app1.com:8181/fire/login.html?service=http%3A%2F%2Fapp1.com%3A8181%2Ffire%2Fbooks.html</a></li>
+<li>登录页面首先向 sso-server 发起 jsonp 的登录验证请求（提交sso-server域名下的cookie），根据 Cookie 判断是否登录过</li>
+</ol>
+<pre><code>未登录返回：jQuery33109023589333109241_1524470965614({&quot;status&quot;:0,&quot;data&quot;:&quot;nothing&quot;})
+登录过返回：jQuery33109023589333109241_1524470965614({&quot;status&quot;:1,&quot;data&quot;:&quot;http://app1.com:8181/fire/books.html?ticket=ST值&quot;})
+</code></pre><p>（1）未登录</p>
+<ol>
+<li>未登录，渲染登录表单，用户进行username、password、service 登录，登录地址提交到 sso-server 的 login 接口</li>
+<li>login 接口通过账号密码调用 cas-server 服务的 v1/tickets 接口，获取 TGT，然后根据用户名规则，将 TGT 保存到 Cookie 和 Redis 缓存中</li>
+<li>login 接口通过 TGT 获取 ST，拼接成 <a href="http://app1.com:8181/fire/books.html?ticket=ST值，进行redirect" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值，进行redirect</a> 该字符串作为响应</li>
+<li><a href="http://app1.com:8181/fire/books.html?ticket=ST值由" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值由</a> app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
+<li>验证通过，建立成功的SessionId</li>
+</ol>
+<p>（2）已登录</p>
+<ol>
+<li>已登录，接收 jsonp 响应的值 <a href="http://app1.com:8181/fire/books.html?ticket=ST值，并进行" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值，并进行</a> JS 的重定向</li>
+<li><a href="http://app1.com:8181/fire/books.html?ticket=ST值" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值</a>  由 app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
+<li>验证通过，建立成功的SessionId</li>
+</ol>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="cas-server-配置"><a href="#cas-server-配置" class="headerlink" title="cas-server 配置"></a>cas-server 配置</h3><p>如果需要使用rest的请求方式，就需要添加下面的依赖。</p>
+<pre><code>&lt;!--开启cas server的rest支持--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.apereo.cas&lt;/groupId&gt;
+    &lt;artifactId&gt;cas-server-support-rest&lt;/artifactId&gt;
+    &lt;version&gt;${cas.version}&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><h3 id="sso-server-配置"><a href="#sso-server-配置" class="headerlink" title="sso-server 配置"></a>sso-server 配置</h3><p>一些常规依赖，主要是redis</p>
+<pre><code>&lt;!--HttpClient--&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;
+   &lt;artifactId&gt;httpclient&lt;/artifactId&gt;
+   &lt;version&gt;4.5.3&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!--Gson--&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;com.google.code.gson&lt;/groupId&gt;
+   &lt;artifactId&gt;gson&lt;/artifactId&gt;
+   &lt;version&gt;2.8.2&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!--redis--&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h3 id="cas-app配置"><a href="#cas-app配置" class="headerlink" title="cas-app配置"></a>cas-app配置</h3><p>主要改动了一下login.html登录页面。增加一个拦截器判断用户是否登录</p>
+<pre><code>$(document).ready(function() {
+    var service = GetQueryString(&quot;service&quot;);
+    // 如果为空，表示直接进入登录页面
+    if (service == null) {
+        service = &quot;http://app1.com:8181/fire/index.html&quot;;
+    }
+    console.info(&quot;service：&quot; + service);
+    $(&quot;#service&quot;).val(service); // 受访受限url的地址
+    // 新进行判断用户是否登录过
+    $.ajax({
+        method: &quot;GET&quot;,
+        url: &quot;http://sso.server.com:9000/sso/user/check&quot;,
+        data: {
+            &#39;service&#39;: service
+        },
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,
+        dataType: &quot;jsonp&quot;,
+        jsonp: &quot;callback&quot;,
+        // cache: false,
+        success: function(result) {
+            console.info(&quot;请求成功&quot;);
+            console.info(result);
+            if (result.status == 1) {
+                // 设置 302 重定向跳转
+                window.location.href = result.data;
+            } else {
+                // 显示登录页面
+                $(&quot;#loginDiv&quot;).show(&quot;slow&quot;);
+            }
+        },
+        error: function(data) {
+            console.info(&quot;请求失败&quot;);
+            $(&quot;#loginDiv&quot;).show(&quot;slow&quot;);
+        }
+    });
+});
+&lt;/script&gt;
+</code></pre><p>登录form提交的URL是 sso server的地址：</p>
+<pre><code>&lt;div id=&quot;loginDiv&quot; style=&quot;display: none&quot;&gt;
+    &lt;form action=&quot;http://sso.server.com:9000/sso/user/login&quot; method=&quot;post&quot;&gt;
+        &lt;table&gt;
+            &lt;tr&gt;
+                &lt;td&gt;用户名:&lt;/td&gt;
+                &lt;td&gt;&lt;input id=&quot;username&quot; name=&quot;username&quot; type=&quot;text&quot; &gt;&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+                &lt;td&gt;密 码:&lt;/td&gt;
+                &lt;td&gt;&lt;input id=&quot;password&quot; name=&quot;password&quot; type=&quot;password&quot;&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+                &lt;td&gt;
+                    &lt;input type=&quot;hidden&quot; name=&quot;service&quot; id=&quot;service&quot; value=&quot;&quot;&gt;
+                    &lt;input type=&quot;submit&quot; value=&quot;登录&quot;&gt;
+                &lt;/td&gt;
+                &lt;td&gt;&lt;input type=&quot;reset&quot;&gt;&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/form&gt;
+&lt;/div&gt;
+</code></pre><p>其他直接看github源码</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2019/01/15/security/cas07.html">CAS教程 - Restful API方式实现SSO</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+    
+        <a href="/2019/01/13/security/cas06.html" class="next-post btn btn-default" title='CAS教程 - Ticket存储和验证'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CAS教程 - Ticket存储和验证</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#系统架构"><span class="toc-text">系统架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#操作流程"><span class="toc-text">操作流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实战"><span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#cas-server-配置"><span class="toc-text">cas-server 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sso-server-配置"><span class="toc-text">sso-server 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#cas-app配置"><span class="toc-text">cas-app配置</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

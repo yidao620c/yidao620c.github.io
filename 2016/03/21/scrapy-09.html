@@ -1,0 +1,465 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="本篇主要介绍两种部署爬虫的方案。如果仅仅在开发调试的时候在本地部署跑起来是很容易的，不过要是生产环境，爬虫任务量大，并且持续时间长，那么还是建议使用专业的部署方法。主要是两种方案：
+
+Scrapyd 开源方案
+Scrapy Cloud 云方案
+
+部署到ScrapydScrapyd是一个开源软件...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记09- 部署 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记09- 部署">
+            
+                Scrapy笔记09- 部署
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/03/21</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>本篇主要介绍两种部署爬虫的方案。如果仅仅在开发调试的时候在本地部署跑起来是很容易的，不过要是生产环境，爬虫任务量大，并且持续时间长，那么还是建议使用专业的部署方法。主要是两种方案：</p>
+<ul>
+<li><a href="http://doc.scrapy.org/en/1.0/topics/deploy.html#deploy-scrapyd" target="_blank" rel="noopener">Scrapyd</a> 开源方案</li>
+<li><a href="http://doc.scrapy.org/en/1.0/topics/deploy.html#deploy-scrapy-cloud" target="_blank" rel="noopener">Scrapy Cloud</a> 云方案</li>
+</ul>
+<h2 id="部署到Scrapyd"><a href="#部署到Scrapyd" class="headerlink" title="部署到Scrapyd"></a>部署到Scrapyd</h2><p><a href="http://doc.scrapy.org/en/1.0/topics/deploy.html#deploy-scrapyd" target="_blank" rel="noopener">Scrapyd</a>是一个开源软件，用来运行蜘蛛爬虫。它提供了HTTP API的服务器，还能运行和监控Scrapy的蜘蛛</p>
+<p>要部署爬虫到Scrapyd，需要使用到<a href="https://github.com/scrapy/scrapyd-client" target="_blank" rel="noopener">scrapyd-client</a>部署工具集，下面我演示下部署的步骤</p>
+<p>Scrapyd通常以守护进程daemon形式运行，监听spider的请求，然后为每个spider创建一个进程执行<code>scrapy crawl myspider</code>,同时Scrapyd还能以多进程方式启动，通过配置<code>max_proc</code>和<code>max_proc_per_cpu</code>选项</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>使用pip安装</p>
+<pre><code class="line-numbers language-bash">pip install scrapyd
+</code></pre>
+<p>在ubuntu系统上面</p>
+<pre><code class="line-numbers language-bash">apt-get install scrapyd
+</code></pre>
+<h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>配置文件地址，优先级从低到高</p>
+<ul>
+<li>/etc/scrapyd/scrapyd.conf (Unix)</li>
+<li>/etc/scrapyd/conf.d/* (in alphabetical order, Unix)</li>
+<li>scrapyd.conf</li>
+<li>~/.scrapyd.conf (users home directory)</li>
+</ul>
+<p>具体参数参考<a href="http://scrapyd.readthedocs.org/en/latest/config.html" target="_blank" rel="noopener">scrapyd配置</a></p>
+<p>简单的例子</p>
+<pre><code>[scrapyd]
+eggs_dir    = eggs
+logs_dir    = logs
+items_dir   =
+jobs_to_keep = 5
+dbs_dir     = dbs
+max_proc    = 0
+max_proc_per_cpu = 4
+finished_to_keep = 100
+poll_interval = 5
+bind_address = 0.0.0.0
+http_port   = 6800
+debug       = off
+runner      = scrapyd.runner
+application = scrapyd.app.application
+launcher    = scrapyd.launcher.Launcher
+webroot     = scrapyd.website.Root
+
+[services]
+schedule.json     = scrapyd.webservice.Schedule
+cancel.json       = scrapyd.webservice.Cancel
+addversion.json   = scrapyd.webservice.AddVersion
+listprojects.json = scrapyd.webservice.ListProjects
+listversions.json = scrapyd.webservice.ListVersions
+listspiders.json  = scrapyd.webservice.ListSpiders
+delproject.json   = scrapyd.webservice.DeleteProject
+delversion.json   = scrapyd.webservice.DeleteVersion
+listjobs.json     = scrapyd.webservice.ListJobs
+daemonstatus.json = scrapyd.webservice.DaemonStatus
+</code></pre><h3 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h3><p>使用<a href="https://github.com/scrapy/scrapyd-client" target="_blank" rel="noopener">scrapyd-client</a>最方便，
+Scrapyd-client是<a href="https://github.com/scrapy/scrapyd" target="_blank" rel="noopener">scrapyd</a>的一个客户端，它提供了<code>scrapyd-deploy</code>工具将工程部署到Scrapyd服务器上面</p>
+<p>通常将你的工程部署到Scrapyd需要两个步骤：</p>
+<ol>
+<li>将工程打包成python蛋，你需要安装<a href="http://pypi.python.org/pypi/setuptools" target="_blank" rel="noopener">setuptools</a></li>
+<li>通过<a href="https://scrapyd.readthedocs.org/en/latest/api.html#addversion-json" target="_blank" rel="noopener">addversion.json</a>终端将蟒蛇蛋上传至Scrapd服务器</li>
+</ol>
+<p>你可以在你的工程配置文件<code>scrapy.cfg</code>定义Scrapyd目标</p>
+<pre><code>[deploy:example]
+url = http://scrapyd.example.com/api/scrapyd
+username = scrapy
+password = secret
+</code></pre><p>列出所有可用目标使用命令</p>
+<pre><code>scrapyd-deploy -l
+</code></pre><p>列出某个目标上面所有可运行的工程，执行命令</p>
+<pre><code>scrapyd-deploy -L example
+</code></pre><p>先<code>cd</code>到工程根目录，然后使用如下命令来部署：</p>
+<pre><code>scrapyd-deploy &lt;target&gt; -p &lt;project&gt;
+</code></pre><p>你还可以定义默认的target和project，省的你每次都去敲代码</p>
+<pre><code>[deploy]
+url = http://scrapyd.example.com/api/scrapyd
+username = scrapy
+password = secret
+project = yourproject
+</code></pre><p>这样你就直接取执行</p>
+<pre><code>scrapyd-deploy
+</code></pre><p>如果你有多个target，那么可以使用下面命令将project部署到多个target服务器上面</p>
+<pre><code>scrapyd-deploy -a -p &lt;project&gt;
+</code></pre><h2 id="部署到Scrapy-Cloud"><a href="#部署到Scrapy-Cloud" class="headerlink" title="部署到Scrapy Cloud"></a>部署到Scrapy Cloud</h2><p><a href="http://scrapinghub.com/scrapy-cloud/" target="_blank" rel="noopener">Scrapy Cloud</a>是一个托管的云服务器，由Scrapy背后的公司<a href="http://scrapinghub.com/" target="_blank" rel="noopener">Scrapinghub</a>维护</p>
+<p>它免除了安装和监控服务器的需要，并提供了非常美观的UI来管理各个Spider，还能查看被抓取的Item，日志和状态等。</p>
+<p>你可以使用<a href="http://doc.scrapinghub.com/shub.html" target="_blank" rel="noopener">shub</a>命令行工具来讲spider部署到Scrapy Cloud。更多请参考<a href="http://doc.scrapinghub.com/scrapy-cloud.html" target="_blank" rel="noopener">官方文档</a></p>
+<p>Scrapy Cloud和Scrapyd是兼容的，你可以根据需要在两者之前切换，配置文件也是<code>scrapy.cfg</code>，跟<code>scrapyd-deploy</code>读取的是一样的。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/03/21/scrapy-09.html">Scrapy笔记09- 部署</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/04/10/scrapy-10.html" class="pre-post btn btn-default" title='Scrapy笔记10- 动态配置爬虫'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记10- 动态配置爬虫</span>
+        </a>
+    
+    
+        <a href="/2016/03/20/scrapy-08.html" class="next-post btn btn-default" title='Scrapy笔记08- 文件与图片'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记08- 文件与图片</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#部署到Scrapyd"><span class="toc-text">部署到Scrapyd</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置"><span class="toc-text">配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#部署"><span class="toc-text">部署</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署到Scrapy-Cloud"><span class="toc-text">部署到Scrapy Cloud</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

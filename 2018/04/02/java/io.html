@@ -1,0 +1,491 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="java,">
+
+
+    <meta name="description" content="同步、异步、阻塞、非阻塞都是和I/O（输入输出）有关的概念，最简单的文件读取就是I/O操作。而在文件读取这件事儿上，可以有多种方式。
+本篇会先介绍一下I/O的基本概念，通过一个生活例子来分别解释下这几种I/O模型，以及Java支持的I/O模型。
+基本概念在解释I/O模型之前，我先说明一下几个操...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>聊聊Java中的几种I/O模型 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="聊聊Java中的几种I/O模型">
+            
+                聊聊Java中的几种I/O模型
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/java" title='java'>
+                        java
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/04/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>同步、异步、阻塞、非阻塞都是和I/O（输入输出）有关的概念，最简单的文件读取就是I/O操作。而在文件读取这件事儿上，可以有多种方式。</p>
+<p>本篇会先介绍一下I/O的基本概念，通过一个生活例子来分别解释下这几种I/O模型，以及Java支持的I/O模型。</p>
+<h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>在解释I/O模型之前，我先说明一下几个操作系统的概念</p>
+<h3 id="文件描述符fd"><a href="#文件描述符fd" class="headerlink" title="文件描述符fd"></a>文件描述符fd</h3><p>文件描述符（file descriptor）是计算机科学中的一个术语，是一个用于表述指向文件的引用的抽象化概念。</p>
+<p>文件描述符在形式上是一个非负整数。实际上，它是一个索引值，指向内核为每一个进程所维护的该进程打开文件的记录表。
+当程序打开一个现有文件或者创建一个新文件时，内核向进程返回一个文件描述符。
+在程序设计中，一些涉及底层的程序编写往往会围绕着文件描述符展开。文件描述符这一概念往往只适用于UNIX、Linux这样的操作系统。</p>
+<h3 id="缓存I-O"><a href="#缓存I-O" class="headerlink" title="缓存I/O"></a>缓存I/O</h3><p>缓存I/O又被称作标准I/O，大多数文件系统的默认I/O操作都是缓存I/O。在Linux的缓存I/O机制中，
+操作系统会将I/O的数据缓存在文件系统的页缓存中，也就是说，数据会先被拷贝到操作系统内核的缓冲区中，
+然后才会从操作系统内核的缓冲区拷贝到应用程序的地址空间。</p>
+<p>缓存I/O的缺点是数据在传输过程中需要在应用程序地址空间和内核进行多次数据拷贝操作，这些数据拷贝操作所带来的CPU以及内存开销是非常大的。</p>
+<p>下面我以一个生活中烧开水的例子来形象解释一下同步、异步、阻塞、非阻塞概念。</p>
+<h3 id="同步和异步"><a href="#同步和异步" class="headerlink" title="同步和异步"></a>同步和异步</h3><p>说到烧水，我们都是通过热水壶来烧水的。在很久之前，科技还没有这么发达的时候，如果我们要烧水，
+需要把水壶放到火炉上，我们通过观察水壶内的水的沸腾程度来判断水有没有烧开。</p>
+<p>随着科技的发展，现在市面上的水壶都有了提醒功能，当我们把水壶插电之后，水壶水烧开之后会通过声音提醒我们水开了。</p>
+<p>对于烧水这件事儿来说，传统水壶的烧水就是同步的，高科技水壶的烧水就是异步的。</p>
+<p><strong>同步请求</strong></p>
+<p>A调用B，B的处理是同步的，在处理完之前他不会通知A，只有处理完之后才会明确的通知A。</p>
+<p><strong>异步请求</strong></p>
+<p>A调用B，B的处理是异步的，B在接到请求后先告诉A我已经接到请求了，然后异步去处理，处理完之后通过回调等方式再通知A。</p>
+<p>所以说，同步和异步最大的区别就是被调用方的执行方式和返回时机。
+同步指的是被调用方做完事情之后再返回，异步指的是被调用方先返回，然后再做事情，做完之后再想办法通知调用方。</p>
+<h3 id="阻塞和非阻塞"><a href="#阻塞和非阻塞" class="headerlink" title="阻塞和非阻塞"></a>阻塞和非阻塞</h3><p>还是那个烧水的例子，当你把水放到水壶里面，按下开关后，你可以坐在水壶前面，别的事情什么都不做，
+一直等着水烧好。你还可以先去客厅看电视，等着水开就好了。</p>
+<p>对于你来说，坐在水壶前面等就是阻塞的，去客厅看电视等着水开就是非阻塞的。</p>
+<p><strong>阻塞请求</strong></p>
+<p>A调用B，A一直等着B的返回，别的事情什么也不干。</p>
+<p><strong>非阻塞请求</strong></p>
+<p>A调用B，A不用一直等着B的返回，先去忙别的事情了。</p>
+<p>所以说，阻塞和非阻塞最大的区别就是在被调用方返回结果之前的这段时间内，调用方是否一直等待。
+阻塞指的是调用方一直等待别的事情什么都不做。非阻塞指的是调用方先去忙别的事情。</p>
+<h3 id="阻塞、非阻塞和同步、异步的区别"><a href="#阻塞、非阻塞和同步、异步的区别" class="headerlink" title="阻塞、非阻塞和同步、异步的区别"></a>阻塞、非阻塞和同步、异步的区别</h3><p>首先，前面已经提到过，阻塞、非阻塞和同步、异步其实针对的对象是不一样的。</p>
+<p>给我大声念三遍下面的句子</p>
+<p><em>阻塞、非阻塞说的是调用者。同步、异步说的是被调用者。</em></p>
+<p><em>阻塞、非阻塞说的是调用者。同步、异步说的是被调用者。</em></p>
+<p><em>阻塞、非阻塞说的是调用者。同步、异步说的是被调用者。</em></p>
+<p>有人认为阻塞和同步是一回事儿，非阻塞和异步是一回事。但是这是不对的。</p>
+<p>========&gt; 同步包含阻塞和非阻塞 &lt;===========</p>
+<p>我们是用传统的水壶烧水。在水烧开之前我们一直做在水壶前面，等着水开。这就是阻塞的。</p>
+<p>我们是用传统的水壶烧水。在水烧开之前我们先去客厅看电视了，但是水壶不会主动通知我们，
+需要我们时不时的去厨房看一下水有没有烧开，这就是非阻塞的。</p>
+<p>========&gt; 异步包含阻塞和非阻塞 &lt;===========</p>
+<p>我们是用带有提醒功能的水壶烧水。在水烧发出提醒之前我们一直做在水壶前面，等着水开。这就是阻塞的。</p>
+<p>我们是用带有提醒功能的水壶烧水。在水烧发出提醒之前我们先去客厅看电视了，等水壶发出声音提醒我们。这就是非阻塞的。</p>
+<h2 id="Unix中的五种I-O模型"><a href="#Unix中的五种I-O模型" class="headerlink" title="Unix中的五种I/O模型"></a>Unix中的五种I/O模型</h2><p>对于一次I/O访问（以read举例），数据会先被拷贝到操作系统内核的缓冲区中，然后才会从操作系统内核的缓冲区拷贝到应用程序的地址空间。
+所以说，当一个read操作发生时，它会经历两个阶段：</p>
+<ul>
+<li>第一阶段：等待数据准备 (Waiting for the data to be ready)。</li>
+<li>第二阶段：将数据从内核拷贝到进程中 (Copying the data from the kernel to the process)。</li>
+</ul>
+<p>对于socket流而言</p>
+<ul>
+<li>第一阶段：通常涉及等待网络上的数据分组到达，也就是被复制到内核的某个缓冲区。</li>
+<li>第二阶段：把数据从内核缓冲区复制到应用进程缓冲区。</li>
+</ul>
+<p>Unix下五种I/O模型：</p>
+<ol>
+<li>同步阻塞I/O</li>
+<li>同步非阻塞I/O</li>
+<li>I/O多路复用（select和poll）</li>
+<li>信号驱动I/O（SIGIO）</li>
+<li>异步非阻塞 IO</li>
+</ol>
+<h3 id="同步阻塞I-O"><a href="#同步阻塞I-O" class="headerlink" title="同步阻塞I/O"></a>同步阻塞I/O</h3><p>阻塞I/O下请求无法立即完成则保持阻塞，阻塞I/O分为如下两个阶段。</p>
+<ul>
+<li>阶段1：等待数据就绪。网络I/O的情况就是等待远端数据陆续抵达，也就是网络数据被复制到内核缓存区中，磁盘I/O的情况就是等待磁盘数据从磁盘上读取到内核态内存中。</li>
+<li>阶段2：数据拷贝。出于系统安全，用户态的程序没有权限直接读取内核态内存，因此内核负责把内核态内存中的数据拷贝一份到用户态内存中。</li>
+</ul>
+<p>这两个阶段必须都完成后才能继续下一步操作</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/linuxio01.png" alt></p>
+<p><strong>所以，blocking IO的特点就是在IO执行的两个阶段都被block了。</strong></p>
+<h3 id="同步非阻塞I-O"><a href="#同步非阻塞I-O" class="headerlink" title="同步非阻塞I/O"></a>同步非阻塞I/O</h3><p>就是阶段1的时候用户进程可选择做其他事情，通过轮询的方式看看内核缓冲区是否就绪。如果数据就绪，再去执行阶段2。</p>
+<p>也就是说非阻塞的recvform系统调用调用之后，进程并没有被阻塞，内核马上返回给进程，如果数据还没准备好，
+此时会返回一个error。进程在返回之后，可以干点别的事情，然后再发起recvform系统调用。重复上面的过程，
+循环往复的进行recvform系统调用。这个过程通常被称之为轮询。轮询检查内核数据，直到数据准备好，
+再拷贝数据到进程，进行数据处理。需要注意，第2阶段的拷贝数据整个过程，进程仍然是属于阻塞的状态。</p>
+<p>在linux下，可以通过设置socket使其变为non-blocking。当对一个non-blocking socket执行读操作时，流程如图所示：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/linuxio02.png" alt></p>
+<p><strong>所以，nonblocking IO的特点是用户进程需要不断的主动询问kernel数据好了没有。</strong></p>
+<h3 id="I-O多路复用"><a href="#I-O多路复用" class="headerlink" title="I/O多路复用"></a>I/O多路复用</h3><p>我这里只想重点解释一下I/O多路复用这种模型，因为现在用的最多。很多地方也称为事件驱动IO模型，只是叫法不同，意思都一个样。</p>
+<p>IO多路复用是指内核一旦发现进程指定的一个或者多个IO条件准备读取，它就通知该进程。</p>
+<p>目前支持I/O多路复用的系统调用有 select、pselect、poll、epoll，I/O多路复用就是通过一种机制，一个进程可以监视多个描述符，
+一旦某个文件描述符fd就绪（一般是读就绪或者写就绪），能够通知程序进行相应的读写操作。
+但select、pselect、poll、epoll本质上都是同步I/O，因为他们都需要在读写事件就绪后自己负责进行读写，也就是说这个读写过程是阻塞的，
+而异步I/O则无需自己负责进行读写，异步I/O的实现会负责把数据从内核拷贝到用户空间。</p>
+<p>相比较于同步非阻塞I/O，它的改进的地方在于，原来需要用户进程去轮询的这事儿交给了内核线程帮你完成，
+而且这个内核线程可以等待多个socket，能实现同时对多个IO端口进行监听。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/linuxio03.png" alt></p>
+<p><strong>多路复用的特点是通过一种机制一个进程能同时等待IO文件描述符，内核监视这些文件描述符（套接字描述符），
+其中的任意一个进入读就绪状态，select， poll，epoll函数就可以返回。对于监视的方式，
+又可以分为 select， poll， epoll三种方式。</strong></p>
+<p>所以，如果处理的连接数不是很高的话，使用select/epoll的web server不一定比使用多线程 + 阻塞IO的web server性能更好，可能延迟还更大。
+也就是说，select/epoll的优势并不是对于单个连接能处理得更快，而是在于能处理更多的连接。</p>
+<p>高并发的程序一般使用同步非阻塞方式而非多线程 + 同步阻塞方式。要理解这一点，首先要扯到并发和并行的区别。
+比如去某部门办事需要依次去几个窗口，办事大厅里的人数就是并发数，而窗口个数就是并行度。
+也就是说并发数是指同时进行的任务数（如同时服务的 HTTP 请求），而并行数是可以同时工作的物理资源数量（如 CPU 核数）。
+通过合理调度任务的不同阶段，并发数可以远远大于并行度，这就是区区几个 CPU 可以支持上万个用户并发请求的奥秘。
+在这种高并发的情况下，为每个任务（用户请求）创建一个进程或线程的开销非常大。而同步非阻塞方式可以把多个 IO 请求丢到后台去，
+这就可以在一个进程里服务大量的并发 IO 请求。</p>
+<p><strong>IO多路复用归为同步阻塞模式</strong></p>
+<h3 id="异步非阻塞-IO"><a href="#异步非阻塞-IO" class="headerlink" title="异步非阻塞 IO"></a>异步非阻塞 IO</h3><p>相对于同步IO，异步IO不是顺序执行。用户进程进行aio_read系统调用之后，无论内核数据是否准备好，都会直接返回给用户进程，
+然后用户态进程可以去做别的事情。等到socket数据准备好了，内核直接复制数据给进程，然后从内核向进程发送通知。IO两个阶段，
+进程都是非阻塞的。</p>
+<p>Linux提供了AIO库函数实现异步，但是用的很少。目前有很多开源的异步IO库，例如libevent、libev、libuv。异步过程如下图所示：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/linuxio04.png" alt></p>
+<p>更详细的分析可参考 <a href="https://www.jianshu.com/p/486b0965c296" target="_blank" rel="noopener">聊聊Linux5种IO模型</a></p>
+<h2 id="Java中四种I-O模型"><a href="#Java中四种I-O模型" class="headerlink" title="Java中四种I/O模型"></a>Java中四种I/O模型</h2><p>上一章所述Unix中的五种I/O模型，除信号驱动I/O外，Java对其它四种I/O模型都有所支持。</p>
+<ol>
+<li>Java传统IO模型即是同步阻塞I/O</li>
+<li>NIO是同步非阻塞I/O</li>
+<li>通过NIO实现的Reactor模式即是I/O多路复用模型的实现</li>
+<li>通过AIO实现的Proactor模式即是异步I/O模型的实现</li>
+</ol>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/04/02/java/io.html">聊聊Java中的几种I/O模型</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/04/05/java/reactor.html" class="pre-post btn btn-default" title='聊聊Reactor I/O模型'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">聊聊Reactor I/O模型</span>
+        </a>
+    
+    
+        <a href="/2018/03/17/linux/nginx-module.html" class="next-post btn btn-default" title='Nginx重新编译添加模块'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Nginx重新编译添加模块</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#文件描述符fd"><span class="toc-text">文件描述符fd</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缓存I-O"><span class="toc-text">缓存I/O</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#同步和异步"><span class="toc-text">同步和异步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞和非阻塞"><span class="toc-text">阻塞和非阻塞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#阻塞、非阻塞和同步、异步的区别"><span class="toc-text">阻塞、非阻塞和同步、异步的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unix中的五种I-O模型"><span class="toc-text">Unix中的五种I/O模型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#同步阻塞I-O"><span class="toc-text">同步阻塞I/O</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#同步非阻塞I-O"><span class="toc-text">同步非阻塞I/O</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O多路复用"><span class="toc-text">I/O多路复用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#异步非阻塞-IO"><span class="toc-text">异步非阻塞 IO</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java中四种I-O模型"><span class="toc-text">Java中四种I/O模型</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

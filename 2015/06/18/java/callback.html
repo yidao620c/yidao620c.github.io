@@ -1,0 +1,478 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="java,">
+
+
+    <meta name="description" content="最近学习内部类的时候，对Java实现回调函数机制有了进一步了解，自己整理点比较，希望大家可以相互讨论。所谓回调，就是允许客户类通过内部类引用来调用其外部类的方法，这是一种非常灵活的功能。
+由于java暂时还不能显示支持闭包(Closure)，不过听说新版可以支持了，不过我还没用过。现在暂时用的...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>java中的回调函数 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="java中的回调函数">
+            
+                java中的回调函数
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/java" title='java'>
+                        java
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/06/18</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>最近学习内部类的时候，对Java实现回调函数机制有了进一步了解，自己整理点比较，希望大家可以相互讨论。所谓回调，就是允许客户类通过内部类引用来调用其外部类的方法，这是一种非常灵活的功能。</p>
+<p>由于java暂时还不能显示支持闭包(Closure)，不过听说新版可以支持了，不过我还没用过。现在暂时用的是非静态内部类实现回调功能。</p>
+<p><strong>情形一</strong></p>
+<p>假设有一个老师Teacher对象，平时的工作是上课，周末的工作在家干农活（乡村老师大部分都这样），方法名都是work，但功能都不一样，可以用内部类实现这种需求：</p>
+<pre><code class="line-numbers language-java">public class Teacher {
+    // 正常的工作
+    public void work() {
+        System.out.println(&quot;平常我在给学生教课&quot;);
+    }
+
+    // 业余的工作
+    public void farming() {
+        System.out.println(&quot;周末我在农田忙活&quot;);
+    }
+
+    private class Farmer {
+        // 非静态内部类回调外部类实现work方法，
+                // 非静态内部类引用的作用仅仅是向客户提供一个回调外部类的途径
+        public void work() {
+            farming();
+        }
+    }
+
+    public Farmer getCallbackReference() {
+        return new Farmer();
+    }
+
+    public static void main(String[] args) {
+        Teacher t = new Teacher();
+        // 直接调用work
+        t.work();
+        // 表面上调用的是Farmer的work方法，实际上是回调Teacher的farming方法
+        t.getCallbackReference().work();
+    }
+}
+</code></pre>
+<p><strong>情形二</strong></p>
+<p>Swing中响应按钮点击事件，使用匿名内部类，各个不同的控件发生事件后可以回调外部类中对应的处理方法。</p>
+<pre><code class="line-numbers language-java">public class ButtonFrame extends JFrame {
+    // 红色按钮
+    private JButton redButton = new JButton(&quot;Red Button&quot;);
+    // 蓝色按钮
+    private JButton blueButton = new JButton(&quot;Blue Button&quot;);
+
+    // 处理红色按钮的方法
+    private void processRedButton() {
+        System.out.println(&quot;红色按钮被点击了&quot;);
+    }
+
+    // 处理蓝色按钮的方法
+    private void processBlueButton() {
+        System.out.println(&quot;蓝色按钮被点击了&quot;);
+    }
+
+    public ButtonFrame() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        redButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // 回调ButtonFrame中处理红色按钮的方法
+                processRedButton();
+            }
+        });
+        blueButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // 回调ButtonFrame中处理蓝色按钮的方法
+                processBlueButton();
+            }
+        });
+        getContentPane().add(redButton);
+        getContentPane().add(redButton);
+    }
+
+    public static void main(String[] args) {
+        new ButtonFrame().setVisible(true);
+    }
+}
+</code></pre>
+<p>最后，顺便提一下C语言中实现这种回调的机制，就是利用函数指针的方式实现的。在《Pointers On C》这本书里面举了一个例子很详细的说明这个问题：</p>
+<p>要编写一个类型无关的函数，在一个链表中查找一个指定的值，这个链表的数据元素可以是整数，也可能是字符串等，所以函数的参数就不能特定类型，C语言里面有个void类型，可以指向任何类型，通过这个，可以编写一个与类型无关的链表查找函数：</p>
+<pre><code class="line-numbers language-c">/**
+* 在一个单链表中查找一个指定值的函数。它的参数是一个指向链表第1个节点的指针，
+* 一个指向我们需要查找的指针和一个函数的指针，它所指向的函数用于比较存储于链表
+* 中的类型的值
+*
+*/
+
+#include ;
+#include ;
+
+/*类型无关的链表查找*/
+Node * search_list() (Node *node, void const *value,
+    int (*compare) (void const *, void const *)) {
+        while (node != NULL) {
+            if (compare( &amp;node-&gt;value, value) == 0) {
+                break;
+            }
+            node = node-&gt;link;
+        }
+        return node;
+    }
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/06/18/java/callback.html">java中的回调函数</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/06/20/java/nio.html" class="pre-post btn btn-default" title='NIO笔记-缓存器细节'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">NIO笔记-缓存器细节</span>
+        </a>
+    
+    
+        <a href="/2015/06/01/algorithm/pirate.html" class="next-post btn btn-default" title='海盗分金'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">海盗分金</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <p>暂无目录</p>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

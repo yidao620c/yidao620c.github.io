@@ -1,0 +1,502 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="squid,">
+
+
+    <meta name="description" content="有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网，
+那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。
+不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。
+本篇演示搭建了一个简单的squid的正向代理...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CentOS7.2搭建代理服务器 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CentOS7.2搭建代理服务器">
+            
+                CentOS7.2搭建代理服务器
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/linux">
+            linux
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/squid" title='squid'>
+                        squid
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/07/07</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网，
+那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。</p>
+<p>不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。
+本篇演示搭建了一个简单的squid的正向代理，同时支持认证，随便记记笔记。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><pre><code class="line-numbers language-bash">yum install squid -y
+yum install httpd-tools -y
+</code></pre>
+<h2 id="生成密码文件"><a href="#生成密码文件" class="headerlink" title="生成密码文件"></a>生成密码文件</h2><pre><code>mkdir /etc/squid3/
+# xiongneng 是用户名
+htpasswd -cd /etc/squid3/passwords xiongneng
+# 提示输入密码，在这里我设的密码为 123456
+# 注意密码不要超过8位
+</code></pre><h2 id="测试密码文件"><a href="#测试密码文件" class="headerlink" title="测试密码文件"></a>测试密码文件</h2><pre><code>/usr/lib64/squid/basic_ncsa_auth /etc/squid3/passwords
+# 输入 用户名 密码
+xiongneng 123456
+# 提示OK说明成功，ERR是有问题，请检查一下之前步骤
+OK
+
+# 测试完成，crtl + c 打断
+</code></pre><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><pre><code>vim /etc/squid/squid.conf
+
+# 在最后添加
+
+auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid3/passwords
+auth_param basic realm proxy
+acl authenticated proxy_auth REQUIRED
+http_access allow authenticated
+
+# 这里是端口号，可以按需修改
+# http_port 3128 这样写会同时监听ipv6和ipv4的端口，推荐适应下面的配置方法。
+http_port 0.0.0.0:3128
+</code></pre><h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>squid的权限控制很灵活，具体配置方法可以参考 <a href="http://www.squid-cache.org/Doc/config/acl/" target="_blank" rel="noopener">官方文档</a>，
+或者 <a href="http://home.arcor.de/pangj/squid/chap06.html" target="_blank" rel="noopener">Squid中文权威指南</a>，
+具体工作原理有点像iptables，用规则去卡控流量。默认的配置只能允许内网用户访问，如果有更多需求，你还可以指定很多规则！</p>
+<p>下面是我的配置实例：</p>
+<pre><code># Example rule allowing access from your local networks.
+# Adapt to list your (internal) IP networks from where browsing
+# should be allowed
+acl localnet src 10.0.0.0/8    # RFC1918 possible internal network
+acl localnet src 172.16.0.0/12    # RFC1918 possible internal network
+acl localnet src 192.168.0.0/16    # RFC1918 possible internal network
+acl localnet src fc00::/7       # RFC 4193 local private network range
+acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
+
+acl SSL_ports port 443
+acl Safe_ports port 80        # http
+acl Safe_ports port 21        # ftp
+acl Safe_ports port 443        # https
+acl Safe_ports port 70        # gopher
+acl Safe_ports port 210        # wais
+acl Safe_ports port 1025-65535    # unregistered ports
+acl Safe_ports port 280        # http-mgmt
+acl Safe_ports port 488        # gss-http
+acl Safe_ports port 591        # filemaker
+acl Safe_ports port 777        # multiling http
+acl CONNECT method CONNECT
+
+#
+# Recommended minimum Access Permission configuration:
+#
+# Deny requests to certain unsafe ports
+http_access deny !Safe_ports
+
+# Deny CONNECT to other than secure SSL ports
+http_access deny CONNECT !SSL_ports
+
+# Only allow cachemgr access from localhost
+http_access allow localhost manager
+http_access deny manager
+
+# We strongly recommend the following be uncommented to protect innocent
+# web applications running on the proxy server who think the only
+# one who can access services on &quot;localhost&quot; is a local user
+#http_access deny to_localhost
+
+#
+# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
+#
+
+# Example rule allowing access from your local networks.
+# Adapt localnet in the ACL section to list your (internal) IP networks
+# from where browsing should be allowed
+http_access allow localnet
+http_access allow localhost
+
+# And finally deny all other access to this proxy
+http_access deny all
+</code></pre><h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>squid的日志默认是打开的，位于目录<code>/var/log/squid/</code>，当然这个地址还有日志的格式都是可以完全自定义的</p>
+<pre><code>[root@controller161 ~]# ll /var/log/squid/
+total 496
+-rw-r----- 1 squid squid 355208 May  6 12:17 access.log
+-rw-r----- 1 squid squid   1846 Jul 10  2016 access.log-20160710.gz
+-rw-r----- 1 squid squid   3710 Jul 15  2016 access.log-20160718.gz
+-rw-r----- 1 squid squid 125341 May  4 15:19 cache.log
+-rw-r----- 1 squid squid   1325 Jul  9  2016 cache.log-20160710.gz
+-rw-r----- 1 squid squid   1110 Jul 14  2016 cache.log-20160718.gz
+</code></pre><h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><pre><code class="line-numbers language-bash"># 开启启动
+systemctl enable squid.service
+# 启动
+systemctl start squid.service
+# 停止
+systemctl stop squid.service
+# 重启
+systemctl restart squid.service
+</code></pre>
+<h2 id="代理服务器设置"><a href="#代理服务器设置" class="headerlink" title="代理服务器设置"></a>代理服务器设置</h2><p>在其他CentOS机器上面配置各种代理方法</p>
+<h3 id="全局代理"><a href="#全局代理" class="headerlink" title="全局代理"></a>全局代理</h3><p><code>vim /etc/profile</code>，在最后加入</p>
+<pre><code class="line-numbers language-bash">export http_proxy=&quot;http://username:password@proxy_ip:port&quot;
+export https_proxy=&quot;http://username:password@proxy_ip:port&quot;
+</code></pre>
+<h3 id="yum代理设置"><a href="#yum代理设置" class="headerlink" title="yum代理设置"></a>yum代理设置</h3><p>编辑<code>/etc/yum.conf</code>，在最后加入</p>
+<pre><code># Proxy
+proxy=http://username:password@proxy_ip:port/
+</code></pre><h3 id="wget的代理设置"><a href="#wget的代理设置" class="headerlink" title="wget的代理设置"></a>wget的代理设置</h3><p>编辑<code>/etc/wgetrc</code>，在最后加入</p>
+<pre><code># Proxy
+http_proxy=http://username:password@proxy_ip:port/
+https_proxy=http://username:password@proxy_ip:port/
+ftp_proxy=http://username:password@proxy_ip:port/
+</code></pre><h3 id="curl的代理设置"><a href="#curl的代理设置" class="headerlink" title="curl的代理设置"></a>curl的代理设置</h3><p>在<code>~/.bashrc</code>里面增加一个别名:</p>
+<pre><code class="line-numbers language-bash">alias curl=&quot;curl -x http://username:password@proxy_ip:port&quot;
+</code></pre>
+<p>另外一种方法是编辑<code>~/.curlrc</code>文件 (没有就创建一个):</p>
+<pre><code>proxy = http://username:password@proxy_ip:port
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/07/07/linux/squid.html">CentOS7.2搭建代理服务器</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/07/20/web/http-cache.html" class="pre-post btn btn-default" title='HTTP缓存介绍'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">HTTP缓存介绍</span>
+        </a>
+    
+    
+        <a href="/2016/07/01/linux/bind9.html" class="next-post btn btn-default" title='CentOS7.2搭建DNS服务器'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CentOS7.2搭建DNS服务器</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成密码文件"><span class="toc-text">生成密码文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试密码文件"><span class="toc-text">测试密码文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置"><span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限控制"><span class="toc-text">权限控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#日志"><span class="toc-text">日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动服务"><span class="toc-text">启动服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代理服务器设置"><span class="toc-text">代理服务器设置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#全局代理"><span class="toc-text">全局代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#yum代理设置"><span class="toc-text">yum代理设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget的代理设置"><span class="toc-text">wget的代理设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl的代理设置"><span class="toc-text">curl的代理设置</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

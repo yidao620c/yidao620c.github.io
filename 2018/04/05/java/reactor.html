@@ -1,0 +1,614 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="java,">
+
+
+    <meta name="description" content="上一篇介绍了Unix系统支持的I/O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。
+I/O多路复用又被称为“事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），
+能够通知程序进行相应的读写操作，技术...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>聊聊Reactor I/O模型 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="聊聊Reactor I/O模型">
+            
+                聊聊Reactor I/O模型
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/java">
+            java
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/java" title='java'>
+                        java
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/04/05</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>上一篇介绍了Unix系统支持的I/O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。</p>
+<p>I/O多路复用又被称为“事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），
+能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。</p>
+<p>与多进程和多线程技术相比，I/O多路复用技术的最大优势是系统开销小，系统不必创建进程/线程，也不必维护这些进程/线程，从而大大减小了系统的开销。</p>
+<p>Reactor是一种应用在服务器端的开发模式，目的是提高服务端程序的并发能力，其实就是实现了I/O多路复用这种I/O模型。</p>
+<h2 id="图解Reactor模式"><a href="#图解Reactor模式" class="headerlink" title="图解Reactor模式"></a>图解Reactor模式</h2><p>为了形象的解释这个模式，我用一个餐厅点餐的例子来直观的说明一下。</p>
+<h3 id="传统的多线程方式"><a href="#传统的多线程方式" class="headerlink" title="传统的多线程方式"></a>传统的多线程方式</h3><p>每个顾客都有自己的服务团队（线程），在人少的情况下是可以良好的运作的，流程如下：</p>
+<ol>
+<li>服务员给出菜单，并等待点菜</li>
+<li>顾客查看菜单，并点菜</li>
+<li>服务员把菜单交给厨师，厨师照着做菜</li>
+<li>厨师做好菜后端到餐桌上</li>
+</ol>
+<p>如下图所示</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png" alt></p>
+<p>现在餐厅的口碑好，顾客人数不断增加，这时服务员就有点处理不过来了。这时老板发现，每个服务员在服务完客人后，都要去休息一下，
+因此老板就说，“你们都别休息了，在旁边待命”。这样可能 10 个服务员也来得及服务 20 个顾客了。这也是“线程池”的方式，
+通过重用线程来减少线程的创建和销毁时间，从而提高性能。</p>
+<h3 id="Reactor方式"><a href="#Reactor方式" class="headerlink" title="Reactor方式"></a>Reactor方式</h3><p>但是客人又进一步增加了，仅仅靠剥削服务员的休息时间也没有办法服务这么多客人。老板仔细观察，
+发现其实服务员并不是一直在干活的，大部分时间他们只是站在餐桌旁边等客人点菜。</p>
+<p>于是老板就对服务员说，客人点菜的时候你们就别傻站着了，先去服务其它客人，有客人点好的时候喊你们再过去。对应于下图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor05.png" alt></p>
+<p>最后，老板发现根本不需要那么多的服务员，于是裁了一波员，最终甚至可以只有一个服务员。</p>
+<p>这就是 Reactor 模式的核心思想：减少等待。当遇到需要等待 IO 时，先释放资源，而在 IO 完成时，
+再通过事件驱动 (event driven) 的方式，继续接下来的处理。从整体上减少了资源的消耗。</p>
+<h2 id="Java中实现Reactor模式"><a href="#Java中实现Reactor模式" class="headerlink" title="Java中实现Reactor模式"></a>Java中实现Reactor模式</h2><p>本篇详细讲解一下Java中如何来实现Reactor模式。</p>
+<p>Reactor模式又分为三种实现方式</p>
+<h3 id="经典模式"><a href="#经典模式" class="headerlink" title="经典模式"></a>经典模式</h3><p>精典的Reactor模式示意图如下所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor01.png" alt></p>
+<p>在Reactor模式中，包含如下角色</p>
+<ul>
+<li>Reactor 将I/O事件发派给对应的Handler</li>
+<li>Acceptor 处理客户端连接请求</li>
+<li>Handlers 执行非阻塞读/写</li>
+</ul>
+<p>最简单的Reactor模式实现代码如下所示</p>
+<pre><code class="line-numbers language-java">public class NIOServer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(NIOServer.class);
+  public static void main(String[] args) throws IOException {
+    Selector selector = Selector.open();
+    ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+    serverSocketChannel.configureBlocking(false);
+    serverSocketChannel.bind(new InetSocketAddress(1234));
+    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+    while (selector.select() &gt; 0) {
+      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
+      Iterator&lt;SelectionKey&gt; iterator = keys.iterator();
+      while (iterator.hasNext()) {
+        SelectionKey key = iterator.next();
+        iterator.remove();
+        if (key.isAcceptable()) {
+          ServerSocketChannel acceptServerSocketChannel = (ServerSocketChannel) key.channel();
+          SocketChannel socketChannel = acceptServerSocketChannel.accept();
+          socketChannel.configureBlocking(false);
+          LOGGER.info(&quot;Accept request from {}&quot;, socketChannel.getRemoteAddress());
+          socketChannel.register(selector, SelectionKey.OP_READ);
+        } else if (key.isReadable()) {
+          SocketChannel socketChannel = (SocketChannel) key.channel();
+          ByteBuffer buffer = ByteBuffer.allocate(1024);
+          int count = socketChannel.read(buffer);
+          if (count &lt;= 0) {
+            socketChannel.close();
+            key.cancel();
+            LOGGER.info(&quot;Received invalide data, close the connection&quot;);
+            continue;
+          }
+          LOGGER.info(&quot;Received message {}&quot;, new String(buffer.array()));
+        }
+        keys.remove(key);
+      }
+    }
+  }
+}
+</code></pre>
+<p>从上示代码中可以看到，多个Channel可以注册到同一个Selector对象上，实现了一个线程同时监控多个请求状态（Channel）。
+同时注册时需要指定它所关注的事件，例如上示代码中socketServerChannel对象只注册了OP_ACCEPT事件，
+而socketChannel对象只注册了OP_READ事件。</p>
+<p>selector.select()是阻塞的，当有至少一个通道可用时该方法返回可用通道个数。同时该方法只捕获Channel注册时指定的所关注的事件。</p>
+<h3 id="多工作线程模式"><a href="#多工作线程模式" class="headerlink" title="多工作线程模式"></a>多工作线程模式</h3><p>经典Reactor模式中，尽管一个线程可同时监控多个请求（Channel），但是所有读/写请求以及对新连接请求的处理都在同一个线程中处理，
+无法充分利用多CPU的优势，同时读/写操作也会阻塞对新连接请求的处理。因此可以引入多线程，并行处理多个读/写操作，如下图所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor02.png" alt></p>
+<p>多线程Reactor模式示例代码如下所示：</p>
+<pre><code class="line-numbers language-java">public class NIOServer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(NIOServer.class);
+  public static void main(String[] args) throws IOException {
+    Selector selector = Selector.open();
+    ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+    serverSocketChannel.configureBlocking(false);
+    serverSocketChannel.bind(new InetSocketAddress(1234));
+    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+    while (true) {
+      if(selector.selectNow() &lt; 0) {
+        continue;
+      }
+      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
+      Iterator&lt;SelectionKey&gt; iterator = keys.iterator();
+      while(iterator.hasNext()) {
+        SelectionKey key = iterator.next();
+        iterator.remove();
+        if (key.isAcceptable()) {
+          ServerSocketChannel acceptServerSocketChannel = (ServerSocketChannel) key.channel();
+          SocketChannel socketChannel = acceptServerSocketChannel.accept();
+          socketChannel.configureBlocking(false);
+          LOGGER.info(&quot;Accept request from {}&quot;, socketChannel.getRemoteAddress());
+          SelectionKey readKey = socketChannel.register(selector, SelectionKey.OP_READ);
+          readKey.attach(new Processor());
+        } else if (key.isReadable()) {
+          Processor processor = (Processor) key.attachment();
+          processor.process(key);
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>从上示代码中可以看到，注册完SocketChannel的OP_READ事件后，可以对相应的SelectionKey
+绑定一个对象（本例中绑定了一个Processor对象，该对象处理读请求），并且在获取到可读事件后，可以取出该对象。</p>
+<p>具体的读请求处理在如下所示的Processor类中。该类中设置了一个静态的线程池处理所有请求。而process方法并不直接处理I/O请求，
+而是把该I/O操作提交给上述线程池去处理，这样就充分利用了多线程的优势，同时将对新连接的处理和读/写操作的处理放在了不同的线程中，
+读/写操作不再阻塞对新连接请求的处理。</p>
+<pre><code class="line-numbers language-java">public class Processor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+  private static final ExecutorService service = Executors.newFixedThreadPool(16);
+  public void process(SelectionKey selectionKey) {
+    service.submit(() -&gt; {
+      ByteBuffer buffer = ByteBuffer.allocate(1024);
+      SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+      int count = socketChannel.read(buffer);
+      if (count &lt; 0) {
+        socketChannel.close();
+        selectionKey.cancel();
+        LOGGER.info(&quot;{}\t Read ended&quot;, socketChannel);
+        return null;
+      } else if(count == 0) {
+        return null;
+      }
+      LOGGER.info(&quot;{}\t Read message {}&quot;, socketChannel, new String(buffer.array()));
+      return null;
+    });
+  }
+}
+</code></pre>
+<h3 id="多Reactor模式"><a href="#多Reactor模式" class="headerlink" title="多Reactor模式"></a>多Reactor模式</h3><p>Netty中使用的Reactor模式，引入了多Reactor，也即一个主Reactor负责监控所有的连接请求，多个子Reactor负责监控并处理读/写请求，
+减轻了主Reactor的压力，降低了主Reactor压力太大而造成的延迟。并且每个子Reactor分别属于一个独立的线程，
+每个成功连接后的Channel的所有操作由同一个线程处理。这样保证了同一请求的所有状态和上下文在同一个线程中，
+避免了不必要的上下文切换，同时也方便了监控请求响应状态。</p>
+<p>多Reactor模式示意图如下所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor03.png" alt></p>
+<p>多Reactor示例代码如下所示：</p>
+<pre><code class="line-numbers language-java">public class NIOServer {
+  private static final Logger LOGGER = LoggerFactory.getLogger(NIOServer.class);
+  public static void main(String[] args) throws IOException {
+    Selector selector = Selector.open();
+    ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+    serverSocketChannel.configureBlocking(false);
+    serverSocketChannel.bind(new InetSocketAddress(1234));
+    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+    int coreNum = Runtime.getRuntime().availableProcessors();
+    Processor[] processors = new Processor[coreNum];
+    for (int i = 0; i &lt; processors.length; i++) {
+      processors[i] = new Processor();
+    }
+    int index = 0;
+    while (selector.select() &gt; 0) {
+      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
+      for (SelectionKey key : keys) {
+        keys.remove(key);
+        if (key.isAcceptable()) {
+          ServerSocketChannel acceptServerSocketChannel = (ServerSocketChannel) key.channel();
+          SocketChannel socketChannel = acceptServerSocketChannel.accept();
+          socketChannel.configureBlocking(false);
+          LOGGER.info(&quot;Accept request from {}&quot;, socketChannel.getRemoteAddress());
+          Processor processor = processors[(int) ((index++) % coreNum)];
+          processor.addChannel(socketChannel);
+          processor.wakeup();
+        }
+      }
+    }
+  }
+}
+</code></pre>
+<p>如上代码所示，本文设置的子Reactor个数是当前机器可用核数的两倍（与Netty默认的子Reactor个数一致）。
+对于每个成功连接的SocketChannel，通过round robin的方式交给不同的子Reactor。</p>
+<p>子Reactor对SocketChannel的处理如下所示：</p>
+<pre><code class="line-numbers language-java">public class Processor {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
+  private static final ExecutorService service =
+      Executors.newFixedThreadPool(2 * Runtime.getRuntime().availableProcessors());
+  private Selector selector;
+  public Processor() throws IOException {
+    this.selector = SelectorProvider.provider().openSelector();
+    start();
+  }
+  public void addChannel(SocketChannel socketChannel) throws ClosedChannelException {
+    socketChannel.register(this.selector, SelectionKey.OP_READ);
+  }
+  public void wakeup() {
+    this.selector.wakeup();
+  }
+  public void start() {
+    service.submit(() -&gt; {
+      while (true) {
+        if (selector.select(500) &lt;= 0) {
+          continue;
+        }
+        Set&lt;SelectionKey&gt; keys = selector.selectedKeys();
+        Iterator&lt;SelectionKey&gt; iterator = keys.iterator();
+        while (iterator.hasNext()) {
+          SelectionKey key = iterator.next();
+          iterator.remove();
+          if (key.isReadable()) {
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            SocketChannel socketChannel = (SocketChannel) key.channel();
+            int count = socketChannel.read(buffer);
+            if (count &lt; 0) {
+              socketChannel.close();
+              key.cancel();
+              LOGGER.info(&quot;{}\t Read ended&quot;, socketChannel);
+              continue;
+            } else if (count == 0) {
+              LOGGER.info(&quot;{}\t Message size is 0&quot;, socketChannel);
+              continue;
+            } else {
+              LOGGER.info(&quot;{}\t Read message {}&quot;, socketChannel, new String(buffer.array()));
+            }
+          }
+        }
+      }
+    });
+  }
+}
+</code></pre>
+<p>在Processor中，同样创建了一个静态的线程池，且线程池的大小为机器核数的两倍。每个Processor实例均包含一个Selector实例。
+同时每次获取Processor实例时均提交一个任务到该线程池，并且该任务正常情况下一直循环处理，不会停止。
+而提交给该Processor的SocketChannel通过在其Selector注册事件，加入到相应的任务中。
+由此实现了每个子Reactor包含一个Selector对象，并由一个独立的线程处理。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/04/05/java/reactor.html">聊聊Reactor I/O模型</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/05/22/docker/softwares.html" class="pre-post btn btn-default" title='Docker安装常用软件'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker安装常用软件</span>
+        </a>
+    
+    
+        <a href="/2018/04/02/java/io.html" class="next-post btn btn-default" title='聊聊Java中的几种I/O模型'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">聊聊Java中的几种I/O模型</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#图解Reactor模式"><span class="toc-text">图解Reactor模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#传统的多线程方式"><span class="toc-text">传统的多线程方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Reactor方式"><span class="toc-text">Reactor方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java中实现Reactor模式"><span class="toc-text">Java中实现Reactor模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#经典模式"><span class="toc-text">经典模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多工作线程模式"><span class="toc-text">多工作线程模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多Reactor模式"><span class="toc-text">多Reactor模式</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

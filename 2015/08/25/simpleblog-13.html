@@ -1,0 +1,509 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="Redis 是一个高性能的key-value数据库。redis的出现，
+很大程度补偿了memcached这类keyvalue存储的不足，在部分场合可以对关系数据库起到很好的补充作用。
+它提供了Python，Ruby，Erlang，PHP客户端，使用很方便。
+目前Redis已经发布了3.0版本，...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Django1.9开发博客13- redis缓存 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Django1.9开发博客13- redis缓存">
+            
+                Django1.9开发博客13- redis缓存
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/08/25</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Redis 是一个高性能的key-value数据库。redis的出现，
+很大程度补偿了memcached这类keyvalue存储的不足，在部分场合可以对关系数据库起到很好的补充作用。
+它提供了Python，Ruby，Erlang，PHP客户端，使用很方便。</p>
+<p>目前Redis已经发布了3.0版本，正式支持分布式，这个特性太强大，以至于你再不用就对不住自己了。</p>
+<h3 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h3><p>服务器配置：Linux 2.6, Xeon X3320 2.5Ghz</p>
+<p>SET操作每秒钟110000次，GET操作每秒钟81000次</p>
+<p>stackoverflow网站使用Redis做为缓存服务器。</p>
+<h3 id="安装redis"><a href="#安装redis" class="headerlink" title="安装redis"></a>安装redis</h3><p>服务器安装篇我写了专门文章，
+请参阅<a href="http://yidao620c.github.io/2015/07/01/java/redis01.html" target="_blank" rel="noopener">redis入门与安装</a></p>
+<h3 id="django中的配置"><a href="#django中的配置" class="headerlink" title="django中的配置"></a>django中的配置</h3><p>我们希望在本博客系统中，对于文章点击数、阅览数等数据实现缓存，提高效率。</p>
+<h4 id="requirements-txt"><a href="#requirements-txt" class="headerlink" title="requirements.txt"></a>requirements.txt</h4><p>添加如下内容，方便以后安装软件依赖，由于在pythonanywhere上面并不能安装redis服务，所以本章只能在本地测试。</p>
+<pre><code>redis==2.10.5
+django-redis==4.4.2
+APScheduler==3.1.0
+</code></pre><h4 id="settings-py配置"><a href="#settings-py配置" class="headerlink" title="settings.py配置"></a>settings.py配置</h4><p>新增内容</p>
+<pre><code class="line-numbers language-python">from urllib.parse import urlparse
+import dj_database_url
+
+redis_url = urlparse(os.environ.get(&#39;REDISTOGO_URL&#39;, &#39;redis://localhost:6959&#39;))
+CACHES = {
+    &#39;default&#39;: {
+        &#39;BACKEND&#39;: &#39;redis_cache.cache.RedisCache&#39;,
+        &#39;LOCATION&#39;: &#39;{0}:{1}&#39;.format(redis_url.hostname, redis_url.port),
+        &#39;OPTIONS&#39;: {
+            &#39;DB&#39;: 0,
+            &#39;PASSWORD&#39;: redis_url.password,
+            &#39;CLIENT_CLASS&#39;: &#39;redis_cache.client.DefaultClient&#39;,
+            &#39;PICKLE_VERSION&#39;: -1,  # Use the latest protocol version
+            &#39;SOCKET_TIMEOUT&#39;: 60,  # in seconds
+            &#39;IGNORE_EXCEPTIONS&#39;: True,
+        }
+    }
+}
+
+SESSION_ENGINE = &#39;django.contrib.sessions.backends.cache&#39;
+SESSION_CACHE_ALIAS = &#39;default&#39;
+
+# 本地开发配置放在local_settings.py中
+try:
+    from .local_settings import *
+except ImportError:
+    pass
+</code></pre>
+<h4 id="local-settings-py配置"><a href="#local-settings-py配置" class="headerlink" title="local_settings.py配置"></a>local_settings.py配置</h4><p>这个是本地开发时候使用到的配置文件</p>
+<pre><code class="line-numbers language-python">DEBUG = True
+
+CACHES = {
+    &#39;default&#39;: {
+        &#39;BACKEND&#39;: &#39;redis_cache.cache.RedisCache&#39;,
+        &#39;LOCATION&#39;: &#39;192.168.203.95:6379:1&#39;,
+        &#39;OPTIONS&#39;: {
+            &#39;CLIENT_CLASS&#39;: &#39;redis_cache.client.DefaultClient&#39;,
+            # &#39;PASSWORD&#39;: &#39;secretpassword&#39;,
+            &#39;PICKLE_VERSION&#39;: -1,  # Use the latest protocol version
+            &#39;SOCKET_TIMEOUT&#39;: 60,  # in seconds
+            &#39;IGNORE_EXCEPTIONS&#39;: True,
+        }
+    }
+}
+</code></pre>
+<h3 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h3><h4 id="cache-manager-py缓存管理器"><a href="#cache-manager-py缓存管理器" class="headerlink" title="cache_manager.py缓存管理器"></a>cache_manager.py缓存管理器</h4><p>我们新建一个缓存管理器cache_manager.py，内容如下</p>
+<pre><code class="line-numbers language-python">#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+&quot;&quot;&quot;
+Topic: redis缓存管理器
+&quot;&quot;&quot;
+from ..models import Post
+from redis_cache import get_redis_connection
+from apscheduler.schedulers.background import BackgroundScheduler
+
+RUNNING_TIMER = False
+REDIS_DB = get_redis_connection(&#39;default&#39;)
+
+
+def update_click(post):
+    &quot;&quot;&quot; 更新点击数 &quot;&quot;&quot;
+    if REDIS_DB.hexists(&quot;CLICKS&quot;, post.id):
+        print(&#39;REDIS_DB.hexists...&#39; + str(post.id))
+        REDIS_DB.hincrby(&#39;CLICKS&#39;, post.id)
+    else:
+        print(&#39;REDIS_DB.not_hexists...&#39; + str(post.id))
+        REDIS_DB.hset(&#39;CLICKS&#39;, post.id, post.click + 1)
+    run_timer()
+
+
+def get_click(post):
+    &quot;&quot;&quot; 获取点击数 &quot;&quot;&quot;
+    if REDIS_DB.hexists(&quot;CLICKS&quot;, post.id):
+        return REDIS_DB.hget(&#39;CLICKS&#39;, post.id)
+    else:
+        REDIS_DB.hset(&#39;CLICKS&#39;, post.id, post.click)
+        return post.click
+
+def sync_click():
+    &quot;&quot;&quot;同步文章点击数&quot;&quot;&quot;
+    print(&#39;同步文章点击数start....&#39;)
+    for k in REDIS_DB.hkeys(&#39;CLICKS&#39;):
+        try:
+            p = Post.objects.get(k)
+            print(&#39;db_click={0}&#39;.format(p.click))
+            cache_click = get_click(p.id)
+            print(&#39;cache_click={0}&#39;.format(cache_click))
+            if cache_click != p.click:
+                p.click = get_click(p.id)
+                p.save()
+        except:
+            pass
+</code></pre>
+<h4 id="views-py修改"><a href="#views-py修改" class="headerlink" title="views.py修改"></a>views.py修改</h4><p>然后我们修改view.py，在相应的action里使用这个cache_manager：</p>
+<pre><code class="line-numbers language-python">from .commons import cache_manager
+
+def post_list(request):
+    &quot;&quot;&quot;所有已发布文章&quot;&quot;&quot;
+    posts = Post.objects.annotate(num_comment=Count(&#39;comment&#39;)).filter(
+        published_date__isnull=False).prefetch_related(
+        &#39;category&#39;).prefetch_related(&#39;tags&#39;).order_by(&#39;-published_date&#39;)
+    for p in posts:
+        p.click = cache_manager.get_click(p)
+    return render(request, &#39;blog/post_list.html&#39;, {&#39;posts&#39;: posts})
+
+def post_detail(request, pk):
+    try:
+        pass
+    except:
+        raise Http404()
+    if post.published_date:
+        cache_manager.update_click(post)
+        post.click = cache_manager.get_click(post)
+</code></pre>
+<p>其他的我就不多演示了。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/08/25/simpleblog-13.html">Django1.9开发博客13- redis缓存</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/08/26/simpleblog-14.html" class="pre-post btn btn-default" title='Django1.9开发博客14- 集成Xadmin'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Django1.9开发博客14- 集成Xadmin</span>
+        </a>
+    
+    
+        <a href="/2015/08/24/simpleblog-12.html" class="next-post btn btn-default" title='Django1.9开发博客12- i18n国际化'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Django1.9开发博客12- i18n国际化</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#性能测试"><span class="toc-text">性能测试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装redis"><span class="toc-text">安装redis</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#django中的配置"><span class="toc-text">django中的配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#requirements-txt"><span class="toc-text">requirements.txt</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#settings-py配置"><span class="toc-text">settings.py配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#local-settings-py配置"><span class="toc-text">local_settings.py配置</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用方法"><span class="toc-text">使用方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#cache-manager-py缓存管理器"><span class="toc-text">cache_manager.py缓存管理器</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#views-py修改"><span class="toc-text">views.py修改</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

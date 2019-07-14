@@ -1,0 +1,582 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="parted,">
+
+
+    <meta name="description" content="最近在做ceph的日志盘分区时候遇到一些问题记录下来。比较古老的分区工具是使用fdisk，后来因为磁盘越来越大，
+而fdisk遇到分区容量超过2TB时无能为力，并且分区还要限制最多4个主分区。越来越不适用现代磁盘，
+后来有了parted工具专门用来对大磁盘分区的。
+分区类型硬盘分区最常见的类型...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Linux磁盘分区总结 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Linux磁盘分区总结">
+            
+                Linux磁盘分区总结
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/ceph">
+            ceph
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/parted" title='parted'>
+                        parted
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/03/14</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>最近在做ceph的日志盘分区时候遇到一些问题记录下来。比较古老的分区工具是使用fdisk，后来因为磁盘越来越大，
+而fdisk遇到分区容量超过2TB时无能为力，并且分区还要限制最多4个主分区。越来越不适用现代磁盘，
+后来有了parted工具专门用来对大磁盘分区的。</p>
+<h2 id="分区类型"><a href="#分区类型" class="headerlink" title="分区类型"></a>分区类型</h2><p>硬盘分区最常见的类型为<code>msdos</code>和<code>gpt</code>，前者表示MBR分区，而后者表示GPT分区。</p>
+<p>传统的BIOS只支持MBR分区硬盘启动，一个硬盘只能分成四个分区，并且单个分区最大不超过2TB。
+EFI支持GPT分区启动的，GPT分区没有分区数目的限制并且单个分区可以超过2TB。</p>
+<blockquote>
+<p><strong><em>MBR</em></strong><br>
+MBR分区表(即主引导记录)大家都很熟悉。所支持的最大卷为2T，而且最多4个主分区或3个主分区加一个扩展分区</p>
+<p><strong><em>GPT</em></strong><br>
+GPT（即GUID分区表）是源自EFI标准的一种较新的磁盘分区表结构的标准，是未来磁盘分区的主要形式。
+与MBR分区方式相比，突破MBR4个主分区限制，每个磁盘最多支持128个分区，持大于2T的分区，最大卷可达18EB。</p>
+</blockquote>
+<p>使用parted命令查看磁盘分区类型:</p>
+<pre><code class="line-numbers language-bash">[root@node200 ~]# parted /dev/sdb print
+Model: SMC SMC2108 (scsi)
+Disk /dev/sdb: 999GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags:
+
+Number  Start   End     Size    File system  Name          Flags
+ 2      1049kB  10.7GB  10.7GB               ceph journal
+ 1      10.7GB  999GB   988GB   xfs          ceph data
+</code></pre>
+<p>输出结果中的<code>Partition Table: gpt</code>表示gpt分区</p>
+<p>这里顺带解释下物理扇区和逻辑扇区的概念，上面的<code>Sector size (logical/physical): 512B/512B</code>，
+也就是硬盘的每个扇区实际大小是512B，不过我们做分区都是针对逻辑扇区的，也就是logical为单位，
+这里也是512B，一般来讲磁盘会将一个物理扇区划分成多个逻辑扇区，逻辑扇区才是分区最小单位。</p>
+<h2 id="fdisk使用"><a href="#fdisk使用" class="headerlink" title="fdisk使用"></a>fdisk使用</h2><p>fdisk用来创建MBR分区，这个工具应该都会用了，这里只是简单介绍几个。</p>
+<p>显示所有硬盘分区情况</p>
+<pre><code>fdisk -l
+</code></pre><p>显示具体单个硬盘分区情况</p>
+<pre><code>fdisk -l /dev/sdb
+</code></pre><p>交互显示方便提示fdisk的所有命令如何使用</p>
+<pre><code>fdisk /dev/sdb
+</code></pre><p>进入交互模式后按m可列出所有命令:</p>
+<pre><code>[root@node200 ~]# fdisk /dev/sdb
+Welcome to fdisk (util-linux 2.23.2).
+
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): m
+Command action
+   d   delete a partition
+   g   create a new empty GPT partition table
+   G   create an IRIX (SGI) partition table
+   l   list known partition types
+   m   print this menu
+   n   add a new partition
+   o   create a new empty DOS partition table
+   q   quit without saving changes
+   s   create a new empty Sun disklabel
+   w   write table to disk and exit
+</code></pre><h2 id="parted使用"><a href="#parted使用" class="headerlink" title="parted使用"></a>parted使用</h2><p>参考：<a href="https://www.gnu.org/software/parted/manual/parted.html" target="_blank" rel="noopener">https://www.gnu.org/software/parted/manual/parted.html</a></p>
+<p>Parted 命令分为两种模式：命令行模式和交互模式。</p>
+<ol>
+<li>命令行模式: <code>parted [option] device [command]</code>, 比较适合编程应用。</li>
+<li>交互模式:  <code>parted [option] device</code> 类似于使用<code>fdisk /dev/xxx</code></li>
+</ol>
+<p>parted是一个可以分区并进行分区调整的工具，他可以创建、删除、移动、复制、
+调整ext2 Linux-swap fat fat32 reiserfs类型的分区，
+可以创建、调整、移动Macintosh的HFS分区，检测jfs，ntfs，ufs，xfs分区。</p>
+<h3 id="显示分区信息"><a href="#显示分区信息" class="headerlink" title="显示分区信息"></a>显示分区信息</h3><pre><code>parted list  # 列出所有磁盘分区信息
+parted /dev/sdb print # 打印出sdb的分区信息
+blkid  # 查看分区名
+</code></pre><h3 id="创建分区类型"><a href="#创建分区类型" class="headerlink" title="创建分区类型"></a>创建分区类型</h3><pre><code>parted /dev/sdb mklabel label-type
+</code></pre><p>label-type可以是：”bsd”, “dvh”, “gpt”,  “loop”,”mac”, “msdos”, “pc98”, or “sun”。
+一般的pc机都是msdos格式，如果分区大于2T则需要选用gpt格式的分区表。</p>
+<h3 id="分区转换"><a href="#分区转换" class="headerlink" title="分区转换"></a>分区转换</h3><p>转换成GPT:</p>
+<pre><code class="line-numbers language-bash">parted /dev/sdb mklabel gpt
+</code></pre>
+<p>转换成MBR:</p>
+<pre><code class="line-numbers language-bash">parted /dev/sdb mklabel msdos
+</code></pre>
+<h3 id="创建分区"><a href="#创建分区" class="headerlink" title="创建分区"></a>创建分区</h3><pre><code class="line-numbers language-bash">parted /dev/sdb mkpart [part-type fs-type name] start end
+</code></pre>
+<p>创建一个part-type类型的分区，part-type可以是：”primary”, “logical”, or “extended”，
+只有在分区类型为’msdos’或’dvh’的时候才能指定这个参数。</p>
+<p>如果指定fs-type则在创建分区的同时进行格式化，start和end指的是分区的起始位置，单位默认是M。</p>
+<h3 id="设置分区名"><a href="#设置分区名" class="headerlink" title="设置分区名"></a>设置分区名</h3><pre><code class="line-numbers language-bash">parted /dev/sdb name 1 &quot;name&quot;
+</code></pre>
+<p>这种设置只能用在Mac, PC98 和 GPT类型的分区表，设置时名字用引号括起来</p>
+<h3 id="调整分区大小"><a href="#调整分区大小" class="headerlink" title="调整分区大小"></a>调整分区大小</h3><pre><code>parted /dev/sdb resize 1 start end
+</code></pre><h3 id="删除一个分区"><a href="#删除一个分区" class="headerlink" title="删除一个分区"></a>删除一个分区</h3><pre><code>parted /dev/sdb rm 1
+</code></pre><h3 id="移动分区"><a href="#移动分区" class="headerlink" title="移动分区"></a>移动分区</h3><pre><code>parted /dev/sdb move 1 start end
+</code></pre><h2 id="sgdisk使用"><a href="#sgdisk使用" class="headerlink" title="sgdisk使用"></a>sgdisk使用</h2><p>参考：<a href="http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html" target="_blank" rel="noopener">http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html</a></p>
+<p>与fdisk创建MBR分区一样，sgdisk是一个创建GPT分区的工具，它也有交互模式gdisk和命令行模式sgdisk两种，
+一般手动分区就选择gdisk会保险一点，这里我讲的是命令行模式sgdisk，方便编程实现。</p>
+<h3 id="查看所有GPT分区"><a href="#查看所有GPT分区" class="headerlink" title="查看所有GPT分区"></a>查看所有GPT分区</h3><p>先可执行parted命令查看磁盘分区类型:</p>
+<pre><code class="line-numbers language-bash">parted /dev/sdb print
+</code></pre>
+<p>然后对于gpt类型的就可以用sgdisk命令查看了:</p>
+<pre><code>[root@node200 ~]# sgdisk -p /dev/sdb
+Disk /dev/sdb: 1951170560 sectors, 930.4 GiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): EFA3DAF2-5AF2-44A0-9AC7-D9F50E60D831
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 1951170526
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 4061 sectors (2.0 MiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1        20973568      1951170526   920.4 GiB   FFFF  ceph data
+   2            2048        20971520   10.0 GiB    FFFF  ceph journal
+</code></pre><h3 id="查看某个分区"><a href="#查看某个分区" class="headerlink" title="查看某个分区"></a>查看某个分区</h3><pre><code>[root@node200 ~]# sgdisk --info=1 /dev/sdb
+Partition GUID code: 4FBD7E29-9D25-41B8-AFD0-062C0CEFF05D (Unknown)
+Partition unique GUID: 4382DDCA-69AE-4753-B181-E800EAA62ADD
+First sector: 20973568 (at 10.0 GiB)
+Last sector: 1951170526 (at 930.4 GiB)
+Partition size: 1930196959 sectors (920.4 GiB)
+Attribute flags: 0000000000000000
+Partition name: &#39;ceph data&#39;
+</code></pre><h3 id="删除磁盘所有分区"><a href="#删除磁盘所有分区" class="headerlink" title="删除磁盘所有分区"></a>删除磁盘所有分区</h3><pre><code>[root@node200 ~]# sgdisk --zap-all --clear --mbrtogpt -g /dev/sdd
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+The operation has completed successfully.
+</code></pre><h3 id="创建分区-1"><a href="#创建分区-1" class="headerlink" title="创建分区"></a>创建分区</h3><p>创建某个分区前，请先查看这个磁盘分区表，查看扇区大小sector，然后算好起始扇区start和结束扇区end。</p>
+<p>比如我要创建第1个分区/dev/sdd1，大小1GiB，扇区数量为<code>1*1024*1024*1024/512=2097152</code>。
+起始扇区start=1，结束扇区end=2097152，type code为8300，分区名为”ceph journal”</p>
+<pre><code>sgdisk -n 1:1:2097152 -t 1:8300 -c 1:&quot;ceph journal&quot; -g -p /dev/sdd
+</code></pre><p>type code一般就是8300(Linux filesystem)，可通过<code>sgdisk -L</code>来查看所有。</p>
+<p>出错:</p>
+<pre><code>Could not create partition 1 from 1 to 2097152
+Could not change partition 1&#39;s type code to 8300!
+Disk /dev/sdd: 16777216 sectors, 8.0 GiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): C2CD3A11-3C49-4DD7-B5E9-8DA6F980CA81
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 16777182
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 16777149 sectors (8.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+Error encountered; not saving changes.
+</code></pre><p>仔细看看发现<code>First usable sector is 34</code>，第一个可用扇区是34（前面33个扇区不能用），
+所以得往后移33再次执行:</p>
+<pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk -n 1:34:2097185 -t 1:8300 -p /dev/sdd
+Information: Moved requested sector from 34 to 2048 in
+order to align on 2048-sector boundaries.
+Disk /dev/sdd: 16777216 sectors, 8.0 GiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): C2CD3A11-3C49-4DD7-B5E9-8DA6F980CA81
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 16777182
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 14682011 sectors (7.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         2097185   1023.0 MiB  8300
+The operation has completed successfully.
+</code></pre>
+<p>执行成功！</p>
+<p>不过你可用看到就是start扇区变成了2048，原因是需要分区对齐
+<code>Moved requested sector from 34 to 2048 in order to align on 2048-sector boundaries</code></p>
+<p>如果忘记设置分区名了，就用下面命令:</p>
+<pre><code class="line-numbers language-bash">sgdisk -c 1:&quot;ceph journal&quot; /dev/sdd
+</code></pre>
+<p>查看下是否成功:</p>
+<pre><code>[root@node200 ~]# sgdisk -p /dev/sdd
+Disk /dev/sdd: 16777216 sectors, 8.0 GiB
+Logical sector size: 512 bytes
+Disk identifier (GUID): C2CD3A11-3C49-4DD7-B5E9-8DA6F980CA81
+Partition table holds up to 128 entries
+First usable sector is 34, last usable sector is 16777182
+Partitions will be aligned on 2048-sector boundaries
+Total free space is 14682011 sectors (7.0 GiB)
+
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1            2048         2097185   1023.0 MiB  8300  ceph journal
+</code></pre><h2 id="分区格式化"><a href="#分区格式化" class="headerlink" title="分区格式化"></a>分区格式化</h2><p>一般来讲分区的时候不要做格式化，分完区之后单独来做格式化。</p>
+<pre><code class="line-numbers language-bash">mkfs -t xfs /dev/sdd1
+</code></pre>
+<h2 id="分区挂载"><a href="#分区挂载" class="headerlink" title="分区挂载"></a>分区挂载</h2><p>显示系统已挂载的分区列表:</p>
+<pre><code class="line-numbers language-bash">df -h
+</code></pre>
+<p>挂载命令格式: <code>mount [-t fstype] [-o options] device dir</code></p>
+<pre><code>1. -t vfstype 指定文件系统的类型，通常不必指定。mount 会自动选择正确的类型。常用类型有：
+　　光盘或光盘镜像：iso9660
+　　DOS fat16文件系统：msdos
+　　Windows 9x fat32文件系统：vfat
+　　Windows NT ntfs文件系统：ntfs
+　　Mount Windows文件网络共享：smbfs
+　　UNIX(LINUX) 文件网络共享：nfs
+2. -o options 主要用来描述设备或档案的挂接方式。常用的参数有：
+　　loop：用来把一个文件当成硬盘分区挂接上系统
+　　ro：采用只读方式挂接设备
+　　rw：采用读写方式挂接设备
+　　iocharset：指定访问文件系统所用字符集
+3. device 要挂接(mount)的设备。
+4. dir设备在系统上的挂接点(mount point)。
+</code></pre><p>实际例子:</p>
+<pre><code class="line-numbers language-bash">mount /dev/sdd1 /opt/winstore/var/log
+</code></pre>
+<p>另外还有两个命令也有用</p>
+<p>查看所有磁盘以及相应的分区挂载:</p>
+<pre><code class="line-numbers language-bash">lsblk
+</code></pre>
+<p>查看系统所有分区名:</p>
+<pre><code class="line-numbers language-bash">blkid
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/03/14/ceph/disk-partition.html">Linux磁盘分区总结</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/03/16/ceph/pool.html" class="pre-post btn btn-default" title='ceph pool相关命令'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">ceph pool相关命令</span>
+        </a>
+    
+    
+        <a href="/2017/02/15/fullstack/git05.html" class="next-post btn btn-default" title='git简明教程 - 技巧篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">git简明教程 - 技巧篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#分区类型"><span class="toc-text">分区类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#fdisk使用"><span class="toc-text">fdisk使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#parted使用"><span class="toc-text">parted使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#显示分区信息"><span class="toc-text">显示分区信息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建分区类型"><span class="toc-text">创建分区类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分区转换"><span class="toc-text">分区转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建分区"><span class="toc-text">创建分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#设置分区名"><span class="toc-text">设置分区名</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#调整分区大小"><span class="toc-text">调整分区大小</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#删除一个分区"><span class="toc-text">删除一个分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#移动分区"><span class="toc-text">移动分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#sgdisk使用"><span class="toc-text">sgdisk使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#查看所有GPT分区"><span class="toc-text">查看所有GPT分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#查看某个分区"><span class="toc-text">查看某个分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#删除磁盘所有分区"><span class="toc-text">删除磁盘所有分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建分区-1"><span class="toc-text">创建分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分区格式化"><span class="toc-text">分区格式化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分区挂载"><span class="toc-text">分区挂载</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

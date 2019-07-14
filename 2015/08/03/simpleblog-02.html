@@ -1,0 +1,528 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="django的模型就是用于在数据库中存储的某种类型的对象。在我们的博客系统中，
+发表的文章就是一个模型，需要存储在数据库中。
+这里我们使用django默认的sqlite3库，对于我们的这个小系统而言已经足够了。
+创建一个应用在django中有两个概念需要弄清楚。一个是工程（project）的概...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Django1.9开发博客02- 模型 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Django1.9开发博客02- 模型">
+            
+                Django1.9开发博客02- 模型
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/08/03</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>django的模型就是用于在数据库中存储的某种类型的对象。在我们的博客系统中，
+发表的文章就是一个模型，需要存储在数据库中。
+这里我们使用django默认的sqlite3库，对于我们的这个小系统而言已经足够了。</p>
+<h3 id="创建一个应用"><a href="#创建一个应用" class="headerlink" title="创建一个应用"></a>创建一个应用</h3><p>在django中有两个概念需要弄清楚。一个是工程（project）的概念，一个是应用（application）的概念。
+它们的关系是：一个工程中包含多个应用。每个应用都是独立的，应用通过setting.py注册到工程中来就可以使用了。
+这样可以解耦合，并且好的应用也可以复用。很好的模块化设计！</p>
+<p>在manage.py文件所在目录，执行下面命令：</p>
+<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py startapp blog
+</code></pre><p>你会看到一个新的blog文件夹被创建，并且下面多了许多文件，目前结构如下：</p>
+<pre><code>mysite
+├── mysite
+|       __init__.py
+|       settings.py
+|       urls.py
+|       wsgi.py
+├── manage.py
+└── blog
+    ├── migrations
+    |       __init__.py
+    ├── __init__.py
+    ├── admin.py
+    ├── models.py
+    ├── tests.py
+    └── views.py
+</code></pre><p>然后在setting.py中注册这个应用</p>
+<pre><code class="line-numbers language-python">INSTALLED_APPS = (
+    &#39;django.contrib.admin&#39;,
+    &#39;django.contrib.auth&#39;,
+    &#39;django.contrib.contenttypes&#39;,
+    &#39;django.contrib.sessions&#39;,
+    &#39;django.contrib.messages&#39;,
+    &#39;django.contrib.staticfiles&#39;,
+    &#39;blog&#39;,
+)
+</code></pre>
+<h3 id="创建一个博客文章的模型"><a href="#创建一个博客文章的模型" class="headerlink" title="创建一个博客文章的模型"></a>创建一个博客文章的模型</h3><p>在blog/models.py中定义所有的模型，用vim打开后添加下面的内容</p>
+<pre><code class="line-numbers language-python">from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+
+class Post(models.Model):
+    author = models.ForeignKey(User)
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(default=timezone.now)
+    published_date = models.DateTimeField(blank=True, null=True)
+
+    def publish(self):
+        self.published_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.title
+</code></pre>
+<p>我们定义了作者，标题，文章内容，创建时间，发布时间等。还添加了一个publish方法用于保存发布。
+每个字段都需要定义它的类型，这里的几个类型解释如下：</p>
+<pre><code>CharField：普通的文本
+TextField：长文本
+DateTimeField：日期时间类型
+ForeignKey：外键类型
+</code></pre><p>详细的字段类型说明请参考官方文档：<a href="https://docs.djangoproject.com/en/1.9/ref/models/fields/#field-types" target="_blank" rel="noopener">field-types</a></p>
+<p><strong>在数据库中为模型生成表结构：</strong></p>
+<p>每次我们新建了一个模型后，需要在数据库中添加对应的表。</p>
+<p>第一步是先让django感知到我们刚刚已经创建了一个新的模型：</p>
+<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py makemigrations blog
+</code></pre><p>输出如下：</p>
+<pre><code>Migrations for &#39;blog&#39;:
+  0001_initial.py:
+    - Create model Post
+</code></pre><p>这时候django已经为我们准备好了数据库更新的sql文件。</p>
+<p>第二步是让django帮我们执行这些文件：</p>
+<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py migrate blog
+</code></pre><p>输出如下：</p>
+<pre><code>Operations to perform:
+  Apply all migrations: blog
+Running migrations:
+  Applying blog.0001_initial... OK
+</code></pre><p>OK，这时候数据库中已经有post这张表了。</p>
+<h3 id="对象关系映射ORM"><a href="#对象关系映射ORM" class="headerlink" title="对象关系映射ORM"></a>对象关系映射ORM</h3><p>下面我们看看django的ORM是怎样和数据库打交道的。</p>
+<p>首先解释下QuerySet，它是某个模型的对象列表，用来从数据库中读取数据，过滤和排序等等。</p>
+<h3 id="Django控制台Django-Shell"><a href="#Django控制台Django-Shell" class="headerlink" title="Django控制台Django Shell"></a>Django控制台Django Shell</h3><p>执行以下命令可以打开django的控制台</p>
+<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py shell
+</code></pre><p>查询所有的博客文章</p>
+<pre><code>&gt;&gt;&gt; from blog.models import Post
+&gt;&gt;&gt; Post.objects.all()
+[]
+</code></pre><p>这时候肯定是空的，因为我们还没有任何数据。</p>
+<p>下面我们去新建几篇文章</p>
+<p>先要创建一个用户，因为Post里面有User外键</p>
+<pre><code>&gt;&gt;&gt; from django.contrib.auth.models import User
+&gt;&gt;&gt; User.objects.create(username=&#39;ola&#39;)
+&lt;User: ola&gt;
+&gt;&gt;&gt; User.objects.all()
+[&lt;User: ola&gt;]
+</code></pre><p>然后添加文章：</p>
+<pre><code>&gt;&gt;&gt; user = User.objects.get(username=&#39;ola&#39;)
+&gt;&gt;&gt; Post.objects.create(author = user, title = &#39;Sample title&#39;, text = &#39;Test&#39;)
+&lt;Post: Sample title&gt;
+&gt;&gt;&gt; Post.objects.all()
+[&lt;Post: Sample title&gt;]
+</code></pre><p><strong>文章过滤</strong></p>
+<p>先像前面那样再添加几篇文章，此处省略七十二个字….</p>
+<pre><code>&gt;&gt;&gt; Post.objects.filter(author=user)
+[&lt;Post: Sample title&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Happy boy&gt;]
+&gt;&gt;&gt; Post.objects.filter(title__contains=&#39;LiLei&#39;)
+[&lt;Post: LiLei and Hanmeimei&gt;]
+&gt;&gt;&gt; Post.objects.filter(published_date__isnull=False)
+[]
+</code></pre><p>最后的输出表示所有的文章published_date都是空的。我想改变这个情况。可以这样做</p>
+<pre><code>&gt;&gt;&gt; post = Post.objects.get(id=1)
+&gt;&gt;&gt; post.publish()
+&gt;&gt;&gt; Post.objects.filter(published_date__isnull=False)
+[&lt;Post: Sample title&gt;]
+</code></pre><p><strong>结果排序</strong></p>
+<p>还可以根据某个或某几个字段来排序检索结果</p>
+<pre><code>&gt;&gt;&gt; Post.objects.order_by(&#39;created_date&#39;)
+[&lt;Post: Sample title&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Happy boy&gt;]
+&gt;&gt;&gt; Post.objects.order_by(&#39;-created_date&#39;)
+[&lt;Post: Happy boy&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: Sample title&gt;]
+</code></pre><p>OK，目前为止你应该对django的ORM有了大体的了解了。</p>
+<p>请用exit()退出django的控制台</p>
+<pre><code>&gt;&gt;&gt; exit()
+</code></pre><h3 id="利用django-admin修改模型"><a href="#利用django-admin修改模型" class="headerlink" title="利用django admin修改模型"></a>利用django admin修改模型</h3><p>在上面我们已经创建了Post模型并且通过django控制台来添加修改模型。
+然后我们使用django自带的web管理界面admin来在页面上修改模型数据。</p>
+<h3 id="模型注册"><a href="#模型注册" class="headerlink" title="模型注册"></a>模型注册</h3><p>首先我们需要在admin中注册对应的模型，打开blog/admin.py文件，修改如下</p>
+<pre><code class="line-numbers language-python">from django.contrib import admin
+from .models import Post
+
+admin.site.register(Post)
+</code></pre>
+<p>注意上面的from .models import Post，使用到了python3的相对导入。</p>
+<h3 id="运行服务器"><a href="#运行服务器" class="headerlink" title="运行服务器"></a>运行服务器</h3><p>一切都这么简单，接下来我们启动服务器</p>
+<pre><code>(myvenv) [mango@centos mysite]$ python manage.py runserver 192.168.203.95:8000
+</code></pre><p>打开链接：<a href="http://192.168.203.95:8000/admin/" target="_blank" rel="noopener">http://192.168.203.95:8000/admin/</a></p>
+<p>看到下面的界面：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj002.jpg" alt></p>
+<h3 id="添加管理员"><a href="#添加管理员" class="headerlink" title="添加管理员"></a>添加管理员</h3><p>不过你需要一个管理员才能登录。运行python manage.py createsuperuser可以创建管理员账号。</p>
+<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py createsuperuser
+Username (leave blank to use &#39;mango&#39;): admin
+Email address: admin@gmail.com
+Password:
+Password (again):
+Superuser created successfully.
+</code></pre><p>我创建了一个admin/admin的账户。这时候登录</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj003.jpg" alt></p>
+<p>点击Posts修改或者增加等等，确保里面至少2个又published_date，这个后面会用到。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj004.jpg" alt></p>
+<p>更多关于django admin的内容，参考官方文档：<a href="https://docs.djangoproject.com/en/1.9/ref/contrib/admin/" target="_blank" rel="noopener">admin</a></p>
+<h3 id="接下来呢？"><a href="#接下来呢？" class="headerlink" title="接下来呢？"></a>接下来呢？</h3><p>先别急嘛，坐下来喝杯咖啡先。到现在为止你已经前进了很远了。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/08/03/simpleblog-02.html">Django1.9开发博客02- 模型</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/08/06/simpleblog-03.html" class="pre-post btn btn-default" title='Django1.9开发博客03- 部署'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Django1.9开发博客03- 部署</span>
+        </a>
+    
+    
+        <a href="/2015/08/01/simpleblog-01.html" class="next-post btn btn-default" title='Django1.9开发博客01- 入门篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Django1.9开发博客01- 入门篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建一个应用"><span class="toc-text">创建一个应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建一个博客文章的模型"><span class="toc-text">创建一个博客文章的模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#对象关系映射ORM"><span class="toc-text">对象关系映射ORM</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Django控制台Django-Shell"><span class="toc-text">Django控制台Django Shell</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#利用django-admin修改模型"><span class="toc-text">利用django admin修改模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模型注册"><span class="toc-text">模型注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行服务器"><span class="toc-text">运行服务器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加管理员"><span class="toc-text">添加管理员</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#接下来呢？"><span class="toc-text">接下来呢？</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

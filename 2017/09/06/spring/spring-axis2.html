@@ -1,0 +1,579 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="spring,axis2,">
+
+
+    <meta name="description" content="虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。
+本篇讲解一下如何在Spring4里面集成Axis2开发WebService，包括服务器端和客户端。
+服务端服务端采用Spring4 MVC技术，maven工程
+添加依赖
+&lt;properties&gt...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Spring集成Axis2 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Spring集成Axis2">
+            
+                Spring集成Axis2
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/spring" title='spring'>
+                        spring
+                    </a>
+                
+                    <a href="/tags/axis2" title='axis2'>
+                        axis2
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/09/06</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。
+本篇讲解一下如何在Spring4里面集成Axis2开发WebService，包括服务器端和客户端。</p>
+<h2 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h2><p>服务端采用Spring4 MVC技术，maven工程</p>
+<h3 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h3><pre><code class="line-numbers language-xml">
+&lt;properties&gt;
+    &lt;spring.version&gt;4.3.13.RELEASE&lt;/spring.version&gt;
+    &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+    &lt;project.reporting.outputEncoding&gt;UTF-8&lt;/project.reporting.outputEncoding&gt;
+    &lt;axis2-version&gt;1.7.7&lt;/axis2-version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+    &lt;!-- spring start--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-core&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-web&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-webmvc&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-beans&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-context-support&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-test&lt;/artifactId&gt;
+        &lt;version&gt;${spring.version}&lt;/version&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- axis2 --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2-spring&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2-transport-http&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2-transport-local&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;!-- Axis2客户端的包--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2-kernel&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.apache.axis2&lt;/groupId&gt;
+        &lt;artifactId&gt;axis2-adb&lt;/artifactId&gt;
+        &lt;version&gt;${axis2-version}&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+</code></pre>
+<h3 id="编写服务接口"><a href="#编写服务接口" class="headerlink" title="编写服务接口"></a>编写服务接口</h3><p>创建接口：</p>
+<pre><code class="line-numbers language-java">public interface AxisHelloWorld {
+    public String getMessage(String message);
+}
+</code></pre>
+<p>实现类：</p>
+<pre><code class="line-numbers language-java">@Service(value = &quot;axisHelloWorldService&quot;)
+public class AxisHelloWorldImpl implements AxisHelloWorld {
+    @Override
+    public String getMessage(String message) {
+        return &quot;---------Axis Server-------&quot; + message;
+    }
+}
+</code></pre>
+<h3 id="配置服务端"><a href="#配置服务端" class="headerlink" title="配置服务端"></a>配置服务端</h3><p>服务端的spring配置文件applicationContext.xml：</p>
+<pre><code class="line-numbers language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+       xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+       xmlns:aop=&quot;http://www.springframework.org/schema/aop&quot;
+       xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+       xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd&quot;&gt;
+
+    &lt;description&gt;spring configuration&lt;/description&gt;
+
+    &lt;!-- 扫描所有标注@Service的服务组件 --&gt;
+    &lt;context:component-scan base-package=&quot;com.xncoding.axis2.service&quot;/&gt;
+
+    &lt;bean id=&quot;applicationContext&quot; class=&quot;org.apache.axis2.extensions.spring.receivers.ApplicationContextHolder&quot; /&gt;
+
+&lt;/beans&gt;
+</code></pre>
+<p>然后再配置services.xml，这个是重点。</p>
+<p>在/WEB-INF/目录下建立目录/services/axis/META-INF，然后再在这个目录下创建文件services.xml，内容如下：</p>
+<pre><code class="line-numbers language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;service name=&quot;axisHelloWorld&quot;&gt;
+    &lt;parameter name=&quot;ServiceObjectSupplier&quot; locked=&quot;false&quot;&gt;
+        org.apache.axis2.extensions.spring.receivers.SpringServletContextObjectSupplier
+    &lt;/parameter&gt;
+    &lt;parameter name=&quot;load-on-startup&quot;&gt;true&lt;/parameter&gt;
+    &lt;parameter name=&quot;SpringBeanName&quot;&gt;axisHelloWorldService&lt;/parameter&gt;
+    &lt;messageReceivers&gt;
+        &lt;messageReceiver mep=&quot;http://www.w3.org/2004/08/wsdl/in-only&quot;
+                         class=&quot;org.apache.axis2.rpc.receivers.RPCInOnlyMessageReceiver&quot;/&gt;
+        &lt;messageReceiver mep=&quot;http://www.w3.org/2004/08/wsdl/in-out&quot;
+                         class=&quot;org.apache.axis2.rpc.receivers.RPCMessageReceiver&quot;/&gt;
+    &lt;/messageReceivers&gt;
+&lt;/service&gt;
+</code></pre>
+<p>再配置web.xml：</p>
+<pre><code class="line-numbers language-xml">&lt;web-app version=&quot;2.4&quot;
+         xmlns=&quot;http://java.sun.com/xml/ns/j2ee&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/j2ee
+    http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd&quot;&gt;
+    &lt;description&gt;Axis2实现的WebService服务器&lt;/description&gt;
+    &lt;display-name&gt;axis2-demo&lt;/display-name&gt;
+    &lt;context-param&gt;
+        &lt;param-name&gt;contextConfigLocation&lt;/param-name&gt;
+        &lt;param-value&gt;classpath*:/applicationContext.xml&lt;/param-value&gt;
+    &lt;/context-param&gt;
+    &lt;listener&gt;
+        &lt;listener-class&gt;org.springframework.web.context.ContextLoaderListener&lt;/listener-class&gt;
+    &lt;/listener&gt;
+
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;AxisServlet&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.apache.axis2.transport.http.AxisServlet&lt;/servlet-class&gt;
+        &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+    &lt;/servlet&gt;
+
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;AxisServlet&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/services/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+
+    &lt;welcome-file-list&gt;
+        &lt;welcome-file&gt;index.html&lt;/welcome-file&gt;
+        &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;
+    &lt;/welcome-file-list&gt;
+&lt;/web-app&gt;
+</code></pre>
+<h3 id="启动测试"><a href="#启动测试" class="headerlink" title="启动测试"></a>启动测试</h3><p>启动Spring MVC应用后，在浏览器中输入：<a href="http://localhost:8080/services/axisHelloWorld?wsdl" target="_blank" rel="noopener">http://localhost:8080/services/axisHelloWorld?wsdl</a></p>
+<p>正确的返回WSDL文件，并且里面会有我定义的一个服务：</p>
+<pre><code>&lt;wsdl:service name=&quot;axisHelloWorld&quot;&gt;
+</code></pre><p>服务器成功完成！</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><h3 id="生成Stub类"><a href="#生成Stub类" class="headerlink" title="生成Stub类"></a>生成Stub类</h3><p>Axis2提供了一个wsdl2java.bat命令可以根据WSDL文件自动产生调用WebService的代码。 
+wsdl2java.bat命令可以在&lt;Axis2安装目录&gt;/bin目录中找到。</p>
+<p>在使用wsdl2java.bat命令之前需要设置AXIS2_HOME环境变量，该变量值是&lt;Axis2安装目录&gt;。然后再将%AXIS2_HOME%\bin目录加入PATH</p>
+<p>然后再任意一个目录执行：</p>
+<pre><code>&gt;wsdl2java -uri http://localhost:8080/services/axisHelloWorld?wsdl  -p com.xncoding.axis2.client -s -o stub
+</code></pre><p>-p指定你生成的客户端Stub的包名</p>
+<p>在执行完上面的命令后，就会发现在当前目录下多了个stub目录， 在stub/src/com/…目录可以找到一个xxxStub.java文件，
+可通过该文件调用WebService，在程序中直接使用这个类。</p>
+<h3 id="编写测试方法"><a href="#编写测试方法" class="headerlink" title="编写测试方法"></a>编写测试方法</h3><pre><code class="line-numbers language-java">@Test
+public void test() throws Exception {
+    //创建生成的stub类
+    AxisHelloWorldStub stub = new AxisHelloWorldStub();
+    //创建对应的方法类（这里我的webservice里有个getMessage的方法，具体的看你自己webservice里定义了何种方法）
+    AxisHelloWorldStub.GetMessage msgParam = new AxisHelloWorldStub.GetMessage();
+    msgParam.setMessage(&quot;消息消息&quot;);
+    AxisHelloWorldStub.GetMessageResponse responseMsg = stub.getMessage(msgParam);
+    //获取方法类的结果集
+    String get_return = responseMsg.get_return();
+    //打印输出结果
+    System.out.println(get_return);
+}
+</code></pre>
+<p>运行后输出结果：</p>
+<pre><code>---------Axis Server-------消息消息
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/09/06/spring/spring-axis2.html">Spring集成Axis2</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/09/21/java/watchservice.html" class="pre-post btn btn-default" title='使用WatchService监听文件变化'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">使用WatchService监听文件变化</span>
+        </a>
+    
+    
+        <a href="/2017/09/02/tool/nexus.html" class="next-post btn btn-default" title='maven私服nexus3.x环境配置'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">maven私服nexus3.x环境配置</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#服务端"><span class="toc-text">服务端</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#添加依赖"><span class="toc-text">添加依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编写服务接口"><span class="toc-text">编写服务接口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置服务端"><span class="toc-text">配置服务端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动测试"><span class="toc-text">启动测试</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端"><span class="toc-text">客户端</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#生成Stub类"><span class="toc-text">生成Stub类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编写测试方法"><span class="toc-text">编写测试方法</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="rabbitmq,">
+
+
+    <meta name="description" content="这里演示的官网通过python使用消息队列的教程：https://www.rabbitmq.com/getstarted.html
+先演示最简单的一个入门级别的hello world例子，
+发送者发送一个字符串，接受者接收到消息后打印出来。然后再介绍怎样实现任务队列
+hello world这里...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>RabbitMQ简易教程 - 任务队列 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="RabbitMQ简易教程 - 任务队列">
+            
+                RabbitMQ简易教程 - 任务队列
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/mq">
+            mq
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/rabbitmq" title='rabbitmq'>
+                        rabbitmq
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/08</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>这里演示的官网通过python使用消息队列的教程：<a href="https://www.rabbitmq.com/getstarted.html" target="_blank" rel="noopener">https://www.rabbitmq.com/getstarted.html</a></p>
+<p>先演示最简单的一个入门级别的<code>hello world</code>例子，
+发送者发送一个字符串，接受者接收到消息后打印出来。然后再介绍怎样实现任务队列</p>
+<h2 id="hello-world"><a href="#hello-world" class="headerlink" title="hello world"></a>hello world</h2><p>这里使用 python 的pika来演示，先安装pika:</p>
+<pre><code>pip install pika
+</code></pre><p>发送者程序需要先建立一个到RabbitMQ的连接(ip地址就是rabbitmq服务器地址)：</p>
+<pre><code class="line-numbers language-python">#!/usr/bin/env python
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(&#39;192.168.217.161&#39;))
+channel = connection.channel()
+</code></pre>
+<p>然后创建一个消息队列：</p>
+<pre><code class="line-numbers language-python">channel.queue_declare(queue=&#39;hello&#39;)
+</code></pre>
+<p>这里的<code>queue_declare</code>可以调用任意多次，因为最终只会有一个名字叫”hello”的队列被创建。</p>
+<p>然后通过默认的路由器来转发消息：</p>
+<pre><code class="line-numbers language-python">channel.basic_publish(exchange=&#39;&#39;,
+                      routing_key=&#39;hello&#39;,
+                      body=&#39;Hello World!&#39;)
+print(&quot; [x] Sent &#39;Hello World!&#39;&quot;)
+</code></pre>
+<p>最后别忘了关闭连接来刷新缓存，确保所有的消息都写到了队列中：</p>
+<pre><code class="line-numbers language-python">connection.close()
+</code></pre>
+<p>最后的接受者程序是这样的：
+<code>`</code> python send.py</p>
+<p>#!/usr/bin/env python
+import pika</p>
+<p>connection = pika.BlockingConnection(pika.ConnectionParameters(host=’192.168.217.161’, port=5673))
+channel = connection.channel()</p>
+<p>channel.queue_declare(queue=’hello’)</p>
+<p>channel.basic_publish(exchange=’’,
+                      routing_key=’hello’,
+                      body=’Hello World!’)
+print(“ [x] Sent ‘Hello World!’”)
+connection.close()</p>
+<pre><code>
+接受者程序差不多，不需要路由器，但是需要传递一个回调函数，每次接收到消息就被调用：
+``` python receive.py
+#!/usr/bin/env python
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.queue_declare(queue=&#39;hello&#39;)
+
+def callback(ch, method, properties, body):
+    print(&quot; [x] Received %r&quot; % body)
+
+channel.basic_consume(callback,
+                      queue=&#39;hello&#39;,
+                      no_ack=True)
+
+print(&#39; [*] Waiting for messages. To exit press CTRL+C&#39;)
+channel.start_consuming()
+</code></pre><p>出现的问题：</p>
+<pre><code>pika.exceptions.ProbableAuthenticationError
+</code></pre><p>查看日志：<code>/var/log/rabbitmq/deploy_rabbitmq.log</code></p>
+<p>发现里面的错误是这样的</p>
+<pre><code>=ERROR REPORT==== 23-May-2017::10:57:22 ===
+Error on AMQP connection &lt;0.460.0&gt; (10.10.111.230:58575 -&gt; 192.168.217.161:5673, state: starting):
+PLAIN login refused: user &#39;guest&#39; - invalid credentials
+</code></pre><p>解决办法是，修改guest的密码：</p>
+<pre><code>[root@controller161 ~]# rabbitmqctl list_users
+Listing users ...
+guest    [administrator]
+test    [administrator]
+[root@controller161 ~]# rabbitmqctl change_password guest guest
+Changing password for user &quot;guest&quot; ...
+</code></pre><p>再次发送就没有问题了。</p>
+<p>发送者发完消息就退出去了，而接受者会永久循环，测试完成通过“Ctrl+C”来结束进程。</p>
+<h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><p>任务队列（或者叫工作队列）的思想是对于处理那些非常耗时的任务的时候，通过异步消息队列来处理，
+而不是等待所有的工作处理完成才返回。将每一个任务封装成一个消息，将它发送到一个队列。
+然后后台运行一个工作进程，通过将队列中的消息pop出来进行处理，可以同时有多个工作进程。</p>
+<p>这种情况在web应用程序里面经常出现，因为很多时候无法在一个短时间的HTTP连接请求内完成一个耗时的任务。</p>
+<p>这里模拟一个长时间任务，用发送的消息中含有的点数<code>.</code>来表示耗时几秒，一个点表示一秒钟。</p>
+<p><code>`</code> python new_task.py
+import pika</p>
+<p>connection = pika.BlockingConnection(pika.ConnectionParameters(host=’192.168.217.161’, port=5673))
+channel = connection.channel()</p>
+<p>channel.queue_declare(queue=’task_queue’)</p>
+<p>messages = [‘python new_task.py First message.’,
+            ‘python new_task.py Second message..’,
+            ‘python new_task.py Third message…’,
+            ‘python new_task.py Fourth message….’,
+            ‘python new_task.py Fifth message…..’,
+            ‘python new_task.py Sixth message……’]
+for m in messages:
+    channel.basic_publish(exchange=’’,
+                          routing_key=’task_queue’,
+                          body=m,
+                          properties=pika.BasicProperties(
+                              delivery_mode=2,  # make message persistent
+                          ))
+    print(“ [x] Sent %r” % m)</p>
+<p>connection.close()</p>
+<pre><code>
+工作进程如下：
+``` python worker.py
+import pika
+import time
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.queue_declare(queue=&#39;task_queue&#39;)
+
+def callback(ch, method, properties, body):
+    print(&quot; [x] Received %r&quot; % body)
+    time.sleep(body.count(b&#39;.&#39;))
+    print(&quot; [x] Done&quot;)
+
+channel.basic_consume(callback,
+                      queue=&#39;task_queue&#39;,
+                      no_ack=True)
+
+print(&#39; [*] Waiting for messages. To exit press CTRL+C&#39;)
+channel.start_consuming()
+</code></pre><p>运行的时候，可以同时开两个窗口运行worker进程，然后再运行<code>new_task.py</code>，最后效果：</p>
+<p>消息发送：</p>
+<pre><code> [x] Sent &#39;python new_task.py First message.&#39;
+ [x] Sent &#39;python new_task.py Second message..&#39;
+ [x] Sent &#39;python new_task.py Third message...&#39;
+ [x] Sent &#39;python new_task.py Fourth message....&#39;
+ [x] Sent &#39;python new_task.py Fifth message.....&#39;
+ [x] Sent &#39;python new_task.py Sixth message......&#39;
+</code></pre><p>工作进程1：</p>
+<pre><code> [*] Waiting for messages. To exit press CTRL+C
+ [x] Received b&#39;python new_task.py First message.&#39;
+ [x] Done
+ [x] Received b&#39;python new_task.py Third message...&#39;
+ [x] Done
+ [x] Received b&#39;python new_task.py Fifth message.....&#39;
+ [x] Done
+</code></pre><p>工作进程2：</p>
+<pre><code> [*] Waiting for messages. To exit press CTRL+C
+ [x] Received b&#39;python new_task.py Second message..&#39;
+ [x] Done
+ [x] Received b&#39;python new_task.py Fourth message....&#39;
+ [x] Done
+ [x] Received b&#39;python new_task.py Sixth message......&#39;
+ [x] Done
+</code></pre><h3 id="消息确认"><a href="#消息确认" class="headerlink" title="消息确认"></a>消息确认</h3><p>RabbitMQ利用<code>Message acknowledgment</code>来确保消息已经被正常并且处理完成，防止消息丢失。</p>
+<p>默认情况下是开启的，前面的例子，我关闭了它，使用<code>no_ack=True</code>，现在我来打开它，
+当处理完成后，发送一个正确的消息确认：</p>
+<pre><code class="line-numbers language-python">def callback(ch, method, properties, body):
+    print &quot; [x] Received %r&quot; % (body,)
+    time.sleep( body.count(&#39;.&#39;) )
+    print &quot; [x] Done&quot;
+    ch.basic_ack(delivery_tag = method.delivery_tag)
+
+channel.basic_consume(callback,
+                      queue=&#39;task_queue&#39;)
+</code></pre>
+<p>这个时候，当你运行某个worker，中途kill掉这个进程，
+你会发现worker里面没有处理完成的消息会重新跑到另外的worker上面运行。</p>
+<h3 id="消息持久化"><a href="#消息持久化" class="headerlink" title="消息持久化"></a>消息持久化</h3><p>上面的消息确认可以让我们在worker挂掉时候也能确保消息的安全性，但是如果rabbitmq服务器挂掉了呢，
+那消息都没了。服务器上面的消息通过持久化来保证安全性。我们需要同时什么队列和消息是持久化的。</p>
+<p>第一步申明队列是持久化的：</p>
+<pre><code class="line-numbers language-python">channel.queue_declare(queue=&#39;task_queue&#39;, durable=True)
+</code></pre>
+<p>第二步申明消息也是持久化的：</p>
+<pre><code class="line-numbers language-python">channel.basic_publish(exchange=&#39;&#39;,
+      routing_key=&#39;task_queue&#39;,
+      body=m,
+      properties=pika.BasicProperties(
+          delivery_mode=2,  # make message persistent
+      ))
+</code></pre>
+<p>不过这个并不会保证严格的持久化，对于一般情况已经可以满足，如给你需要完全的持久化，
+请参考<a href="https://www.rabbitmq.com/confirms.html" target="_blank" rel="noopener">publisher confirms</a></p>
+<h3 id="消息分发策略"><a href="#消息分发策略" class="headerlink" title="消息分发策略"></a>消息分发策略</h3><p>默认策略是只要消息来了我就分给某个worker，而不会去管那个worker是否已经完成了任务。
+可通过<code>basic_qos</code>方法，并指定只有收到了消息处理应答后才将消息发送给worker。</p>
+<pre><code class="line-numbers language-python">channel.basic_qos(prefetch_count=1)
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/08/mq/rabbitmq-tutorial02.html">RabbitMQ简易教程 - 任务队列</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/05/10/mq/rabbitmq-tutorial03.html" class="pre-post btn btn-default" title='RabbitMQ简易教程 - 发布订阅'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 发布订阅</span>
+        </a>
+    
+    
+        <a href="/2017/05/06/mq/rabbitmq-tutorial01.html" class="next-post btn btn-default" title='RabbitMQ简易教程 - 安装'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 安装</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#hello-world"><span class="toc-text">hello world</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#任务队列"><span class="toc-text">任务队列</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#消息确认"><span class="toc-text">消息确认</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消息持久化"><span class="toc-text">消息持久化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#消息分发策略"><span class="toc-text">消息分发策略</span></a></li></ol></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

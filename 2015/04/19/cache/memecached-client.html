@@ -1,0 +1,562 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="memcached,">
+
+
+    <meta name="description" content="Xmemcached是基于java nio实现的高性能可扩展的memcached客户端。它的主要特点：
+
+高性能，稳定可靠，已经在众多公司的众多项目里得到应用。
+功能完备：客户端分布式、权重、最新最完整的协议支持。
+可扩展，易于集成
+可动态增删memached节点
+客户端操作统计
+NIO连接池...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>使用xmemcached客户端 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="使用xmemcached客户端">
+            
+                使用xmemcached客户端
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/cache">
+            cache
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/memcached" title='memcached'>
+                        memcached
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/04/19</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Xmemcached是基于java nio实现的高性能可扩展的memcached客户端。它的主要特点：</p>
+<ol>
+<li>高性能，稳定可靠，已经在众多公司的众多项目里得到应用。</li>
+<li>功能完备：客户端分布式、权重、最新最完整的协议支持。</li>
+<li>可扩展，易于集成</li>
+<li>可动态增删memached节点</li>
+<li>客户端操作统计</li>
+<li>NIO连接池</li>
+</ol>
+<p>等等，更多信息请见wiki文档。</p>
+<h3 id="实例演示"><a href="#实例演示" class="headerlink" title="实例演示"></a>实例演示</h3><p>废话不多讲，先上代码：</p>
+<pre><code class="line-numbers language-java">package xmemcache;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import net.rubyeye.xmemcached.Counter;
+import net.rubyeye.xmemcached.GetsResponse;
+import net.rubyeye.xmemcached.MemcachedClient;
+import net.rubyeye.xmemcached.MemcachedClientBuilder;
+import net.rubyeye.xmemcached.XMemcachedClientBuilder;
+import net.rubyeye.xmemcached.auth.AuthInfo;
+import net.rubyeye.xmemcached.command.BinaryCommandFactory;
+import net.rubyeye.xmemcached.exception.MemcachedException;
+import net.rubyeye.xmemcached.transcoders.StringTranscoder;
+import net.rubyeye.xmemcached.utils.AddrUtil;
+
+/**
+ * Description of this file.
+ *
+ * @author XiongNeng
+ * @version 1.0
+ * @since 13-7-13
+ */
+public class SimpleCache {
+    private String addresses = &quot;192.168.0.5:11211&quot;;
+    public void test1() throws IOException {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(addresses));
+        // AddrUtil.getAddresses(&quot;server1:11211 server2:11211&quot;)
+        // 宕机报警
+        builder.setFailureMode(true);
+        // 使用二进制文件
+        builder.setCommandFactory(new BinaryCommandFactory());
+        /**
+         * 设置连接池大小，即客户端个数
+         * In a high concurrent enviroment,you may want to pool memcached clients.
+         * But a xmemcached client has to start a reactor thread and some thread pools,
+         * if you create too many clients,the cost is very large.
+         * Xmemcached supports connection pool instreadof client pool.
+         * you can create more connections to one or more memcached servers,
+         * and these connections share the same reactor and thread pools,
+         * it will reduce the cost of system.
+         *  默认的pool size是1。设置这一数值不一定能提高性能，请依据你的项目的测试结果为准。
+         *  初步的测试表明只有在大并发下才有提升。
+         *  设置连接池的一个不良后果就是，同一个memcached的连接之间的数据更新并非同步的
+         *  因此你的应用需要自己保证数据更新的原子性（采用CAS或者数据之间毫无关联）。
+         */
+        builder.setConnectionPoolSize(10);
+        MemcachedClient client = builder.build();
+        try {
+            /**
+             * 第一个是存储的key名称，
+             * 第二个是expire时间（单位秒），超过这个时间,memcached将这个数据替换出去，0表示永久存储（默认是一个月)
+             * 第三个参数就是实际存储的数据
+             */
+            client.set(&quot;hello&quot;, 0, &quot;Hello,xmemcached&quot;);
+            String value = client.get(&quot;hello&quot;);
+            System.out.println(&quot;hello=&quot; + value);
+            client.delete(&quot;hello&quot;);
+            value = client.get(&quot;hello&quot;);
+            System.out.println(&quot;hello=&quot; + value);
+
+            // value=client.get(“hello”,3000);
+
+            /**
+             * Memcached是通过cas协议实现原子更新，所谓原子更新就是compare and set，
+             * 原理类似乐观锁，每次请求存储某个数据同时要附带一个cas值， memcached比对这个cas值与当前存储数据的cas值是否相等，
+             * 如果相等就让新的数据覆盖老的数据，如果不相等就认为更新失败， 这在并发环境下特别有用
+             */
+            GetsResponse&lt;Integer&gt; result = client.gets(&quot;a&quot;);
+            if (result == null) {
+                client.add(&quot;a&quot;, 0, 12);
+            }
+            result = client.gets(&quot;a&quot;);
+            long cas = result.getCas();
+            // 尝试将a的值更新为2
+            if (!client.cas(&quot;a&quot;, 0, 2, cas)) {
+                System.err.println(&quot;cas error&quot;);
+            }
+        } catch (MemcachedException e) {
+            System.err.println(&quot;MemcachedClient operation fail&quot;);
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            System.err.println(&quot;MemcachedClient operation timeout&quot;);
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        try {
+            // close memcached client
+            client.shutdown();
+        } catch (IOException e) {
+            System.err.println(&quot;Shutdown MemcachedClient fail&quot;);
+            e.printStackTrace();
+        }
+
+    }
+
+    public void test2() throws TimeoutException, InterruptedException,
+            MemcachedException, IOException {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(addresses));
+        MemcachedClient client = builder.build();
+        client.flushAll();
+        if (!client.set(&quot;hello&quot;, 0, &quot;world&quot;)) {
+            System.err.println(&quot;set error&quot;);
+        }
+        if (client.add(&quot;hello&quot;, 0, &quot;dennis&quot;)) {
+            System.err.println(&quot;Add error,key is existed&quot;);
+        }
+        if (!client.replace(&quot;hello&quot;, 0, &quot;dennis&quot;)) {
+            System.err.println(&quot;replace error&quot;);
+        }
+        client.append(&quot;hello&quot;, &quot; good&quot;);
+        client.prepend(&quot;hello&quot;, &quot;hello &quot;);
+        String name = client.get(&quot;hello&quot;, new StringTranscoder());
+        System.out.println(name);
+
+        /**
+         * 而删除数据则是通过deleteWithNoReply方法，这个方法删除数据并且告诉memcached
+         * 不用返回应答，因此这个方法不会等待应答直接返回，特别适合于批量处理
+         */
+        client.deleteWithNoReply(&quot;hello&quot;);
+    }
+
+    public void incrDecr() throws IOException, TimeoutException,
+            InterruptedException, MemcachedException {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(addresses));
+        MemcachedClient client = builder.build();
+        /**
+         * 第一个参数指定递增的key名称， 第二个参数指定递增的幅度大小， 第三个参数指定当key不存在的情况下的初始值。
+         * 两个参数的重载方法省略了第三个参数，默认指定为0。
+         */
+        assert (1 == client.incr(&quot;a&quot;, 5, 1));
+        assert (6 == client.incr(&quot;a&quot;, 5));
+        assert (10 == client.incr(&quot;a&quot;, 4));
+        assert (9 == client.decr(&quot;a&quot;, 1));
+        assert (7 == client.decr(&quot;a&quot;, 2));
+    }
+
+    public void counter() throws Exception {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(addresses));
+        MemcachedClient client = builder.build();
+        Counter counter = client.getCounter(&quot;counter&quot;, 0);
+        counter.incrementAndGet();
+        counter.decrementAndGet();
+        counter.addAndGet(-10);
+    }
+
+    public void auth() throws Exception {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(addresses));
+        builder.addAuthInfo(AddrUtil.getOneAddress(addresses),
+                AuthInfo.typical(&quot;cacheuser&quot;, &quot;123456&quot;));
+        // Must use binary protocol
+        builder.setCommandFactory(new BinaryCommandFactory());
+        MemcachedClient client = builder.build();
+    }
+
+    public void nioPool() throws Exception {
+        MemcachedClientBuilder builder = new XMemcachedClientBuilder(
+                AddrUtil.getAddresses(&quot;localhost:11211&quot;));
+        builder.setConnectionPoolSize(5);
+    }
+}
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/04/19/cache/memecached-client.html">使用xmemcached客户端</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/04/22/java/fastjson-date.html" class="pre-post btn btn-default" title='fastjson对Date的处理'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">fastjson对Date的处理</span>
+        </a>
+    
+    
+        <a href="/2015/04/18/algorithm/sort-search.html" class="next-post btn btn-default" title='快速排序和二分查找'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">快速排序和二分查找</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#实例演示"><span class="toc-text">实例演示</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

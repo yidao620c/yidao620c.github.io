@@ -1,0 +1,416 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="jenkins,">
+
+
+    <meta name="description" content="这一篇记录一下Jenkins的一些有趣的东西，或者说更加接近于实战的东西，也许我写的这几篇内容只覆盖了20%左右的内容，
+但是应该能解决实际工作中80%左右的问题。这就是常说的2/8准则，时间有限，我也只会去记录这些常用的东西。
+Master/Slave模式对于大型构件项目而已，一台机器肯定是...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Jenkins持续集成 - 高级特性 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Jenkins持续集成 - 高级特性">
+            
+                Jenkins持续集成 - 高级特性
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/jenkins" title='jenkins'>
+                        jenkins
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/03/27</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>这一篇记录一下Jenkins的一些有趣的东西，或者说更加接近于实战的东西，也许我写的这几篇内容只覆盖了20%左右的内容，
+但是应该能解决实际工作中80%左右的问题。这就是常说的2/8准则，时间有限，我也只会去记录这些常用的东西。</p>
+<h2 id="Master-Slave模式"><a href="#Master-Slave模式" class="headerlink" title="Master/Slave模式"></a>Master/Slave模式</h2><p>对于大型构件项目而已，一台机器肯定是不够用的，Jenkins支持Master/Slave模式，可以添加任意多的从节点，将复杂任务分发出去。</p>
+<p>另外对于不同的构建环境要求，比如Linux环境和Windows环境需要不同节点构建和测试，也需要设置多个从节点。</p>
+<p>添加从节点方法：
+系统管理 -&gt;管理节点 -&gt; 新建节点</p>
+<p>这里我演示新建一个从节点，ip为：192.168.217.212，名称为212节点</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins32.png" alt></p>
+<p>请注意有多种启动从节点的方式，这里我选择最常用的通过SSH方式启动，这里就需要配置Credentials，
+通过SSH Key免密码登录从节点，用户名就是Jenkins进程启动用户tomcat（一般来讲用户名应该为jenkins）。</p>
+<p>添加完SSH Key以后，最好在slave节点亲自测试是否能通过用户tomcat能否clone和push代码。</p>
+<p>添加好了从节点后测试下，这里直接通过pipeline script的方式去测试，<code>Jenkinsfile</code>内容如下：</p>
+<pre><code>pipeline {
+    // 默认的JENKINS_HOME只存在于master节点，/opt/tomcat/.jenkins/
+    // 默认的WORKSPACE /var/jenkins/workspace/test
+    agent { label &#39;centos7&#39; }
+    environment {
+       home = &quot;${JENKINS_HOME}&quot;
+       workspace = &quot;${WORKSPACE}&quot;
+    }
+    stages {
+        stage(&#39;build&#39;) {
+            steps {
+                sh &#39;echo &quot;test1111&quot; &gt; test.txt&#39;
+                sh &quot;&quot;&quot;echo &quot;JENKINS_HOME === ${JENKINS_HOME}&quot; &gt;&gt; test.txt&quot;&quot;&quot;
+                sh &quot;&quot;&quot;echo &quot;workspace === ${workspace}&quot; &gt;&gt; test.txt&quot;&quot;&quot;
+                sh &#39;python --version &gt;&gt; test.txt&#39;
+            }
+        }
+    }
+}
+</code></pre><p>测试截图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins33.png" alt></p>
+<h2 id="主目录和工作目录"><a href="#主目录和工作目录" class="headerlink" title="主目录和工作目录"></a>主目录和工作目录</h2><p>Jenkins里面有两个目录很重要，一个是主目录，环境变量访问名称为<code>${JENKINS_HOME}</code>，
+默认为<code>/opt/tomcat/.jenkins/</code>，这个只在master节点上面有意义，所有jenkins配置，插件等等都放这里面。</p>
+<p>另外一个叫工作目录，环境变量访问名称为<code>${WORKSPACE}</code>，这个在每个节点都要定义，也就是任务运行时候所处的目录，
+比如源码拉下来放哪个目录。默认为<code>/var/jenkins/workspace</code></p>
+<p>上面我写的Jenkinsfile特地就是测试着两个变量的，可以去亲自测试一下。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/03/27/fullstack/jenkins04.html">Jenkins持续集成 - 高级特性</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/03/29/security/oauth2.html" class="pre-post btn btn-default" title='简单介绍OAuth2.0的授权流程'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">简单介绍OAuth2.0的授权流程</span>
+        </a>
+    
+    
+        <a href="/2017/03/25/fullstack/jenkins03.html" class="next-post btn btn-default" title='Jenkins持续集成 - 使用案例'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Jenkins持续集成 - 使用案例</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Master-Slave模式"><span class="toc-text">Master/Slave模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#主目录和工作目录"><span class="toc-text">主目录和工作目录</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

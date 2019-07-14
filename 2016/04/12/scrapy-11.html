@@ -1,0 +1,577 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="有时候爬取网站的时候需要登录，在Scrapy中可以通过模拟登录保存cookie后再去爬取相应的页面。这里我通过登录github然后爬取自己的issue列表来演示下整个原理。
+要想实现登录就需要表单提交，先通过浏览器访问github的登录页面https://github.com/login，然后...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记11- 模拟登录 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记11- 模拟登录">
+            
+                Scrapy笔记11- 模拟登录
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/04/12</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>有时候爬取网站的时候需要登录，在Scrapy中可以通过模拟登录保存cookie后再去爬取相应的页面。这里我通过登录github然后爬取自己的issue列表来演示下整个原理。</p>
+<p>要想实现登录就需要表单提交，先通过浏览器访问github的登录页面<a href="https://github.com/login" target="_blank" rel="noopener">https://github.com/login</a>，然后使用浏览器调试工具来得到登录时需要提交什么东西。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/scrapy01.png" alt>
+我这里使用chrome浏览器的调试工具，F12打开后选择Network，并将Preserve log勾上。我故意输入错误的用户名和密码，得到它提交的form表单参数还有POST提交的UR
+<img src="https://xnstatic-1253397658.file.myqcloud.com/scrapy02.png" alt>
+去查看html源码会发现表单里面有个隐藏的<code>authenticity_token</code>值，这个是需要先获取然后跟用户名和密码一起提交的。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/scrapy03.png" alt></p>
+<h3 id="重写start-requests方法"><a href="#重写start-requests方法" class="headerlink" title="重写start_requests方法"></a>重写start_requests方法</h3><p>要使用cookie，第一步得打开它呀，默认scrapy使用<code>CookiesMiddleware</code>中间件，并且打开了。如果你之前禁止过，请设置如下</p>
+<pre><code class="line-numbers language-python">COOKIES_ENABLES = True
+</code></pre>
+<p>我们先要打开登录页面，获取<code>authenticity_token</code>值，这里我重写了start_requests方法</p>
+<pre><code class="line-numbers language-python"># 重写了爬虫类的方法, 实现了自定义请求, 运行成功后会调用callback回调函数
+def start_requests(self):
+    return [Request(&quot;https://github.com/login&quot;,
+                    meta={&#39;cookiejar&#39;: 1}, callback=self.post_login)]
+
+# FormRequeset
+def post_login(self, response):
+    # 先去拿隐藏的表单参数authenticity_token
+    authenticity_token = response.xpath(
+        &#39;//input[@name=&quot;authenticity_token&quot;]/@value&#39;).extract_first()
+    logging.info(&#39;authenticity_token=&#39; + authenticity_token)
+    pass
+</code></pre>
+<p><code>start_requests</code>方法指定了回调函数，用来获取隐藏表单值<code>authenticity_token</code>，同时我们还给Request指定了<code>cookiejar</code>的元数据，用来往回调函数传递cookie标识。</p>
+<h3 id="使用FormRequest"><a href="#使用FormRequest" class="headerlink" title="使用FormRequest"></a>使用FormRequest</h3><p>Scrapy为我们准备了<code>FormRequest</code>类专门用来进行Form表单提交的</p>
+<pre><code class="line-numbers language-python"># 为了模拟浏览器，我们定义httpheader
+post_headers = {
+    &quot;Accept&quot;: &quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&quot;,
+    &quot;Accept-Encoding&quot;: &quot;gzip, deflate&quot;,
+    &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.8,en;q=0.6&quot;,
+    &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+    &quot;Connection&quot;: &quot;keep-alive&quot;,
+    &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;,
+    &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36&quot;,
+    &quot;Referer&quot;: &quot;https://github.com/&quot;,
+}
+# 使用FormRequeset模拟表单提交
+def post_login(self, response):
+    # 先去拿隐藏的表单参数authenticity_token
+    authenticity_token = response.xpath(
+        &#39;//input[@name=&quot;authenticity_token&quot;]/@value&#39;).extract_first()
+    logging.info(&#39;authenticity_token=&#39; + authenticity_token)
+    # FormRequeset.from_response是Scrapy提供的一个函数, 用于post表单
+    # 登陆成功后, 会调用after_login回调函数，如果url跟Request页面的一样就省略掉
+    return [FormRequest.from_response(response,
+                                      url=&#39;https://github.com/session&#39;,
+                                      meta={&#39;cookiejar&#39;: response.meta[&#39;cookiejar&#39;]},
+                                      headers=self.post_headers,  # 注意此处的headers
+                                      formdata={
+                                          &#39;utf8&#39;: &#39;✓&#39;,
+                                          &#39;login&#39;: &#39;yidao620c&#39;,
+                                          &#39;password&#39;: &#39;******&#39;,
+                                          &#39;authenticity_token&#39;: authenticity_token
+                                      },
+                                      callback=self.after_login,
+                                      dont_filter=True
+                                      )]
+
+def after_login(self, response):
+    pass
+</code></pre>
+<p><code>FormRequest.from_response()</code>方法让你指定提交的url，请求头还有form表单值，注意我们还通过<code>meta</code>传递了cookie标识。它同样有个回调函数，登录成功后调用。下面我们来实现它</p>
+<pre><code class="line-numbers language-python">def after_login(self, response):
+    # 登录之后，开始进入我要爬取的私信页面
+    for url in self.start_urls:
+        # 因为我们上面定义了Rule，所以只需要简单的生成初始爬取Request即可
+        yield Request(url, meta={&#39;cookiejar&#39;: response.meta[&#39;cookiejar&#39;]})
+</code></pre>
+<p>这里我通过<code>start_urls</code>定义了开始页面，然后生成Request，具体爬取的规则和<code>下一页</code>规则在前面的Rule里定义了。注意这里我继续传递<code>cookiejar</code>，访问初始页面时带上cookie信息。</p>
+<h3 id="重写-requests-to-follow"><a href="#重写-requests-to-follow" class="headerlink" title="重写_requests_to_follow"></a>重写_requests_to_follow</h3><p>有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的<code>_requests_to_follow()</code>方法解决了这个问题</p>
+<pre><code class="line-numbers language-python">def _requests_to_follow(self, response):
+    &quot;&quot;&quot;重写加入cookiejar的更新&quot;&quot;&quot;
+    if not isinstance(response, HtmlResponse):
+        return
+    seen = set()
+    for n, rule in enumerate(self._rules):
+        links = [l for l in rule.link_extractor.extract_links(response) if l not in seen]
+        if links and rule.process_links:
+            links = rule.process_links(links)
+        for link in links:
+            seen.add(link)
+            r = Request(url=link.url, callback=self._response_downloaded)
+            # 下面这句是我重写的
+            r.meta.update(rule=n, link_text=link.text, cookiejar=response.meta[&#39;cookiejar&#39;])
+            yield rule.process_request(r)
+</code></pre>
+<h3 id="页面处理方法"><a href="#页面处理方法" class="headerlink" title="页面处理方法"></a>页面处理方法</h3><p>在规则Rule里面我定义了每个链接的回调函数<code>parse_page</code>，就是最终我们处理每个issue页面提取信息的逻辑</p>
+<pre><code class="line-numbers language-python">def parse_page(self, response):
+    &quot;&quot;&quot;这个是使用LinkExtractor自动处理链接以及`下一页`&quot;&quot;&quot;
+    logging.info(u&#39;--------------消息分割线-----------------&#39;)
+    logging.info(response.url)
+    issue_title = response.xpath(
+        &#39;//span[@class=&quot;js-issue-title&quot;]/text()&#39;).extract_first()
+    logging.info(u&#39;issue_title：&#39; + issue_title.encode(&#39;utf-8&#39;))
+</code></pre>
+<h3 id="完整源码"><a href="#完整源码" class="headerlink" title="完整源码"></a>完整源码</h3><pre><code class="line-numbers language-python">#!/usr/bin/env python
+# -*- encoding: utf-8 -*-
+&quot;&quot;&quot;
+Topic: 登录爬虫
+Desc : 模拟登录https://github.com后将自己的issue全部爬出来
+tips：使用chrome调试post表单的时候勾选Preserve log和Disable cache
+&quot;&quot;&quot;
+import logging
+import re
+import sys
+import scrapy
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+from scrapy.http import Request, FormRequest, HtmlResponse
+
+logging.basicConfig(level=logging.INFO,
+                    format=&#39;%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s&#39;,
+                    datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;,
+                    handlers=[logging.StreamHandler(sys.stdout)])
+
+
+class GithubSpider(CrawlSpider):
+    name = &quot;github&quot;
+    allowed_domains = [&quot;github.com&quot;]
+    start_urls = [
+        &#39;https://github.com/issues&#39;,
+    ]
+    rules = (
+        # 消息列表
+        Rule(LinkExtractor(allow=(&#39;/issues/\d+&#39;,),
+                           restrict_xpaths=&#39;//ul[starts-with(@class, &quot;table-list&quot;)]/li/div[2]/a[2]&#39;),
+             callback=&#39;parse_page&#39;),
+        # 下一页, If callback is None follow defaults to True, otherwise it defaults to False
+        Rule(LinkExtractor(restrict_xpaths=&#39;//a[@class=&quot;next_page&quot;]&#39;)),
+    )
+    post_headers = {
+        &quot;Accept&quot;: &quot;text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.8,en;q=0.6&quot;,
+        &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+        &quot;Connection&quot;: &quot;keep-alive&quot;,
+        &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.75 Safari/537.36&quot;,
+        &quot;Referer&quot;: &quot;https://github.com/&quot;,
+    }
+
+    # 重写了爬虫类的方法, 实现了自定义请求, 运行成功后会调用callback回调函数
+    def start_requests(self):
+        return [Request(&quot;https://github.com/login&quot;,
+                        meta={&#39;cookiejar&#39;: 1}, callback=self.post_login)]
+
+    # FormRequeset
+    def post_login(self, response):
+        # 先去拿隐藏的表单参数authenticity_token
+        authenticity_token = response.xpath(
+            &#39;//input[@name=&quot;authenticity_token&quot;]/@value&#39;).extract_first()
+        logging.info(&#39;authenticity_token=&#39; + authenticity_token)
+        # FormRequeset.from_response是Scrapy提供的一个函数, 用于post表单
+        # 登陆成功后, 会调用after_login回调函数，如果url跟Request页面的一样就省略掉
+        return [FormRequest.from_response(response,
+                                          url=&#39;https://github.com/session&#39;,
+                                          meta={&#39;cookiejar&#39;: response.meta[&#39;cookiejar&#39;]},
+                                          headers=self.post_headers,  # 注意此处的headers
+                                          formdata={
+                                              &#39;utf8&#39;: &#39;✓&#39;,
+                                              &#39;login&#39;: &#39;yidao620c&#39;,
+                                              &#39;password&#39;: &#39;******&#39;,
+                                              &#39;authenticity_token&#39;: authenticity_token
+                                          },
+                                          callback=self.after_login,
+                                          dont_filter=True
+                                          )]
+
+    def after_login(self, response):
+        for url in self.start_urls:
+            # 因为我们上面定义了Rule，所以只需要简单的生成初始爬取Request即可
+            yield Request(url, meta={&#39;cookiejar&#39;: response.meta[&#39;cookiejar&#39;]})
+
+    def parse_page(self, response):
+        &quot;&quot;&quot;这个是使用LinkExtractor自动处理链接以及`下一页`&quot;&quot;&quot;
+        logging.info(u&#39;--------------消息分割线-----------------&#39;)
+        logging.info(response.url)
+        issue_title = response.xpath(
+            &#39;//span[@class=&quot;js-issue-title&quot;]/text()&#39;).extract_first()
+        logging.info(u&#39;issue_title：&#39; + issue_title.encode(&#39;utf-8&#39;))
+
+    def _requests_to_follow(self, response):
+        &quot;&quot;&quot;重写加入cookiejar的更新&quot;&quot;&quot;
+        if not isinstance(response, HtmlResponse):
+            return
+        seen = set()
+        for n, rule in enumerate(self._rules):
+            links = [l for l in rule.link_extractor.extract_links(response) if l not in seen]
+            if links and rule.process_links:
+                links = rule.process_links(links)
+            for link in links:
+                seen.add(link)
+                r = Request(url=link.url, callback=self._response_downloaded)
+                # 下面这句是我重写的
+                r.meta.update(rule=n, link_text=link.text, cookiejar=response.meta[&#39;cookiejar&#39;])
+                yield rule.process_request(r)
+
+</code></pre>
+<p>你可以在<a href="https://github.com/yidao620c/core-scrapy" target="_blank" rel="noopener">GitHub</a>上看到本文的完整项目源码，还有另外一个自动登陆iteye网站的例子。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/04/12/scrapy-11.html">Scrapy笔记11- 模拟登录</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/04/15/scrapy-12.html" class="pre-post btn btn-default" title='Scrapy笔记12- 抓取动态网站'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记12- 抓取动态网站</span>
+        </a>
+    
+    
+        <a href="/2016/04/10/scrapy-10.html" class="next-post btn btn-default" title='Scrapy笔记10- 动态配置爬虫'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记10- 动态配置爬虫</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#重写start-requests方法"><span class="toc-text">重写start_requests方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用FormRequest"><span class="toc-text">使用FormRequest</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重写-requests-to-follow"><span class="toc-text">重写_requests_to_follow</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#页面处理方法"><span class="toc-text">页面处理方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#完整源码"><span class="toc-text">完整源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

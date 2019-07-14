@@ -1,0 +1,737 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="jenkins,">
+
+
+    <meta name="description" content="这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。
+第一个例子演示一个标准的SpringMVC这个Java Web工程怎样自动抓取最新源码、测试、打包和部署，
+第二个例子演示目前我做的Winstore这个Python项目怎样实现自定义构建指令、在线升级、自动打包和自动部署。
+Sp...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Jenkins持续集成 - 使用案例 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Jenkins持续集成 - 使用案例">
+            
+                Jenkins持续集成 - 使用案例
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/jenkins" title='jenkins'>
+                        jenkins
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/03/25</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。
+第一个例子演示一个标准的<code>SpringMVC</code>这个Java Web工程怎样自动抓取最新源码、测试、打包和部署，
+第二个例子演示目前我做的<code>Winstore</code>这个Python项目怎样实现自定义构建指令、在线升级、自动打包和自动部署。</p>
+<h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><p>关于怎样写<code>SpringMVC</code>项目我这里就不去讲了，这里我构建了一个最简单的Web工程，把它放到开源中国码云上面了，大家可以下载下来测试。
+地址：<a href="http://git.oschina.net/yidao620/javaweb" target="_blank" rel="noopener">http://git.oschina.net/yidao620/javaweb</a></p>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>当然，在跟Jenkins集成的时候我还是使用的内部gitlab源码管理系统，
+这个项目的git地址为：<a href="mailto:`git@192.168.217.161" target="_blank" rel="noopener">`git@192.168.217.161</a>:xiongneng/javaweb.git`</p>
+<p>在Jenkins机器上面安装JDK8，并设置好环境变量<code>JAVA_HOME</code>。</p>
+<p>安装sqlite3：</p>
+<pre><code class="line-numbers language-bash">yum install -y sqlite sqlite-devel
+</code></pre>
+<p>由于Jenkins要单独占用一个tomcat，所以我将<code>/opt/tomcat</code>复制出来一份<code>/opt/tomcat1</code>用来作为测试这个java web工程的环境，
+并修改里面多个端口号，通过8083端口访问。</p>
+<p>另外，还有修改<code>catalina.sh</code>，指定3个环境变量，否则会影响到主tomcat：</p>
+<pre><code>export CATALINA_BASE=/opt/tomcat1
+export CATALINA_HOME=/opt/tomcat1
+export CATALINA_PID=/opt/tomcat1/temp/tomcat.pid
+</code></pre><p>安装maven-3.5.0，同时配置好<code>M2_HOME</code>和PATH</p>
+<h3 id="配置Jenkins"><a href="#配置Jenkins" class="headerlink" title="配置Jenkins"></a>配置Jenkins</h3><p>通过<code>系统设置</code>-&gt;<code>Global Tool Configuration</code>配置JDK、Git、Maven，就是设置环境变量，
+并且每个配置都会有一个名字，这个名字后面的Pipeline可以用到。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins25.png" alt></p>
+<p>然后新建一个Job，名字叫做<code>javaweb</code>， 类型选择<code>Pipeline</code>，触发器选择<code>GitLab Push</code>。
+然后在Pipeline定义中配置<code>Repository URL</code>，同时指定私钥，这些步骤在前面一篇已经讲得很详细了。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins26.png" alt></p>
+<p>GitLab里面设置好Web Hook</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins27.png" alt></p>
+<h3 id="定义Pipeline"><a href="#定义Pipeline" class="headerlink" title="定义Pipeline"></a>定义Pipeline</h3><p>环境都准备好之后，就可以定义这个Pipeline了，还是通过<code>Jenkinsfile</code>使用代码方式定义，
+在项目根目录下面添加这个<code>Jenkinsfile</code>文件</p>
+<p>最主要步骤是：拉取最新源码、测试、部署。看看内容其实很简单：</p>
+<pre><code>
+node(&quot;master&quot;) {
+    checkout scm
+    def workspace = pwd()
+    def TOMCAT_HOME = &quot;/opt/tomcat1&quot;
+    def MVN_HOME = tool &#39;maven-3.5.0&#39;
+    def MVN_BIN = &quot;${MVN_HOME}/bin/mvn&quot;
+    stage(&#39;InitDB&#39;) {
+        echo &quot;InitDB start...&quot;
+        sh &#39;sh dbinit.sh&#39;
+        return
+    }
+    stage(&#39;Build&#39;) {
+        echo &quot;InitDB start...&quot;
+        return
+    }
+    stage(&#39;Test&#39;) {
+        echo &quot;Test start...&quot;
+        sh &quot;&quot;&quot;
+            ${MVN_BIN} clean &amp;&amp; ${MVN_BIN} test
+        &quot;&quot;&quot;
+    }
+    stage(&#39;Deploy&#39;) {
+        echo &quot;Deploy start...&quot;
+        sh &quot;&quot;&quot;
+            ${MVN_BIN} package -Dmaven.test.skip=true
+            ${TOMCAT_HOME}/bin/catalina.sh stop || true
+            rm -rf ${TOMCAT_HOME}/webapps/ROOT/*
+            cp target/javaweb.war ${TOMCAT_HOME}/webapps/ROOT/
+            unzip ${TOMCAT_HOME}/webapps/ROOT/javaweb.war -d ${TOMCAT_HOME}/webapps/ROOT &gt;/dev/null
+            rm -f ${TOMCAT_HOME}/webapps/ROOT/javaweb.war
+            ${TOMCAT_HOME}/bin/catalina.sh start
+        &quot;&quot;&quot;
+    }
+}
+</code></pre><p>稍微解释一下：<code>InitDB</code>这一构建阶段提前初始化数据库，这里使用的是文件数据库<code>sqlite3</code>。
+<code>tool &#39;maven-3.5.0&#39;</code>这一行就是通过之前配置的maven名称来获得<code>MAVEN_HOME</code>的。</p>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>最后首页随便改点东西，push上去后看看效果，大概十几秒就能完成。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins28.png" alt></p>
+<p>成功后打开<code>http://192.168.217.161:8083</code>看首页是否正常显示：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins31.png" alt></p>
+<p>然后，修改首页页面内容，再次提交后push上去，再看看是否更新过来。</p>
+<p>另外，如果单元测试不通过，构建就会失败，修改一下单元测试，</p>
+<pre><code class="line-numbers language-java">@Test
+public void testIndex() {
+    assertEquals(&quot;www&quot;, &quot;www1&quot;);
+}
+</code></pre>
+<p>再次push后看看结果：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins29.png" alt></p>
+<p>看看详细日志：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins30.png" alt></p>
+<p>可以非常清楚直观告诉我们哪里出错了。</p>
+<h2 id="Winstore"><a href="#Winstore" class="headerlink" title="Winstore"></a>Winstore</h2><p>我们组开发的项目名称叫分布式存储winstore，使用的python语言开发。
+之前的开发流程为：用最新的安装包在服务器集群上面安装并初始化配置。配置好和服务器源码映射后进行相应开发，
+结果没有问题后，提交至版本管理系统，然后去某台机器上面执行<code>winstore_install.sh</code>脚本，
+发布最新的安装包至某个samba服务器。最后将这个新包复制到安装服务器上面进行安装。</p>
+<p>这时候还要分两种情况，一种是不需要重新安装和配置的在线升级，只需覆盖相应文件重启服务器即可。
+另一种是必须重新卸载再安装，要完整的执行整个安装配置流程。</p>
+<p>现在想将整个过程通过Jenkins做自动化，并通过提交注释来控制是否在线升级或者重新安装。</p>
+<p>这里我先定义一个大致框图，分4个阶段：</p>
+<ul>
+<li><code>Check</code>阶段将源码pull下来后，对最后一次<code>commit</code>的注释进行分析，如果有关键字才会进行后续步骤</li>
+<li><code>Build</code>阶段依据不同的注释执行不通过的操作</li>
+<li><code>Test</code>阶段暂时保留用作测试</li>
+<li><code>Deploy</code>阶段依据不同的情况进行远程文件更新或重新安装，以及后续的处理</li>
+</ul>
+<h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><p>有几个工作需要预先准备好</p>
+<p>jenkins主机上面，编辑visudo，将tomcat用户加入<code>sudo</code>组并且可免密码执行”sudo”。</p>
+<p>测试集群：</p>
+<pre><code>192.168.217.231
+192.168.217.232
+192.168.217.233
+</code></pre><p><code>192.168.217.231</code>为安装机器，保证该主机可ssh无密码登录其他主机。
+并将这些IP地址配置写到<code>Jenkinsfile</code>开头的配置中。</p>
+<p>保证jenkins主机上面root用户无密码访问集群的所有节点，</p>
+<pre><code>sudo su root
+ssh-copy-id root@192.168.217.231
+ssh-copy-id root@192.168.217.232
+ssh-copy-id root@192.168.217.233
+</code></pre><p>将winstore项目版本管理由svn迁移至git，我自己构建了一个内部的gitlab服务器。
+新建一个名字为<code>winstore-ansible</code>的项目，在项目根目录添加之前的<code>Jenkinsfile</code>，
+同时将本地最新项目push上来。</p>
+<h3 id="创建job"><a href="#创建job" class="headerlink" title="创建job"></a>创建job</h3><p>创建一个<code>Pipeline</code>类型的job，同时设置它的git仓库地址，添加相应的私钥。
+然后在gitlab上面配置<code>winstore-ansible</code>项目的<code>webhook</code>即可。</p>
+<h3 id="自定义构建指令"><a href="#自定义构建指令" class="headerlink" title="自定义构建指令"></a>自定义构建指令</h3><p>这里我通过push的注释部分来自定义构建指令。</p>
+<p>在线升级指令：
+对每台主机执行替换操作，这里分替换前端web，还是替换后台代码，再或者是两个都修改了替换。
+另外还有一个更新shell脚本。</p>
+<p>我用四种commit来表示这4种指令：</p>
+<ol>
+<li>[update web]</li>
+<li>[update back]</li>
+<li>[update all]</li>
+<li>[update shell]</li>
+</ol>
+<p>打包指令：
+也就是使用最新的源码构建安装包上传至samba服务器。
+对应的commit为<code>[package]</code>和<code>[package all]</code>，后者连mysql包也一起打。</p>
+<p>打包并安装指令：
+先执行打包任务，然后将samba上面的安装包复制到安装节点执行自动化安装。
+对应的commit为：<code>[reinstall]</code></p>
+<h3 id="Pipeline中执行shell"><a href="#Pipeline中执行shell" class="headerlink" title="Pipeline中执行shell"></a>Pipeline中执行shell</h3><p>在Pipeline中通过<code>sh</code>执行shell脚本有很多现在，最好不要在里面写复杂逻辑，
+可以将复杂逻辑拿出来写到一个单独的脚本文件中，比如我的打包和安装写到单独的<code>sh</code>文件中,
+并且将它们纳入版本管理中。</p>
+<p>下面是打包脚本：</p>
+<pre><code class="line-numbers language-sh">#!/bin/bash
+# winstore package
+
+param=&quot;$1&quot;
+cd /root/winstore_git/
+if [[ &quot;$param&quot; -eq &quot;winstore&quot; ]]; then
+    ./winstore_deploy.sh 4.0 &gt;/dev/null
+elif [[ &quot;$param&quot; -eq &quot;all&quot; ]]; then
+    ./winstore_deploy.sh 4.0 mysql &gt;/dev/null
+fi
+exit 0
+</code></pre>
+<p>下面是安装winstore集群脚本：</p>
+<pre><code class="line-numbers language-sh">#!/bin/bash
+# winstore package
+
+install_node=&quot;$1&quot;
+cluster_nodes_str=&quot;$2&quot;
+IFS=&#39;,&#39; read -r -a cluster_nodes &lt;&lt;&lt; &quot;$cluster_nodes_str&quot;
+
+mount -t cifs -o username=&quot;samba&quot;,password=&quot;samba&quot; //10.10.161.99/public /mnt/ -o rw
+cd /mnt/winstore-liuhua/winstore4.0Beta/
+ssh root@${install_node} &quot;rm -rf /root/mysql-ansible&quot; &gt;/dev/null || true
+ssh root@${install_node} &quot;rm -rf /root/mysql_install*&quot; &gt;/dev/null || true
+ssh root@${install_node} &quot;rm -rf /root/winstore4.0_install*&quot; &gt;/dev/null || true
+ssh root@${install_node} &quot;rm -rf /root/winstore-ansible&quot; &gt;/dev/null || true
+mysql_tar=`ls -l mysql_install* |tail -n1 |awk &#39;{print $NF}&#39;`
+winstore_tar=`ls -l winstore4.0* |tail -n1 |awk &#39;{print $NF}&#39;`
+echo &quot;mysql_tar=${mysql_tar}, winstore_tar=${winstore_tar}&quot;
+scp ${mysql_tar} root@${install_node}:/root/ || true
+scp ${winstore_tar} root@${install_node}:/root/ || true
+cd /root/
+umount /mnt/
+ssh root@${install_node} &quot;cd /root; tar zxf ${winstore_tar} &amp;&gt;/dev/null&quot; || true
+ssh root@${install_node} &quot;echo &#39;[localhost]&#39; &gt; /root/winstore-ansible/hosts&quot; || true
+ssh root@${install_node} &quot;echo &#39;localhost ansible_connection=local&#39; &gt;&gt; /root/winstore-ansible/hosts&quot; || true
+for i in &quot;${cluster_nodes[@]}&quot;; do
+    if [[ &quot;$i&quot; != &quot;$install_node&quot; ]]; then
+        echo &quot;install node ip = ${i}&quot;
+        ssh root@${install_node} &quot;echo \&quot;$i ansible_connection=ssh ansible_user=root\&quot; &gt;&gt; /root/winstore-ansible/hosts&quot; || true
+    fi
+done
+
+echo &quot;start to install winstore&quot;
+ssh root@${install_node} &quot;cd /root/winstore-ansible; ./install_winstore_simple.sh&quot; || true
+echo &quot;end to install winstore&quot;
+exit 0
+</code></pre>
+<h3 id="最后的Jenkinsfile"><a href="#最后的Jenkinsfile" class="headerlink" title="最后的Jenkinsfile"></a>最后的Jenkinsfile</h3><p>最终的<code>Jenkinsfile</code>文件如下，简单起见我只写了2种指令：</p>
+<pre><code>node(&quot;master&quot;) {
+    // -------------------------------配置部分start----------------------------------
+    // 集群节点列表，安装节点放第一个
+    def cluster_nodes_str = &quot;192.168.217.231,192.168.217.232,192.168.217.233&quot;
+    //def cluster_nodes_str = &quot;192.168.212.200,192.168.212.201,192.168.212.202,192.168.212.203&quot;
+    // -------------------------------配置部分end---------------------------------
+
+    // 集群节点
+    def cluster_nodes = cluster_nodes_str.split(&quot;,&quot;)
+    // 安装节点
+    def install_node = cluster_nodes[0]
+    // 默认忽略所有push请求，除非commit说明包含特定字符串
+    def skip = &#39;-1&#39;
+    def workspace = pwd()
+
+    stage(&#39;Check&#39;) {
+        checkout scm
+        // 一个优雅的退出pipeline的方法，这里可执行任意逻辑
+        def resultUpdateshell = sh script: &#39;git log -1 --pretty=%B | grep &quot;\\[update shell\\]&quot; &amp;&gt;/dev/null&#39;, returnStatus: true
+        def resultUpdateweb = sh script: &#39;git log -1 --pretty=%B | grep &quot;\\[update web\\]&quot; &amp;&gt;/dev/null&#39;, returnStatus: true
+        currentBuild.result = &#39;SUCCESS&#39;
+        if (resultUpdateshell == 0) {
+            skip = &#39;0&#39;
+            return
+        }
+        if (resultUpdateweb == 0) {
+            skip = &#39;1&#39;
+            return
+        }
+        echo &quot;Skipping ci build...&quot;
+        return
+    }
+    stage(&#39;Build&#39;) {
+        if (skip == &#39;-1&#39;) {
+            echo &quot;skipping building. lalala,&quot;
+            currentBuild.result = &#39;SUCCESS&#39;
+            return
+        }
+        def node = null
+        if (skip == &#39;0&#39;) {
+            echo &quot;Build Updateshell only... &quot;
+            for (int i = 0; i &lt; cluster_nodes.size(); i++) {
+                node = cluster_nodes[i]
+                echo &quot;Updateshell ${node}&quot;
+                sh &quot;&quot;&quot;
+                    cd resource/winstore/tools
+                    sudo tar zcf configure.tar.gz configure/
+                    sudo ssh root@${node} &quot;rm -rf /opt/winstore/tools/configure/&quot; 2&gt;/dev/null || true
+                    sudo scp configure.tar.gz root@&quot;${node}&quot;:/opt/winstore/tools/ 2&gt;/dev/null || true
+                    sudo ssh root@${node} &quot;cd /opt/winstore/tools/; tar zxf configure.tar.gz; chown -R sdsadmin:sdsadmin *; chmod +x configure/*; rm -f configure.tar.gz&quot; 2&gt;/dev/null || true
+
+                    cd ${workspace}
+                    sudo ssh root@${node} &quot;rm -f /opt/winstore/venv/bin/query_wwid_disk.sh&quot; 2&gt;/dev/null || true
+                    sudo scp update_resource/winstore/scripts/query_wwid_disk.sh root@&quot;${node}&quot;:/opt/winstore/venv/bin/ 2&gt;/dev/null || true
+                    sudo ssh root@${node} &quot;chown sdsadmin:sdsadmin /opt/winstore/venv/bin/query_wwid_disk.sh; chmod +x /opt/winstore/venv/bin/query_wwid_disk.sh&quot; 2&gt;/dev/null || true
+                &quot;&quot;&quot;
+            }
+            currentBuild.result = &#39;SUCCESS&#39;
+            return
+        }
+    }
+    stage(&#39;Test&#39;) {
+        currentBuild.result = &#39;SUCCESS&#39;
+        echo &quot;Test do nothing...&quot;
+    }
+    stage(&#39;Deploy&#39;) {
+        if (skip == &#39;5&#39;) {
+            echo &quot;step deploying...&quot;
+            sh &quot;&quot;&quot;
+                echo &quot;Deploy reinstall ...........&quot;
+                sudo resource/shell/jk_install.sh &quot;${install_node}&quot; &quot;${cluster_nodes_str}&quot; || true
+                echo &quot;Deploy reinstall finished...&quot;
+            &quot;&quot;&quot;
+            currentBuild.result = &#39;SUCCESS&#39;
+            return
+        }
+        currentBuild.result = &#39;SUCCESS&#39;
+        echo &quot;Deploy do nothing...&quot;
+    }
+}
+</code></pre><p>我测试下<code>[update shell]</code>，随便改点什么，在提交时候前面加上<code>[update shell]</code></p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins23.png" alt></p>
+<p>点击构建查看详细构建日志：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jenkins24.png" alt></p>
+<p>成功，其他的情况我就一一演示了！</p>
+<h2 id="更进一步"><a href="#更进一步" class="headerlink" title="更进一步"></a>更进一步</h2><p>这里我以一个python项目为例子来说明自动化的实现，经过对比后工作效率会比之前手动操作高了很多。
+利用shell脚本、python脚本、git版本管理，最后在Jenkins这个平台上面就能实现常见的自动化工作。</p>
+<p>这里我的任务都比较简单，并且就一个jenkins单节点，而且并没有涉及到繁重的任务，没用到agent节点，
+权限和安全控制暂时还没做，以后会逐渐补全这些。</p>
+<h2 id="maven项目"><a href="#maven项目" class="headerlink" title="maven项目"></a>maven项目</h2><p>最后再来一个典型maven项目的jenkinsfile：</p>
+<pre><code>// 持续集成脚本，勿动
+
+pipeline {
+    environment {
+        // 部署远程主机ip地址
+        remoteIp = &quot;123.207.66.156&quot;
+        // 失败通知Email
+        email = &quot;xn@enzhico.com&quot;
+        // 应用名称
+        appName = &quot;app-manage-api&quot;
+    }
+
+    agent any
+    tools {
+        maven &#39;maven-3.5.3&#39;
+    }
+    stages {
+        stage(&#39;Build&#39;) {
+            steps {
+                sh &#39;&#39;&#39;
+                    echo &quot;开始编译打包过程&quot;
+                    echo &quot;PATH = ${PATH}&quot;
+                    echo &quot;M2_HOME = ${M2_HOME}&quot;
+                    mvn clean &amp;&amp; mvn package -DskipTests=true
+                &#39;&#39;&#39;
+            }
+        }
+        stage(&#39;Test&#39;){
+            steps {
+                sh &#39;echo &quot;Test stage&quot;&#39;
+            }
+        }
+        stage(&#39;Deploy&#39;) {
+            steps {
+                sh &#39;&#39;&#39;
+                    echo &quot;开始远程部署应用包&quot;
+                    jarfile=$(ls target/*.jar)
+                    scp &quot;${jarfile}&quot; root@${remoteIp}:/opt/adm/${appName}/
+                    ssh root@${remoteIp} &quot;cd /opt/adm/${appName}/; ./run.sh start test&quot;
+                &#39;&#39;&#39;
+            }
+        }
+        stage(&#39;Check&#39;) {
+            steps {
+                sh &#39;&#39;&#39;
+                    echo &quot;查看日志是否启动完成&quot;
+                    log_file=&quot;/opt/adm/${appName}/temp.log&quot;
+                    c=0
+                    while [[ &quot;$c&quot; &lt; 15 ]]; do
+                        ssh root@${remoteIp} &quot;grep &#39;Started Application in&#39; ${log_file} &gt;/dev/null&quot;
+                        if [[ &quot;$?&quot; != &quot;0&quot; ]]; then
+                            echo &quot;开始睡觉2秒钟...&quot;
+                            sleep 2
+                            (( c++ ))
+                        else
+                            echo &quot;启动完成！&quot;
+                            exit 0
+                        fi
+                    done
+                    echo &quot;超过30秒，启动失败了！&quot;
+                    exit 1
+                &#39;&#39;&#39;
+            }
+        }
+    }
+
+    post {
+        failure {
+            mail to: &quot;${email}&quot;,
+            subject: &quot;Failed Pipeline: ${currentBuild.fullDisplayName}&quot;,
+            body: &quot;Something is wrong with ${env.BUILD_URL}&quot;
+        }
+    }
+}
+</code></pre><h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p>构建历史太多了咋办，写个脚本清空下：</p>
+<pre><code class="line-numbers language-groovy">def jobName = &quot;winstore-pipeline&quot;
+def job = Jenkins.instance.getItem(jobName)
+job.getBuilds().each { it.delete() }
+// uncomment these lines to reset the build number to 1:
+job.nextBuildNumber = 1
+job.save()
+println(&#39;clear succesfully...&#39;)
+</code></pre>
+<p>在系统管理-&gt;脚本命令行里面输入上面的脚本。点击运行即可</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/03/25/fullstack/jenkins03.html">Jenkins持续集成 - 使用案例</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/03/27/fullstack/jenkins04.html" class="pre-post btn btn-default" title='Jenkins持续集成 - 高级特性'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Jenkins持续集成 - 高级特性</span>
+        </a>
+    
+    
+        <a href="/2017/03/22/fullstack/jenkins02.html" class="next-post btn btn-default" title='Jenkins持续集成 - 管道详解'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Jenkins持续集成 - 管道详解</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringMVC"><span class="toc-text">SpringMVC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#环境准备"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Jenkins"><span class="toc-text">配置Jenkins</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#定义Pipeline"><span class="toc-text">定义Pipeline</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#验证"><span class="toc-text">验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Winstore"><span class="toc-text">Winstore</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#前期准备"><span class="toc-text">前期准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建job"><span class="toc-text">创建job</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#自定义构建指令"><span class="toc-text">自定义构建指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Pipeline中执行shell"><span class="toc-text">Pipeline中执行shell</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最后的Jenkinsfile"><span class="toc-text">最后的Jenkinsfile</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#更进一步"><span class="toc-text">更进一步</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#maven项目"><span class="toc-text">maven项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FAQ"><span class="toc-text">FAQ</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

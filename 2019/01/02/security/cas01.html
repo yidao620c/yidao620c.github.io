@@ -1,0 +1,430 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="CAS,">
+
+
+    <meta name="description" content="所谓单点登录(SSO)，就是同平台的诸多应用登陆一次，下一次就免登陆的功能。就像你在知乎首页登录一次，
+下一次再访问知乎专栏或是知乎日报就可以免去登录操作。
+实现SSO的方式有很多，现在主流的就是CAS这种基于session的单点登录形式。
+CAS是一个单点登录框架，开始是由耶鲁大学的一个组织...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CAS教程 - 原理篇 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CAS教程 - 原理篇">
+            
+                CAS教程 - 原理篇
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/CAS" title='CAS'>
+                        CAS
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2019/01/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>所谓单点登录(SSO)，就是同平台的诸多应用登陆一次，下一次就免登陆的功能。就像你在知乎首页登录一次，
+下一次再访问知乎专栏或是知乎日报就可以免去登录操作。</p>
+<p>实现SSO的方式有很多，现在主流的就是CAS这种基于session的单点登录形式。
+CAS是一个单点登录框架，开始是由耶鲁大学的一个组织开发，后来归到apereo去管。 
+CAS也是开源，遵循着apache 2.0协议，代码目前是在github上管理。</p>
+<p>接下来我会写一个CAS的系列教程，这篇是一个原理篇，后面系列教程是实际操作篇。</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><p>CAS分为两部分，CAS Server和CAS Client</p>
+<ul>
+<li>CAS Server用来负责用户的认证工作，就像是把第一次登录用户的一个标识存在这里，
+以便此用户在其他系统登录时验证其需不需要再次登录。</li>
+<li>CAS Client就是我们自己的应用，需要接入CAS Server端。当用户访问我们的应用时，
+首先需要重定向到CAS Server端进行验证，要是原来登陆过，就免去登录，重定向到下游系统，否则进行用户名密码登陆操作。</li>
+</ul>
+<h2 id="术语"><a href="#术语" class="headerlink" title="术语"></a>术语</h2><ul>
+<li>Ticket Granting ticket (TGT) ：可以认为是CAS Server根据用户名密码生成的一张票，存在server端</li>
+<li>Ticket-granting cookie (TGC) ：其实就是一个cookie，存放用户身份信息，由server发给client端</li>
+<li>Service ticket (ST) ：由TGT生成的一次性票据，用于验证，只能用一次。相当于server发给client一张票，
+然后client拿着这是个票再来找server验证，看看是不是server签发的。</li>
+<li>全局会话 ：用户到认证中心登录后，用户和认证中心之间建立起了会话。</li>
+<li>局部会话 ：在系统应用和用户浏览器之间建立的会话。</li>
+</ul>
+<h2 id="登录流程图"><a href="#登录流程图" class="headerlink" title="登录流程图"></a>登录流程图</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190218-01.jpg" alt></p>
+<p>1)、问：系统A是如何发现该请求需要登录重定向到认证中心的？</p>
+<p>答：用户通过浏览器地址栏访问系统A，系统A(也可以称为CAS客户端)去Cookie中拿JSESSION，
+即在Cookie中维护的当前回话session的id，如果拿到了，说明用户已经登录，如果未拿到，说明用户未登录。</p>
+<p>2)、问：系统A重定向到认证中心，发送了什么信息或者地址变成了什么？ </p>
+<p>答：假如系统A的地址为<a href="http://a:8080/，CAS认证中心的服务地址为http://cas.server:8080/，" target="_blank" rel="noopener">http://a:8080/，CAS认证中心的服务地址为http://cas.server:8080/，</a>
+那么重点向前后地址变化为：<a href="http://a:8080/" target="_blank" rel="noopener">http://a:8080/</a> ==&gt; <a href="http://cas.server:8080/?service=http://a:8080/，" target="_blank" rel="noopener">http://cas.server:8080/?service=http://a:8080/，</a>
+由此可知，重点向到认证中心，认证中心拿到了当前访问客户端的地址。</p>
+<p>3)、问：登录成功后，认证中心重定向请求到系统A，认证通过令牌是如何附加发送给系统A的？ </p>
+<p>答：重定向之后的地址栏变成：<a href="http://a:8080/?ticket=ST-XXXX-XXX，将票据以ticket为参数名的方式通过地址栏发送给系统A" target="_blank" rel="noopener">http://a:8080/?ticket=ST-XXXX-XXX，将票据以ticket为参数名的方式通过地址栏发送给系统A</a></p>
+<p>4)、问：系统A验证令牌，怎样操作证明用户登录的？</p>
+<p>答：系统A通过地址栏获取ticket的参数值ST票据，然后从后台将ST发送给CAS server认证中心验证，验证ST有效后，
+CAS server返回当前用户登录的相关信息，系统A接收到返回的用户信息，并为该用户创建session会话，会话id由cookie维护，来证明其已登录。</p>
+<p>5)、问：登录B系统，认证中心是如何判断用户已经登录的？ </p>
+<p>答：在系统A登录成功后，用户和认证中心之间建立起了全局会话，这个全局会话就是TGT(Ticket Granting Ticket)，
+TGT位于CAS服务器端，TGT并没有放在Session中，也就是说，CAS全局会话的实现并没有直接使用Session机制，
+而是利用了Cookie自己实现的，这个Cookie叫做TGC(Ticket Granting Cookie)，它存放了TGT的id,保存在用户浏览器上。 </p>
+<p>浏览器访问另一应用B需登录受限资源，此时进行登录检查，发现未登录，然后进行获取临时票据（ST）操作，发现没有临时票据（ST）。</p>
+<p>系统B发现该请求需要登录，将请求重定向到CAS认证中心，获取全局票据TGT操作，获取全局票据，可以获得，认证中心发现已经登录。</p>
+<p>CAS认证中心发放临时票据(ST)，并携带该票据ST重定向到系统B。</p>
+<p>此时系统B再次进行登录检查，发现未登录，然后再次获取票据操作，此时可以获得票据(令牌)，
+系统B再去cas-server验证一下是否为自己签发的，验证通过后就会返回用户信息，并建立局部会话。</p>
+<p>6)、问：登出的过程，各个系统对当前用户都做了什么？ </p>
+<p>答：认证中心清除当前用户的全局会话TGT，同时清掉cookie中TGT的id：TGC； 
+然后是各个客户端系统，比如系统A、系统B，清除局部会话session，同时清掉cookie中session会话id：jsession</p>
+<p>参考：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/25007591" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/25007591</a></li>
+<li><a href="https://blog.csdn.net/javaloveiphone/article/details/52439613" target="_blank" rel="noopener">https://blog.csdn.net/javaloveiphone/article/details/52439613</a></li>
+</ul>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2019/01/02/security/cas01.html">CAS教程 - 原理篇</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2019/01/03/security/cas02.html" class="pre-post btn btn-default" title='CAS教程 - 服务安装'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">CAS教程 - 服务安装</span>
+        </a>
+    
+    
+        <a href="/2018/06/25/java/jstack.html" class="next-post btn btn-default" title='JVM性能分析工具jstack介绍'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">JVM性能分析工具jstack介绍</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#术语"><span class="toc-text">术语</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#登录流程图"><span class="toc-text">登录流程图</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="Django是一个非常强大的web框架，能让你快速的构建应用，它本身包含了一个简单的服务器程序，让你在开发环境里调试用。
+但是在生产环境中就需要将其部署到更专业的web服务器里去了，比如Apache、Nginx等。
+对于Django这个框架的教程我之前的博客已经有一个系列了，这里就不多说，我假...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CentOS7上使用mod_wsgi部署Django | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CentOS7上使用mod_wsgi部署Django">
+            
+                CentOS7上使用mod_wsgi部署Django
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/04/30</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Django是一个非常强大的web框架，能让你快速的构建应用，它本身包含了一个简单的服务器程序，让你在开发环境里调试用。
+但是在生产环境中就需要将其部署到更专业的web服务器里去了，比如Apache、Nginx等。</p>
+<p>对于Django这个框架的教程我之前的博客已经有一个系列了，这里就不多说，我假设你已经创建好了一个Django工程，这里我已自己的zspace工程来说明。</p>
+<h3 id="安装必要的软件"><a href="#安装必要的软件" class="headerlink" title="安装必要的软件"></a>安装必要的软件</h3><p>Apache应该默认会安装，如果没有就请安装</p>
+<pre><code class="line-numbers language-bash"># 开启EPEL
+sudo yum install epel-release
+# 安装软件
+sudo yum -y install httpd
+# 配置防火墙端口
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --reload
+# 启动
+sudo systemctl start httpd
+# 开机启动
+sudo systemctl enable httpd
+# 查看状态
+sudo systemctl status httpd
+# 停止
+sudo systemctl stop httpd
+</code></pre>
+<p>安装mod_wsgi、pip等</p>
+<pre><code class="line-numbers language-bash">sudo yum install python-pip mod_wsgi
+</code></pre>
+<h3 id="配置Python虚拟环境"><a href="#配置Python虚拟环境" class="headerlink" title="配置Python虚拟环境"></a>配置Python虚拟环境</h3><pre><code class="line-numbers language-bash">sudo pip install virtualenv
+mkdir ~/myproject
+cd ~/myproject
+virtualenv py27
+source py27/bin/activate
+</code></pre>
+<p>这样你就进入了虚拟环境，然后在虚拟环境下使用pip安装django以及应用的其他依赖</p>
+<pre><code class="line-numbers language-bash">pip install django
+pip install django-crispy-forms
+</code></pre>
+<h3 id="准备Django工程"><a href="#准备Django工程" class="headerlink" title="准备Django工程"></a>准备Django工程</h3><p>这一步我省略，关于怎样创建Django工程请参考我之前的文章。我现在有一个zspace工程，我直接将其复制到myproject目录下。</p>
+<h3 id="配置Apache"><a href="#配置Apache" class="headerlink" title="配置Apache"></a>配置Apache</h3><p>在/etc/httpd/conf.d目录下面添加一个django.conf，用vim打开，内容如下</p>
+<pre><code>Alias /static /home/orhcard/myproject/static
+&lt;Directory /home/orhcard/myproject/static&gt;
+    Require all granted
+&lt;/Directory&gt;
+
+&lt;Directory /home/orhcard/myproject/zspace&gt;
+    &lt;Files wsgi.py&gt;
+        Require all granted
+    &lt;/Files&gt;
+&lt;/Directory&gt;
+
+WSGIDaemonProcess zspace python-path=/home/orhcard/myproject:/home/orhcard/myproject/py27/lib/python2.7/site-packages
+WSGIProcessGroup zspace
+WSGIScriptAlias / /home/orhcard/myproject/zspace/wsgi.py
+</code></pre><p>稍微解释下，第一部分我定义了静态文件路径的别名，也就是将django工程中的静态文件目录映射为/static，并且将它的权限放开。</p>
+<p>第二部分将工程目录下的wsgi.py文件权限放开，这样apache就能找到应用程序的入口了。</p>
+<p>第三部分配置了以守护进程形式启动WSGI进程，这是一种推荐方式，zspace是为这个进程起的一个名字，后面跟着工程根目录加上python虚拟环境的包目录。
+下面的WSGIProcessGroup也设置成一样的名称。
+最后将django工程的wsgi.py文件映射为/，这样Apache就会将根域名的访问转给这个wsgi.py文件处理。</p>
+<h3 id="权限的配置"><a href="#权限的配置" class="headerlink" title="权限的配置"></a>权限的配置</h3><p>下面我们还需要配置一些用户和目录的权限来是的apache用户可以放到到我们工程文件，因为httpd进程是以apache用户启动的。
+这些设置是最基本的linux知识，就不多解释了。</p>
+<pre><code class="line-numbers language-bash">sudo usermod -a -G orhcard apache
+chmod 710 /home/orhcard
+chmod 664 ~/myproject/db.sqlite3
+sudo chown :apache ~/myproject/db.sqlite3
+sudo chown :apache ~/myproject
+sudo systemctl start httpd
+sudo systemctl enable httpd
+</code></pre>
+<p>这些步骤时候，你再去通过域名或ip访问你的服务器，不需要加端口号，你的应用首页就出现了。Congratulations~</p>
+<h3 id="结束语"><a href="#结束语" class="headerlink" title="结束语"></a>结束语</h3><p>通过本篇文章你已经可以创建一个python虚拟环境，配置apache和mode_wsgi模块来将客户端请求转发到Django应用上来了。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/04/30/python/django-deploy.html">CentOS7上使用mod_wsgi部署Django</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/05/09/python/pyenv.html" class="pre-post btn btn-default" title='使用pyenv创建多版本python环境'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">使用pyenv创建多版本python环境</span>
+        </a>
+    
+    
+        <a href="/2016/04/22/python/wsgi.html" class="next-post btn btn-default" title='WGSI简易教程'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">WGSI简易教程</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装必要的软件"><span class="toc-text">安装必要的软件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Python虚拟环境"><span class="toc-text">配置Python虚拟环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#准备Django工程"><span class="toc-text">准备Django工程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#配置Apache"><span class="toc-text">配置Apache</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#权限的配置"><span class="toc-text">权限的配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#结束语"><span class="toc-text">结束语</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

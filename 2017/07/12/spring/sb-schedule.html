@@ -1,0 +1,478 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。
+为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。
+接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。
+默认，springb...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 定时任务 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 定时任务">
+            
+                SpringBoot系列 - 定时任务
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/12</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。
+为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。
+接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。</p>
+<p>默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求，
+一般来说，没有必要再加入Quartz2了，不过你要是有更高级需求也可以整合Quartz2进来。</p>
+<h2 id="定时任务架构"><a href="#定时任务架构" class="headerlink" title="定时任务架构"></a>定时任务架构</h2><p>一般来说，实际项目中，为了提高服务的响应能力，我们一般会通过负载均衡的方式，或者反向代理多个节点的方式来进行。
+如果我们将定时任务写在我们的项目中，那么在同一个时间点，定时任务会一起执行，也就是会执行多次，这样很可能会导致我们的业务出现错误。</p>
+<p>建议使用逻辑分离的方式来解决这个问题。就是我们将真正要定时任务处理的逻辑，写成rest或者rpc服务，
+然后我们可以新建一个单独的定时任务项目，这个项目应该是没有任何的业务代码的，他纯粹只有定时任务功能，
+几点启动，或者每隔多少时间启动。启动后，通过rest或者rpc的方式，调用真正处理逻辑的服务。</p>
+<h2 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h2><p>实际上只要添加最基础的start依赖即可支持定时任务：</p>
+<pre><code class="line-numbers language-xml">&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;2.0.4.RELEASE&lt;/version&gt;
+&lt;/parent&gt;
+</code></pre>
+<h2 id="添加注解配置类"><a href="#添加注解配置类" class="headerlink" title="添加注解配置类"></a>添加注解配置类</h2><p>如果有多个耗时任务，最好使用线程池来执行，添加一个配置类专门用来配置定时任务执行的线程池：</p>
+<pre><code class="line-numbers language-java">@Configuration
+@EnableScheduling
+public class ScheduleConfig implements SchedulingConfigurer {
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        taskRegistrar.setScheduler(taskExecutor());
+    }
+
+    @Bean(destroyMethod=&quot;shutdown&quot;)
+    public ExecutorService taskExecutor() {
+        return Executors.newScheduledThreadPool(20);
+    }
+}
+</code></pre>
+<h2 id="添加执行任务类"><a href="#添加执行任务类" class="headerlink" title="添加执行任务类"></a>添加执行任务类</h2><pre><code class="line-numbers language-java">@Component
+public class MyJob {
+    private Logger logger = LoggerFactory.getLogger(MyJob.class);
+    public final static long ONE_Minute =  10 * 1000;
+
+    @Scheduled(fixedDelay=ONE_Minute)
+    public void fixedDelayJob() throws InterruptedException {
+        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;fixedDelay执行.... start&quot;);
+        Thread.sleep(5000L);
+    }
+
+    @Scheduled(fixedRate=ONE_Minute)
+    public void fixedRateJob() throws InterruptedException {
+        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;fixedRate执行....&quot;);
+        Thread.sleep(8000L);
+    }
+
+    /**
+     * 第一位，表示秒，取值0-59
+     * 第二位，表示分，取值0-59
+     * 第三位，表示小时，取值0-23
+     * 第四位，日期天/日，取值1-31
+     * 第五位，日期月份，取值1-12
+     * 第六位，星期，取值1-7，1表示星期天，2表示星期一
+     * 第七位，年份，可以留空，取值1970-2099
+     */
+    @Scheduled(cron=&quot;0 40 19 * * ?&quot;)
+    public void cronJob(){
+        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;cron执行....&quot;);
+    }
+}
+</code></pre>
+<h2 id="三种定时任务类型"><a href="#三种定时任务类型" class="headerlink" title="三种定时任务类型"></a>三种定时任务类型</h2><p>上面的例子中有三种典型的定时任务，先将前面最简单的两种，单位都是毫秒，比如1分钟=60秒×1000：</p>
+<ol>
+<li>fixedDelay：当任务执行完毕后x毫秒后再执行下一个任务</li>
+<li>fixedRate： 每隔x毫秒执行一次，不论你业务执行花费了多少时间</li>
+</ol>
+<p>而还有一类定时任务，比如是每天的3点15分执行，那么我们就需要用另外一种方式：cron表达式</p>
+<h2 id="cron表达式"><a href="#cron表达式" class="headerlink" title="cron表达式"></a>cron表达式</h2><p>cron表达式，有专门的语法，而且感觉有点绕人，不过简单来说，大家记住一些常用的用法即可，特殊的语法可以单独去查。</p>
+<p>cron一共有7位，但是最后一位是年，可以留空，所以我们可以写6位：</p>
+<pre><code>* 第一位，秒，取值0-59
+* 第二位，分，取值0-59
+* 第三位，时，取值0-23
+* 第四位，日，取值1-31
+* 第五位，月，取值1-12
+* 第六位，星期，取值1-7，1表示星期天，2表示星期一
+* 第七位，年份，可以留空，取值1970-2099
+
+</code></pre><p>cron中，还有一些特殊的符号，含义如下：</p>
+<pre><code>(*)星号：可以理解为每的意思，每秒，每分，每时，每日，每月，每星期，每年...
+(?)问号：问号只能出现在日和星期这两个位置，表示这个位置的值不确定，每天3点执行，所以第六位星期的位置，
+我们是不需要关注的，就是不确定的值。同时：日和星期是两个相互排斥的元素，通过问号来表明不指定值。
+比如，1月10日，比如是星期1，如果在星期的位置是另指定星期二，就前后冲突矛盾了。
+(-)减号：表达一个范围，如在小时字段中使用“10-12”，则表示从10到12点，即10,11,12
+(,)逗号：表达一个列表值，如在星期字段中使用“1,2,4”，则表示星期一，星期二，星期四
+(/)斜杠：如：x/y，x是开始值，y是步长，比如在第一位（秒） 0/15就是，从0秒开始，每15秒，最后就是0，15，30，45，60 另：*/y，等同于0/y
+(L)字符：用在日表示一个月中的最后一天，用在周表示该月最后一个星期X
+(W)字符：指定离给定日期最近的工作日(周一到周五)
+(#)字符：表示该月第几个周X。6#3表示该月第3个周五
+</code></pre><p>下面列举几个例子供大家来验证：</p>
+<pre><code>0 0 3 * * ?     每天3点执行
+0 5 3 * * ?     每天3点5分执行
+0 5 3 ? * *     每天3点5分执行，与上面作用相同
+0 5/10 3 * * ?  每天3点的 5分，15分，25分，35分，45分，55分这几个时间点执行
+0 10 3 ? * 1    每周星期天，3点10分 执行，注：1表示星期天    
+0 10 3 ? * 1#3  每个月的第三个星期，星期天执行，#号只能出现在星期的位置
+</code></pre><h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-schedule" target="_blank" rel="noopener">springboot-schedule</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/12/spring/sb-schedule.html">SpringBoot系列 - 定时任务</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/13/spring/sb-cxf.html" class="pre-post btn btn-default" title='SpringBoot系列 - cxf实现WebService'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - cxf实现WebService</span>
+        </a>
+    
+    
+        <a href="/2017/07/10/spring/sb-multisource.html" class="next-post btn btn-default" title='SpringBoot系列 - 多数据源配置'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 多数据源配置</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#定时任务架构"><span class="toc-text">定时任务架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加依赖"><span class="toc-text">添加依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加注解配置类"><span class="toc-text">添加注解配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加执行任务类"><span class="toc-text">添加执行任务类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三种定时任务类型"><span class="toc-text">三种定时任务类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cron表达式"><span class="toc-text">cron表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

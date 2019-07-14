@@ -1,0 +1,674 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="小程序,">
+
+
+    <meta name="description" content="小程序已经添加了对WebSocket的支持，如果需要长连接和推送的场景来讲可以使用。
+关于websocket的使用，小程序WebSocket API 里边已经给了。
+相比较传统的HTTP接口形式，websocket长连接可实现双向通信，但是用好它可并不简单。
+刚开始的时候做这个推送，我选用了S...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>小程序开发 - websocket | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="小程序开发 - websocket">
+            
+                小程序开发 - websocket
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/微信开发">
+            微信开发
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/小程序" title='小程序'>
+                        小程序
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/12/15</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>小程序已经添加了对WebSocket的支持，如果需要长连接和推送的场景来讲可以使用。
+关于websocket的使用，<a href="https://mp.weixin.qq.com/debug/wxadoc/dev/api/network-socket.html" target="_blank" rel="noopener">小程序WebSocket API</a> 里边已经给了。
+相比较传统的HTTP接口形式，websocket长连接可实现双向通信，但是用好它可并不简单。</p>
+<p>刚开始的时候做这个推送，我选用了Socket.IO协议来实现，服务器端用netty-socketio实现，
+而小程序用了一个第三方库<a href="https://github.com/wxsocketio/wxapp-socket-io" target="_blank" rel="noopener">wxapp-socket-io</a>，但是遇到各种问题，连接自动断掉，一直连不上服务器。</p>
+<p>经常出现如下情况，后台发现连接已经断了：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mapp01.png" alt></p>
+<p>后来查询资料发现，socket.io 支持的协议版本为4，参考 <a href="https://github.com/socketio/socket.io-protocol" target="_blank" rel="noopener">socket.io-protocol</a></p>
+<p>微信小程序 websocket 协议版本为13，可以用ws包或者以他为依赖的 <a href="https://github.com/websockets/ws" target="_blank" rel="noopener">中间件ws</a></p>
+<p>后来服务器改成SpringBoot集成的WebSocket实现，实现标准协议，客户端采用小程序官方API。不过又出现了其他的问题，
+踩过很多的坑，最后终于完美解决连接不稳定和断线重连的问题，本篇文章做一个总结。</p>
+<p>注：在开发小程序长连接的过程中，在网上也google过大量的文章，但是都是一些皮毛，一个单页面演示一下连接成功例子就完了，
+都是些玩具级别的例子，对于断线重连机制要么就没做，要么就做的很差。</p>
+<h2 id="小程序API介绍"><a href="#小程序API介绍" class="headerlink" title="小程序API介绍"></a>小程序API介绍</h2><p>具体的参数说明我就不贴出来了。</p>
+<p><strong>wx.connectSocket(OBJECT)</strong></p>
+<p>创建一个 WebSocket 连接。</p>
+<p>基础库版本 1.7.0 及以后，支持存在多个 WebSokcet 连接，每次成功调用 wx.connectSocket 会返回一个新的 SocketTask。</p>
+<p><strong>wx.onSocketOpen(CALLBACK)</strong></p>
+<p>监听WebSocket连接打开事件。</p>
+<p><strong>wx.onSocketError(CALLBACK)</strong></p>
+<p>监听WebSocket错误。</p>
+<p><strong>wx.sendSocketMessage(OBJECT)</strong></p>
+<p>通过 WebSocket 连接发送数据，需要先 wx.connectSocket，并在 wx.onSocketOpen 回调完成之后才能发送。</p>
+<p><strong>wx.onSocketMessage(CALLBACK)</strong></p>
+<p>监听WebSocket接受到服务器的消息事件。</p>
+<p><strong>wx.closeSocket(OBJECT)</strong></p>
+<p>关闭 WebSocket 连接。</p>
+<p><strong>wx.onSocketClose(CALLBACK)</strong></p>
+<p>监听WebSocket关闭。</p>
+<h2 id="SocketTask"><a href="#SocketTask" class="headerlink" title="SocketTask"></a>SocketTask</h2><p>这个类我要专门拿出来讲，因为小程序官方文档上面对它的介绍并不完整，导致小程序控制WebSocket的连接时遇到各种坑。</p>
+<p>上面讲过，这个对象是通过方法<code>wx.connectSocket(OBJECT)</code>来获取的，它有一个属性值<code>readyState</code>，取下面4个状态值：</p>
+<ol>
+<li>CONNECTING:0  连接中</li>
+<li>OPEN:1        已连接</li>
+<li>CLOSING:2     关闭中</li>
+<li>CLOSED:3      已关闭</li>
+</ol>
+<p>刚开始我们的做法是全局一个变量<code>socketOpen</code>，用来表示这个socket是否打开，没有打开就重连，否则就直接调用发送消息接口了。
+但是经过测试发现网络不稳定，会出现这个变量没有得到及时更新一直是true，然后就不再去连接了，但实际上已经断开了。</p>
+<p>所以最后把这个<code>socketOpen</code>变量去掉，直接判断SocketTask对象的属性值<code>readyState</code>，如果是1的话就表示连接可用。</p>
+<h2 id="小程序生命周期"><a href="#小程序生命周期" class="headerlink" title="小程序生命周期"></a>小程序生命周期</h2><p>要写好小程序应用，就必须理解小程序的生命周期，以及每个生命周期发生的时候会调用什么方法。</p>
+<p>小程序分为应用和页面两个部分，所以小程序的生命周期就涉及到三个部分，分别是：</p>
+<ol>
+<li>应用的生命周期</li>
+<li>页面的生命周期</li>
+<li>应用的生命周期对页面生命周期的影响</li>
+</ol>
+<h3 id="应用的生命周期"><a href="#应用的生命周期" class="headerlink" title="应用的生命周期"></a>应用的生命周期</h3><p>App() 函数用来注册一个小程序。接受一个 object 参数，其指定小程序的生命周期函数等。</p>
+<p>object参数说明：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>类型</th>
+<th>描述</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>onLaunch</td>
+<td>Function</td>
+<td>生命周期函数–监听小程序初始化</td>
+<td>当小程序初始化完成时，会触发 onLaunch（全局只触发一次）</td>
+</tr>
+<tr>
+<td>onShow</td>
+<td>Function</td>
+<td>生命周期函数–监听小程序显示</td>
+<td>当小程序启动，或从后台进入前台显示，会触发 onShow</td>
+</tr>
+<tr>
+<td>onHide</td>
+<td>Function</td>
+<td>生命周期函数–监听小程序隐藏</td>
+<td>当小程序从前台进入后台，会触发 onHide</td>
+</tr>
+</tbody>
+</table>
+<p>前台、后台定义：当用户点击右上角关闭，或者按了设备 Home 键离开微信，小程序并没有直接销毁，而是进入了后台；
+当再次进入微信或再次打开小程序，又会从后台进入前台。</p>
+<ul>
+<li>用户首次打开小程序，触发 onLaunch（全局只触发一次）。</li>
+<li>小程序初始化完成后，触发onShow方法，监听小程序显示。</li>
+<li>小程序从前台进入后台，触发 onHide方法。</li>
+<li>小程序从后台进入前台显示，触发 onShow方法。</li>
+<li>小程序后台运行一定时间，或系统资源占用过高，会被销毁。</li>
+</ul>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mapp02.png" alt></p>
+<h3 id="页面的生命周期"><a href="#页面的生命周期" class="headerlink" title="页面的生命周期"></a>页面的生命周期</h3><p>Page()函数用来注册一个页面。接受一个 object 参数，其指定页面的初始数据、生命周期函数、事件处理函数等。</p>
+<p>object 参数说明：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>data</td>
+<td>Object</td>
+<td>页面的初始数据</td>
+</tr>
+<tr>
+<td>onLoad</td>
+<td>Function</td>
+<td>生命周期函数–监听页面加载</td>
+</tr>
+<tr>
+<td>onReady</td>
+<td>Function</td>
+<td>生命周期函数–监听页面初次渲染完成</td>
+</tr>
+<tr>
+<td>onShow</td>
+<td>Function</td>
+<td>生命周期函数–监听页面显示</td>
+</tr>
+<tr>
+<td>onHide</td>
+<td>Function</td>
+<td>生命周期函数–监听页面隐藏</td>
+</tr>
+<tr>
+<td>onUnload</td>
+<td>Function</td>
+<td>生命周期函数–监听页面卸载</td>
+</tr>
+</tbody>
+</table>
+<p>说明：</p>
+<ul>
+<li>小程序注册完成后，加载页面，触发onLoad方法。</li>
+<li>页面载入后触发onShow方法，显示页面。</li>
+<li>首次显示页面，会触发onReady方法，渲染页面元素和样式，一个页面只会调用一次。</li>
+<li>当小程序后台运行或跳转到其他页面时，触发onHide方法。</li>
+<li>当小程序有后台进入到前台运行或重新进入页面时，触发onShow方法。</li>
+<li>当使用重定向方法wx.redirectTo(OBJECT)或关闭当前页返回上一页wx.navigateBack()，触发onUnload。</li>
+</ul>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mapp03.png" alt></p>
+<p>理解这些后，才能开始编写服务器和客户端代码</p>
+<h2 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h2><p>服务器代码就不贴了，请参考我的 <a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-websocket" target="_blank" rel="noopener">github源码</a></p>
+<p>服务器端主要修正2个问题，一个是经常出现的Idle Timeout的异常，另外一个是Druid数据库连接池异常。</p>
+<h2 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h2><p>基本思路是：</p>
+<ol>
+<li>全局维护一个SocketTask对象，用来表示websocket连接，判断是否断线，作为重连的依据。</li>
+<li>同时定义一个全局callback回调函数，每个页面初始化的时候更新这个回调函数，那么在每个页面中收到返回消息就会执行当前页面逻辑。</li>
+<li>维护一个消息队列，所有消息请求会首先判断连接是否可用，如果可用直接发消息，否则将消息push到这个队列中。</li>
+<li>在<code>app.js</code>的<code>onShow()</code>函数中判断连接是否连上，如果没有连上就会触发websocket连接</li>
+<li>SocketTask对象的<code>onOpen()</code>负责从消息队列中取出请求消息，并发送这个请求消息</li>
+<li>SocketTask对象的<code>onMessage()</code>负责接收返回消息，并调用每个页面自己定义的回调函数</li>
+<li>SocketTask对象的<code>onClose()</code>监听函数中，触发websocket连接</li>
+</ol>
+<p>下面是app.js代码：</p>
+<pre><code class="line-numbers language-js">let socketMsgQueue = []
+let isLoading = false
+
+App({
+  globalData: {
+    userInfo: null,
+    localSocket: {},
+    callback: function () {}
+  },
+  onLaunch: function (options) {
+    // 展示本地存储能力
+    var logs = wx.getStorageSync(&#39;logs&#39;) || []
+    logs.unshift(Date.now())
+    wx.setStorageSync(&#39;logs&#39;, logs)
+    const updateManager = wx.getUpdateManager()
+    updateManager.onUpdateReady(function () {
+      updateManager.applyUpdate()
+    })
+    let that = this
+
+    // 登录
+    wx.login({
+      success: res =&gt; {
+        // 发送 res.code 到后台换取 openId, sessionKey, unionId
+      }
+    })
+    // 获取用户信息
+    wx.getSetting({
+      success: res =&gt; {
+        if (res.authSetting[&#39;scope.userInfo&#39;]) {
+          // 已经授权，可以直接调用 getUserInfo 获取头像昵称，不会弹框
+          wx.getUserInfo({
+            success: res =&gt; {
+              // 可以将 res 发送给后台解码出 unionId
+              this.globalData.userInfo = res.userInfo
+              // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
+              // 所以此处加入回调以防止这种情况
+              if (this.userInfoReadyCallback) {
+                this.userInfoReadyCallback(res)
+              }
+            }
+          })
+        }
+      }
+    })
+  },
+  showLoad() {
+    if(!isLoading) {
+      wx.showLoading({
+        title: &#39;请稍后...&#39;,
+      })
+      isLoading = true
+    }
+  },
+  hideLoad() {
+    wx.hideLoading()
+    isLoading = false
+  },
+  initSocket() {
+    let that = this
+    that.globalData.localSocket = wx.connectSocket({
+      // url: &#39;wss://test.enzhico.net/app&#39;
+      url: &#39;wss://mapp.enzhico.net/app&#39;
+    })
+    that.showLoad()
+    that.globalData.localSocket.onOpen(function (res) {
+      console.log(&#39;WebSocket连接已打开！readyState=&#39; + that.globalData.localSocket.readyState)
+      that.hideLoad()
+      while (socketMsgQueue.length &gt; 0) {
+        var msg = socketMsgQueue.shift();
+        that.sendSocketMessage(msg);
+      }
+    })
+    that.globalData.localSocket.onMessage(function(res) {
+      that.hideLoad()
+      that.globalData.callback(res)
+    })
+    that.globalData.localSocket.onError(function(res) {
+      console.log(&#39;readyState=&#39; + that.globalData.localSocket.readyState)
+    })
+    that.globalData.localSocket.onClose(function (res) {
+      console.log(&#39;WebSocket连接已关闭！readyState=&#39; + that.globalData.localSocket.readyState)
+      that.initSocket()
+    })
+  },
+  //统一发送消息
+  sendSocketMessage: function (msg) {
+    if (this.globalData.localSocket.readyState === 1) {
+      this.showLoad()
+      this.globalData.localSocket.send({
+        data: JSON.stringify(msg)
+      })
+    } else {
+      socketMsgQueue.push(msg)
+    }
+  },
+  onShow: function(options) {
+    if (this.globalData.localSocket.readyState !== 0 &amp;&amp; this.globalData.localSocket.readyState !== 1) {
+      console.log(&#39;开始尝试连接WebSocket！readyState=&#39; + this.globalData.localSocket.readyState)
+      this.initSocket()
+    }
+  }
+})
+</code></pre>
+<p>下面是某个页面的onshow()函数：</p>
+<pre><code class="line-numbers language-js">/**
+* 生命周期函数--监听页面显示
+*/
+onShow: function () {
+  var that = this
+  app.globalData.callback = function (res) {
+    let resData = JSON.parse(res.data)
+    let data = resData.result
+    if (resData.method == &#39;list&#39;) {
+      that.setData({
+        total: parseInt(data.allAmount),
+        amount: data.orderNum,
+        jdcAmount: parseInt(data.jdcAmount),
+        jszAmount: parseInt(data.jszAmount),
+        list: data.list || []
+      })
+      if(data.list == 0) {
+        that.setData({
+          isEmpty: true
+        })
+      }
+      that.getNumber(resData.result.allAmount)
+      that.setAmount()
+    } else if (resData.method == &#39;notify&#39;) {
+      // 服务器推送消息，省略具体逻辑
+    }
+  }
+  setTimeout(function () {
+    app.sendSocketMessage({
+      method: &#39;list&#39;
+    })
+  }, 300)
+},
+</code></pre>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/12/15/weixin/ma-websocket.html">小程序开发 - websocket</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/12/29/web/ngrok.html" class="pre-post btn btn-default" title='CentOS7搭建ngrok服务器'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">CentOS7搭建ngrok服务器</span>
+        </a>
+    
+    
+        <a href="/2017/12/13/weixin/ma-pay.html" class="next-post btn btn-default" title='小程序开发 - 跳转支付'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">小程序开发 - 跳转支付</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#小程序API介绍"><span class="toc-text">小程序API介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SocketTask"><span class="toc-text">SocketTask</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小程序生命周期"><span class="toc-text">小程序生命周期</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#应用的生命周期"><span class="toc-text">应用的生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#页面的生命周期"><span class="toc-text">页面的生命周期</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器端"><span class="toc-text">服务器端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端"><span class="toc-text">客户端</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

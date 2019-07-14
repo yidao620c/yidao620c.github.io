@@ -1,0 +1,495 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="rabbitmq,">
+
+
+    <meta name="description" content="前面一篇介绍的任务队列是每个消息只能被一个工作者取走。这一篇讲解发布/订阅消息模式，
+在这个模式里面，一个消息可以被发送给多个消费者。
+这里我通过一个简单的日志系统来说明，消息生产者会将日志发送给队列，然后多个订阅者可以接收到这条日志显示到不同的地方，
+比如可以打印到文件中，同时打印到控制台上...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>RabbitMQ简易教程 - 发布订阅 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="RabbitMQ简易教程 - 发布订阅">
+            
+                RabbitMQ简易教程 - 发布订阅
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/mq">
+            mq
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/rabbitmq" title='rabbitmq'>
+                        rabbitmq
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/05/10</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>前面一篇介绍的任务队列是每个消息只能被一个工作者取走。这一篇讲解发布/订阅消息模式，
+在这个模式里面，一个消息可以被发送给多个消费者。</p>
+<p>这里我通过一个简单的日志系统来说明，消息生产者会将日志发送给队列，然后多个订阅者可以接收到这条日志显示到不同的地方，
+比如可以打印到文件中，同时打印到控制台上面。</p>
+<h2 id="Exchanges"><a href="#Exchanges" class="headerlink" title="Exchanges"></a>Exchanges</h2><p>前面都是直接向某个队列发送/接受消息，现在是时候构建一个RabbitMQ中完整的消息模型了。</p>
+<p>在RabbitMQ中，消息生产者从来不会将消息直接发送给某个队列，
+甚至都不知道这个消息会不会发送到队列中去。</p>
+<p>消息生产者将消息发送给交换机(exchange)，它负责接收生产者的消息，并将消息发送给多个队列。
+交换机必须知道处理这个消息的规则，比如发送给某个特定队列，发送给多个队列，或者丢弃它。
+这些规则是通过<code>exchange type</code>来定义。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb02.png" alt></p>
+<p>有很多种交换机类型：direct、topic, headers 和 fanout。
+这篇重点关注最后一个<code>fanout</code>类型。声明一个交换机：</p>
+<pre><code class="line-numbers language-python">channel.exchange_declare(exchange=&#39;logs&#39;,
+                         type=&#39;fanout&#39;)
+</code></pre>
+<p>fanout类型的将消息广播给它所知道的所有队列。</p>
+<p>列出所有的交换机命令：</p>
+<pre><code>sudo rabbitmqctl list_exchanges
+``
+
+你会发现里面有很多`amq.*`开头的和一个空名字的默认交换机，这些都是系统自带的。
+
+现在使用我们前面自己创建的交换机：
+``` python
+channel.basic_publish(exchange=&#39;logs&#39;,
+                      routing_key=&#39;&#39;,
+                      body=message)
+</code></pre><h2 id="临时队列"><a href="#临时队列" class="headerlink" title="临时队列"></a>临时队列</h2><p>我们需要每次连接至mq的时候使用一个新队列，使用完了就销毁，这里可使用临时队列：</p>
+<pre><code class="line-numbers language-python">result = channel.queue_declare()
+</code></pre>
+<p>然后就可以通过<code>result.method.queue</code>获取临时队列名称，提供给消费者使用。
+另外消费者用完后需要销毁，可添加一个<code>exclusive</code>选项：</p>
+<pre><code>result = channel.queue_declare(exclusive=True)
+</code></pre><h2 id="绑定"><a href="#绑定" class="headerlink" title="绑定"></a>绑定</h2><p>交换机和队列直接的关系我们称为绑定<code>binding</code></p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb03.png" alt></p>
+<pre><code class="line-numbers language-python">channel.queue_bind(exchange=&#39;logs&#39;,
+                   queue=result.method.queue)
+</code></pre>
+<p>这时候，<code>logs</code>交换机就会将它接收到的消息发送给我们的临时队列了。</p>
+<p>查看系统所有的绑定命令：</p>
+<pre><code>rabbitmqctl list_binding
+</code></pre><h2 id="最终代码"><a href="#最终代码" class="headerlink" title="最终代码"></a>最终代码</h2><p>最后我们开始把所有代码整理出来，消息生产者发送日志消息到<code>logs</code>交换机，
+必须给这个交换机一个<code>routing_key</code>，但是对于fanout类型的会忽略这个值。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb04.png" alt></p>
+<p><code>`</code> python emit_log.py</p>
+<p>#!/usr/bin/env python
+import pika
+import sys</p>
+<p>connection = pika.BlockingConnection(pika.ConnectionParameters(host=’192.168.217.161’, port=5673))
+channel = connection.channel()</p>
+<p>channel.exchange_declare(exchange=’logs’,
+                         type=’fanout’)</p>
+<p>message = ‘ ‘.join(sys.argv[1:]) or “info: Hello World!”
+channel.basic_publish(exchange=’logs’,
+                      routing_key=’’,
+                      body=message)
+print(“ [x] Sent %r” % message)
+connection.close()</p>
+<pre><code>
+日志接受者实现：
+
+``` python receive_logs.py
+import pika
+
+connection = pika.BlockingConnection(pika.ConnectionParameters(host=&#39;192.168.217.161&#39;, port=5673))
+channel = connection.channel()
+
+channel.exchange_declare(exchange=&#39;logs&#39;,
+                         type=&#39;fanout&#39;)
+
+result = channel.queue_declare(exclusive=True)
+queue_name = result.method.queue
+
+channel.queue_bind(exchange=&#39;logs&#39;,
+                   queue=queue_name)
+
+print(&#39; [*] Waiting for logs. To exit press CTRL+C&#39;)
+
+def callback(ch, method, properties, body):
+    print(&quot; [x] %r&quot; % body)
+
+channel.basic_consume(callback,
+                      queue=queue_name,
+                      no_ack=True)
+
+channel.start_consuming()
+</code></pre><p>一切搞定，先运行接受者程序，如果你想把消息写入文件中，可以这样执行：</p>
+<pre><code class="line-numbers language-bash">python receive_logs.py &gt; test.log
+</code></pre>
+<p>如果只想打印到控制台：</p>
+<pre><code>python receive_logs.py
+</code></pre><p>然后开始启动日志发送者进程：</p>
+<pre><code>python emit_log.py
+</code></pre><p>演示结果：</p>
+<p>第一个窗口</p>
+<pre><code>rabbitmqctl list_bindings
+</code></pre><p>查看test.log内容：</p>
+<pre><code>
+</code></pre><p>第二个窗口：</p>
+<pre><code>$ python receive_logs.py
+ [*] Waiting for logs. To exit press CTRL+C
+ [x] b&#39;info: Hello World!&#39;
+</code></pre><p>发送者窗口：</p>
+<pre><code>$ python emit_log.py
+ [x] Sent &#39;info: Hello World!&#39;
+</code></pre><p>最后，运行如下命令来确认绑定的确建立了：</p>
+<pre><code>[root@controller161 ~]# rabbitmqctl list_bindings
+Listing bindings ...
+    exchange    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    queue    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    []
+    exchange    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    queue    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    []
+    exchange    hello    queue    hello    []
+    exchange    task_queue    queue    task_queue    []
+logs    exchange    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    queue    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    []
+logs    exchange    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    queue    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    []
+</code></pre><p>很清楚，交换机<code>logs</code>里面的消息被发送给两个由服务器生成的名字的队列中去了，这正是我们想要的。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/05/10/mq/rabbitmq-tutorial03.html">RabbitMQ简易教程 - 发布订阅</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/05/13/mq/rabbitmq-tutorial04.html" class="pre-post btn btn-default" title='RabbitMQ简易教程 - 路由'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 路由</span>
+        </a>
+    
+    
+        <a href="/2017/05/08/mq/rabbitmq-tutorial02.html" class="next-post btn btn-default" title='RabbitMQ简易教程 - 任务队列'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">RabbitMQ简易教程 - 任务队列</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Exchanges"><span class="toc-text">Exchanges</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#临时队列"><span class="toc-text">临时队列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#绑定"><span class="toc-text">绑定</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#最终代码"><span class="toc-text">最终代码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

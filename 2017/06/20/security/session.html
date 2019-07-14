@@ -1,0 +1,489 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="jwt,session,cookie,token,">
+
+
+    <meta name="description" content="Web刚刚兴起的时候，服务器只提供一些简单的HTML页面和链接，用户打开网址去浏览。
+并不需要记住每次请求是谁发送来的，每次请求对服务器来讲都是全新的。
+既然是浏览，作为一个服务器，为什么要记住谁在一段时间里都浏览了什么文档呢？
+但是好日子没持续多久，很快大家就不满足于静态的HTML文档了，交...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>聊聊Web会话管理 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="聊聊Web会话管理">
+            
+                聊聊Web会话管理
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/jwt" title='jwt'>
+                        jwt
+                    </a>
+                
+                    <a href="/tags/session" title='session'>
+                        session
+                    </a>
+                
+                    <a href="/tags/cookie" title='cookie'>
+                        cookie
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/06/20</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Web刚刚兴起的时候，服务器只提供一些简单的HTML页面和链接，用户打开网址去浏览。
+并不需要记住每次请求是谁发送来的，每次请求对服务器来讲都是全新的。
+既然是浏览，作为一个服务器，为什么要记住谁在一段时间里都浏览了什么文档呢？</p>
+<p>但是好日子没持续多久，很快大家就不满足于静态的HTML文档了，交互式的Web应用开始兴起，尤其是论坛，在线购物等网站。
+必须管理会话，必须记住哪些人登录系统，哪些人往自己的购物车中放了商品，也就是说我必须把每个人区分开。</p>
+<p>由于HTTP协议的无状态特性，必须加点小手段，才能完成会话管理。</p>
+<p>本文总结了3种常见的实现web应用会话管理的方式：</p>
+<ol>
+<li>基于server端session的管理方式</li>
+<li>基于cookie的管理方式</li>
+<li>基于token的管理方式</li>
+</ol>
+<p>目的是加深对web中用户登录机制的理解，对实际项目开发也有参考价值。</p>
+<h2 id="session和cookie"><a href="#session和cookie" class="headerlink" title="session和cookie"></a>session和cookie</h2><p>在讲解着三种方式之前，先科普一下几个知识。</p>
+<ol>
+<li><p>由于HTTP协议是无状态的协议，所以服务端需要记录用户的状态时，就需要用某种机制来识具体的用户，这个机制就是Session。
+Session是保存在服务端的，有一个唯一标识。在大型的网站，一般会有专门的Session服务器集群，这个时候 Session 信息都是放在内存的。</p>
+</li>
+<li><p>思考一下服务端如何识别特定的客户？这个时候Cookie就登场了。每次HTTP请求的时候，客户端都会发送相应的Cookie信息到服务端。
+实际上大多数的应用都是用 Cookie 来实现Session跟踪的，第一次创建Session的时候，服务端会在HTTP协议中告诉客户端，
+需要在 Cookie 里面记录一个Session ID，以后每次请求把这个会话ID发送到服务器，我就知道你是谁了。
+有人问，如果客户端的浏览器禁用了 Cookie 怎么办？一般这种情况下，会使用一种叫做URL重写的技术来进行会话跟踪，
+即每次HTTP交互，URL后面都会被附加上一个诸如 sid=xxxxx 这样的参数，服务端据此来识别用户。</p>
+</li>
+<li><p>Cookie其实还可以用在一些方便用户的场景下，设想你某次登陆过一个网站，下次登录的时候不想再次输入账号了，怎么办？
+这个信息可以写到Cookie里面，访问网站的时候，网站页面的脚本可以读取这个信息，就自动帮你把用户名给填了，能够方便一下用户。
+这也是Cookie名称的由来，给用户的一点甜头。</p>
+</li>
+</ol>
+<p>所以，总结一下：</p>
+<ol>
+<li>session 在服务器端，cookie 在客户端（浏览器）</li>
+<li>session 默认被存在在服务器的一个文件里（不是内存）</li>
+<li>session 的运行依赖 session id，而 session id 是存在cookie中的，也就是说，如果浏览器禁用了cookie，
+同时 session 也会失效（但是可以通过其它方式实现，比如在 url 中传递 session_id）</li>
+<li>session 可以放在 文件、数据库、或内存中都可以。</li>
+<li>用户验证这种场合一般会用 session 因此，维持一个会话的核心就是客户端的唯一标识，即 session id</li>
+</ol>
+<h2 id="基于server端session"><a href="#基于server端session" class="headerlink" title="基于server端session"></a>基于server端session</h2><p>在早期web应用中，通常使用服务端session来管理用户的会话。</p>
+<p>1）服务端session是用户第一次访问应用时，服务器就会创建的对象，代表用户的一次会话过程，可以用来存放数据。
+服务器为每一个session都分配一个唯一的sessionid，以保证每个用户都有一个不同的session对象。</p>
+<p>2）服务器在创建完session后，会把sessionid通过cookie返回给用户所在的浏览器，这样当用户第二次及以后向服务器发送请求的时候，
+就会通过cookie把sessionid传回给服务器，以便服务器能够根据sessionid找到与该用户对应的session对象。</p>
+<p>3）session通常有失效时间的设定，比如2个小时。当失效时间到，服务器会销毁之前的session，并创建新的session返回给用户。
+但是只要用户在失效时间内，有发送新的请求给服务器，通常服务器都会把他对应的session的失效时间根据当前的请求时间再延长2个小时。</p>
+<p>4）session在一开始并不具备会话管理的作用。它只有在用户登录认证成功之后，并且往sesssion对象里面放入了用户登录成功的凭证，
+才能用来管理会话。管理会话的逻辑也很简单，只要拿到用户的session对象，看它里面有没有登录成功的凭证，就能判断这个用户是否已经登录。
+当用户主动退出的时候，会把它的session对象里的登录凭证清掉。
+所以在用户登录前或退出后或者session对象失效时，肯定都是拿不到需要的登录凭证的。</p>
+<p>可简单使用流程图描述如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/session01.png" alt></p>
+<p>主流的web开发平台都原生支持这种会话管理的方式，而且开发起来很简单。它还有一个比较大的优点就是安全性好，
+因为在浏览器端与服务器端保持会话状态的媒介始终只是一个sessionid串，只要这个串够随机，攻击者就不能轻易冒充他人的sessionid进行操作；
+除非通过CSRF或http劫持的方式，才有可能冒充别人进行操作；即使冒充成功，也必须被冒充的用户session里面包含有效的登录凭证才行。</p>
+<p>但是这种方式也有几个问题需要解决：</p>
+<p>1）这种方式将会话信息存储在web服务器里面，所以在用户同时在线量比较多时，这些会话信息会占据比较多的内存；</p>
+<p>2）当应用采用集群部署的时候，会遇到多台web服务器之间如何做session共享的问题。因为session是由单个服务器创建的，
+但是处理用户请求的服务器不一定是那个创建session的服务器，这样他就拿不到之前已经放入到session中的登录凭证之类的信息了；</p>
+<p>3）多个应用要共享session时，除了以上问题，还会遇到跨域问题，因为不同的应用可能部署的主机不一样，需要在各个应用做好cookie跨域的处理。</p>
+<p>针对问题1和问题2，我见过的解决方案是采用redis/memcached这种中间服务器来管理session的增删改查，
+一来减轻web服务器的负担，二来解决不同web服务器共享session的问题。</p>
+<p>针对问题3，由于服务端的session依赖cookie来传递sessionid，所以在实际项目中，只要解决各个项目里面如何实现sessionid的cookie跨域访问即可，
+这个是可以实现的，就是比较麻烦，前后端有可能都要做处理。</p>
+<p>如果在一些小型的web应用中使用，可以不用考虑上面三个问题，所以很适合这种方式。</p>
+<h2 id="基于cookie"><a href="#基于cookie" class="headerlink" title="基于cookie"></a>基于cookie</h2><p>由于前一种方式会增加服务器的负担和架构的复杂性，所以后来就有人想出直接把用户的登录凭证直接存到客户端的方案，
+当用户登录成功之后，把登录凭证写到cookie里面，并给cookie设置有效期，后续请求直接验证存有登录凭证的cookie是否存在以及凭证是否有效，
+即可判断用户的登录状态。使用它来实现会话管理的整体流程如下：</p>
+<p>1）用户发起登录请求，服务端根据传入的用户密码之类的身份信息，验证用户是否满足登录条件，如果满足，就根据用户信息创建一个登录凭证，
+这个登录凭证简单来说就是一个对象，最简单的形式可以只包含用户id，凭证创建时间和过期时间三个值。</p>
+<p>2）服务端把上一步创建好的登录凭证，先对它做数字签名，然后再用对称加密算法做加密处理，将签名、加密后的字串，写入cookie。
+cookie的名字必须固定（如ticket），因为后面再获取的时候，还得根据这个名字来获取cookie值。
+这一步添加数字签名的目的是防止登录凭证里的信息被篡改，因为一旦信息被篡改，那么下一步做签名验证的时候肯定会失败。
+做加密的目的，是防止cookie被别人截取的时候，无法轻易读到其中的用户信息。</p>
+<p>3）用户登录后发起后续请求，服务端根据上一步存登录凭证的cookie名字，获取到相关的cookie值。然后先做解密处理，再做数字签名的认证，
+如果这两步都失败，说明这个登录凭证非法；如果这两步成功，接着就可以拿到原始存入的登录凭证了。然后用这个凭证的过期时间和当前时间做对比，
+判断凭证是否过期，如果过期，就需要用户再重新登录；如果未过期，则允许请求继续。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/session02.png" alt></p>
+<p>它的缺点也比较明显：</p>
+<p>1）cookie有大小限制，存储不了太多数据</p>
+<p>2）每次传送cookie，增加了请求的数量，对访问性能也有影响；</p>
+<p>3）也有跨域问题，毕竟还是要用cookie。</p>
+<p>相比起第一种方式，基于cookie方案明显还是要好一些，目前好多web开发平台或框架都默认使用这种方式来做会话管理。</p>
+<p>跨域的问题可以用CORS（跨域资源共享）的方式来快速解决。</p>
+<h2 id="基于token"><a href="#基于token" class="headerlink" title="基于token"></a>基于token</h2><p>前面两种会话管理方式因为都用到cookie，不适合用在移动端native app里面，native app不好管理cookie，毕竟它不是浏览器。
+这两种方案都不适合用来做纯api服务的登录认证，就要考虑第三种会话管理方式，也就是token认证。</p>
+<p>这种方式从流程和实现上来说，跟cookie-based的方式没有太多区别，只不过cookie-based里面写到cookie里面的ticket在这种方式下称为token，
+这个token在返回给客户端之后，后续请求都必须通过url参数或者是http header的形式，主动带上token，
+这样服务端接收到请求之后就能直接从http header或者url里面取到token进行验证：</p>
+<p>这种方式不通过cookie进行token的传递，而是每次请求的时候，主动把token加到http header里面或者url后面，
+所以即使在native app里面也能使用它来调用我们通过web发布的api接口。app里面还要做两件事情：</p>
+<p>1）有效存储token，得保证每次调接口的时候都能从同一个位置拿到同一个token；</p>
+<p>2）每次调接口的的代码里都得把token加到header或者接口地址里面。</p>
+<p>这种方式同样适用于网页应用，token可以存于localStorage或者sessionStorage里面，然后每发ajax请求的时候，
+都把token拿出来放到ajax请求的header里即可。不过如果是非接口的请求，比如直接通过点击链接请求一个页面这种，
+是无法自动带上token的。所以这种方式也仅限于走纯接口的web应用。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/session03.png" alt></p>
+<h2 id="JWT"><a href="#JWT" class="headerlink" title="JWT"></a>JWT</h2><p>现在SPA应用，前后端完全分离，基于API接口的应用越来越多，这时候基于token的认证就是最好的选择方式了。
+好在这个方式的技术其实早就有很多实现了，而且还有现成的标准可用，这个标准就是JWT(json-web-token)。</p>
+<p>JWT本身并没有做任何技术实现，它只是定义了token-based的管理方式该如何实现，
+它规定了token的应该包含的标准内容以及token的生成过程和方法。目前实现了这个标准的技术已经有非常多：</p>
+<p>官方网站：<a href="https://jwt.io/#libraries-io" target="_blank" rel="noopener">https://jwt.io/#libraries-io</a></p>
+<p>Java实现：<a href="https://github.com/auth0/java-jwt" target="_blank" rel="noopener">https://github.com/auth0/java-jwt</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/06/20/security/session.html">聊聊Web会话管理</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/06/22/security/jwt.html" class="pre-post btn btn-default" title='JWT介绍和安全防范'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">JWT介绍和安全防范</span>
+        </a>
+    
+    
+        <a href="/2017/06/12/web/jetty9.html" class="next-post btn btn-default" title='Jetty9简易教程'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Jetty9简易教程</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#session和cookie"><span class="toc-text">session和cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基于server端session"><span class="toc-text">基于server端session</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基于cookie"><span class="toc-text">基于cookie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基于token"><span class="toc-text">基于token</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JWT"><span class="toc-text">JWT</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

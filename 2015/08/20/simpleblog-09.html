@@ -1,0 +1,534 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录，
+这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！
+编辑和删除的认证我们需要保护post_new, post_edit和post_publish这三个视图，只有登录用户才有权去执行。
+django为我们...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Django1.9开发博客09- 用户认证 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Django1.9开发博客09- 用户认证">
+            
+                Django1.9开发博客09- 用户认证
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/08/20</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录，
+这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！</p>
+<h2 id="编辑和删除的认证"><a href="#编辑和删除的认证" class="headerlink" title="编辑和删除的认证"></a>编辑和删除的认证</h2><p>我们需要保护post_new, post_edit和post_publish这三个视图，只有登录用户才有权去执行。
+django为我们提供了很好的帮助类，其实就是利用了python中的decorators技术。
+django中认证的装饰器位于模块django.contrib.auth.decorators中，名称叫login_required。</p>
+<p>编辑blog/views.py文件，在import部分添加如下的导入语句：</p>
+<pre><code class="line-numbers language-python">from django.contrib.auth.decorators import login_required
+</code></pre>
+<p>然后在post_new, post_edit和post_publish这三个函数上添加@login_required，
+类似下面</p>
+<pre><code class="line-numbers language-python">@login_required
+def post_new(request):
+    [...]
+</code></pre>
+<p>好的，现在你再去访问下<code>http://localhost:8000/post/new/</code>，看看有啥变化。</p>
+<p>注：如果你仍然能正常进入新建页面，那可能是你之前在admin界面登陆过。
+那么你需要先退出，访问<code>http://localhost:8000/admin/logout/</code>可以退出，然后你再看下效果。</p>
+<p>我刚刚添加的@login_required装饰器检测到你尚未登陆的时候会重定向到login页面，
+但是我现在还没有定义login的模板页面，所以这时候会是404错误页面。</p>
+<h2 id="用户登录"><a href="#用户登录" class="headerlink" title="用户登录"></a>用户登录</h2><p>django在用户认证方面做得很好了，我们只需要去使用它就行。</p>
+<p>在mysite/urls.py文件中，添加下面一行</p>
+<pre><code class="line-numbers language-python">url(r&#39;^accounts/login/$&#39;, &#39;django.contrib.auth.views.login&#39;)
+</code></pre>
+<p>现在这个文件内容如下：</p>
+<pre><code class="line-numbers language-python">from django.conf.urls import patterns, include, url
+
+from django.contrib import admin
+admin.autodiscover()
+
+urlpatterns = patterns(&#39;&#39;,
+    url(r&#39;^admin/&#39;, include(admin.site.urls)),
+    url(r&#39;^accounts/login/$&#39;, &#39;django.contrib.auth.views.login&#39;),
+    url(r&#39;&#39;, include(&#39;blog.urls&#39;)),
+)
+</code></pre>
+<p>然后我们再定义一个登陆页面，创建目录mysite/templates/registration，
+并在里面新建模板文件login.html，内容如下：</p>
+<pre><code class="line-numbers language-html">@% extends &quot;mysite/base.html&quot; %@
+
+@% block content %@
+
+    @% if form.errors %@
+    &lt;p&gt;Your username and password didn&#39;t match. Please try again.&lt;/p&gt;
+    @% endif %@
+
+    &lt;form method=&quot;post&quot; action=&quot;@% url &#39;django.contrib.auth.views.login&#39; %@&quot;&gt;
+    @% csrf_token %@
+    &lt;table&gt;
+    &lt;tr&gt;
+        &lt;td&gt;@@ form.username.label_tag @@&lt;/td&gt;
+        &lt;td&gt;@@ form.username @@&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;@@ form.password.label_tag @@&lt;/td&gt;
+        &lt;td&gt;@@ form.password @@&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;/table&gt;
+
+    &lt;input type=&quot;submit&quot; value=&quot;login&quot; /&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;next&quot; value=&quot;@@ next @@&quot; /&gt;
+    &lt;/form&gt;
+@% endblock %@
+</code></pre>
+<p>你可以看到我们仍然使用到了模板继承。这个时候可以定义一个<code>mysite/templates/mysite/base.html</code>，
+把<code>blog/templates/blog/base.html</code>的内容复制给它即可。</p>
+<p>不过我们需要在<code>mysite/settings.py</code>中再添加一个urls配置：</p>
+<pre><code class="line-numbers language-python">LOGIN_REDIRECT_URL = &#39;/&#39;
+</code></pre>
+<p>这样的话当用户直接访问login页面后登录成功会重定向到文章列表页面去。</p>
+<h2 id="改进显示"><a href="#改进显示" class="headerlink" title="改进显示"></a>改进显示</h2><p>现在的确只有登录用户才能修改和删除文章，但是未登录用户却能看到这些按钮，
+这个是很不好的体验。现在如果是未登录用户的话就把这些按钮给隐藏掉。</p>
+<p>因此我们修改<code>mysite/templates/mysite/base.html</code>如下：</p>
+<pre><code class="line-numbers language-html">&lt;body&gt;
+    &lt;div class=&quot;page-header&quot;&gt;
+        @% if user.is_authenticated %@
+        &lt;a href=&quot;@% url &#39;post_new&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-plus&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+        &lt;a href=&quot;@% url &#39;post_draft_list&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-edit&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+        @% else %@
+        &lt;a href=&quot;@% url &#39;django.contrib.auth.views.login&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-lock&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+        @% endif %@
+        &lt;h1&gt;&lt;a href=&quot;@% url &#39;blog.views.post_list&#39; %@&quot;&gt;Django Girls&lt;/a&gt;&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;content&quot;&gt;
+        &lt;div class=&quot;row&quot;&gt;
+            &lt;div class=&quot;col-md-8&quot;&gt;
+            @% block content %@
+            @% endblock %@
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+</code></pre>
+<p>然后修改blog/templates/blog/post_detail.html如下：</p>
+<pre><code class="line-numbers language-html">@% extends &#39;blog/base.html&#39; %@
+
+@% block content %@
+    &lt;div class=&quot;date&quot;&gt;
+        @% if post.published_date %@
+            @@ post.published_date @@
+        @% else %@
+            @% if user.is_authenticated %@
+                &lt;a class=&quot;btn btn-default&quot; href=&quot;@% url &#39;blog.views.post_publish&#39; pk=post.pk %@&quot;&gt;Publish&lt;/a&gt;
+            @% endif %@
+        @% endif %@
+        @% if user.is_authenticated %@
+            &lt;a class=&quot;btn btn-default&quot; href=&quot;@% url &#39;post_edit&#39; pk=post.pk %@&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-pencil&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+            &lt;a class=&quot;btn btn-default&quot; href=&quot;@% url &#39;post_remove&#39; pk=post.pk %@&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-remove&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+        @% endif %@
+    &lt;/div&gt;
+    &lt;h1&gt;@@ post.title @@&lt;/h1&gt;
+    &lt;p&gt;@@ post.text|linebreaks @@&lt;/p&gt;
+@% endblock %@
+</code></pre>
+<h2 id="用户注销"><a href="#用户注销" class="headerlink" title="用户注销"></a>用户注销</h2><p>当用户登录后显示欢迎语句，Hello ，然后后面跟一个logout链接。还是依靠django帮我们处理logout动作。</p>
+<p>修改mysite/templates/mysite/base.html文件如下：</p>
+<pre><code class="line-numbers language-html">&lt;div class=&quot;page-header&quot;&gt;
+    @% if user.is_authenticated %@
+    &lt;a href=&quot;@% url &#39;post_new&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-plus&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+    &lt;a href=&quot;@% url &#39;post_draft_list&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-edit&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+    &lt;p class=&quot;top-menu&quot;&gt;Hello @@ user.username @@&lt;small&gt;&amp;nbsp;&lt;a href=&quot;@% url &#39;django.contrib.auth.views.logout&#39; %@&quot;&gt;Log out&lt;/a&gt;&lt;/p&gt;
+    @% else %@
+    &lt;a href=&quot;@% url &#39;django.contrib.auth.views.login&#39; %@&quot; class=&quot;top-menu&quot;&gt;&lt;span class=&quot;glyphicon glyphicon-lock&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+    @% endif %@
+    &lt;h1&gt;&lt;a href=&quot;@% url &#39;blog.views.post_list&#39; %@&quot;&gt;Django Girls&lt;/a&gt;&lt;/h1&gt;
+&lt;/div&gt;
+</code></pre>
+<p>很显然这时候logout肯定会报错。我们还得做些事情。</p>
+<p>对于这方面的详细文档请参考：<a href="https://docs.djangoproject.com/en/1.9/topics/auth/default/" target="_blank" rel="noopener">https://docs.djangoproject.com/en/1.9/topics/auth/default/</a></p>
+<p>打开mysite/urls.py文件，添加一个logout配置：</p>
+<pre><code class="line-numbers language-python">from django.conf.urls import patterns, include, url
+
+from django.contrib import admin
+admin.autodiscover()
+
+urlpatterns = patterns(&#39;&#39;,
+    url(r&#39;^admin/&#39;, include(admin.site.urls)),
+    url(r&#39;^accounts/login/$&#39;, &#39;django.contrib.auth.views.login&#39;),
+    url(r&#39;^accounts/logout/$&#39;, &#39;django.contrib.auth.views.logout&#39;, {&#39;next_page&#39;: &#39;/&#39;}),
+    url(r&#39;&#39;, include(&#39;blog.urls&#39;)),
+)
+</code></pre>
+<p>如果访问网站时出现模板找不到错误，那么你就在<code>mysite/settings.py</code>中添加如下配置：</p>
+<pre><code class="line-numbers language-python"># TEMPLATE_DIRS
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, &#39;mysite/templates&#39;),
+    os.path.join(BASE_DIR, &#39;blog/templates&#39;),
+)
+</code></pre>
+<p>好的，现在你已经可以达成如下的效果了：</p>
+<ol>
+<li>需要一个用户名和密码登录系统</li>
+<li>在添加/编辑/删除/发布文章的时候需要登录</li>
+<li>也能注销</li>
+</ol>
+<p>这么说的话，这个博客系统算功能比较完善了！朋友，祝福你。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/08/20/simpleblog-09.html">Django1.9开发博客09- 用户认证</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/08/21/simpleblog-10.html" class="pre-post btn btn-default" title='Django1.9开发博客10- 全文搜索'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Django1.9开发博客10- 全文搜索</span>
+        </a>
+    
+    
+        <a href="/2015/08/18/simpleblog-08.html" class="next-post btn btn-default" title='Django1.9开发博客08- 继续完善'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Django1.9开发博客08- 继续完善</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#编辑和删除的认证"><span class="toc-text">编辑和删除的认证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户登录"><span class="toc-text">用户登录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改进显示"><span class="toc-text">改进显示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户注销"><span class="toc-text">用户注销</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

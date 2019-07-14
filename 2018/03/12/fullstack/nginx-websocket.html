@@ -1,0 +1,515 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="nginx,websocket,">
+
+
+    <meta name="description" content="WebSocket协议相比较于HTTP协议成功握手后可以多次进行通讯，直到连接被关闭。但是WebSocket中的握手和HTTP中的握手兼容，
+它使用HTTP中的Upgrade协议头将连接从HTTP升级到WebSocket。这使得WebSocket程序可以更容易的使用现已存在的基础设施。
+Web...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>nginx反向代理WebSocket | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="nginx反向代理WebSocket">
+            
+                nginx反向代理WebSocket
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/fullstack">
+            fullstack
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/nginx" title='nginx'>
+                        nginx
+                    </a>
+                
+                    <a href="/tags/websocket" title='websocket'>
+                        websocket
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/03/12</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>WebSocket协议相比较于HTTP协议成功握手后可以多次进行通讯，直到连接被关闭。但是WebSocket中的握手和HTTP中的握手兼容，
+它使用HTTP中的Upgrade协议头将连接从HTTP升级到WebSocket。这使得WebSocket程序可以更容易的使用现已存在的基础设施。</p>
+<p>WebSocket工作在HTTP的80和443端口并使用前缀ws://或者wss://进行协议标注，在建立连接时使用HTTP/1.1的101状态码进行协议切换，
+当前标准不支持两个客户端之间不借助HTTP直接建立Websocket连接。</p>
+<p>更多Websocket的介绍可参考我写的 <a href="https://www.xncoding.com/2017/05/03/web/websocket.html">聊一聊WebSocket</a> 一文。</p>
+<p>开发小程序的时候需要用到WebSocket长连接和推送技术，但是必须使用wss，并且必须通过域名访问。这时候就需要用到nginx反向代理了。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>一般我们开发的WebSocket服务程序使用ws协议，明文的。但是怎样让它安全的通过互联网传输呢？这时候可以通过nginx在客户端和服务端直接做一个转发了，
+客户端通过wss访问，然后nginx和服务端通过ws协议通信。如下图所示：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-websocket01.png" alt></p>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>前提条件是你有一个域名，并且申请好了证书。</p>
+<p>新建nginx配置文件<code>/etc/nginx/conf.d/websocket.conf</code>，内容如下：</p>
+<pre><code>map $http_upgrade $connection_upgrade {
+    default upgrade;
+    &#39;&#39; close;
+}
+
+upstream websocket {
+    server localhost:8282; # appserver_ip:ws_port
+}
+
+server {
+     server_name test.enzhico.net;
+     listen 443 ssl;
+     location / {
+         proxy_pass http://websocket;
+         proxy_read_timeout 300s;
+         proxy_send_timeout 300s;
+
+         proxy_set_header Host $host;
+         proxy_set_header X-Real-IP $remote_addr;
+         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection $connection_upgrade;
+     }
+    ssl_certificate /etc/letsencrypt/live/test.enzhico.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/test.enzhico.net/privkey.pem;
+}
+</code></pre><p>之类解释一下关键配置部分：</p>
+<p>最重要的就是在反向代理的配置中增加了如下两行，其它的部分和普通的HTTP反向代理没有任何差别。</p>
+<pre><code>proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection $connection_upgrade;
+</code></pre><p>这里面的关键部分在于HTTP的请求中多了如下头部：</p>
+<pre><code>Upgrade: websocket
+Connection: Upgrade
+</code></pre><p>这两个字段表示请求服务器升级协议为WebSocket。服务器处理完请求后，响应如下报文：</p>
+<pre><code># 状态码为101
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: upgrade
+</code></pre><p>告诉客户端已成功切换协议，升级为Websocket协议。握手成功之后，服务器端和客户端便角色对等，就像普通的Socket一样，能够双向通信。
+不再进行HTTP的交互，而是开始WebSocket的数据帧协议实现数据交换。</p>
+<p>这里使用map指令可以将变量组合成为新的变量，会根据客户端传来的连接中是否带有Upgrade头来决定是否给源站传递Connection头，
+这样做的方法比直接全部传递upgrade更加优雅。</p>
+<p>默认情况下，连接将会在无数据传输60秒后关闭，<code>proxy_read_timeout</code>参数可以延长这个时间。源站通过定期发送ping帧以保持连接并确认连接是否还在使用。</p>
+<h2 id="两个超时参数"><a href="#两个超时参数" class="headerlink" title="两个超时参数"></a>两个超时参数</h2><p><strong>proxy_read_timeout</strong></p>
+<blockquote>
+<p>语法 proxy_read_timeout time 
+默认值 60s
+上下文 http server location
+说明 该指令设置与代理服务器的读超时时间。它决定了nginx会等待多长时间来获得请求的响应。
+这个时间不是获得整个response的时间，而是两次reading操作的时间。</p>
+</blockquote>
+<p><strong>proxy_send_timeout</strong></p>
+<blockquote>
+<p>语法 proxy_send_timeout time 
+默认值 60s
+上下文 http server location
+说明 这个指定设置了发送请求给upstream服务器的超时时间。超时设置不是为了整个发送期间，而是在两次write操作期间。
+如果超时后，upstream没有收到新的数据，nginx会关闭连接</p>
+</blockquote>
+<h2 id="多次代理转发"><a href="#多次代理转发" class="headerlink" title="多次代理转发"></a>多次代理转发</h2><p>工作中遇见过一种情况，就是某个域名在移动网络下面访问不了，这样的话我需要通过一个前段代理服务器做转发，这样就涉及到两次代理。</p>
+<p>比如访问的websocket服务URL为：</p>
+<pre><code>wss://test.enzhico.net
+</code></pre><p>这个在腾讯云公网IP上面，所有网络都能访问。另外一个域名<code>board.xncoding.com</code>解析到电信网络，部署在网关中心，这个域名腾讯云可以访问到。</p>
+<p>在腾讯云主机上面：</p>
+<pre><code>map $http_upgrade $connection_upgrade {
+    default upgrade;
+    &#39;&#39; close;
+}
+
+server {
+     server_name test.enzhico.net;
+     location / {
+         proxy_pass http://board.xncoding.com;
+         proxy_read_timeout 300s;
+         proxy_send_timeout 300s;
+         #proxy_set_header Host $host;
+         proxy_set_header X-Real-IP $remote_addr;
+         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection $connection_upgrade;
+    }
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/test.enzhico.net/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/test.enzhico.net/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+
+</code></pre><p>上面唯一要注意的是忙，把<code>proxy_set_header Host $host;</code>这一行注释掉了。</p>
+<p>而在网关中心主机上面：</p>
+<pre><code>map $http_upgrade $connection_upgrade {
+    default upgrade;
+    &#39;&#39; close;
+}
+
+upstream websocket {
+    server localhost:8282; # appserver_ip:ws_port
+}
+
+server {
+    listen 80;
+    server_name board.xncoding.com;
+    location / {
+        proxy_pass http://websocket;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 300s;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+}
+</code></pre><p>只需要最外层使用wss协议，里面的交互都使用ws协议，所以监听80端口即可。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://pankajmalhotra.com/Websockets-SSL-TLS-Termination-Using-NGINX-Proxy" target="_blank" rel="noopener">Websockets SSL/TLS Termination Using NGINX Proxy</a></li>
+<li><a href="https://www.hi-linux.com/posts/42176.html" target="_blank" rel="noopener">配置Nginx反向代理WebSocket</a></li>
+</ul>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/03/12/fullstack/nginx-websocket.html">nginx反向代理WebSocket</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/03/17/linux/nginx-module.html" class="pre-post btn btn-default" title='Nginx重新编译添加模块'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Nginx重新编译添加模块</span>
+        </a>
+    
+    
+        <a href="/2018/02/20/linux/samba.html" class="next-post btn btn-default" title='CentOS7通过samba共享文件夹'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CentOS7通过samba共享文件夹</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#原理"><span class="toc-text">原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置"><span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#两个超时参数"><span class="toc-text">两个超时参数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多次代理转发"><span class="toc-text">多次代理转发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考"><span class="toc-text">参考</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

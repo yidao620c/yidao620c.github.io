@@ -1,0 +1,452 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="samba,">
+
+
+    <meta name="description" content="Samba是在Linux系统上实现SMB协议的一个免费软件，由服务器及客户端程序构成。
+SMB(Server Messages Block, 信息服务块)是一种在局域网上共享文件和打印机的一种通信协议，
+它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。
+SMB协议是客户机/服务器...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CentOS7通过samba共享文件夹 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CentOS7通过samba共享文件夹">
+            
+                CentOS7通过samba共享文件夹
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/linux">
+            linux
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/samba" title='samba'>
+                        samba
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/02/20</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Samba是在Linux系统上实现SMB协议的一个免费软件，由服务器及客户端程序构成。
+SMB(Server Messages Block, 信息服务块)是一种在局域网上共享文件和打印机的一种通信协议，
+它为局域网内的不同计算机之间提供文件及打印机等资源的共享服务。
+SMB协议是客户机/服务器型协议，客户机通过该协议可以访问服务器上的共享文件系统，打印机及其他资源。 </p>
+<p>比如我想共享/home/samba这个文件夹给其他计算机使用。</p>
+<h2 id="安装samba"><a href="#安装samba" class="headerlink" title="安装samba"></a>安装samba</h2><pre><code>yum install -y samba
+</code></pre><h2 id="创建samba用户"><a href="#创建samba用户" class="headerlink" title="创建samba用户"></a>创建samba用户</h2><pre><code>useradd samba
+</code></pre><h2 id="修改samba配置"><a href="#修改samba配置" class="headerlink" title="修改samba配置"></a>修改samba配置</h2><p>配置文件是/etc/samba/smb.conf</p>
+<pre><code># See smb.conf.example for a more detailed config file or
+# read the smb.conf manpage.
+# Run &#39;testparm&#39; to verify the config is correct after
+# you modified it.
+
+[global]
+    workgroup = SAMBA   #samba的工作组，设置成 Windows 的工作组
+    security = user     #安全选项，可以是 share|user|server|domain，安全级别递增
+    passdb backend = tdbsam
+    printing = cups
+    printcap name = cups
+    load printers = yes
+    cups options = raw
+
+[homes]   #共享默认会将用户的主目录共享 , 这是不安全的 , 可以将其注释
+    comment = Home Directories
+    valid users = %S, %D%w%S
+    browseable = No
+    read only = No
+    inherit acls = Yes
+
+[printers]   #打印机共享
+    comment = All Printers
+    path = /var/tmp
+    printable = Yes
+    create mask = 0600
+    browseable = No
+
+[print$]
+    comment = Printer Drivers
+    path = /var/lib/samba/drivers
+    write list = root
+    create mask = 0664
+    directory mask = 0775
+
+[rootdir]   #自定义的共享文件夹
+    comment = SambaRoot
+    path = /home/samba/   #共享的路径
+    read only = No
+</code></pre><p>注意，自己修改时去掉 <code>#</code> 后面的备注</p>
+<h2 id="添加-Samba-用户"><a href="#添加-Samba-用户" class="headerlink" title="添加 Samba 用户"></a>添加 Samba 用户</h2><p>添加刚刚创建的samba用户，根据提示设置相应的密码</p>
+<pre><code>smbpasswd -a samba
+</code></pre><p>smbpasswd 命令是用于维护 Samba 服务器的用户帐号的，具体如下：</p>
+<pre><code>// 添加 Samba 用户帐号
+# smbpasswd -a sambauser 
+// 禁用 Samba 用户帐号
+# smbpasswd -d sambauser
+// 启用 Samba 用户帐号
+# smbpasswd -e sambauser
+// 删除 Samba 用户帐号
+# smbpasswd -x sambauser
+</code></pre><h2 id="启动-Samba-服务"><a href="#启动-Samba-服务" class="headerlink" title="启动 Samba 服务"></a>启动 Samba 服务</h2><p>启动、停止、查看相关命令</p>
+<pre><code>systemctl start smb
+systemctl stop smb
+systemctl status smb
+</code></pre><h2 id="Windows-访问共享目录"><a href="#Windows-访问共享目录" class="headerlink" title="Windows 访问共享目录"></a>Windows 访问共享目录</h2><p>直接 Win + R , 在运行界面输入 \192.168.1.20， 也就是你的 Linux 主机地址，会弹出用户名密码输入界面，
+输入刚刚设置的用户名密码就可以访问。</p>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><p>如果 Windows 下访问 Linux 下共享目录 , 提示没有权限</p>
+<ol>
+<li>确保 Linux 下防火墙关闭或者是开放共享目录权限</li>
+<li>确保 Samba 服务器配置文件 smb.conf 设置没有问题</li>
+<li>确保 setlinux 关闭 , 可以用 <code>setenforce 0</code> 命令执行; 默认 SELinux 禁止网络上对 Samba 服务器上的共享目录进行写操作</li>
+</ol>
+<p>Samb 还需要开放下面四个端口</p>
+<pre><code>UDP 137、UDP 138、TCP 139、TCP 445
+</code></pre>
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/02/20/linux/samba.html">CentOS7通过samba共享文件夹</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/03/12/fullstack/nginx-websocket.html" class="pre-post btn btn-default" title='nginx反向代理WebSocket'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">nginx反向代理WebSocket</span>
+        </a>
+    
+    
+        <a href="/2018/02/16/linux/ntpd.html" class="next-post btn btn-default" title='CentOS7搭建NTP服务器'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CentOS7搭建NTP服务器</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装samba"><span class="toc-text">安装samba</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建samba用户"><span class="toc-text">创建samba用户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改samba配置"><span class="toc-text">修改samba配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加-Samba-用户"><span class="toc-text">添加 Samba 用户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动-Samba-服务"><span class="toc-text">启动 Samba 服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Windows-访问共享目录"><span class="toc-text">Windows 访问共享目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常见问题"><span class="toc-text">常见问题</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

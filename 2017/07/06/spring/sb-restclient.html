@@ -1,0 +1,700 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="springboot,">
+
+
+    <meta name="description" content="spring框架提供的RestTemplate类可用于在应用中调用rest服务，它简化了与http服务的通信方式，统一了RESTful的标准，封装了http链接，
+我们只需要传入url及返回值类型即可。相较于之前常用的HttpClient，RestTemplate是一种更优雅的调用RESTfu...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>SpringBoot系列 - 使用RestTemplate | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="SpringBoot系列 - 使用RestTemplate">
+            
+                SpringBoot系列 - 使用RestTemplate
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/spring">
+            spring
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/springboot" title='springboot'>
+                        springboot
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2017/07/06</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>spring框架提供的RestTemplate类可用于在应用中调用rest服务，它简化了与http服务的通信方式，统一了RESTful的标准，封装了http链接，
+我们只需要传入url及返回值类型即可。相较于之前常用的HttpClient，RestTemplate是一种更优雅的调用RESTful服务的方式。</p>
+<p>RestTemplate默认依赖JDK提供http连接的能力（HttpURLConnection），如果有需要的话也可以通过setRequestFactory方法替换为例如
+Apache HttpComponents、Netty或OkHttp等其它HTTP library。</p>
+<p>本篇介绍如何使用RestTemplate，以及在SpringBoot里面的配置和注入。</p>
+<h2 id="实现逻辑"><a href="#实现逻辑" class="headerlink" title="实现逻辑"></a>实现逻辑</h2><p>RestTemplate包含以下几个部分：</p>
+<ul>
+<li>HttpMessageConverter 对象转换器</li>
+<li>ClientHttpRequestFactory 默认是JDK的HttpURLConnection</li>
+<li>ResponseErrorHandler 异常处理</li>
+<li>ClientHttpRequestInterceptor 请求拦截器</li>
+</ul>
+<p>用一张图可以很直观的理解：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rest01.png" alt></p>
+<p>直接使用方式很简单：</p>
+<pre><code class="line-numbers language-java">public class RestTemplateTest {
+    public static void main(String[] args) {
+        RestTemplate restT = new RestTemplate();
+        //通过Jackson JSON processing library直接将返回值绑定到对象
+        Quote quote = restT.getForObject(&quot;http://gturnquist-quoters.cfapps.io/api/random&quot;, Quote.class);
+        String quoteString = restT.getForObject(&quot;http://gturnquist-quoters.cfapps.io/api/random&quot;, String.class);
+        System.out.println(quoteString);
+    }
+}
+</code></pre>
+<h2 id="发送GET请求"><a href="#发送GET请求" class="headerlink" title="发送GET请求"></a>发送GET请求</h2><pre><code class="line-numbers language-java">// 1-getForObject()
+User user1 = this.restTemplate.getForObject(uri, User.class);
+
+// 2-getForEntity()
+ResponseEntity&lt;User&gt; responseEntity1 = this.restTemplate.getForEntity(uri, User.class);
+HttpStatus statusCode = responseEntity1.getStatusCode();
+HttpHeaders header = responseEntity1.getHeaders();
+User user2 = responseEntity1.getBody();
+
+// 3-exchange()
+RequestEntity requestEntity = RequestEntity.get(new URI(uri)).build();
+ResponseEntity&lt;User&gt; responseEntity2 = this.restTemplate.exchange(requestEntity, User.class);
+User user3 = responseEntity2.getBody();
+</code></pre>
+<h2 id="发送POST请求"><a href="#发送POST请求" class="headerlink" title="发送POST请求"></a>发送POST请求</h2><pre><code class="line-numbers language-java">// 1-postForObject()
+User user1 = this.restTemplate.postForObject(uri, user, User.class);
+
+// 2-postForEntity()
+ResponseEntity&lt;User&gt; responseEntity1 = this.restTemplate.postForEntity(uri, user, User.class);
+
+// 3-exchange()
+RequestEntity&lt;User&gt; requestEntity = RequestEntity.post(new URI(uri)).body(user);
+ResponseEntity&lt;User&gt; responseEntity2 = this.restTemplate.exchange(requestEntity, User.class);
+</code></pre>
+<h2 id="设置HTTP-Header"><a href="#设置HTTP-Header" class="headerlink" title="设置HTTP Header"></a>设置HTTP Header</h2><pre><code class="line-numbers language-java">// 1-Content-Type
+RequestEntity&lt;User&gt; requestEntity = RequestEntity
+        .post(new URI(uri))
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(user);
+
+// 2-Accept
+RequestEntity&lt;User&gt; requestEntity = RequestEntity
+        .post(new URI(uri))
+        .accept(MediaType.APPLICATION_JSON)
+        .body(user);
+
+// 3-Other
+RequestEntity&lt;User&gt; requestEntity = RequestEntity
+        .post(new URI(uri))
+        .header(&quot;Authorization&quot;, &quot;Basic &quot; + base64Credentials)
+        .body(user);
+</code></pre>
+<h2 id="捕获异常"><a href="#捕获异常" class="headerlink" title="捕获异常"></a>捕获异常</h2><p>捕获<code>HttpServerErrorException</code></p>
+<pre><code class="line-numbers language-java">try {
+    responseEntity = restTemplate.exchange(requestEntity, String.class);
+} catch (HttpServerErrorException e) {
+    // log error
+}
+</code></pre>
+<h2 id="自定义异常处理器"><a href="#自定义异常处理器" class="headerlink" title="自定义异常处理器"></a>自定义异常处理器</h2><pre><code class="line-numbers language-java">public class CustomErrorHandler extends DefaultResponseErrorHandler {
+    @Override
+    public void handleError(ClientHttpResponse response) throws IOException {
+        // todo
+    }
+}
+</code></pre>
+<p>然后设置下异常处理器：</p>
+<pre><code class="line-numbers language-java">@Configuration
+public class RestClientConfig {
+    @Bean
+    public RestTemplate restTemplate() {
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setErrorHandler(new CustomErrorHandler());
+        return restTemplate;
+    }
+}
+</code></pre>
+<h2 id="配置类"><a href="#配置类" class="headerlink" title="配置类"></a>配置类</h2><p>创建<code>HttpClientConfig</code>类，设置连接池大小、超时时间、重试机制等。配置如下：</p>
+<pre><code class="line-numbers language-java">/**
+ * - Supports both HTTP and HTTPS
+ * - Uses a connection pool to re-use connections and save overhead of creating connections.
+ * - Has a custom connection keep-alive strategy (to apply a default keep-alive if one isn&#39;t specified)
+ * - Starts an idle connection monitor to continuously clean up stale connections.
+ *
+ * @author XiongNeng
+ * @version 1.0
+ * @since 2018/7/5
+ */
+@Configuration
+@EnableScheduling
+public class HttpClientConfig {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientConfig.class);
+
+    @Resource
+    private HttpClientProperties p;
+
+    @Bean
+    public PoolingHttpClientConnectionManager poolingConnectionManager() {
+        SSLContextBuilder builder = new SSLContextBuilder();
+        try {
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                public boolean isTrusted(X509Certificate[] arg0, String arg1) {
+                    return true;
+                }
+            });
+        } catch (NoSuchAlgorithmException | KeyStoreException e) {
+            LOGGER.error(&quot;Pooling Connection Manager Initialisation failure because of &quot; + e.getMessage(), e);
+        }
+
+        SSLConnectionSocketFactory sslsf = null;
+        try {
+            sslsf = new SSLConnectionSocketFactory(builder.build());
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            LOGGER.error(&quot;Pooling Connection Manager Initialisation failure because of &quot; + e.getMessage(), e);
+        }
+
+        Registry&lt;ConnectionSocketFactory&gt; socketFactoryRegistry = RegistryBuilder
+                .&lt;ConnectionSocketFactory&gt;create()
+                .register(&quot;https&quot;, sslsf)
+                .register(&quot;http&quot;, new PlainConnectionSocketFactory())
+                .build();
+
+        PoolingHttpClientConnectionManager poolingConnectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        poolingConnectionManager.setMaxTotal(p.getMaxTotalConnections());  //最大连接数
+        poolingConnectionManager.setDefaultMaxPerRoute(p.getDefaultMaxPerRoute());  //同路由并发数
+        return poolingConnectionManager;
+    }
+
+    @Bean
+    public ConnectionKeepAliveStrategy connectionKeepAliveStrategy() {
+        return new ConnectionKeepAliveStrategy() {
+            @Override
+            public long getKeepAliveDuration(HttpResponse response, HttpContext httpContext) {
+                HeaderElementIterator it = new BasicHeaderElementIterator
+                        (response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+                while (it.hasNext()) {
+                    HeaderElement he = it.nextElement();
+                    String param = he.getName();
+                    String value = he.getValue();
+                    if (value != null &amp;&amp; param.equalsIgnoreCase(&quot;timeout&quot;)) {
+                        return Long.parseLong(value) * 1000;
+                    }
+                }
+                return p.getDefaultKeepAliveTimeMillis();
+            }
+        };
+    }
+
+    @Bean
+    public CloseableHttpClient httpClient() {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectionRequestTimeout(p.getRequestTimeout())
+                .setConnectTimeout(p.getConnectTimeout())
+                .setSocketTimeout(p.getSocketTimeout()).build();
+
+        return HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .setConnectionManager(poolingConnectionManager())
+                .setKeepAliveStrategy(connectionKeepAliveStrategy())
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, true))  // 重试次数
+                .build();
+    }
+
+    @Bean
+    public Runnable idleConnectionMonitor(final PoolingHttpClientConnectionManager connectionManager) {
+        return new Runnable() {
+            @Override
+            @Scheduled(fixedDelay = 10000)
+            public void run() {
+                try {
+                    if (connectionManager != null) {
+                        LOGGER.trace(&quot;run IdleConnectionMonitor - Closing expired and idle connections...&quot;);
+                        connectionManager.closeExpiredConnections();
+                        connectionManager.closeIdleConnections(p.getCloseIdleConnectionWaitTimeSecs(), TimeUnit.SECONDS);
+                    } else {
+                        LOGGER.trace(&quot;run IdleConnectionMonitor - Http Client Connection manager is not initialised&quot;);
+                    }
+                } catch (Exception e) {
+                    LOGGER.error(&quot;run IdleConnectionMonitor - Exception occurred. msg={}, e={}&quot;, e.getMessage(), e);
+                }
+            }
+        };
+    }
+
+    @Bean
+    public TaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setThreadNamePrefix(&quot;poolScheduler&quot;);
+        scheduler.setPoolSize(50);
+        return scheduler;
+    }
+}
+</code></pre>
+<p>然后再配置RestTemplateConfig类，使用之前配置好的CloseableHttpClient类注入，同时配置一些默认的消息转换器：</p>
+<pre><code class="line-numbers language-java">/**
+ * RestTemplate客户端连接池配置
+ *
+ * @author XiongNeng
+ * @version 1.0
+ * @since 2018/1/24
+ */
+@Configuration
+@EnableAspectJAutoProxy(proxyTargetClass = true)
+public class RestTemplateConfig {
+
+    @Resource
+    private CloseableHttpClient httpClient;
+
+    @Bean
+    public RestTemplate restTemplate(MappingJackson2HttpMessageConverter jackson2HttpMessageConverter) {
+        RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
+
+        List&lt;HttpMessageConverter&lt;?&gt;&gt; messageConverters = new ArrayList&lt;&gt;();
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName(&quot;utf-8&quot;));
+        messageConverters.add(stringHttpMessageConverter);
+        messageConverters.add(jackson2HttpMessageConverter);
+        restTemplate.setMessageConverters(messageConverters);
+
+        return restTemplate;
+    }
+
+    @Bean
+    public HttpComponentsClientHttpRequestFactory clientHttpRequestFactory() {
+        HttpComponentsClientHttpRequestFactory rf = new HttpComponentsClientHttpRequestFactory();
+        rf.setHttpClient(httpClient);
+        return rf;
+    }
+
+}
+</code></pre>
+<p>注意，如果没有apache的HttpClient类，需要在pom文件中添加：</p>
+<pre><code class="line-numbers language-xml">&lt;dependency&gt;
+    &lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;
+    &lt;artifactId&gt;httpclient&lt;/artifactId&gt;
+    &lt;version&gt;4.5.3&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="发送文件"><a href="#发送文件" class="headerlink" title="发送文件"></a>发送文件</h2><pre><code class="line-numbers language-java">MultiValueMap&lt;String, Object&gt; multiPartBody = new LinkedMultiValueMap&lt;&gt;();
+multiPartBody.add(&quot;file&quot;, new ClassPathResource(&quot;/tmp/user.txt&quot;));
+RequestEntity&lt;MultiValueMap&lt;String, Object&gt;&gt; requestEntity = RequestEntity
+        .post(uri)
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(multiPartBody);
+</code></pre>
+<h2 id="下载文件"><a href="#下载文件" class="headerlink" title="下载文件"></a>下载文件</h2><pre><code class="line-numbers language-java">// 小文件
+RequestEntity requestEntity = RequestEntity.get(uri).build();
+ResponseEntity&lt;byte[]&gt; responseEntity = restTemplate.exchange(requestEntity, byte[].class);
+byte[] downloadContent = responseEntity.getBody();
+
+// 大文件  
+ResponseExtractor&lt;ResponseEntity&lt;File&gt;&gt; responseExtractor = new ResponseExtractor&lt;ResponseEntity&lt;File&gt;&gt;() {
+    @Override
+    public ResponseEntity&lt;File&gt; extractData(ClientHttpResponse response) throws IOException {
+        File rcvFile = File.createTempFile(&quot;rcvFile&quot;, &quot;zip&quot;);
+        FileCopyUtils.copy(response.getBody(), new FileOutputStream(rcvFile));
+        return ResponseEntity.status(response.getStatusCode()).headers(response.getHeaders()).body(rcvFile);
+    }
+};
+File getFile = this.restTemplate.execute(targetUri, HttpMethod.GET, null, responseExtractor);
+</code></pre>
+<h2 id="Service注入"><a href="#Service注入" class="headerlink" title="Service注入"></a>Service注入</h2><pre><code class="line-numbers language-java">@Service
+public class DeviceService {
+    private static final Logger logger = LoggerFactory.getLogger(DeviceService.class);
+
+    @Resource
+    private RestTemplate restTemplate;
+}
+</code></pre>
+<h2 id="实际使用例子"><a href="#实际使用例子" class="headerlink" title="实际使用例子"></a>实际使用例子</h2><pre><code class="line-numbers language-java">// 开始推送消息
+logger.info(&quot;解绑成功后推送消息给对应的POS机&quot;);
+LoginParam loginParam = new LoginParam();
+loginParam.setUsername(managerInfo.getUsername());
+loginParam.setPassword(managerInfo.getPassword());
+HttpBaseResponse r = restTemplate.postForObject(
+        p.getPosapiUrlPrefix() + &quot;/notifyLogin&quot;, loginParam, HttpBaseResponse.class);
+if (r.isSuccess()) {
+    logger.info(&quot;推送消息登录认证成功&quot;);
+    String token = (String) r.getData();
+    UnbindParam unbindParam = new UnbindParam();
+    unbindParam.setImei(pos.getImei());
+    unbindParam.setLocation(location);
+    // 设置HTTP Header信息
+    URI uri;
+    try {
+        uri = new URI(p.getPosapiUrlPrefix() + &quot;/notify/unbind&quot;);
+    } catch (URISyntaxException e) {
+        logger.error(&quot;URI构建失败&quot;, e);
+        return 1;
+    }
+    RequestEntity&lt;UnbindParam&gt; requestEntity = RequestEntity
+            .post(uri)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON)
+            .header(&quot;Authorization&quot;, token)
+            .body(unbindParam);
+    ResponseEntity&lt;HttpBaseResponse&gt; responseEntity = restTemplate.exchange(requestEntity, HttpBaseResponse.class);
+    HttpBaseResponse r2 = responseEntity.getBody();
+    if (r2.isSuccess()) {
+        logger.info(&quot;推送消息解绑网点成功&quot;);
+    } else {
+        logger.error(&quot;推送消息解绑网点失败，errmsg = &quot; + r2.getMsg());
+    }
+} else {
+    logger.error(&quot;推送消息登录认证失败&quot;);
+}
+</code></pre>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-resttemplate" target="_blank" rel="noopener">springboot-resttemplate</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2017/07/06/spring/sb-restclient.html">SpringBoot系列 - 使用RestTemplate</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2017/07/07/spring/sb-shiro.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成Shiro权限管理'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 集成Shiro权限管理</span>
+        </a>
+    
+    
+        <a href="/2017/07/05/spring/sb-restful.html" class="next-post btn btn-default" title='SpringBoot系列 - 实现RESTful接口'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">SpringBoot系列 - 实现RESTful接口</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#实现逻辑"><span class="toc-text">实现逻辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发送GET请求"><span class="toc-text">发送GET请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发送POST请求"><span class="toc-text">发送POST请求</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置HTTP-Header"><span class="toc-text">设置HTTP Header</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#捕获异常"><span class="toc-text">捕获异常</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义异常处理器"><span class="toc-text">自定义异常处理器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置类"><span class="toc-text">配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发送文件"><span class="toc-text">发送文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#下载文件"><span class="toc-text">下载文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Service注入"><span class="toc-text">Service注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#实际使用例子"><span class="toc-text">实际使用例子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

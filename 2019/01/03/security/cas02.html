@@ -1,0 +1,590 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="CAS,">
+
+
+    <meta name="description" content="这篇开始写一个系列，讲解如何使用配置和使用CAS实现单点登录。
+我的环境：
+
+CAS-server：5.3.X
+Maven：3.6.0
+JDK：1.8
+cas-server域名：cas.server.com
+tomcat服务器：SpringBoot内置/tomcat8
+操作系统：华为云主机上C...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CAS教程 - 服务安装 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CAS教程 - 服务安装">
+            
+                CAS教程 - 服务安装
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/网络安全">
+            网络安全
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/CAS" title='CAS'>
+                        CAS
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2019/01/03</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>这篇开始写一个系列，讲解如何使用配置和使用CAS实现单点登录。</p>
+<p>我的环境：</p>
+<ul>
+<li>CAS-server：5.3.X</li>
+<li>Maven：3.6.0</li>
+<li>JDK：1.8</li>
+<li>cas-server域名：cas.server.com</li>
+<li>tomcat服务器：SpringBoot内置/tomcat8</li>
+<li>操作系统：华为云主机上CentOS 7</li>
+</ul>
+<p>Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。</p>
+<h2 id="Maven镜像配置"><a href="#Maven镜像配置" class="headerlink" title="Maven镜像配置"></a>Maven镜像配置</h2><p>华为和Sonatype 联合发布中国官方 Maven 仓库，特意试了试，感觉速度挺快的，比阿里的快。这里贴一下配置：</p>
+<pre><code>  &lt;servers&gt;
+    &lt;server&gt;
+      &lt;id&gt;huaweicloud&lt;/id&gt;
+      &lt;username&gt;anonymous&lt;/username&gt;
+      &lt;password&gt;devcloud&lt;/password&gt;
+    &lt;/server&gt;
+  &lt;/servers&gt;
+
+  &lt;mirrors&gt;
+      &lt;mirror&gt;
+          &lt;id&gt;nexus-aliyun&lt;/id&gt;
+          &lt;mirrorOf&gt;central&lt;/mirrorOf&gt;
+          &lt;name&gt;Nexus aliyun&lt;/name&gt;
+          &lt;url&gt;http://maven.aliyun.com/nexus/content/groups/public&lt;/url&gt;
+      &lt;/mirror&gt;
+      &lt;mirror&gt;
+          &lt;id&gt;huaweicloud&lt;/id&gt;
+          &lt;mirrorOf&gt;*&lt;/mirrorOf&gt;
+          &lt;name&gt;Nexus osc thirdparty&lt;/name&gt;
+          &lt;url&gt;https://mirrors.huaweicloud.com/repository/maven/&lt;/url&gt;
+        &lt;/mirror&gt;
+    &lt;/mirrors&gt;
+</code></pre><h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>Maven地址：<a href="https://github.com/apereo/cas-overlay-template" target="_blank" rel="noopener">https://github.com/apereo/cas-overlay-template</a></p>
+<p>Gradle地址：<a href="https://github.com/apereo/cas-gradle-overlay-template" target="_blank" rel="noopener">https://github.com/apereo/cas-gradle-overlay-template</a></p>
+<p>我下载的是5.3分支：</p>
+<pre><code>git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
+</code></pre><h2 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h2><p>将下载Overlay解压，默认配置就可以直接构筑能用的 war 包：</p>
+<pre><code>cd cas-overlay-template/
+./build.sh package
+</code></pre><h2 id="证书生成"><a href="#证书生成" class="headerlink" title="证书生成"></a>证书生成</h2><p>由于CAS服务器需要HTTPS访问，所以需要生产证书并导入JRE中。</p>
+<p>创建一个cas目录，cd进入cas目录之后执行如下命令</p>
+<p>注意要点</p>
+<ul>
+<li>名字和姓氏输入项：访问的域名地址</li>
+<li>alias：别名可以随便写，一般要有意义，后续操作别名要一致，我这里保持和域名统一了</li>
+<li>密码：changeit</li>
+<li>别名：cas.server.com</li>
+</ul>
+<p><strong>使用java自带keytool创建本地密钥库</strong></p>
+<pre><code>[root@ecs-hw01 cas]# keytool -genkey -alias cas.server.com -keyalg RSA -keystore casServer.keystore
+Enter keystore password:  
+Re-enter new password: 
+What is your first and last name?
+  [Unknown]:  cas.server.com
+What is the name of your organizational unit?
+  [Unknown]:  wusong
+What is the name of your organization?
+  [Unknown]:  yanfazu
+What is the name of your City or Locality?
+  [Unknown]:  beijing
+What is the name of your State or Province?
+  [Unknown]:  dongcheng
+What is the two-letter country code for this unit?
+  [Unknown]:  zh
+Is CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh correct?
+  [no]:  y
+
+Enter key password for &lt;cas.server.com&gt;
+    (RETURN if same as keystore password):  
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using &quot;keytool -importkeystore -srckeystore casServer.keystore -destkeystore casServer.keystore -deststoretype pkcs12&quot;.
+</code></pre><p><strong>把密钥库导出成证书文件</strong></p>
+<pre><code>[root@ecs-hw01 cas]# keytool -export -alias cas.server.com -keystore casServer.keystore -file casServer.crt -storepass changeit
+Certificate stored in file &lt;casServer.crt&gt;
+
+Warning:
+The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using &quot;keytool -importkeystore -srckeystore casServer.keystore -destkeystore casServer.keystore -deststoretype pkcs12&quot;.
+</code></pre><p><strong>查看证书</strong></p>
+<pre><code>[root@ecs-hw01 cas]# keytool -printcert -file casServer.crt
+Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Serial number: 6f53fb64
+Valid from: Sun Feb 17 20:52:57 CST 2019 until: Sat May 18 20:52:57 CST 2019
+Certificate fingerprints:
+     MD5:  9F:B9:29:69:B5:15:AF:B2:4B:5D:97:06:EA:C7:3C:F3
+     SHA1: 3D:64:ED:8C:FA:AF:F2:B6:E5:D5:A6:5D:DB:7F:44:EF:84:EC:8C:F7
+     SHA256: EF:A5:8A:B1:28:89:4C:D6:4E:B6:AF:64:F2:4A:A0:2B:B5:7B:4D:3E:9A:60:57:F3:6A:37:89:0C:FF:19:D9:BF
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: F9 B6 E1 F4 5F 3B 8D FE   88 1E 59 6A 2D 68 8D B1  ...._;....Yj-h..
+0010: 66 4D E1 AF                                        fM..
+]
+]
+</code></pre><p><strong>将创建过的证书导入到java证书库</strong></p>
+<pre><code>[root@ecs-hw01 cas]# keytool -import -keystore &quot;/usr/local/jdk/jre/lib/security/cacerts&quot; -file &quot;/root/cas/casServer.crt&quot; -alias cas.server.com
+Enter keystore password:  
+Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Serial number: 6f53fb64
+Valid from: Sun Feb 17 20:52:57 CST 2019 until: Sat May 18 20:52:57 CST 2019
+Certificate fingerprints:
+     MD5:  9F:B9:29:69:B5:15:AF:B2:4B:5D:97:06:EA:C7:3C:F3
+     SHA1: 3D:64:ED:8C:FA:AF:F2:B6:E5:D5:A6:5D:DB:7F:44:EF:84:EC:8C:F7
+     SHA256: EF:A5:8A:B1:28:89:4C:D6:4E:B6:AF:64:F2:4A:A0:2B:B5:7B:4D:3E:9A:60:57:F3:6A:37:89:0C:FF:19:D9:BF
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: F9 B6 E1 F4 5F 3B 8D FE   88 1E 59 6A 2D 68 8D B1  ...._;....Yj-h..
+0010: 66 4D E1 AF                                        fM..
+]
+]
+
+Trust this certificate? [no]:  y
+Certificate was added to keystore
+</code></pre><p><strong>查看JDK证书内容</strong></p>
+<pre><code>[root@ecs-hw01 cas]# keytool -list -v -keystore /usr/local/jdk/jre/lib/security/cacerts -alias cas.server.com
+Enter keystore password:  
+Alias name: cas.server.com
+Creation date: Feb 17, 2019
+Entry type: trustedCertEntry
+
+Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
+Serial number: 6f53fb64
+Valid from: Sun Feb 17 20:52:57 CST 2019 until: Sat May 18 20:52:57 CST 2019
+Certificate fingerprints:
+     MD5:  9F:B9:29:69:B5:15:AF:B2:4B:5D:97:06:EA:C7:3C:F3
+     SHA1: 3D:64:ED:8C:FA:AF:F2:B6:E5:D5:A6:5D:DB:7F:44:EF:84:EC:8C:F7
+     SHA256: EF:A5:8A:B1:28:89:4C:D6:4E:B6:AF:64:F2:4A:A0:2B:B5:7B:4D:3E:9A:60:57:F3:6A:37:89:0C:FF:19:D9:BF
+Signature algorithm name: SHA256withRSA
+Subject Public Key Algorithm: 2048-bit RSA key
+Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: F9 B6 E1 F4 5F 3B 8D FE   88 1E 59 6A 2D 68 8D B1  ...._;....Yj-h..
+0010: 66 4D E1 AF                                        fM..
+]
+]
+</code></pre><p><strong>根据 alias 别名删除 JDK 证书</strong></p>
+<p>做完实验后如果你想删除JDK证书，可使用如下命令：</p>
+<pre><code>keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/cacerts
+</code></pre><h2 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h2><p>第一步，先将上面创建的证书文件 <code>casServer.crt</code>、<code>casServer.keystore</code> 拷贝到项目的/etc/cas/目录中。</p>
+<p>第二步，然后修改<code>cas.properties</code>文件</p>
+<pre><code>cas.server.name: https://cas.server.com:8443
+cas.server.prefix: https://cas.server.com:8443/cas
+
+cas.adminPagesSecurity.ip=127\.0\.0\.1
+
+logging.config: file:/etc/cas/config/log4j2.xml
+# cas.serviceRegistry.config.location: classpath:/services
+
+server.ssl.keyStore=file:/etc/cas/casServer.keystore
+server.ssl.keyStorePassword=changeit
+server.ssl.keyPassword=changeit
+server.ssl.key-alias=cas.server.com
+</code></pre><p>第三步，修改log4j2.xml 日志文件</p>
+<p>在<code>cas-overlay-template-master</code>项目中，创建一个logs目录，用于存放日志文件，
+默认cas在项目根目录下生成日志，日志多了不方便管理，修改log4j2.xml文件，将日志目录做调整。</p>
+<p>比如将<code>fileName=&quot;${sys:cas.log.dir}/cas.log&quot;</code> 修改为 <code>fileName=&quot;${sys:cas.log.dir}/logs/cas.log&quot;</code></p>
+<p>第四步，将项目的/etc/cas复制到操作系统的/etc/命令中</p>
+<pre><code>[root@ecs-hw01 cas-overlay-template]# cp -r etc/cas/ /etc/
+</code></pre><h2 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h2><pre><code>[root@ecs-hw01 cas-overlay-template]# ./build.sh run
+</code></pre><p>如果是windows本地开发就在terminal中执行<code>build run</code></p>
+<p>本地修改host文件</p>
+<pre><code>xx.xx.xx.xx cas.server.com
+</code></pre><p>访问地址：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
+<p>默认账号：<code>casuser</code>默认密码：<code>Mellon</code> </p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190221-01.png" alt></p>
+<p>登录成功后页面：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190221-02.png" alt></p>
+<p>退出登录：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190221-03.png" alt></p>
+<h2 id="tomcat部署"><a href="#tomcat部署" class="headerlink" title="tomcat部署"></a>tomcat部署</h2><p>上面演示的是SpringBoot内置容器运行方式，现在演示如何部署到已有的tomcat容器中。</p>
+<p>tomcat的下载和安装我就不讲了，直接下载tomcat包解压即可。</p>
+<p>然后把上面mvn package命令生成的cas.war复制到webapps/目录中。</p>
+<p><strong>配置SSL</strong></p>
+<p>修改tomcat的配置文件server.xml，找到下面的代码：</p>
+<pre><code>&lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot;
+           maxThreads=&quot;150&quot; SSLEnabled=&quot;true&quot;&gt;
+    &lt;SSLHostConfig&gt;
+        &lt;Certificate certificateKeystoreFile=&quot;/etc/cas/casServer.keystore&quot;
+                     certificateKeystoreType=&quot;JKS&quot; certificateKeystorePassword=&quot;changeit&quot; /&gt;
+    &lt;/SSLHostConfig&gt;
+&lt;/Connector&gt;
+</code></pre><p>完了后去bin目录执行start.sh即可。访问：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
+<p>效果一样，完成验证！</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2019/01/03/security/cas02.html">CAS教程 - 服务安装</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2019/01/05/security/cas03.html" class="pre-post btn btn-default" title='CAS教程 - 定制开发'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">CAS教程 - 定制开发</span>
+        </a>
+    
+    
+        <a href="/2019/01/02/security/cas01.html" class="next-post btn btn-default" title='CAS教程 - 原理篇'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">CAS教程 - 原理篇</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Maven镜像配置"><span class="toc-text">Maven镜像配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#下载"><span class="toc-text">下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#构建"><span class="toc-text">构建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#证书生成"><span class="toc-text">证书生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#修改配置"><span class="toc-text">修改配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行测试"><span class="toc-text">运行测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#tomcat部署"><span class="toc-text">tomcat部署</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

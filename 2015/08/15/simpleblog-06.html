@@ -1,0 +1,466 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="django,">
+
+
+    <meta name="description" content="模板继承就是网站的多个页面可以共享同一个页面布局或者是页面的某几个部分的内容。通过这种方式你就需要在每个页面复制粘贴同样的代码了。
+如果你想改变页面某个公共部分，你不需要每个页面的去修改，只需要修改一个模板就行了，
+这样最大化复用，减少了冗余，也减少了出错的几率，而且你敲的代码也少了。
+创建一...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Django1.9开发博客06- 模板继承 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Django1.9开发博客06- 模板继承">
+            
+                Django1.9开发博客06- 模板继承
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/django" title='django'>
+                        django
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2015/08/15</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>模板继承就是网站的多个页面可以共享同一个页面布局或者是页面的某几个部分的内容。通过这种方式你就需要在每个页面复制粘贴同样的代码了。
+如果你想改变页面某个公共部分，你不需要每个页面的去修改，只需要修改一个模板就行了，
+这样最大化复用，减少了冗余，也减少了出错的几率，而且你敲的代码也少了。</p>
+<h3 id="创建一个base模板"><a href="#创建一个base模板" class="headerlink" title="创建一个base模板"></a>创建一个base模板</h3><p>一个base模板就是你全站所有页面都会继承的最基本的网站框架模板。我们在blog/templates/blog/中创建一个base.html模板：</p>
+<pre><code>blog
+└───templates
+    └───blog
+            base.html
+            post_list.html
+</code></pre><p>打开base.html，然后将post_list.html的所有内容都复制过来，现在它的内容如下：</p>
+<pre><code class="line-numbers language-html">@% load staticfiles %@
+&lt;html&gt;
+&lt;head&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css&quot;&gt;
+&lt;script src=&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;
+&lt;link href=&quot;http://fonts.googleapis.com/css?family=Lobster&amp;subset=latin,latin-ext&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;@% static &#39;css/blog.css&#39; %@&quot;&gt;
+&lt;title&gt;Django Girls Blog&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class=&quot;page-header&quot;&gt;
+        &lt;h1&gt;&lt;a href=&quot;/&quot;&gt;Django Girls Blog&lt;/a&gt;&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;content&quot;&gt;
+        &lt;div class=&quot;row&quot;&gt;
+            &lt;div class=&quot;col-md-8&quot;&gt;
+                @% for post in posts %@
+                    &lt;div class=&quot;post&quot;&gt;
+                        &lt;h1&gt;&lt;a href=&quot;&quot;&gt;@@ post.title @@&lt;/a&gt;&lt;/h1&gt;
+                        &lt;p&gt;published: @@ post.published_date @@&lt;/p&gt;
+                        &lt;p&gt;@@ post.text|linebreaks @@&lt;/p&gt;
+                    &lt;/div&gt;
+                @% endfor %@
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>在base.html中，将…块替换成下面的：</p>
+<pre><code class="line-numbers language-html">&lt;body&gt;
+    &lt;div class=&quot;page-header&quot;&gt;
+        &lt;h1&gt;&lt;a href=&quot;/&quot;&gt;Django Girls Blog&lt;/a&gt;&lt;/h1&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;content&quot;&gt;
+        &lt;div class=&quot;row&quot;&gt;
+            &lt;div class=&quot;col-md-8&quot;&gt;
+            @% block content %@
+            @% endblock %@
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+</code></pre>
+<p>我们其实就是将<code>@% raw %@@% for post in posts %@@% endfor %@@% endraw %@</code>
+替换成了<code>@% raw %@@% block content %@@% endblock %@@% endraw %@</code>。
+在base.html中我们创建了一个名字为content的block，其他页面可以通过继承base.html，
+替换这个content块来生成新的页面，页面其他内容保持不变。</p>
+<p>保存后，再修改post_list.html页面，只保留@% for post in posts %@@% endfor %@的内容：</p>
+<pre><code class="line-numbers language-html">@% for post in posts %@
+    &lt;div class=&quot;post&quot;&gt;
+        &lt;h1&gt;&lt;a href=&quot;&quot;&gt;@@ post.title @@&lt;/a&gt;&lt;/h1&gt;
+        &lt;p&gt;published: @@ post.published_date @@&lt;/p&gt;
+        &lt;p&gt;@@ post.text|linebreaks @@&lt;/p&gt;
+    &lt;/div&gt;
+@% endfor %@
+</code></pre>
+<p>然后添加这句到post_list.html页面的最开始部分：</p>
+<pre><code>@% extends &#39;blog/base.html&#39; %@
+</code></pre><p>这句话的意思就是该模板继承自blog/base.html模板</p>
+<p>还有一步就是要将刚刚的内容放到@% raw %@@% block content %@和
+@% endblock content %@@% endraw %@之间，这时候整个页面是这样的：</p>
+<pre><code class="line-numbers language-html">@% extends &#39;blog/base.html&#39; %@
+@% block content %@
+@% for post in posts %@
+    &lt;div class=&quot;post&quot;&gt;
+        &lt;h1&gt;&lt;a href=&quot;&quot;&gt;@@ post.title @@&lt;/a&gt;&lt;/h1&gt;
+        &lt;p&gt;published: @@ post.published_date @@&lt;/p&gt;
+        &lt;p&gt;@@ post.text|linebreaks @@&lt;/p&gt;
+    &lt;/div&gt;
+@% endfor %@
+@% endblock content %@
+</code></pre>
+<p>保存后刷新页面，看下是不是能正常工作：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj016.jpg" alt></p>
+<p>一切都OK…</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2015/08/15/simpleblog-06.html">Django1.9开发博客06- 模板继承</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2015/08/16/simpleblog-07.html" class="pre-post btn btn-default" title='Django1.9开发博客07- 实现功能'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Django1.9开发博客07- 实现功能</span>
+        </a>
+    
+    
+        <a href="/2015/08/12/simpleblog-05.html" class="next-post btn btn-default" title='Django1.9开发博客05- 页面美化'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Django1.9开发博客05- 页面美化</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#创建一个base模板"><span class="toc-text">创建一个base模板</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

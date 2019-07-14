@@ -1,0 +1,478 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="scrapy,">
+
+
+    <meta name="description" content="Spider是爬虫框架的核心，爬取流程如下：
+
+先初始化请求URL列表，并指定下载后处理response的回调函数。初次请求URL通过start_urls指定，调用start_requests()产生Request对象，然后注册parse方法作为回调
+在parse回调中解析response并返...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Scrapy笔记03- Spider详解 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Scrapy笔记03- Spider详解">
+            
+                Scrapy笔记03- Spider详解
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/scrapy" title='scrapy'>
+                        scrapy
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/03/12</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Spider是爬虫框架的核心，爬取流程如下：</p>
+<ol>
+<li>先初始化请求URL列表，并指定下载后处理response的回调函数。初次请求URL通过<code>start_urls</code>指定，调用<code>start_requests()</code>产生<code>Request</code>对象，然后注册<code>parse</code>方法作为回调</li>
+<li>在parse回调中解析response并返回字典,<code>Item</code>对象,<code>Request</code>对象或它们的迭代对象。<code>Request</code>对象还会包含回调函数，之后Scrapy下载完后会被这里注册的回调函数处理。</li>
+<li>在回调函数里面，你通过使用选择器（同样可以使用BeautifulSoup,lxml或其他工具）解析页面内容，并生成解析后的结果Item。</li>
+<li>最后返回的这些Item通常会被持久化到数据库中(使用<a href="http://doc.scrapy.org/en/latest/topics/item-pipeline.html#topics-item-pipeline" target="_blank" rel="noopener">Item Pipeline</a>)或者使用<a href="http://doc.scrapy.org/en/latest/topics/feed-exports.html#topics-feed-exports" target="_blank" rel="noopener">Feed exports</a>将其保存到文件中。</li>
+</ol>
+<p>尽管这个流程适合于所有的蜘蛛，但是Scrapy里面为不同的使用目的实现了一些常见的Spider。下面我们把它们列出来。</p>
+<h2 id="CrawlSpider"><a href="#CrawlSpider" class="headerlink" title="CrawlSpider"></a>CrawlSpider</h2><p>链接爬取蜘蛛，专门为那些爬取有特定规律的链接内容而准备的。
+如果你觉得它还不足以适合你的需求，可以先继承它然后覆盖相应的方法，或者自定义Spider也行。</p>
+<p>它除了从<code>scrapy.Spider</code>类继承的属性外，还有一个新的属性<code>rules</code>,它是一个<code>Rule</code>对象列表，每个<code>Rule</code>对象定义了某个规则，如果多个<code>Rule</code>匹配一个连接，那么使用第一个，根据定义的顺序。</p>
+<p>一个详细的例子：</p>
+<pre><code class="line-numbers language-python">from coolscrapy.items import HuxiuItem
+import scrapy
+from scrapy.spiders import CrawlSpider, Rule
+from scrapy.linkextractors import LinkExtractor
+
+
+class LinkSpider(CrawlSpider):
+    name = &quot;link&quot;
+    allowed_domains = [&quot;huxiu.com&quot;]
+    start_urls = [
+        &quot;http://www.huxiu.com/index.php&quot;
+    ]
+
+    rules = (
+        # 提取匹配正则式&#39;/group?f=index_group&#39;链接 (但是不能匹配&#39;deny.php&#39;)
+        # 并且会递归爬取(如果没有定义callback，默认follow=True).
+        Rule(LinkExtractor(allow=(&#39;/group?f=index_group&#39;, ), deny=(&#39;deny\.php&#39;, ))),
+        # 提取匹配&#39;/article/\d+/\d+.html&#39;的链接，并使用parse_item来解析它们下载后的内容，不递归
+        Rule(LinkExtractor(allow=(&#39;/article/\d+/\d+\.html&#39;, )), callback=&#39;parse_item&#39;),
+    )
+
+    def parse_item(self, response):
+        self.logger.info(&#39;Hi, this is an item page! %s&#39;, response.url)
+        detail = response.xpath(&#39;//div[@class=&quot;article-wrap&quot;]&#39;)
+        item = HuxiuItem()
+        item[&#39;title&#39;] = detail.xpath(&#39;h1/text()&#39;)[0].extract()
+        item[&#39;link&#39;] = response.url
+        item[&#39;posttime&#39;] = detail.xpath(
+            &#39;div[@class=&quot;article-author&quot;]/span[@class=&quot;article-time&quot;]/text()&#39;)[0].extract()
+        print(item[&#39;title&#39;],item[&#39;link&#39;],item[&#39;posttime&#39;])
+        yield item
+
+</code></pre>
+<h2 id="XMLFeedSpider"><a href="#XMLFeedSpider" class="headerlink" title="XMLFeedSpider"></a>XMLFeedSpider</h2><p>XML订阅蜘蛛，用来爬取XML形式的订阅内容，通过某个指定的节点来遍历。
+可使用<code>iternodes</code>, <code>xml</code>, 和<code>html</code>三种形式的迭代器，不过当内容比较多的时候推荐使用<code>iternodes</code>，
+默认也是它，可以节省内存提升性能，不需要将整个DOM加载到内存中再解析。而使用<code>html</code>可以处理XML有格式错误的内容。
+处理XML的时候最好先<a href="http://doc.scrapy.org/en/1.0/topics/selectors.html#removing-namespaces" target="_blank" rel="noopener">Removing namespaces</a></p>
+<p>接下来我通过爬取我的博客订阅XML来展示它的使用方法。</p>
+<pre><code class="line-numbers language-python">from coolscrapy.items import BlogItem
+import scrapy
+from scrapy.spiders import XMLFeedSpider
+
+
+class XMLSpider(XMLFeedSpider):
+    name = &quot;xml&quot;
+    namespaces = [(&#39;atom&#39;, &#39;http://www.w3.org/2005/Atom&#39;)]
+    allowed_domains = [&quot;github.io&quot;]
+    start_urls = [
+        &quot;http://www.pycoding.com/atom.xml&quot;
+    ]
+    iterator = &#39;xml&#39;  # 缺省的iternodes，貌似对于有namespace的xml不行
+    itertag = &#39;atom:entry&#39;
+
+    def parse_node(self, response, node):
+        # self.logger.info(&#39;Hi, this is a &lt;%s&gt; node!&#39;, self.itertag)
+        item = BlogItem()
+        item[&#39;title&#39;] = node.xpath(&#39;atom:title/text()&#39;)[0].extract()
+        item[&#39;link&#39;] = node.xpath(&#39;atom:link/@href&#39;)[0].extract()
+        item[&#39;id&#39;] = node.xpath(&#39;atom:id/text()&#39;)[0].extract()
+        item[&#39;published&#39;] = node.xpath(&#39;atom:published/text()&#39;)[0].extract()
+        item[&#39;updated&#39;] = node.xpath(&#39;atom:updated/text()&#39;)[0].extract()
+        self.logger.info(&#39;|&#39;.join([item[&#39;title&#39;],item[&#39;link&#39;],item[&#39;id&#39;],item[&#39;published&#39;]]))
+        return item
+</code></pre>
+<h2 id="CSVFeedSpider"><a href="#CSVFeedSpider" class="headerlink" title="CSVFeedSpider"></a>CSVFeedSpider</h2><p>这个跟上面的XMLFeedSpider很类似，区别在于它会一行一行的迭代，而不是一个节点一个节点的迭代。
+每次迭代行的时候会调用<code>parse_row()</code>方法。</p>
+<pre><code class="line-numbers language-python">from coolscrapy.items import BlogItem
+from scrapy.spiders import CSVFeedSpider
+
+
+class CSVSpider(CSVFeedSpider):
+    name = &quot;csv&quot;
+    allowed_domains = [&#39;example.com&#39;]
+    start_urls = [&#39;http://www.example.com/feed.csv&#39;]
+    delimiter = &#39;;&#39;
+    quotechar = &quot;&#39;&quot;
+    headers = [&#39;id&#39;, &#39;name&#39;, &#39;description&#39;]
+
+    def parse_row(self, response, row):
+        self.logger.info(&#39;Hi, this is a row!: %r&#39;, row)
+        item = BlogItem()
+        item[&#39;id&#39;] = row[&#39;id&#39;]
+        item[&#39;name&#39;] = row[&#39;name&#39;]
+        return item
+</code></pre>
+<h2 id="SitemapSpider"><a href="#SitemapSpider" class="headerlink" title="SitemapSpider"></a>SitemapSpider</h2><p>站点地图蜘蛛，允许你使用<a href="http://www.sitemaps.org/" target="_blank" rel="noopener">Sitemaps</a>发现URL后爬取整个站点。
+还支持嵌套的站点地图以及从<code>robots.txt</code>中发现站点URL</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/03/12/scrapy-03.html">Scrapy笔记03- Spider详解</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/03/14/scrapy-04.html" class="pre-post btn btn-default" title='Scrapy笔记04- Selector详解'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Scrapy笔记04- Selector详解</span>
+        </a>
+    
+    
+        <a href="/2016/03/10/scrapy-02.html" class="next-post btn btn-default" title='Scrapy笔记02- 完整示例'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Scrapy笔记02- 完整示例</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CrawlSpider"><span class="toc-text">CrawlSpider</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XMLFeedSpider"><span class="toc-text">XMLFeedSpider</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSVFeedSpider"><span class="toc-text">CSVFeedSpider</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SitemapSpider"><span class="toc-text">SitemapSpider</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

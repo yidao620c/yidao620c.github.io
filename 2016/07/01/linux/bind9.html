@@ -1,0 +1,501 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="dns,bind9,">
+
+
+    <meta name="description" content="Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
+全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。
+DNS服务由BIND软件提供，启动后服务名为named，管理工具为rndc，deb...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>CentOS7.2搭建DNS服务器 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="CentOS7.2搭建DNS服务器">
+            
+                CentOS7.2搭建DNS服务器
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/linux">
+            linux
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/dns" title='dns'>
+                        dns
+                    </a>
+                
+                    <a href="/tags/bind9" title='bind9'>
+                        bind9
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2016/07/01</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
+全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。</p>
+<p>DNS服务由BIND软件提供，启动后服务名为<code>named</code>，管理工具为<code>rndc</code>，debug工具为<code>dig</code>。主要配置文件为<code>/etc/named.conf</code>。</p>
+<p>本篇演示如何在CentOS 7上架设主域名服务器。</p>
+<p>当局域网内主机要访问外网域名时，DNS服务器会先查本地缓存，查不到则将该解析请求转发给ISP的DNS服务器
+（假设IP为<code>211.155.23.88</code>和<code>211.155.27.88</code>），而不是转发给.（root）服务器。
+并且，只会对内网主机的解析请求进行转发（假设内网网段范围为<code>192.168.0.0/16</code>），而不会对外网主机的解析请求进行转发。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里选择将bind运行在chroot环境下面，更加安全。只需要安装<code>bind-chroot</code>即可，其他软件比如<code>bind</code>本身也会自动安装，
+也即执行：</p>
+<pre><code class="line-numbers language-bash">yum install -y bind-chroot
+systemctl start named-chroot
+systemctl enable named-chroot
+systemctl status named-chroot
+``
+
+## 配置
+``` bash
+cp -a /etc/named.conf /etc/named.conf.raw
+vi /etc/named.conf
+</code></pre>
+<p>修改如下：</p>
+<pre><code>options {
+    listen-on port 53 { any; };
+    listen-on-v6 port 53 { ::1; };
+    directory     &quot;/var/named&quot;;
+    dump-file     &quot;/var/named/data/cache_dump.db&quot;;
+    statistics-file &quot;/var/named/data/named_stats.txt&quot;;
+    memstatistics-file &quot;/var/named/data/named_mem_stats.txt&quot;;
+    allow-query     { 192.168.0.0/16; };
+    recursion yes;
+    allow-recursion { 192.168.0.0/16; };
+    forward first;
+    forwarders {
+        211.155.23.88;
+        211.155.27.88;
+    };
+
+    dnssec-enable no;
+    dnssec-validation no;
+    dnssec-lookaside no;
+
+    /* Path to ISC DLV key */
+    bindkeys-file &quot;/etc/named.iscdlv.key&quot;;
+
+    managed-keys-directory &quot;/var/named/dynamic&quot;;
+
+    pid-file &quot;/run/named/named.pid&quot;;
+    session-keyfile &quot;/run/named/session.key&quot;;
+};
+
+logging {
+        channel default_debug {
+                file &quot;data/named.run&quot;;
+                severity dynamic;
+        };
+};
+
+zone &quot;.&quot; IN {
+    type hint;
+    file &quot;named.ca&quot;;
+};
+
+/*新增xn.local的域名解析*/
+zone &quot;xn.local&quot; IN {
+    type master;
+    file &quot;fwd.xn.local.db&quot;;
+    allow-update { none; };
+    allow-query { any; };
+};
+
+include &quot;/etc/named.rfc1912.zones&quot;;
+include &quot;/etc/named.root.key&quot;;
+</code></pre><p>新增一个文件 <code>vi /var/named/fwd.xn.local.db</code>，内容如下：</p>
+<pre><code>$TTL 86400
+@ IN SOA primary.xn.local. root.xn.local. (
+2016042112 ;Serial
+3600 ;Refresh
+1800 ;Retry
+604800 ;Expire
+43200 ;Minimum TTL
+)
+;Name Server Information
+@ IN NS primary.xn.local.
+
+;IP address of Name Server
+primary IN A 192.168.217.161
+
+;Mail exchanger
+xn.local. IN MX 10 mail.xn.local.
+
+;A - Record HostName To Ip Address
+www IN A 192.168.217.161
+mail IN A 192.168.217.161
+
+;CNAME record
+ftp IN CNAME www.xn.local.
+</code></pre><p>最后启动<code>named</code>服务：</p>
+<pre><code class="line-numbers language-bash">systemctl start named
+systemctl enable named
+systemctl status named
+</code></pre>
+<h2 id="测试与验证"><a href="#测试与验证" class="headerlink" title="测试与验证"></a>测试与验证</h2><p>默认情况下，DNS服务的日志信息会放置到<code>/var/log/messages</code>文档中。如果有修改配置文件，
+并启动或重启named服务的话，建议第一时间先查看这个日志文档，看有没有报错：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns01.png" alt></p>
+<p>检查DNS服务的端口（端口53）是否有开启：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns02.png" alt></p>
+<h2 id="指定DNS服务器"><a href="#指定DNS服务器" class="headerlink" title="指定DNS服务器"></a>指定DNS服务器</h2><p>CentOS7指定DNS服务器方法：</p>
+<pre><code class="line-numbers language-bash">systemctl restart NetworkManager.service
+nmcli connection show
+nmcli con mod eth0 ipv4.dns &quot;192.168.217.161&quot;
+# nmcli con mod eth0 ipv4.dns &quot;192.168.217.161 8.8.8.8&quot;
+nmcli con up eth0
+</code></pre>
+<p>利用<code>dig</code>工具测试主DNS能否正常解析外网网址：</p>
+<pre><code># 如果没安装dig命令，可以使用下面命令安装
+yum install bind-utils
+dig @192.168.217.161 www.baidu.com
+</code></pre><p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns02.png" alt></p>
+<p>搞定！</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2016/07/01/linux/bind9.html">CentOS7.2搭建DNS服务器</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2016/07/07/linux/squid.html" class="pre-post btn btn-default" title='CentOS7.2搭建代理服务器'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">CentOS7.2搭建代理服务器</span>
+        </a>
+    
+    
+        <a href="/2016/06/22/web/echarts.html" class="next-post btn btn-default" title='JavaScript图表库ECharts使用'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">JavaScript图表库ECharts使用</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试与验证"><span class="toc-text">测试与验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#指定DNS服务器"><span class="toc-text">指定DNS服务器</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>
