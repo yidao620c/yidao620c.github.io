@@ -254,42 +254,48 @@ mv server.crt server_nopwd.key /usr/local/nginx/conf/
 </code></pre>
 <p>保存退出</p>
 <p>执行<code>nginx -t</code>检查，如果没问题的话就重启nginx</p>
-<pre><code>nginx: [emerg] the &quot;ssl&quot; parameter requires ngx_http_ssl_module in /usr/local/nginx/conf/nginx.conf:99
-</code></pre><p>原因也很简单，nginx缺少http_ssl_module模块，编译安装的时候带上<code>--with-http_ssl_module</code>配置就行了，
+<pre><code class="line-numbers language-none">nginx: [emerg] the &quot;ssl&quot; parameter requires ngx_http_ssl_module in /usr/local/nginx/conf/nginx.conf:99
+</code></pre>
+<p>原因也很简单，nginx缺少http_ssl_module模块，编译安装的时候带上<code>--with-http_ssl_module</code>配置就行了，
 但是现在的情况是我的nginx已经安装过了，怎么添加模块，其实也很简单，往下看：</p>
 <p>做个说明，我的nginx的安装目录是<code>/usr/local/nginx</code>这个目录，我的源码包在<code>/root/nginx-1.10.3</code>目录</p>
 <p>切换到源码包<code>cd /root/nginx-1.10.3</code>，查看nginx原有的模块</p>
 <pre><code class="line-numbers language-bash">/usr/local/nginx/sbin/nginx -V
 </code></pre>
 <p>结果如下：</p>
-<pre><code>nginx version: nginx/1.10.3
+<pre><code class="line-numbers language-none">nginx version: nginx/1.10.3
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-11) (GCC)
 configure arguments:
-</code></pre><p>那么我们的新配置信息就应该这样写，在configure arguments基础上面加：</p>
-<pre><code>./configure --prefix=/usr/local/nginx --with-http_ssl_module
-</code></pre><p>运行上面的命令即可，等配置完，运行命令:</p>
+</code></pre>
+<p>那么我们的新配置信息就应该这样写，在configure arguments基础上面加：</p>
+<pre><code class="line-numbers language-bash">./configure --prefix=/usr/local/nginx --with-http_ssl_module
+</code></pre>
+<p>运行上面的命令即可，等配置完，运行命令:</p>
 <pre><code class="line-numbers language-bash">make
 </code></pre>
 <p>这里不要进行<code>make install</code>，否则就是覆盖安装。</p>
 <p>然后备份原有已安装好的nginx</p>
-<pre><code>cp /usr/local/nginx/sbin/nginx /usr/local/nginx/sbin/nginx.bak
-</code></pre><p>然后将刚刚编译好的nginx覆盖掉原有的nginx（这个时候nginx要停止状态）:</p>
-<pre><code>systemctl stop nginx.service
+<pre><code class="line-numbers language-bash">cp /usr/local/nginx/sbin/nginx /usr/local/nginx/sbin/nginx.bak
+</code></pre>
+<p>然后将刚刚编译好的nginx覆盖掉原有的nginx（这个时候nginx要停止状态）:</p>
+<pre><code class="line-numbers language-bash">systemctl stop nginx.service
 cp ./objs/nginx /usr/local/nginx/sbin/
-</code></pre><p>提示是否覆盖，输入y即可</p>
+</code></pre>
+<p>提示是否覆盖，输入y即可</p>
 <p>然后启动nginx，仍可以通过命令查看是否已经加入成功</p>
 <pre><code class="line-numbers language-bash">/usr/local/nginx/sbin/nginx -V
 </code></pre>
 <p>结果:</p>
-<pre><code>nginx version: nginx/1.10.3
+<pre><code class="line-numbers language-none">nginx version: nginx/1.10.3
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-11) (GCC)
 built with OpenSSL 1.0.1e-fips 11 Feb 2013
 TLS SNI support enabled
 configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module
-</code></pre><p>重启 nginx 后，我们打开浏览器，验证下反向代理的效果。
+</code></pre>
+<p>重启 nginx 后，我们打开浏览器，验证下反向代理的效果。
 在浏览器地址栏中输入<code>http://www.xiongneng.cc/README.md</code>，返回的结果是我的GitHub上面的README页面:</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-09.png" alt></p>
-<h2 id="HTTPS配置实例"><a href="#HTTPS配置实例" class="headerlink" title="HTTPS配置实例"></a>HTTPS配置实例</h2><pre><code>server {
+<h2 id="HTTPS配置实例"><a href="#HTTPS配置实例" class="headerlink" title="HTTPS配置实例"></a>HTTPS配置实例</h2><pre><code class="line-numbers language-nginx">server {
     listen       443 ssl http2;
     listen       [::]:443 ssl http2;
     server_name  api.enzhico.cn;
@@ -310,16 +316,19 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module
     ssl_certificate_key &quot;server_nopwd.key&quot;;
 
 }
-</code></pre><h2 id="虚拟主机"><a href="#虚拟主机" class="headerlink" title="虚拟主机"></a>虚拟主机</h2><p>有时候我们需要在同一台主机上面托管多个应用，每个应用访问域名不同，这里我们可以使用基于域名的虚拟主机来实现。</p>
+</code></pre>
+<h2 id="虚拟主机"><a href="#虚拟主机" class="headerlink" title="虚拟主机"></a>虚拟主机</h2><p>有时候我们需要在同一台主机上面托管多个应用，每个应用访问域名不同，这里我们可以使用基于域名的虚拟主机来实现。</p>
 <p>假设我们在本地开发有3个项目，分别在hosts里映射到本地的127.0.0.1上：</p>
-<pre><code>127.0.0.1 www.xiongneng.com xiongneng.com
+<pre><code class="line-numbers language-none">127.0.0.1 www.xiongneng.com xiongneng.com
 127.0.0.1 api.xiongneng.com
 127.0.0.1 admin.xiongneng.com
-</code></pre><p>有这样3个项目，分别对应于web根目录下的3个文件夹，我们用域名对应文件夹名字，这样子好记：</p>
-<pre><code>/home/xiongneng/www/www.xiongneng.com/
+</code></pre>
+<p>有这样3个项目，分别对应于web根目录下的3个文件夹，我们用域名对应文件夹名字，这样子好记：</p>
+<pre><code class="line-numbers language-none">/home/xiongneng/www/www.xiongneng.com/
 /home/xiongneng/www/api.xiongneng.com/
 /home/xiongneng/www/admin.xiongneng.com/
-</code></pre><p>每个目录下都有一个index.php文件，内容就是都是简单的输入自己的域名</p>
+</code></pre>
+<p>每个目录下都有一个index.php文件，内容就是都是简单的输入自己的域名</p>
 <p>下面我们就来搭建这3个域名的虚拟主机，很显然，我们要新建3个server来完成。建议将对虚拟主机进行配置的内容写进另外一个文件，
 然后通过include指令包含进来，这样更便于维护和管理。不会使得这个nginx.conf内容太多：</p>
 <pre><code class="line-numbers language-nginx">main

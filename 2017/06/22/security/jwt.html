@@ -197,8 +197,9 @@
 以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。&lt;!–more&gt;</p>
 <p>JWT官网：<a href="https://jwt.io/" target="_blank" rel="noopener">https://jwt.io/</a></p>
 <p>JWT是由三段信息构成的，将这三段信息文本用.链接一起就构成了Jwt字符串。就像这样:</p>
-<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
-</code></pre><h2 id="JWT的构成"><a href="#JWT的构成" class="headerlink" title="JWT的构成"></a>JWT的构成</h2><p>第一部分我们称它为头部（header),第二部分我们称其为载荷（payload, 类似于飞机上承载的物品)，第三部分是签证（signature)。</p>
+<pre><code class="line-numbers language-none">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+</code></pre>
+<h2 id="JWT的构成"><a href="#JWT的构成" class="headerlink" title="JWT的构成"></a>JWT的构成</h2><p>第一部分我们称它为头部（header),第二部分我们称其为载荷（payload, 类似于飞机上承载的物品)，第三部分是签证（signature)。</p>
 <p><em>header</em></p>
 <p>jwt的头部承载两部分信息：</p>
 <ul>
@@ -212,13 +213,15 @@
 <li>HMAC (Hash Message Authentication Code，散列消息鉴别码，基于密钥的Hash算法的认证协议。用公开函数和密钥产生一个固定长度的值作为认证标识，用这个标识鉴别消息的完整性。常用于接口签名验证</li>
 </ul>
 <p>完整的头部就像下面这样的JSON：</p>
-<pre><code>{
+<pre><code class="line-numbers language-json">{
   &#39;typ&#39;: &#39;JWT&#39;,
   &#39;alg&#39;: &#39;HS256&#39;
 }
-</code></pre><p>然后将头部进行base64加密（该加密是可以对称解密的),构成了第一部分</p>
-<pre><code>eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
-</code></pre><p><em>playload</em></p>
+</code></pre>
+<p>然后将头部进行base64加密（该加密是可以对称解密的),构成了第一部分</p>
+<pre><code class="line-numbers language-none">eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
+</code></pre>
+<p><em>playload</em></p>
 <p>载荷就是存放有效信息的地方，这些有效信息包含三个部分：</p>
 <ul>
 <li>标准中注册的声明</li>
@@ -240,27 +243,31 @@
 <p>私有的声明：</p>
 <p>私有声明是提供者和消费者所共同定义的声明，一般不建议存放敏感信息，因为base64是对称解密的，意味着该部分信息可以归类为明文信息。</p>
 <p>定义一个payload:</p>
-<pre><code>{
+<pre><code class="line-numbers language-json">{
   &quot;sub&quot;: &quot;1234567890&quot;,
   &quot;name&quot;: &quot;John Doe&quot;,
   &quot;admin&quot;: true
 }
-</code></pre><p>然后将其进行base64加密，得到Jwt的第二部分：</p>
-<pre><code>eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
-</code></pre><p><em>signature</em></p>
+</code></pre>
+<p>然后将其进行base64加密，得到Jwt的第二部分：</p>
+<pre><code class="line-numbers language-none">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
+</code></pre>
+<p><em>signature</em></p>
 <p>jwt的第三部分是一个签证信息，这个签证信息由三部分组成：</p>
-<pre><code>header (base64后的)
+<pre><code class="line-numbers language-none">header (base64后的)
 payload (base64后的)
 secret
-</code></pre><p>这个部分需要base64加密后的header和base64加密后的payload使用.连接组成的字符串，
+</code></pre>
+<p>这个部分需要base64加密后的header和base64加密后的payload使用.连接组成的字符串，
 然后通过header中声明的加密方式进行加盐secret组合加密，然后就构成了jwt的第三部分。</p>
 <pre><code class="line-numbers language-js">// javascript
 var encodedString = base64UrlEncode(header) + &#39;.&#39; + base64UrlEncode(payload);
 var signature = HMACSHA256(encodedString, &#39;secret&#39;); // TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 </code></pre>
 <p>将这三部分用.连接成一个完整的字符串,构成了最终的jwt:</p>
-<pre><code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
-</code></pre><p>注意：secret是保存在服务器端的，jwt的签发生成也是在服务器端的，secret就是用来进行jwt的签发和jwt的验证，
+<pre><code class="line-numbers language-none">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
+</code></pre>
+<p>注意：secret是保存在服务器端的，jwt的签发生成也是在服务器端的，secret就是用来进行jwt的签发和jwt的验证，
 所以，它就是你服务端的私钥，在任何场景都不应该流露出去。一旦客户端得知这个secret, 那就意味着客户端是可以自我签发jwt了。</p>
 <h2 id="如何应用"><a href="#如何应用" class="headerlink" title="如何应用"></a>如何应用</h2><p>一般是在请求头里加入Authorization，并加上Bearer标注：</p>
 <pre><code class="line-numbers language-js">fetch(&#39;api/user/1&#39;, {

@@ -194,29 +194,35 @@
     <div class="post-body post-content">
         <p>NTP是网络时间协议(Network Time Protocol)，它是用来同步网络中各个计算机的时间的协议。把计算机的时钟同步到世界协调时UTC，
 其精度在局域网内可达0.1ms，在互联网上绝大多数的地方其精度可以达到1-50ms。而且可以使用加密确认的方式来防止病毒的协议攻击。</p>
-<h2 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h2><h3 id="安装NTP服务"><a href="#安装NTP服务" class="headerlink" title="安装NTP服务"></a>安装NTP服务</h3><pre><code>yum install -y ntp
-</code></pre><h3 id="修改ntp配置文件"><a href="#修改ntp配置文件" class="headerlink" title="修改ntp配置文件"></a>修改ntp配置文件</h3><p>查找最近的时间同步服务器，网址在<a href="http://www.pool.ntp.org/zone/asia" target="_blank" rel="noopener">http://www.pool.ntp.org/zone/asia</a></p>
+<h2 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h2><h3 id="安装NTP服务"><a href="#安装NTP服务" class="headerlink" title="安装NTP服务"></a>安装NTP服务</h3><pre><code class="line-numbers language-bash">yum install -y ntp
+</code></pre>
+<h3 id="修改ntp配置文件"><a href="#修改ntp配置文件" class="headerlink" title="修改ntp配置文件"></a>修改ntp配置文件</h3><p>查找最近的时间同步服务器，网址在<a href="http://www.pool.ntp.org/zone/asia" target="_blank" rel="noopener">http://www.pool.ntp.org/zone/asia</a></p>
 <p>编辑 /etc/ntp.conf，增加时间同步服务器：</p>
-<pre><code>server 0.asia.pool.ntp.org
+<pre><code class="line-numbers language-none">server 0.asia.pool.ntp.org
 server 1.asia.pool.ntp.org
 server 2.asia.pool.ntp.org
 server 3.asia.pool.ntp.org
 server 127.127.1.0 iburst    # 当外部时间服务器不可用，使用本机时间作为时间服务的标准
 fudge 127.127.1.0 stratum 10 #这个值不能太高0-15，太高会报错
-</code></pre><p>添加允许访问的ip段</p>
-<pre><code>restrict 192.168.217.0 mask 255.255.255.0 nomodify notrap
+</code></pre>
+<p>添加允许访问的ip段</p>
+<pre><code class="line-numbers language-bash">restrict 192.168.217.0 mask 255.255.255.0 nomodify notrap
 restrict 192.168.212.0 mask 255.255.255.0 nomodify notrap
-</code></pre><h3 id="配置防火墙"><a href="#配置防火墙" class="headerlink" title="配置防火墙"></a>配置防火墙</h3><p>开启防火墙ntp默认端口udp123</p>
-<pre><code>firewall-cmd --permanent --zone=public --add-port=123/udp
+</code></pre>
+<h3 id="配置防火墙"><a href="#配置防火墙" class="headerlink" title="配置防火墙"></a>配置防火墙</h3><p>开启防火墙ntp默认端口udp123</p>
+<pre><code class="line-numbers language-bash">firewall-cmd --permanent --zone=public --add-port=123/udp
 firewall-cmd --reload
-</code></pre><h3 id="开机启动服务"><a href="#开机启动服务" class="headerlink" title="开机启动服务"></a>开机启动服务</h3><pre><code>systemctl enable ntpd
+</code></pre>
+<h3 id="开机启动服务"><a href="#开机启动服务" class="headerlink" title="开机启动服务"></a>开机启动服务</h3><pre><code class="line-numbers language-bash">systemctl enable ntpd
 systemctl start ntpd
 systemctl status ntpd
-</code></pre><h3 id="验证NTP服务"><a href="#验证NTP服务" class="headerlink" title="验证NTP服务"></a>验证NTP服务</h3><pre><code>ntpq -p
+</code></pre>
+<h3 id="验证NTP服务"><a href="#验证NTP服务" class="headerlink" title="验证NTP服务"></a>验证NTP服务</h3><pre><code class="line-numbers language-bash">ntpq -p
 date -R
-</code></pre><h2 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h2><p>安装的NTP跟上面的步骤一样</p>
+</code></pre>
+<h2 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h2><p>安装的NTP跟上面的步骤一样</p>
 <h3 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h3><p>将上面的NTP服务器作为客户端同步NTP时间服务器，<code>vim /etc/ntp.conf</code></p>
-<pre><code>#配置允许NTP Server时间服务器主动修改本机的时间
+<pre><code class="line-numbers language-none">#配置允许NTP Server时间服务器主动修改本机的时间
 restrict 192.168.217.161 nomodify notrap noquery
 #注释掉其他时间服务器
 #server 0.centos.pool.ntp.org iburst
@@ -225,14 +231,18 @@ restrict 192.168.217.161 nomodify notrap noquery
 #server 3.centos.pool.ntp.org iburst
 #配置时间服务器为本地搭建的NTP Server服务器
 server 192.168.217.161
-</code></pre><h3 id="与NTP-server服务器同步一下时间"><a href="#与NTP-server服务器同步一下时间" class="headerlink" title="与NTP server服务器同步一下时间"></a>与NTP server服务器同步一下时间</h3><pre><code>ntpdate -u 192.168.217.161
-</code></pre><h3 id="查看ntp同步状态"><a href="#查看ntp同步状态" class="headerlink" title="查看ntp同步状态"></a>查看ntp同步状态</h3><p>能看到已经成功同步</p>
-<pre><code>ntpq -p
+</code></pre>
+<h3 id="与NTP-server服务器同步一下时间"><a href="#与NTP-server服务器同步一下时间" class="headerlink" title="与NTP server服务器同步一下时间"></a>与NTP server服务器同步一下时间</h3><pre><code class="line-numbers language-bash">ntpdate -u 192.168.217.161
+</code></pre>
+<h3 id="查看ntp同步状态"><a href="#查看ntp同步状态" class="headerlink" title="查看ntp同步状态"></a>查看ntp同步状态</h3><p>能看到已经成功同步</p>
+<pre><code class="line-numbers language-bash">ntpq -p
 date -R
-</code></pre><h2 id="修正时区"><a href="#修正时区" class="headerlink" title="修正时区"></a>修正时区</h2><p>最后讲一下怎样修改linux的时区</p>
-<pre><code>rm -rf /etc/localtime    #删除当前默认时区
+</code></pre>
+<h2 id="修正时区"><a href="#修正时区" class="headerlink" title="修正时区"></a>修正时区</h2><p>最后讲一下怎样修改linux的时区</p>
+<pre><code class="line-numbers language-bash">rm -rf /etc/localtime    #删除当前默认时区
 ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
-</code></pre><p>将时区修改为中国上海的时区，当然，也可以设置中国香港或北京的时间。</p>
+</code></pre>
+<p>将时区修改为中国上海的时区，当然，也可以设置中国香港或北京的时间。</p>
 
     </div>
     

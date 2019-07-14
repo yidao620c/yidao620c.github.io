@@ -233,17 +233,18 @@ cas-server...">
 </tbody>
 </table>
 <p>接下来，老夫就要开始飙车了。</p>
-<h2 id="一、配置hosts文件"><a href="#一、配置hosts文件" class="headerlink" title="一、配置hosts文件"></a>一、配置hosts文件</h2><pre><code># SSO单点登录Demo
+<h2 id="一、配置hosts文件"><a href="#一、配置hosts文件" class="headerlink" title="一、配置hosts文件"></a>一、配置hosts文件</h2><pre><code class="line-numbers language-none"># SSO单点登录Demo
 127.0.0.1    cas.server.com
 127.0.0.1    app1.com
 127.0.0.1    app2.com
-</code></pre><h2 id="二、配置cas服务端"><a href="#二、配置cas服务端" class="headerlink" title="二、配置cas服务端"></a>二、配置cas服务端</h2><p><strong>配置json服务注册</strong></p>
+</code></pre>
+<h2 id="二、配置cas服务端"><a href="#二、配置cas服务端" class="headerlink" title="二、配置cas服务端"></a>二、配置cas服务端</h2><p><strong>配置json服务注册</strong></p>
 <ol>
 <li>在src/main/resources/目录下创建services文件夹</li>
 <li>在war包中，找到HTTPSandIMAPS-10000001.json文件，并copy到services文件夹中</li>
 <li>将HTTPSandIMAPS-10000001.json文件内容修改如下</li>
 </ol>
-<pre><code>{
+<pre><code class="line-numbers language-json">{
   &quot;@class&quot; : &quot;org.apereo.cas.services.RegexRegisteredService&quot;,
   &quot;serviceId&quot; : &quot;^(https|http|imaps)://.*&quot;,
   &quot;name&quot; : &quot;HTTPS and HTTP and IMAPS&quot;,
@@ -251,13 +252,14 @@ cas-server...">
   &quot;description&quot; : &quot;This service definition authorizes all application urls that support HTTPS and HTTP and IMAPS protocols.&quot;,
   &quot;evaluationOrder&quot; : 10000
 }
-</code></pre><p>默认cas支持https，不支持http客户端站点来登录，所以需要手动进行配置兼容。
+</code></pre>
+<p>默认cas支持https，不支持http客户端站点来登录，所以需要手动进行配置兼容。
 如果不做此操作就会出现如下图：未认证授权的服务，所以还是乖乖的听话，跟着我的飙车轨道，别跑丢了。</p>
 <p>体json文件中代表什么含义，后续篇会详细讲解到。</p>
 <p><strong>application.properties 配置</strong></p>
 <p>application.properties文件中，增加配置项cas.serviceRegistry.initFromJson=true表示开启了json注册服务。</p>
 <p>另外为了Demo尽可能的简单方便理解，我这里启用静态账号密码方式认证（非JDBC和Rest）</p>
-<pre><code>##
+<pre><code class="line-numbers language-properties">##
 # CAS Authentication Credentials
 #
 cas.authn.accept.users=test::test
@@ -271,10 +273,11 @@ cas.serviceRegistry.initFromJson=true
 # 登出后允许跳转到指定页面
 #
 cas.logout.followServiceRedirects=true
-</code></pre><h2 id="三、配置客户端"><a href="#三、配置客户端" class="headerlink" title="三、配置客户端"></a>三、配置客户端</h2><p>客户端 app1 和 app2 的项目逻辑相同，不多说。</p>
+</code></pre>
+<h2 id="三、配置客户端"><a href="#三、配置客户端" class="headerlink" title="三、配置客户端"></a>三、配置客户端</h2><p>客户端 app1 和 app2 的项目逻辑相同，不多说。</p>
 <p><strong>pom.xml 配置</strong></p>
 <p>添加 cas-client 包依赖，我用的 3.5.1 版本</p>
-<pre><code>&lt;properties&gt;
+<pre><code class="line-numbers language-xml">&lt;properties&gt;
     &lt;cas.client.version&gt;3.5.1&lt;/cas.client.version&gt;
 &lt;/properties&gt;
 &lt;!--cas的客户端 --&gt;
@@ -283,7 +286,8 @@ cas.logout.followServiceRedirects=true
    &lt;artifactId&gt;cas-client-core&lt;/artifactId&gt;
    &lt;version&gt;${java.cas.client.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre><p>源代码我已上传至GitHub，主要几个类如下。</p>
+</code></pre>
+<p>源代码我已上传至GitHub，主要几个类如下。</p>
 <p>CasClientConfig.java是CAS 客户端配置类，这个最重要。</p>
 <pre><code class="line-numbers language-java">@Configuration
 public class CasClientConfig {
@@ -466,7 +470,7 @@ public class CasClientConfig {
 }
 </code></pre>
 <p>Cas的一些配置项，这里我写成常量了，其实作为Properties配置文件才是最好：</p>
-<pre><code>public class CasConfig {
+<pre><code class="line-numbers language-java">public class CasConfig {
 
     /**
      * 当前应用程序的baseUrl（注意最后面的斜线）
@@ -496,7 +500,8 @@ public class CasClientConfig {
     public static String CAS_SERVER_LOGOUT_PATH = &quot;https://cas.server.com:8443/cas/logout&quot;;
 
 }
-</code></pre><p>然后就是几个Controller接口类，定义的/books是需要登录才能访问，而/index不需要拦截。这里就不贴了。</p>
+</code></pre>
+<p>然后就是几个Controller接口类，定义的/books是需要登录才能访问，而/index不需要拦截。这里就不贴了。</p>
 <h2 id="几个常用配置项"><a href="#几个常用配置项" class="headerlink" title="几个常用配置项"></a>几个常用配置项</h2><ol>
 <li>cas.logout.followServiceRedirects=true 是否允许客户端Logout后重定向到service参数指定的资源</li>
 <li>tgt.maxTimeToLiveInSeconds=28800 指定Session的最大有效时间,即从生成到指定时间后就将超时,默认28800s,即8小时</li>

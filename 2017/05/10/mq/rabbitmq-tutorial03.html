@@ -211,7 +211,7 @@
 </code></pre>
 <p>fanout类型的将消息广播给它所知道的所有队列。</p>
 <p>列出所有的交换机命令：</p>
-<pre><code>sudo rabbitmqctl list_exchanges
+<pre><code class="line-numbers language-bash">sudo rabbitmqctl list_exchanges
 ``
 
 你会发现里面有很多`amq.*`开头的和一个空名字的默认交换机，这些都是系统自带的。
@@ -221,21 +221,24 @@
 channel.basic_publish(exchange=&#39;logs&#39;,
                       routing_key=&#39;&#39;,
                       body=message)
-</code></pre><h2 id="临时队列"><a href="#临时队列" class="headerlink" title="临时队列"></a>临时队列</h2><p>我们需要每次连接至mq的时候使用一个新队列，使用完了就销毁，这里可使用临时队列：</p>
+</code></pre>
+<h2 id="临时队列"><a href="#临时队列" class="headerlink" title="临时队列"></a>临时队列</h2><p>我们需要每次连接至mq的时候使用一个新队列，使用完了就销毁，这里可使用临时队列：</p>
 <pre><code class="line-numbers language-python">result = channel.queue_declare()
 </code></pre>
 <p>然后就可以通过<code>result.method.queue</code>获取临时队列名称，提供给消费者使用。
 另外消费者用完后需要销毁，可添加一个<code>exclusive</code>选项：</p>
-<pre><code>result = channel.queue_declare(exclusive=True)
-</code></pre><h2 id="绑定"><a href="#绑定" class="headerlink" title="绑定"></a>绑定</h2><p>交换机和队列直接的关系我们称为绑定<code>binding</code></p>
+<pre><code class="line-numbers language-python">result = channel.queue_declare(exclusive=True)
+</code></pre>
+<h2 id="绑定"><a href="#绑定" class="headerlink" title="绑定"></a>绑定</h2><p>交换机和队列直接的关系我们称为绑定<code>binding</code></p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb03.png" alt></p>
 <pre><code class="line-numbers language-python">channel.queue_bind(exchange=&#39;logs&#39;,
                    queue=result.method.queue)
 </code></pre>
 <p>这时候，<code>logs</code>交换机就会将它接收到的消息发送给我们的临时队列了。</p>
 <p>查看系统所有的绑定命令：</p>
-<pre><code>rabbitmqctl list_binding
-</code></pre><h2 id="最终代码"><a href="#最终代码" class="headerlink" title="最终代码"></a>最终代码</h2><p>最后我们开始把所有代码整理出来，消息生产者发送日志消息到<code>logs</code>交换机，
+<pre><code class="line-numbers language-bash">rabbitmqctl list_binding
+</code></pre>
+<h2 id="最终代码"><a href="#最终代码" class="headerlink" title="最终代码"></a>最终代码</h2><p>最后我们开始把所有代码整理出来，消息生产者发送日志消息到<code>logs</code>交换机，
 必须给这个交换机一个<code>routing_key</code>，但是对于fanout类型的会忽略这个值。</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb04.png" alt></p>
 <p><code>`</code> python emit_log.py</p>
@@ -284,23 +287,27 @@ channel.start_consuming()
 <pre><code class="line-numbers language-bash">python receive_logs.py &gt; test.log
 </code></pre>
 <p>如果只想打印到控制台：</p>
-<pre><code>python receive_logs.py
-</code></pre><p>然后开始启动日志发送者进程：</p>
-<pre><code>python emit_log.py
-</code></pre><p>演示结果：</p>
+<pre><code class="line-numbers language-bash">python receive_logs.py
+</code></pre>
+<p>然后开始启动日志发送者进程：</p>
+<pre><code class="line-numbers language-bash">python emit_log.py
+</code></pre>
+<p>演示结果：</p>
 <p>第一个窗口</p>
-<pre><code>rabbitmqctl list_bindings
-</code></pre><p>查看test.log内容：</p>
-<pre><code>
-</code></pre><p>第二个窗口：</p>
-<pre><code>$ python receive_logs.py
+<pre><code class="line-numbers language-bash">rabbitmqctl list_bindings
+</code></pre>
+<p>查看test.log内容</p>
+<p>第二个窗口：</p>
+<pre><code class="line-numbers language-bash">$ python receive_logs.py
  [*] Waiting for logs. To exit press CTRL+C
  [x] b&#39;info: Hello World!&#39;
-</code></pre><p>发送者窗口：</p>
-<pre><code>$ python emit_log.py
+</code></pre>
+<p>发送者窗口：</p>
+<pre><code class="line-numbers language-bash">$ python emit_log.py
  [x] Sent &#39;info: Hello World!&#39;
-</code></pre><p>最后，运行如下命令来确认绑定的确建立了：</p>
-<pre><code>[root@controller161 ~]# rabbitmqctl list_bindings
+</code></pre>
+<p>最后，运行如下命令来确认绑定的确建立了：</p>
+<pre><code class="line-numbers language-bash">[root@controller161 ~]# rabbitmqctl list_bindings
 Listing bindings ...
     exchange    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    queue    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    []
     exchange    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    queue    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    []
@@ -308,7 +315,8 @@ Listing bindings ...
     exchange    task_queue    queue    task_queue    []
 logs    exchange    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    queue    amq.gen-4CuguDMUeYD7j9rFJQvF9Q    []
 logs    exchange    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    queue    amq.gen-TlEpq9mpE7zlfa3Qq6qFMA    []
-</code></pre><p>很清楚，交换机<code>logs</code>里面的消息被发送给两个由服务器生成的名字的队列中去了，这正是我们想要的。</p>
+</code></pre>
+<p>很清楚，交换机<code>logs</code>里面的消息被发送给两个由服务器生成的名字的队列中去了，这正是我们想要的。</p>
 
     </div>
     

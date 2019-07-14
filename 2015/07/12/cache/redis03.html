@@ -24,7 +24,8 @@
 # SADD &quot;user:1:following&quot; 2
 # SADD &quot;user:2:followers&quot; 1
 # EXEC
-redis将客...">
+
+redis将...">
 
 
 <meta name="robots" content="all">
@@ -196,11 +197,12 @@ redis将客...">
     
     <div class="post-body post-content">
         <h3 id="redis事务"><a href="#redis事务" class="headerlink" title="redis事务"></a>redis事务</h3><p>redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。</p>
-<pre><code># MULTI
+<pre><code class="line-numbers language-none"># MULTI
 # SADD &quot;user:1:following&quot; 2
 # SADD &quot;user:2:followers&quot; 1
 # EXEC
-</code></pre><p>redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。</p>
+</code></pre>
+<p>redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。</p>
 <p>错误处理：</p>
 <ul>
 <li>语法错误，redis直接返回错误，连语法正确的其他命令也不会执行</li>
@@ -211,16 +213,20 @@ redis将客...">
 <p>Tips：watch命令的作用只是当被监控的键值被修改后阻止之后一个事务的执行，而不能保证其他客户端不修改这一键值，所以我们需要在EXEC执行失败后重新执行整个函数</p>
 <p>执行EXEC命令后会取消对所有键的监控，如果不想执行事务中的命令也可以使用unwatch命令取消监控</p>
 <h3 id="生存时间"><a href="#生存时间" class="headerlink" title="生存时间"></a>生存时间</h3><p>在实际开发中经常会遇到一些有时效的数据，比如限时优惠活动、缓存或验证码等，过了一定时间就需要删除这些数据。在redis中可以使用EXPIRE命令设置一个键的生存时间，到时间后redis自动删除它。</p>
-<pre><code># EXPIRE key seconds
+<pre><code class="line-numbers language-none"># EXPIRE key seconds
 # TTL key
-</code></pre><p>返回一个键还要多久就要超时，当键不存在或者木有为键设置超时间接时返回-1</p>
-<pre><code># PERSIST key
-</code></pre><p>取消键的生存时间设置，即将键恢复成永久</p>
+</code></pre>
+<p>返回一个键还要多久就要超时，当键不存在或者木有为键设置超时间接时返回-1</p>
+<pre><code class="line-numbers language-none"># PERSIST key
+</code></pre>
+<p>取消键的生存时间设置，即将键恢复成永久</p>
 <p>除了PERSIST外，使用SET或GETSET命令为键赋值会同时清除键的生存时间。其他命令不会</p>
-<pre><code># PEXPIRE key millseconds
-</code></pre><p>以毫秒为单位的超时设置</p>
-<pre><code># EXPIREAT key time
-</code></pre><p>使用Unix时间作为参数，也就是1970-01-01 00:00:00 到现在的秒数</p>
+<pre><code class="line-numbers language-none"># PEXPIRE key millseconds
+</code></pre>
+<p>以毫秒为单位的超时设置</p>
+<pre><code class="line-numbers language-none"># EXPIREAT key time
+</code></pre>
+<p>使用Unix时间作为参数，也就是1970-01-01 00:00:00 到现在的秒数</p>
 <h3 id="实现缓存cache"><a href="#实现缓存cache" class="headerlink" title="实现缓存cache"></a>实现缓存cache</h3><p>为了提高网站的负载能力，常常需要将一些访问频率较高但是对CPU或IO资源消耗较大的操作结果缓存起来，比如每次获取一个单方报价，需要去数据库检索一个大字段，请求IO资源，然后多线程反序列化为一个对象，请求线程资源和CUP资源，那么这个东西就需要缓存起来。
 一般来讲会给缓存设置过期时间，防止内存被大量占用。</p>
 <p>然而在一些场景中这种方法并不能满足需要，当服务器内存有限的时候，如果大量使用缓存键其生存时间过长会导致redis占满内存，另一方面如果生存时间过短会导致缓存命中率过低而影响效率。</p>
@@ -228,31 +234,37 @@ redis将客...">
 <p>具体方法如下：</p>
 <p>修改配置文件的maxmemory参数，单位是字节，当超过这个限制redis会根据maxmemory-policy参数指定的策略删除不需要的键，直到redis占用内存小于指定内存。</p>
 <p>redis支持的淘汰键规则：</p>
-<pre><code>* volatile-lru    使用LRU算法删除一个键（只对设置了生存时间的键）
+<pre><code class="line-numbers language-none">* volatile-lru    使用LRU算法删除一个键（只对设置了生存时间的键）
 * allkeys-lru    使用LRU算法删除一个键，这个比较常用
 * volatile-random    随机删除一个键（只对设置了生存时间的键）
 * allkeys-random    随机删除一个键
 * volatile-ttl    删除生存时间最近的一个键（只对设置了生存时间的键）
 * noeviction    不删除键，只返回错误
-</code></pre><p>事实上redis并不会准确将整个数据库中最久未被使用的键删除，而是每次从数据库中随机取3个键并删除这3个键中最久未被使用的键，删除生存时间最接近的键的实现方案也是一样，这个3这个数字可以通过maxmemory-samples来配置。</p>
+</code></pre>
+<p>事实上redis并不会准确将整个数据库中最久未被使用的键删除，而是每次从数据库中随机取3个键并删除这3个键中最久未被使用的键，删除生存时间最接近的键的实现方案也是一样，这个3这个数字可以通过maxmemory-samples来配置。</p>
 <h3 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h3><h4 id="有序集合SortedSet"><a href="#有序集合SortedSet" class="headerlink" title="有序集合SortedSet"></a>有序集合SortedSet</h4><p>SortedSet常见使用场景是大数据排序，如游戏玩家排行榜，所以很少会需要获得键中全部数据。可以使用下列命令序列来获取集合运算：</p>
-<pre><code>MULTI
+<pre><code class="line-numbers language-none">MULTI
 ZINTERSCORE tempKey ...
 ZRANGE tempKey ...
 DEL tempKey
 EXEC
-</code></pre><h4 id="SORT命令"><a href="#SORT命令" class="headerlink" title="SORT命令"></a>SORT命令</h4><p>sort命令可以对list、Set、SortedSet进行排序，并且可以完成类似于关系型数据库中的连接查询任务。</p>
-<pre><code># SORT key ALPHA DESC LIMIT 11, 10
-</code></pre><p>默认SORT以数字排序，添加ALPHA参数可以以字典顺序排序，DESC表示倒序，LIMIT参数不解释</p>
+</code></pre>
+<h4 id="SORT命令"><a href="#SORT命令" class="headerlink" title="SORT命令"></a>SORT命令</h4><p>sort命令可以对list、Set、SortedSet进行排序，并且可以完成类似于关系型数据库中的连接查询任务。</p>
+<pre><code class="line-numbers language-none"># SORT key ALPHA DESC LIMIT 11, 10
+</code></pre>
+<p>默认SORT以数字排序，添加ALPHA参数可以以字典顺序排序，DESC表示倒序，LIMIT参数不解释</p>
 <h4 id="BY参数"><a href="#BY参数" class="headerlink" title="BY参数"></a>BY参数</h4><p>很多情况下list或set中存储的元素值代表的是对象的ID，更多时候我们希望根据ID对应的对象的某个属性进行排序，比如提交时间。
 如果提供了BY参数，SORT命令将不再依据元素自身的值进行排序，而是对每个元素使用元素的值替换参考键中第一个*并获取其值，然后依据该值对元素排序。</p>
-<pre><code># SORT tag:Python:posts by post:*-&gt;time DESC
-</code></pre><p>上面的post:*是散列键Hash类型，而time是散列键值中的一个属性</p>
+<pre><code class="line-numbers language-none"># SORT tag:Python:posts by post:*-&gt;time DESC
+</code></pre>
+<p>上面的post:*是散列键Hash类型，而time是散列键值中的一个属性</p>
 <h4 id="GET参数"><a href="#GET参数" class="headerlink" title="GET参数"></a>GET参数</h4><p>对于SORT排序后获取了一个ID列表，要显示所有文章的标题，并不需要对每个ID都去请求一次HGET，可以使用SORT命令的GET参数，可以获取多个字段</p>
-<pre><code># SORT tag:python:posts BY post:*-&gt;time DESC GET post:*-&gt;title GET post:*-&gt;time GET #
-</code></pre><p>最后一个# 代表还能获取文章的ID，也就是返回元素本身的值</p>
-<h4 id="STORE参数"><a href="#STORE参数" class="headerlink" title="STORE参数"></a>STORE参数</h4><pre><code># SORT tag:python:posts BY post:*-&gt;time DESC GET post:*-&gt;title GET post:*-&gt;time GET # STORE sort.result
-</code></pre><p>STORE参数常用来结合EXPIRE命令缓存排序结果</p>
+<pre><code class="line-numbers language-none"># SORT tag:python:posts BY post:*-&gt;time DESC GET post:*-&gt;title GET post:*-&gt;time GET #
+</code></pre>
+<p>最后一个# 代表还能获取文章的ID，也就是返回元素本身的值</p>
+<h4 id="STORE参数"><a href="#STORE参数" class="headerlink" title="STORE参数"></a>STORE参数</h4><pre><code class="line-numbers language-none"># SORT tag:python:posts BY post:*-&gt;time DESC GET post:*-&gt;title GET post:*-&gt;time GET # STORE sort.result
+</code></pre>
+<p>STORE参数常用来结合EXPIRE命令缓存排序结果</p>
 <h4 id="SORT性能优化："><a href="#SORT性能优化：" class="headerlink" title="SORT性能优化："></a>SORT性能优化：</h4><p>SORT是redis中最强大最复杂的命令之一，如果使用不好很容易成为性能瓶颈。SORT命令的时间复杂度是O(n + mlogm)，其中n表示要排序的列表中的元素个数，m表示要返回的元素个数。当n较大时候SORT命令性能会比较低，并且redis在排序前会建立一个长度为n的容器来存储待排序元素，n较大时严重影响性能
 所以要注意：</p>
 <ul>
@@ -262,21 +274,24 @@ EXEC
 </ul>
 <h3 id="消息通知"><a href="#消息通知" class="headerlink" title="消息通知"></a>消息通知</h3><p> 一个很常见的例子就是发送邮件。使用redis的list数据结构可以轻松实现，消费者LPUSH到list中，然后消费者RPOP取出任务。
 一般来讲消费者需要去不断的轮训这个队列，这个有些不完美。如果有新任务加入到任务队列就通知消费者就好了。其实借助BRPOP命令可以实现这样的需求，不过这个是阻塞的，一直到这个队列中有任务了才会返回。</p>
-<pre><code># BRPOP queue, timetoutseconds
-</code></pre><h3 id="优先级队列"><a href="#优先级队列" class="headerlink" title="优先级队列"></a>优先级队列</h3><p>BRPOP命令可以同时接受多个键，其完整命令格式为 BRPOP key1 key2</p>
+<pre><code class="line-numbers language-none"># BRPOP queue, timetoutseconds
+</code></pre>
+<h3 id="优先级队列"><a href="#优先级队列" class="headerlink" title="优先级队列"></a>优先级队列</h3><p>BRPOP命令可以同时接受多个键，其完整命令格式为 BRPOP key1 key2</p>
 <p>可同时检测多个键，如果所有键都没有元素则阻塞，如果其中有一个键有元素则会从该键中弹出元素。</p>
 <p>借此特性可以实现区分优先级的任务队列。</p>
-<pre><code>$task = BRPOP queue:confirm.email queue:notify.email 0
+<pre><code class="line-numbers language-none">$task = BRPOP queue:confirm.email queue:notify.email 0
 execute($task[1])
-</code></pre><p>这样只要confirm队列中有任务，那么取出来的肯定是confirm任务，否则才会去取notify的任务</p>
-<h3 id="发布-订阅模式"><a href="#发布-订阅模式" class="headerlink" title="发布/订阅模式"></a>发布/订阅模式</h3><pre><code># PUBLISH channel message
+</code></pre>
+<p>这样只要confirm队列中有任务，那么取出来的肯定是confirm任务，否则才会去取notify的任务</p>
+<h3 id="发布-订阅模式"><a href="#发布-订阅模式" class="headerlink" title="发布/订阅模式"></a>发布/订阅模式</h3><pre><code class="line-numbers language-none"># PUBLISH channel message
 向某个频道channel发布一个消息
 # SUBSCRIBE channel
 # UNSUBSCRIBE channel
 按照规则订阅：
 支持glob风格的通配符，shell风格的通配符，跟正则式没有半毛钱关系
 # PSUBSCRIBE channel.?*
-</code></pre><h3 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h3><p>客户端和redis使用TCP协议连接。往返时延在数量级上相当于redis处理一条简单命令。
+</code></pre>
+<h3 id="管道"><a href="#管道" class="headerlink" title="管道"></a>管道</h3><p>客户端和redis使用TCP协议连接。往返时延在数量级上相当于redis处理一条简单命令。
 redis底层通信协议对管道pipelining提供了支持，但一组命令中每条命令都不依赖于之前命令的执行结果就可以将这组命令一起通过管道发出去。</p>
 <h3 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h3><p>内部编码优化</p>
 

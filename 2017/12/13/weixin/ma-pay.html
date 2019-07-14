@@ -228,7 +228,7 @@
 <p>然后小程序的管理员会受到一条微信消息，点击进去同意即可。之后再进入小程序后台，就能看到小程序所关联的公众号了：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma003.png" alt></p>
 <p>小程序A跳转到B的示例代码：</p>
-<pre><code>wx.navigateToMiniProgram({
+<pre><code class="line-numbers language-js">wx.navigateToMiniProgram({
   appId: &#39;APPID&#39;,
   path: &#39;pages/index/index?id=123&#39;,
   extraData: {
@@ -239,8 +239,9 @@
     // 打开成功
   }
 })
-</code></pre><p>同时还可以给小程序B传递参数，通过<code>extraData</code>这个参数，小程序B接受参数的方法：</p>
-<pre><code>App({
+</code></pre>
+<p>同时还可以给小程序B传递参数，通过<code>extraData</code>这个参数，小程序B接受参数的方法：</p>
+<pre><code class="line-numbers language-js">App({
   onLaunch: function(options) {
     wx.setStorageSync(&#39;fromAppId&#39;, options.referrerInfo.appId)
     wx.setStorageSync(&#39;foo&#39;, options.referrerInfo.extraData.foo)
@@ -256,8 +257,9 @@
   },
   globalData: &#39;I am global data&#39;
 })
-</code></pre><p>小程序B处理完成后返回小程序A的方式：</p>
-<pre><code>console.log(&#39;支付成功啦啦啦啦。。。。。&#39;)
+</code></pre>
+<p>小程序B处理完成后返回小程序A的方式：</p>
+<pre><code class="line-numbers language-js">console.log(&#39;支付成功啦啦啦啦。。。。。&#39;)
 wx.navigateBackMiniProgram({
   extraData: {
     payResult: &#39;good&#39;
@@ -266,24 +268,28 @@ wx.navigateBackMiniProgram({
     // 打开成功
   }
 })
-</code></pre><p>然后小程序A在<code>App.js</code>中接受到返回值：</p>
-<pre><code>onShow: function (options) {
+</code></pre>
+<p>然后小程序A在<code>App.js</code>中接受到返回值：</p>
+<pre><code class="line-numbers language-js">onShow: function (options) {
     wx.setStorageSync(&#39;payResult&#39;, options.referrerInfo.extraData.payResult)
 },
-</code></pre><p>然后在相应的页面就能处理结果值了，这里还是用onShow函数：</p>
-<pre><code>onShow: function (options) {
+</code></pre>
+<p>然后在相应的页面就能处理结果值了，这里还是用onShow函数：</p>
+<pre><code class="line-numbers language-js">onShow: function (options) {
     this.setData({
       &#39;lalala&#39;: wx.getStorageSync(&#39;payResult&#39;)
     }) 
 },
-</code></pre><h2 id="小程序支付"><a href="#小程序支付" class="headerlink" title="小程序支付"></a>小程序支付</h2><p>小程序B需要实现微信支付功能，还需要有一个后端系统，我这里通过一个SpringBoot工程搭建后端系统，
+</code></pre>
+<h2 id="小程序支付"><a href="#小程序支付" class="headerlink" title="小程序支付"></a>小程序支付</h2><p>小程序B需要实现微信支付功能，还需要有一个后端系统，我这里通过一个SpringBoot工程搭建后端系统，
 另外引入一个微信支付的依赖：</p>
-<pre><code>&lt;dependency&gt;
+<pre><code class="line-numbers language-xml">&lt;dependency&gt;
     &lt;groupId&gt;com.github.binarywang&lt;/groupId&gt;
     &lt;artifactId&gt;weixin-java-pay&lt;/artifactId&gt;
     &lt;version&gt;${weixin-java-pay.version}&lt;/version&gt;
 &lt;/dependency&gt;
-</code></pre><p>主要的逻辑是这样：</p>
+</code></pre>
+<p>主要的逻辑是这样：</p>
 <ol>
 <li>小程序向服务端发送商品详情、金额、openid</li>
 <li>服务端向微信统一下单</li>
@@ -295,7 +301,7 @@ wx.navigateBackMiniProgram({
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma002.png" alt></p>
 <p>服务器域名只能是https开头，所以需要先去给你的网站申请一个SSL证书，配置一下nginx来代理转发即可，
 比如我的域名为<code>https://aggrepay.enzhico.cn/</code>，这里我申请的是lets encrypted证书：</p>
-<pre><code>server {
+<pre><code class="line-numbers language-nginx">server {
     listen 443 ssl;
     server_name aggrepay.enzhico.cn;
 
@@ -326,12 +332,13 @@ wx.navigateBackMiniProgram({
     ssl_ciphers &#39;ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128:AES256:AES:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK&#39;;
     ssl_prefer_server_ciphers on;
 }
-</code></pre><p>设置完服务器后，就将后台应用部署上去。</p>
+</code></pre>
+<p>设置完服务器后，就将后台应用部署上去。</p>
 <p>回到小程序B中，先要获取到用户openid，小程序是通过登录操作获取到用户的openid的。</p>
 <p>参考官方的<a href="https://mp.weixin.qq.com/debug/wxadoc/dev/api/api-login.html" target="_blank" rel="noopener">小程序登录API</a></p>
 <p>很重要的一张登录时序图：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma004.png" alt></p>
-<pre><code>  onLoad: function () {
+<pre><code class="line-numbers language-js">  onLoad: function () {
     var that = this
     //登陆获取code
     wx.login({
@@ -360,8 +367,9 @@ wx.navigateBackMiniProgram({
       }
     })
   },
-</code></pre><p>对应后台代码：</p>
-<pre><code>/**
+</code></pre>
+<p>对应后台代码：</p>
+<pre><code class="line-numbers language-java">/**
  * get openid
  *
  * @return 成功标准
@@ -380,8 +388,9 @@ public String openid(@RequestParam(value = &quot;code&quot;) String code) throws
         return result;
     }
 }
-</code></pre><p>获取到openid后就可以调用统一下单接口了：</p>
-<pre><code>  /**生成商户订单 */
+</code></pre>
+<p>获取到openid后就可以调用统一下单接口了：</p>
+<pre><code class="line-numbers language-js">  /**生成商户订单 */
   generateOrder: function (openid) {
     var that = this
     //统一支付
@@ -409,7 +418,8 @@ public String openid(@RequestParam(value = &quot;code&quot;) String code) throws
       },
     })
   },
-</code></pre><p>对应后台代码，注意二次签名：</p>
+</code></pre>
+<p>对应后台代码，注意二次签名：</p>
 <pre><code class="line-numbers language-java">/**
  * 统一下单(详见https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1)
  * 在发起微信支付前，需要调用统一下单接口，获取&quot;预支付交易会话标识&quot;
@@ -445,7 +455,7 @@ private String createSign(WxPayMpOrderResultVO p, String mchKey) {
 }
 </code></pre>
 <p>拿到预支付订单后，小程序B就能调用支付了，支付成功后返回到小程序A中，并将支付结果通过<code>extraData</code>参数回传过去：</p>
-<pre><code>/* 支付   */
+<pre><code class="line-numbers language-js">/* 支付   */
 pay: function (param) {
   console.log(&quot;支付&quot;)
   console.log(param)
@@ -474,7 +484,8 @@ pay: function (param) {
     }
   })
 }
-</code></pre><p>小程序的跳转需要上线版本才能看到效果，所以需要把代码上传后，提交上线审核。
+</code></pre>
+<p>小程序的跳转需要上线版本才能看到效果，所以需要把代码上传后，提交上线审核。
 登录小程序后台，点击”开发管理”，在下面的开发版本中点击提交审核，一般半天左右审核完成。</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma005.png" alt></p>
 

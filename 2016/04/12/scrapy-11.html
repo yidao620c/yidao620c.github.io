@@ -253,15 +253,18 @@ def post_login(self, response):
 def after_login(self, response):
     pass
 </code></pre>
-<p><code>FormRequest.from_response()</code>方法让你指定提交的url，请求头还有form表单值，注意我们还通过<code>meta</code>传递了cookie标识。它同样有个回调函数，登录成功后调用。下面我们来实现它</p>
+<p><code>FormRequest.from_response()</code>方法让你指定提交的url，请求头还有form表单值，注意我们还通过<code>meta</code>传递了cookie标识。
+它同样有个回调函数，登录成功后调用。下面我们来实现它</p>
 <pre><code class="line-numbers language-python">def after_login(self, response):
     # 登录之后，开始进入我要爬取的私信页面
     for url in self.start_urls:
         # 因为我们上面定义了Rule，所以只需要简单的生成初始爬取Request即可
         yield Request(url, meta={&#39;cookiejar&#39;: response.meta[&#39;cookiejar&#39;]})
 </code></pre>
-<p>这里我通过<code>start_urls</code>定义了开始页面，然后生成Request，具体爬取的规则和<code>下一页</code>规则在前面的Rule里定义了。注意这里我继续传递<code>cookiejar</code>，访问初始页面时带上cookie信息。</p>
-<h3 id="重写-requests-to-follow"><a href="#重写-requests-to-follow" class="headerlink" title="重写_requests_to_follow"></a>重写_requests_to_follow</h3><p>有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的<code>_requests_to_follow()</code>方法解决了这个问题</p>
+<p>这里我通过<code>start_urls</code>定义了开始页面，然后生成Request，具体爬取的规则和<code>下一页</code>规则在前面的Rule里定义了。
+注意这里我继续传递<code>cookiejar</code>，访问初始页面时带上cookie信息。</p>
+<h3 id="重写-requests-to-follow"><a href="#重写-requests-to-follow" class="headerlink" title="重写_requests_to_follow"></a>重写_requests_to_follow</h3><p>有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，
+而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的<code>_requests_to_follow()</code>方法解决了这个问题</p>
 <pre><code class="line-numbers language-python">def _requests_to_follow(self, response):
     &quot;&quot;&quot;重写加入cookiejar的更新&quot;&quot;&quot;
     if not isinstance(response, HtmlResponse):

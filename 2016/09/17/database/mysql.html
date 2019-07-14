@@ -196,50 +196,64 @@
 <p>开源数据库里面mysql的份额最高，也是最流行的，其实性能也非常高，所以一直用它。</p>
 <h2 id="安装和配置"><a href="#安装和配置" class="headerlink" title="安装和配置"></a>安装和配置</h2><p>在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。</p>
 <p>从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 <code>wget</code> 下载：</p>
-<pre><code>wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
-</code></pre><p>安装 yum Repository</p>
-<pre><code>yum -y install mysql57-community-release-el7-8.noarch.rpm
-</code></pre><p>搜索 mysql server</p>
-<pre><code>yum search mysql-com
-</code></pre><p>安装</p>
-<pre><code>yum -y install mysql-community-server.x86_64
-</code></pre><p>启动、停止、查看状态、开机启动等</p>
-<pre><code>systemctl start mysqld.service
+<pre><code class="line-numbers language-bash">wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
+</code></pre>
+<p>安装 yum Repository</p>
+<pre><code class="line-numbers language-bash">yum -y install mysql57-community-release-el7-8.noarch.rpm
+</code></pre>
+<p>搜索 mysql server</p>
+<pre><code class="line-numbers language-bash">yum search mysql-com
+</code></pre>
+<p>安装</p>
+<pre><code class="line-numbers language-bash">yum -y install mysql-community-server.x86_64
+</code></pre>
+<p>启动、停止、查看状态、开机启动等</p>
+<pre><code class="line-numbers language-bash">systemctl start mysqld.service
 systemctl stop mysqld.service
 systemctl status mysqld.service
 systemctl enable mysqld.service
-</code></pre><p>登陆数据库</p>
+</code></pre>
+<p>登陆数据库</p>
 <p>MySQL5.7.6 之后会在启动 mysql 进程的时候生成一个用户密码，首次登陆需要这个密码才行。
 密码保存在 mysql 进程的日志里，即<code>/var/log/mysqld.log</code></p>
-<pre><code>cat /var/log/mysqld.log | grep &#39;password&#39;
+<pre><code class="line-numbers language-bash">cat /var/log/mysqld.log | grep &#39;password&#39;
 # 登录
 mysql -uroot -p
-</code></pre><p>修改root密码，先登录进去后：</p>
-<pre><code>mysql&gt; ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;new_password&#39;;
-</code></pre><p>最后，安装完了可以删除 MySQL 的 Repository ，这样可以减少 yum 检查更新的时间，使用下面的命令：</p>
-<pre><code>yum -y remove mysql57-community-release-el7-8.noarch
-</code></pre><p>修改权限，让其他的机器也能访问：</p>
-<pre><code>mysql&gt; GRANT ALL ON *.* TO &#39;root&#39;@&#39;%&#39; IDENTIFIED BY &#39;mysql&#39;;
+</code></pre>
+<p>修改root密码，先登录进去后：</p>
+<pre><code class="line-numbers language-none">mysql&gt; ALTER USER &#39;root&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;new_password&#39;;
+</code></pre>
+<p>最后，安装完了可以删除 MySQL 的 Repository ，这样可以减少 yum 检查更新的时间，使用下面的命令：</p>
+<pre><code class="line-numbers language-bash">yum -y remove mysql57-community-release-el7-8.noarch
+</code></pre>
+<p>修改权限，让其他的机器也能访问：</p>
+<pre><code class="line-numbers language-none">mysql&gt; GRANT ALL ON *.* TO &#39;root&#39;@&#39;%&#39; IDENTIFIED BY &#39;mysql&#39;;
 mysql&gt; flush privileges;
-</code></pre><p>如果还不能远程访问，就需要关闭防火墙。</p>
+</code></pre>
+<p>如果还不能远程访问，就需要关闭防火墙。</p>
 <h2 id="常见数据库操作"><a href="#常见数据库操作" class="headerlink" title="常见数据库操作"></a>常见数据库操作</h2><p>创建新的数据库并制定UTF-8编码</p>
-<pre><code>drop database fastloan3;
+<pre><code class="line-numbers language-none">drop database fastloan3;
 create database fastloan3 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
-</code></pre><p>通过sql脚本文件执行sql：</p>
-<pre><code>mysql -uroot -p... fastloan3 &lt; t_invoice.sql
-</code></pre><p>导出数据库</p>
-<pre><code>mysqldump -u... -p... mydb &gt; mydb_tables.sql
+</code></pre>
+<p>通过sql脚本文件执行sql：</p>
+<pre><code class="line-numbers language-bash">mysql -uroot -p... fastloan3 &lt; t_invoice.sql
+</code></pre>
+<p>导出数据库</p>
+<pre><code class="line-numbers language-bash">mysqldump -u... -p... mydb &gt; mydb_tables.sql
 mysqldump -u... -p... mydb t1 t2 t3 &gt; mydb_tables.sqlhe
-</code></pre><p>查看表空间占用大小</p>
-<pre><code>mysql&gt; use information_schema;
+</code></pre>
+<p>查看表空间占用大小</p>
+<pre><code class="line-numbers language-none">mysql&gt; use information_schema;
 mysql&gt; SELECT TABLE_NAME,DATA_LENGTH+INDEX_LENGTH,TABLE_ROWS
 FROM TABLES WHERE TABLE_SCHEMA=&#39;数据库名&#39; //AND TABLE_NAME=&#39;表名&#39;
-</code></pre><p>查看详细表结构，包括注释</p>
-<pre><code>show full columns from &lt;table_name&gt;
+</code></pre>
+<p>查看详细表结构，包括注释</p>
+<pre><code class="line-numbers language-none">show full columns from &lt;table_name&gt;
 SELECT COLUMN_NAME, COLUMN_TYPE, EXTRA, COLUMN_COMMENT
 FROM information_schema.columns
 WHERE table_name = &#39;metrics&#39; AND table_schema = &#39;fastloan3&#39;;
-</code></pre><h2 id="关于表连接"><a href="#关于表连接" class="headerlink" title="关于表连接"></a>关于表连接</h2><p>SQL的Join语法有很多inner的，有outer的，有left的，有时候对于Select出来的结果集是什么样子有点不是很清楚。
+</code></pre>
+<h2 id="关于表连接"><a href="#关于表连接" class="headerlink" title="关于表连接"></a>关于表连接</h2><p>SQL的Join语法有很多inner的，有outer的，有left的，有时候对于Select出来的结果集是什么样子有点不是很清楚。
 这里我通过实际例子来演示它们的用法。</p>
 <p>假设我们有两张表。TableA是左边的表。TableB是右边的表。其各有5条记录，
 其中有4条记录name是相同的，如下所示：让我们看看不同JOIN的不同</p>
@@ -458,19 +472,20 @@ UNION
 SELECT name FROM TableB
 </code></pre>
 <p>结果集（注意下面没有重复项）</p>
-<pre><code>HaHa
+<pre><code class="line-numbers language-none">HaHa
 HeiHei
 WaWa
 SaSa
 YaYa
 ZaZa
-</code></pre><p>使用<code>UNION ALL</code></p>
+</code></pre>
+<p>使用<code>UNION ALL</code></p>
 <pre><code class="line-numbers language-sql">SELECT name FROM TableA
 UNION ALL
 SELECT name FROM TableB
 </code></pre>
 <p>结果集</p>
-<pre><code>HaHa
+<pre><code class="line-numbers language-none">HaHa
 HeiHei
 WaWa
 SaSa
@@ -480,7 +495,8 @@ WaWa
 SaSa
 YaYa
 ZaZa
-</code></pre><h2 id="分组查询GROUP-BY"><a href="#分组查询GROUP-BY" class="headerlink" title="分组查询GROUP BY"></a>分组查询GROUP BY</h2><p>很多时候需要分组统计查询，这里就需要使用到<code>GROUP BY</code>，以及<code>HAVING</code>子句。</p>
+</code></pre>
+<h2 id="分组查询GROUP-BY"><a href="#分组查询GROUP-BY" class="headerlink" title="分组查询GROUP BY"></a>分组查询GROUP BY</h2><p>很多时候需要分组统计查询，这里就需要使用到<code>GROUP BY</code>，以及<code>HAVING</code>子句。</p>
 <p>在 SQL 中增加 HAVING 子句原因是，WHERE 关键字无法与合计函数一起使用。</p>
 <pre><code class="line-numbers language-sql">SELECT column_name, aggregate_function(column_name)
 FROM table_name
@@ -569,11 +585,12 @@ HAVING SUM(OrderPrice)&gt;1500
 </tbody>
 </table>
 <p>现在我要求”Bush” 或 “Adams” 拥有超过 1500 的订单平均金额：</p>
-<pre><code>SELECT Customer,SUM(OrderPrice) FROM Orders
+<pre><code class="line-numbers language-sql">SELECT Customer,SUM(OrderPrice) FROM Orders
 WHERE Customer=&#39;Bush&#39; OR Customer=&#39;Adams&#39;
 GROUP BY Customer
 HAVING AVG(OrderPrice)&gt;1500
-</code></pre><p>结果集：</p>
+</code></pre>
+<p>结果集：</p>
 <table>
 <thead>
 <tr>

@@ -215,17 +215,21 @@ String password = request.get(&quot;password&quot;);
 String sql = &quot;SELECT * FROM user WHERE username=&#39;&quot;+username+&quot;&#39; AND password=&#39;&quot;+password+&quot;&#39;&quot;;
 </code></pre>
 <p>如果用户的输入的用户名如下，密码任意：</p>
-<pre><code>myuser&#39; or &#39;foo&#39; = &#39;foo&#39; --
-</code></pre><p>那么我们的SQL变成了如下所示：</p>
-<pre><code>SELECT * FROM user WHERE username=&#39;myuser&#39; or &#39;foo&#39; = &#39;foo&#39; --&#39;&#39; AND password=&#39;xxx&#39;
-</code></pre><p>在SQL里面–是注释标记，所以查询语句会在此中断。这就让攻击者在不知道任何合法用户名和密码的情况下成功登录了。</p>
+<pre><code class="line-numbers language-none">myuser&#39; or &#39;foo&#39; = &#39;foo&#39; --
+</code></pre>
+<p>那么我们的SQL变成了如下所示：</p>
+<pre><code class="line-numbers language-sql">SELECT * FROM user WHERE username=&#39;myuser&#39; or &#39;foo&#39; = &#39;foo&#39; --&#39;&#39; AND password=&#39;xxx&#39;
+</code></pre>
+<p>在SQL里面–是注释标记，所以查询语句会在此中断。这就让攻击者在不知道任何合法用户名和密码的情况下成功登录了。</p>
 <p>对于MSSQL还有更加危险的一种SQL注入，就是控制系统，
 下面这个可怕的例子将演示如何在某些版本的MSSQL数据库上执行系统命令:</p>
-<pre><code>sql:=&quot;SELECT * FROM products WHERE name LIKE &#39;%&quot;+prod+&quot;%&#39;&quot;
+<pre><code class="line-numbers language-none">sql:=&quot;SELECT * FROM products WHERE name LIKE &#39;%&quot;+prod+&quot;%&#39;&quot;
 Db.Exec(sql)
-</code></pre><p>如果攻击提交 <code>a%&#39; exec master..xp_cmdshell &#39;net user test testpass /ADD&#39; --</code> 作为变量 prod的值，那么sql将会变成</p>
-<pre><code>sql:=&quot;SELECT * FROM products WHERE name LIKE &#39;%a%&#39; exec master..xp_cmdshell &#39;net user test testpass /ADD&#39;--%&#39;&quot;
-</code></pre><p>MSSQL服务器会执行这条SQL语句，包括它后面那个用于向系统添加新用户的命令。
+</code></pre>
+<p>如果攻击提交 <code>a%&#39; exec master..xp_cmdshell &#39;net user test testpass /ADD&#39; --</code> 作为变量 prod的值，那么sql将会变成</p>
+<pre><code class="line-numbers language-sql">sql:=&quot;SELECT * FROM products WHERE name LIKE &#39;%a%&#39; exec master..xp_cmdshell &#39;net user test testpass /ADD&#39;--%&#39;&quot;
+</code></pre>
+<p>MSSQL服务器会执行这条SQL语句，包括它后面那个用于向系统添加新用户的命令。
 如果这个程序是以sa运行而 MSSQLSERVER服务又有足够的权限的话，攻击者就可以获得一个系统帐号来访问主机了。</p>
 <p>对其他数据库也有类似的攻击。</p>
 <h2 id="如何预防SQL注入"><a href="#如何预防SQL注入" class="headerlink" title="如何预防SQL注入"></a>如何预防SQL注入</h2><p>永远不要信任外界输入的数据，特别是来自于用户的数据，包括选择框、表单隐藏域和 cookie。

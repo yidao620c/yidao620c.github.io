@@ -220,14 +220,15 @@ Redis是一个开源的使用ANSI C语言编写、支持网络、可基于内存
 <p>使用LPUSH latest.comments命令，向list集合中插入数据</p>
 <p>插入完成后再用LTRIM latest.comments 0 5000命令使其永远只保存最近5000个ID</p>
 <p>然后我们在客户端获取某一页评论时可以用下面的逻辑</p>
-<pre><code>FUNCTION get_latest_comments(start,num_items):
+<pre><code class="line-numbers language-none">FUNCTION get_latest_comments(start,num_items):
     id_list = redis.lrange(&quot;latest.comments&quot;,start,start+num_items-1)
     IF id_list.length &lt; num_items
         id_list = SQL_DB(&quot;SELECT ... ORDER BY time LIMIT ...&quot;)
     END
     RETURN id_list
 END
-</code></pre><p>如果你还有不同的筛选维度，比如某个分类的最新N条，那么你可以再建一个按此分类的List，只存ID的话，Redis是非常高效的。</p>
+</code></pre>
+<p>如果你还有不同的筛选维度，比如某个分类的最新N条，那么你可以再建一个按此分类的List，只存ID的话，Redis是非常高效的。</p>
 <p>(2)、排行榜应用，取TOP N操作</p>
 <p>这个需求与上面需求的不同之处在于，前面操作以时间为权重，这个是以某个条件为权重，比如按顶的次数排序，这时候就需要我们的sorted set出马了，
 将你要排序的值设置成sorted set的score，将具体的数据设置成相应的value，每次只需要执行一条ZADD命令即可。</p>
@@ -262,9 +263,10 @@ make distclean
 make &amp;&amp; make test
 </code></pre>
 <p>如果测试没有问题，就开始安装：</p>
-<pre><code>make install
-</code></pre><p>安装redis-server服务，一路默认按Enter：</p>
-<pre><code>cd utils
+<pre><code class="line-numbers language-bash">make install
+</code></pre>
+<p>安装redis-server服务，一路默认按Enter：</p>
+<pre><code class="line-numbers language-none">cd utils
 ./install_server.sh
 
 Selected config:
@@ -275,24 +277,27 @@ Data dir       : /var/lib/redis/6379
 Executable     : /usr/local/bin/redis-server
 Cli Executable : /usr/local/bin/redis-cli
 Is this ok? Then press ENTER to go on or Ctrl-C to abort.
-</code></pre><p>安装完成会根据你的端口号生成对应的服务，比如默认的就是redis_6379服务。</p>
+</code></pre>
+<p>安装完成会根据你的端口号生成对应的服务，比如默认的就是redis_6379服务。</p>
 <p>安装完成就可以启动服务：</p>
 <pre><code class="line-numbers language-bash">systemctl enable redis_6379
 systemctl start redis_6379
 systemctl status redis_6379
 </code></pre>
 <p>测试服务：</p>
-<pre><code>redis-cli
+<pre><code class="line-numbers language-none">redis-cli
  &gt; set test &#39;XnServer&#39;
  &gt; get test
-</code></pre><p>几个命令说明：</p>
-<pre><code>redis-server：Redis服务器的daemon启动程序
+</code></pre>
+<p>几个命令说明：</p>
+<pre><code class="line-numbers language-none">redis-server：Redis服务器的daemon启动程序
 redis-cli：Redis命令行操作工具。当然，你也可以用telnet根据其纯文本协议来操作
 redis-benchmark：Redis性能测试工具，测试Redis在你的系统及你的配置下的读写性能
-</code></pre><h2 id="配置Redis"><a href="#配置Redis" class="headerlink" title="配置Redis"></a>配置Redis</h2><p>使用配置文件启动：<code>/etc/redis/6379.conf</code></p>
+</code></pre>
+<h2 id="配置Redis"><a href="#配置Redis" class="headerlink" title="配置Redis"></a>配置Redis</h2><p>使用配置文件启动：<code>/etc/redis/6379.conf</code></p>
 <p>主要配置项：</p>
 <p>Redis支持很多的参数，但都有默认值。</p>
-<pre><code>●daemonize:
+<pre><code class="line-numbers language-none">●daemonize:
 默认情况下，redis不是在后台运行的，如果需要在后台运行，把该项的值更改为yes。
 ●pidfile
 当Redis在后台运行的时候，Redis默认会把pid文件放在/var/run/redis.pid，你可以配置到其他地址。当运行多个redis服务时，需要指定不同的pid文件和端口。
@@ -339,7 +344,8 @@ if(在60秒之内有10000个keys发生变化时){
 设置对appendonly.aof文件进行同步的频率。always表示每次有写操作都进行同步，everysec表示对写操作进行累积，每秒同步一次。这个需要根据实际业务场景进行配置。
 ●activerehashing
 开启之后，redis将在每100毫秒时使用1毫秒的CPU时间来对redis的hash表进行重新hash，可以降低内存的使用。当你的使用场景中，有非常严格的实时性需要，不能够接受Redis时不时的对请求有2毫秒的延迟的话，把这项配置为no。如果没有这么严格的实时性要求，可以设置为yes，以便能够尽可能快的释放内存。
-</code></pre><h2 id="操作Redis"><a href="#操作Redis" class="headerlink" title="操作Redis"></a>操作Redis</h2><h3 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h3><pre><code class="line-numbers language-bash">redis 127.0.0.1:6379&gt; set name wwl //设置一个key-value对
+</code></pre>
+<h2 id="操作Redis"><a href="#操作Redis" class="headerlink" title="操作Redis"></a>操作Redis</h2><h3 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h3><pre><code class="line-numbers language-bash">redis 127.0.0.1:6379&gt; set name wwl //设置一个key-value对
 </code></pre>
 <h3 id="查询数据"><a href="#查询数据" class="headerlink" title="查询数据"></a>查询数据</h3><pre><code class="line-numbers language-bash">redis 127.0.0.1:6379&gt; get name //取出key所对应的value
 </code></pre>

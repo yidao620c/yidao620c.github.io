@@ -242,7 +242,7 @@
 <li>-Joption 传递参数到vm,例如:-J-Xms48m</li>
 </ul>
 <p>示例：</p>
-<pre><code>[root@CZT-FS1 board-api]# jps -lvm
+<pre><code class="line-numbers language-bash">[root@CZT-FS1 board-api]# jps -lvm
 67136 board-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms1024m -Xmx1024m
 100547 board-web-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms512m
 8819 app-manage-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms512m
@@ -250,10 +250,11 @@
 105268 wechat-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms512m
 89172 sun.tools.jps.Jps -lvm -Denv.class.path=.:/usr/local/jdk/lib/dt.jar:/usr/local/jdk/lib/tools.jar:/usr/local/jdk/jre/lib -Dapplication.home=/usr/local/jdk -Xms8m
 44921 app-manage-1.0.0-SNAPSHOT.jar --spring.config.location=file:./application.yml -Xms512m -Xmx1024m
-</code></pre><p>我们选取PID=67136的Java进程作为后续研究对象。</p>
+</code></pre>
+<p>我们选取PID=67136的Java进程作为后续研究对象。</p>
 <h2 id="top使用"><a href="#top使用" class="headerlink" title="top使用"></a>top使用</h2><p>除了常用的打印所有进程使用资源外，还可以对单独的进程，打印线程资源排行榜，按T键可对TIME倒序排列，
 也就是CPU运行时间。TIME列就是各个Java线程耗费的CPU时间，我们线程pid为67163的线程作为后续线程研究对象</p>
-<pre><code>[root@CZT-FS1 board-api]# top -Hp 67136
+<pre><code class="line-numbers language-bash">[root@CZT-FS1 board-api]# top -Hp 67136
 top - 11:22:26 up 166 days, 17:06,  1 user,  load average: 0.07, 0.02, 0.00
 Tasks: 140 total,   0 running, 140 sleeping,   0 stopped,   0 zombie
 Cpu(s):  0.1%us,  0.0%sy,  0.0%ni, 99.9%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
@@ -277,14 +278,16 @@ Swap:  8175612k total,   461868k used,  7713744k free,  7831512k cached
  67148 root      20   0 6825m 867m  14m S  0.0  5.4   0:00.35 java
  67149 root      20   0 6825m 867m  14m S  0.0  5.4   0:00.00 java
  67150 root      20   0 6825m 867m  14m S  0.0  5.4   0:25.08 java
-</code></pre><h2 id="jstack使用"><a href="#jstack使用" class="headerlink" title="jstack使用"></a>jstack使用</h2><p>jstack主要用来查看某个Java进程内的线程堆栈信息。语法格式如下：</p>
-<pre><code>jstack [option] pid
-</code></pre><p>参数如下：</p>
+</code></pre>
+<h2 id="jstack使用"><a href="#jstack使用" class="headerlink" title="jstack使用"></a>jstack使用</h2><p>jstack主要用来查看某个Java进程内的线程堆栈信息。语法格式如下：</p>
+<pre><code class="line-numbers language-bash">jstack [option] pid
+</code></pre>
+<p>参数如下：</p>
 <ol>
 <li>-l    long listings，会打印出额外的锁信息，在发生死锁时可以用jstack -l pid来观察锁持有情况</li>
 <li>-m    mixed mode，不仅会输出Java堆栈信息，还会输出C/C++堆栈信息（比如Native方法）</li>
 </ol>
-<pre><code>[root@CZT-FS1 board-api]# jstack -l 67136 | more
+<pre><code class="line-numbers language-bash">[root@CZT-FS1 board-api]# jstack -l 67136 | more
 Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):
 
 &quot;Thread-12126&quot; #12389 daemon prio=6 os_prio=0 tid=0x00007f3190075800 nid=0x15d08 runnable [0x00007f31f43c4000]
@@ -312,11 +315,13 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):
     at java.net.SocketInputStream.socketRead(SocketInputStream.java:116)
     at java.net.SocketInputStream.read(SocketInputStream.java:171)
 
-</code></pre><p>使用<code>printf &quot;%x\n&quot;</code>，获得线程ID=的十六进制值。</p>
-<pre><code>[root@CZT-FS1 board-api]# printf &quot;%x\n&quot; 67163
+</code></pre>
+<p>使用<code>printf &quot;%x\n&quot;</code>，获得线程ID=的十六进制值。</p>
+<pre><code class="line-numbers language-bash">[root@CZT-FS1 board-api]# printf &quot;%x\n&quot; 67163
 1065b
-</code></pre><p>查看该线程的堆栈：</p>
-<pre><code>[root@CZT-FS1 board-api]# jstack -l 67136 | grep 1065b -A20
+</code></pre>
+<p>查看该线程的堆栈：</p>
+<pre><code class="line-numbers language-bash">[root@CZT-FS1 board-api]# jstack -l 67136 | grep 1065b -A20
 &quot;System Clock&quot; #17 daemon prio=5 os_prio=0 tid=0x00007f322d089000 nid=0x1065b runnable [0x00007f320487c000]
    java.lang.Thread.State: TIMED_WAITING (parking)
     at sun.misc.Unsafe.park(Native Method)
@@ -338,6 +343,7 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):
     at java.lang.Thread.sleep(Native Method)
     at com.alibaba.druid.pool.DruidDataSource$DestroyConnectionThread.run(DruidDataSource.java:2538)
 </code></pre>
+
     </div>
     
     <div class="post-footer">

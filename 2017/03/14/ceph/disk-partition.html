@@ -224,13 +224,16 @@ Number  Start   End     Size    File system  Name          Flags
 这里也是512B，一般来讲磁盘会将一个物理扇区划分成多个逻辑扇区，逻辑扇区才是分区最小单位。</p>
 <h2 id="fdisk使用"><a href="#fdisk使用" class="headerlink" title="fdisk使用"></a>fdisk使用</h2><p>fdisk用来创建MBR分区，这个工具应该都会用了，这里只是简单介绍几个。</p>
 <p>显示所有硬盘分区情况</p>
-<pre><code>fdisk -l
-</code></pre><p>显示具体单个硬盘分区情况</p>
-<pre><code>fdisk -l /dev/sdb
-</code></pre><p>交互显示方便提示fdisk的所有命令如何使用</p>
-<pre><code>fdisk /dev/sdb
-</code></pre><p>进入交互模式后按m可列出所有命令:</p>
-<pre><code>[root@node200 ~]# fdisk /dev/sdb
+<pre><code class="line-numbers language-bash">fdisk -l
+</code></pre>
+<p>显示具体单个硬盘分区情况</p>
+<pre><code class="line-numbers language-bash">fdisk -l /dev/sdb
+</code></pre>
+<p>交互显示方便提示fdisk的所有命令如何使用</p>
+<pre><code class="line-numbers language-bash">fdisk /dev/sdb
+</code></pre>
+<p>进入交互模式后按m可列出所有命令:</p>
+<pre><code class="line-numbers language-bash">[root@node200 ~]# fdisk /dev/sdb
 Welcome to fdisk (util-linux 2.23.2).
 
 Changes will remain in memory only, until you decide to write them.
@@ -249,7 +252,8 @@ Command action
    q   quit without saving changes
    s   create a new empty Sun disklabel
    w   write table to disk and exit
-</code></pre><h2 id="parted使用"><a href="#parted使用" class="headerlink" title="parted使用"></a>parted使用</h2><p>参考：<a href="https://www.gnu.org/software/parted/manual/parted.html" target="_blank" rel="noopener">https://www.gnu.org/software/parted/manual/parted.html</a></p>
+</code></pre>
+<h2 id="parted使用"><a href="#parted使用" class="headerlink" title="parted使用"></a>parted使用</h2><p>参考：<a href="https://www.gnu.org/software/parted/manual/parted.html" target="_blank" rel="noopener">https://www.gnu.org/software/parted/manual/parted.html</a></p>
 <p>Parted 命令分为两种模式：命令行模式和交互模式。</p>
 <ol>
 <li>命令行模式: <code>parted [option] device [command]</code>, 比较适合编程应用。</li>
@@ -258,11 +262,13 @@ Command action
 <p>parted是一个可以分区并进行分区调整的工具，他可以创建、删除、移动、复制、
 调整ext2 Linux-swap fat fat32 reiserfs类型的分区，
 可以创建、调整、移动Macintosh的HFS分区，检测jfs，ntfs，ufs，xfs分区。</p>
-<h3 id="显示分区信息"><a href="#显示分区信息" class="headerlink" title="显示分区信息"></a>显示分区信息</h3><pre><code>parted list  # 列出所有磁盘分区信息
+<h3 id="显示分区信息"><a href="#显示分区信息" class="headerlink" title="显示分区信息"></a>显示分区信息</h3><pre><code class="line-numbers language-bash">parted list  # 列出所有磁盘分区信息
 parted /dev/sdb print # 打印出sdb的分区信息
 blkid  # 查看分区名
-</code></pre><h3 id="创建分区类型"><a href="#创建分区类型" class="headerlink" title="创建分区类型"></a>创建分区类型</h3><pre><code>parted /dev/sdb mklabel label-type
-</code></pre><p>label-type可以是：”bsd”, “dvh”, “gpt”,  “loop”,”mac”, “msdos”, “pc98”, or “sun”。
+</code></pre>
+<h3 id="创建分区类型"><a href="#创建分区类型" class="headerlink" title="创建分区类型"></a>创建分区类型</h3><pre><code class="line-numbers language-bash">parted /dev/sdb mklabel label-type
+</code></pre>
+<p>label-type可以是：”bsd”, “dvh”, “gpt”,  “loop”,”mac”, “msdos”, “pc98”, or “sun”。
 一般的pc机都是msdos格式，如果分区大于2T则需要选用gpt格式的分区表。</p>
 <h3 id="分区转换"><a href="#分区转换" class="headerlink" title="分区转换"></a>分区转换</h3><p>转换成GPT:</p>
 <pre><code class="line-numbers language-bash">parted /dev/sdb mklabel gpt
@@ -278,17 +284,20 @@ blkid  # 查看分区名
 <h3 id="设置分区名"><a href="#设置分区名" class="headerlink" title="设置分区名"></a>设置分区名</h3><pre><code class="line-numbers language-bash">parted /dev/sdb name 1 &quot;name&quot;
 </code></pre>
 <p>这种设置只能用在Mac, PC98 和 GPT类型的分区表，设置时名字用引号括起来</p>
-<h3 id="调整分区大小"><a href="#调整分区大小" class="headerlink" title="调整分区大小"></a>调整分区大小</h3><pre><code>parted /dev/sdb resize 1 start end
-</code></pre><h3 id="删除一个分区"><a href="#删除一个分区" class="headerlink" title="删除一个分区"></a>删除一个分区</h3><pre><code>parted /dev/sdb rm 1
-</code></pre><h3 id="移动分区"><a href="#移动分区" class="headerlink" title="移动分区"></a>移动分区</h3><pre><code>parted /dev/sdb move 1 start end
-</code></pre><h2 id="sgdisk使用"><a href="#sgdisk使用" class="headerlink" title="sgdisk使用"></a>sgdisk使用</h2><p>参考：<a href="http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html" target="_blank" rel="noopener">http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html</a></p>
+<h3 id="调整分区大小"><a href="#调整分区大小" class="headerlink" title="调整分区大小"></a>调整分区大小</h3><pre><code class="line-numbers language-bash">parted /dev/sdb resize 1 start end
+</code></pre>
+<h3 id="删除一个分区"><a href="#删除一个分区" class="headerlink" title="删除一个分区"></a>删除一个分区</h3><pre><code class="line-numbers language-bash">parted /dev/sdb rm 1
+</code></pre>
+<h3 id="移动分区"><a href="#移动分区" class="headerlink" title="移动分区"></a>移动分区</h3><pre><code class="line-numbers language-bash">parted /dev/sdb move 1 start end
+</code></pre>
+<h2 id="sgdisk使用"><a href="#sgdisk使用" class="headerlink" title="sgdisk使用"></a>sgdisk使用</h2><p>参考：<a href="http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html" target="_blank" rel="noopener">http://www.rodsbooks.com/gdisk/sgdisk-walkthrough.html</a></p>
 <p>与fdisk创建MBR分区一样，sgdisk是一个创建GPT分区的工具，它也有交互模式gdisk和命令行模式sgdisk两种，
 一般手动分区就选择gdisk会保险一点，这里我讲的是命令行模式sgdisk，方便编程实现。</p>
 <h3 id="查看所有GPT分区"><a href="#查看所有GPT分区" class="headerlink" title="查看所有GPT分区"></a>查看所有GPT分区</h3><p>先可执行parted命令查看磁盘分区类型:</p>
 <pre><code class="line-numbers language-bash">parted /dev/sdb print
 </code></pre>
 <p>然后对于gpt类型的就可以用sgdisk命令查看了:</p>
-<pre><code>[root@node200 ~]# sgdisk -p /dev/sdb
+<pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk -p /dev/sdb
 Disk /dev/sdb: 1951170560 sectors, 930.4 GiB
 Logical sector size: 512 bytes
 Disk identifier (GUID): EFA3DAF2-5AF2-44A0-9AC7-D9F50E60D831
@@ -300,7 +309,8 @@ Total free space is 4061 sectors (2.0 MiB)
 Number  Start (sector)    End (sector)  Size       Code  Name
    1        20973568      1951170526   920.4 GiB   FFFF  ceph data
    2            2048        20971520   10.0 GiB    FFFF  ceph journal
-</code></pre><h3 id="查看某个分区"><a href="#查看某个分区" class="headerlink" title="查看某个分区"></a>查看某个分区</h3><pre><code>[root@node200 ~]# sgdisk --info=1 /dev/sdb
+</code></pre>
+<h3 id="查看某个分区"><a href="#查看某个分区" class="headerlink" title="查看某个分区"></a>查看某个分区</h3><pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk --info=1 /dev/sdb
 Partition GUID code: 4FBD7E29-9D25-41B8-AFD0-062C0CEFF05D (Unknown)
 Partition unique GUID: 4382DDCA-69AE-4753-B181-E800EAA62ADD
 First sector: 20973568 (at 10.0 GiB)
@@ -308,17 +318,20 @@ Last sector: 1951170526 (at 930.4 GiB)
 Partition size: 1930196959 sectors (920.4 GiB)
 Attribute flags: 0000000000000000
 Partition name: &#39;ceph data&#39;
-</code></pre><h3 id="删除磁盘所有分区"><a href="#删除磁盘所有分区" class="headerlink" title="删除磁盘所有分区"></a>删除磁盘所有分区</h3><pre><code>[root@node200 ~]# sgdisk --zap-all --clear --mbrtogpt -g /dev/sdd
+</code></pre>
+<h3 id="删除磁盘所有分区"><a href="#删除磁盘所有分区" class="headerlink" title="删除磁盘所有分区"></a>删除磁盘所有分区</h3><pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk --zap-all --clear --mbrtogpt -g /dev/sdd
 GPT data structures destroyed! You may now partition the disk using fdisk or
 other utilities.
 The operation has completed successfully.
-</code></pre><h3 id="创建分区-1"><a href="#创建分区-1" class="headerlink" title="创建分区"></a>创建分区</h3><p>创建某个分区前，请先查看这个磁盘分区表，查看扇区大小sector，然后算好起始扇区start和结束扇区end。</p>
+</code></pre>
+<h3 id="创建分区-1"><a href="#创建分区-1" class="headerlink" title="创建分区"></a>创建分区</h3><p>创建某个分区前，请先查看这个磁盘分区表，查看扇区大小sector，然后算好起始扇区start和结束扇区end。</p>
 <p>比如我要创建第1个分区/dev/sdd1，大小1GiB，扇区数量为<code>1*1024*1024*1024/512=2097152</code>。
 起始扇区start=1，结束扇区end=2097152，type code为8300，分区名为”ceph journal”</p>
-<pre><code>sgdisk -n 1:1:2097152 -t 1:8300 -c 1:&quot;ceph journal&quot; -g -p /dev/sdd
-</code></pre><p>type code一般就是8300(Linux filesystem)，可通过<code>sgdisk -L</code>来查看所有。</p>
+<pre><code class="line-numbers language-bash">sgdisk -n 1:1:2097152 -t 1:8300 -c 1:&quot;ceph journal&quot; -g -p /dev/sdd
+</code></pre>
+<p>type code一般就是8300(Linux filesystem)，可通过<code>sgdisk -L</code>来查看所有。</p>
 <p>出错:</p>
-<pre><code>Could not create partition 1 from 1 to 2097152
+<pre><code class="line-numbers language-none">Could not create partition 1 from 1 to 2097152
 Could not change partition 1&#39;s type code to 8300!
 Disk /dev/sdd: 16777216 sectors, 8.0 GiB
 Logical sector size: 512 bytes
@@ -330,7 +343,8 @@ Total free space is 16777149 sectors (8.0 GiB)
 
 Number  Start (sector)    End (sector)  Size       Code  Name
 Error encountered; not saving changes.
-</code></pre><p>仔细看看发现<code>First usable sector is 34</code>，第一个可用扇区是34（前面33个扇区不能用），
+</code></pre>
+<p>仔细看看发现<code>First usable sector is 34</code>，第一个可用扇区是34（前面33个扇区不能用），
 所以得往后移33再次执行:</p>
 <pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk -n 1:34:2097185 -t 1:8300 -p /dev/sdd
 Information: Moved requested sector from 34 to 2048 in
@@ -354,7 +368,7 @@ The operation has completed successfully.
 <pre><code class="line-numbers language-bash">sgdisk -c 1:&quot;ceph journal&quot; /dev/sdd
 </code></pre>
 <p>查看下是否成功:</p>
-<pre><code>[root@node200 ~]# sgdisk -p /dev/sdd
+<pre><code class="line-numbers language-bash">[root@node200 ~]# sgdisk -p /dev/sdd
 Disk /dev/sdd: 16777216 sectors, 8.0 GiB
 Logical sector size: 512 bytes
 Disk identifier (GUID): C2CD3A11-3C49-4DD7-B5E9-8DA6F980CA81
@@ -365,14 +379,15 @@ Total free space is 14682011 sectors (7.0 GiB)
 
 Number  Start (sector)    End (sector)  Size       Code  Name
    1            2048         2097185   1023.0 MiB  8300  ceph journal
-</code></pre><h2 id="分区格式化"><a href="#分区格式化" class="headerlink" title="分区格式化"></a>分区格式化</h2><p>一般来讲分区的时候不要做格式化，分完区之后单独来做格式化。</p>
+</code></pre>
+<h2 id="分区格式化"><a href="#分区格式化" class="headerlink" title="分区格式化"></a>分区格式化</h2><p>一般来讲分区的时候不要做格式化，分完区之后单独来做格式化。</p>
 <pre><code class="line-numbers language-bash">mkfs -t xfs /dev/sdd1
 </code></pre>
 <h2 id="分区挂载"><a href="#分区挂载" class="headerlink" title="分区挂载"></a>分区挂载</h2><p>显示系统已挂载的分区列表:</p>
 <pre><code class="line-numbers language-bash">df -h
 </code></pre>
 <p>挂载命令格式: <code>mount [-t fstype] [-o options] device dir</code></p>
-<pre><code>1. -t vfstype 指定文件系统的类型，通常不必指定。mount 会自动选择正确的类型。常用类型有：
+<pre><code class="line-numbers language-none">1. -t vfstype 指定文件系统的类型，通常不必指定。mount 会自动选择正确的类型。常用类型有：
 　　光盘或光盘镜像：iso9660
 　　DOS fat16文件系统：msdos
 　　Windows 9x fat32文件系统：vfat
@@ -386,7 +401,8 @@ Number  Start (sector)    End (sector)  Size       Code  Name
 　　iocharset：指定访问文件系统所用字符集
 3. device 要挂接(mount)的设备。
 4. dir设备在系统上的挂接点(mount point)。
-</code></pre><p>实际例子:</p>
+</code></pre>
+<p>实际例子:</p>
 <pre><code class="line-numbers language-bash">mount /dev/sdd1 /opt/winstore/var/log
 </code></pre>
 <p>另外还有两个命令也有用</p>

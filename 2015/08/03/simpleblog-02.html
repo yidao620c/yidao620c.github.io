@@ -200,9 +200,10 @@
 它们的关系是：一个工程中包含多个应用。每个应用都是独立的，应用通过setting.py注册到工程中来就可以使用了。
 这样可以解耦合，并且好的应用也可以复用。很好的模块化设计！</p>
 <p>在manage.py文件所在目录，执行下面命令：</p>
-<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py startapp blog
-</code></pre><p>你会看到一个新的blog文件夹被创建，并且下面多了许多文件，目前结构如下：</p>
-<pre><code>mysite
+<pre><code class="line-numbers language-none">(myvenv) [mango@centos00 mysite]$ python manage.py startapp blog
+</code></pre>
+<p>你会看到一个新的blog文件夹被创建，并且下面多了许多文件，目前结构如下：</p>
+<pre><code class="line-numbers language-none">mysite
 ├── mysite
 |       __init__.py
 |       settings.py
@@ -217,7 +218,8 @@
     ├── models.py
     ├── tests.py
     └── views.py
-</code></pre><p>然后在setting.py中注册这个应用</p>
+</code></pre>
+<p>然后在setting.py中注册这个应用</p>
 <pre><code class="line-numbers language-python">INSTALLED_APPS = (
     &#39;django.contrib.admin&#39;,
     &#39;django.contrib.auth&#39;,
@@ -249,73 +251,86 @@ class Post(models.Model):
 </code></pre>
 <p>我们定义了作者，标题，文章内容，创建时间，发布时间等。还添加了一个publish方法用于保存发布。
 每个字段都需要定义它的类型，这里的几个类型解释如下：</p>
-<pre><code>CharField：普通的文本
+<pre><code class="line-numbers language-none">CharField：普通的文本
 TextField：长文本
 DateTimeField：日期时间类型
 ForeignKey：外键类型
-</code></pre><p>详细的字段类型说明请参考官方文档：<a href="https://docs.djangoproject.com/en/1.9/ref/models/fields/#field-types" target="_blank" rel="noopener">field-types</a></p>
+</code></pre>
+<p>详细的字段类型说明请参考官方文档：<a href="https://docs.djangoproject.com/en/1.9/ref/models/fields/#field-types" target="_blank" rel="noopener">field-types</a></p>
 <p><strong>在数据库中为模型生成表结构：</strong></p>
 <p>每次我们新建了一个模型后，需要在数据库中添加对应的表。</p>
 <p>第一步是先让django感知到我们刚刚已经创建了一个新的模型：</p>
-<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py makemigrations blog
-</code></pre><p>输出如下：</p>
-<pre><code>Migrations for &#39;blog&#39;:
+<pre><code class="line-numbers language-bash">(myvenv) [mango@centos00 mysite]$ python manage.py makemigrations blog
+</code></pre>
+<p>输出如下：</p>
+<pre><code class="line-numbers language-none">Migrations for &#39;blog&#39;:
   0001_initial.py:
     - Create model Post
-</code></pre><p>这时候django已经为我们准备好了数据库更新的sql文件。</p>
+</code></pre>
+<p>这时候django已经为我们准备好了数据库更新的sql文件。</p>
 <p>第二步是让django帮我们执行这些文件：</p>
-<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py migrate blog
-</code></pre><p>输出如下：</p>
-<pre><code>Operations to perform:
+<pre><code class="line-numbers language-bash">(myvenv) [mango@centos00 mysite]$ python manage.py migrate blog
+</code></pre>
+<p>输出如下：</p>
+<pre><code class="line-numbers language-none">Operations to perform:
   Apply all migrations: blog
 Running migrations:
   Applying blog.0001_initial... OK
-</code></pre><p>OK，这时候数据库中已经有post这张表了。</p>
+</code></pre>
+<p>OK，这时候数据库中已经有post这张表了。</p>
 <h3 id="对象关系映射ORM"><a href="#对象关系映射ORM" class="headerlink" title="对象关系映射ORM"></a>对象关系映射ORM</h3><p>下面我们看看django的ORM是怎样和数据库打交道的。</p>
 <p>首先解释下QuerySet，它是某个模型的对象列表，用来从数据库中读取数据，过滤和排序等等。</p>
 <h3 id="Django控制台Django-Shell"><a href="#Django控制台Django-Shell" class="headerlink" title="Django控制台Django Shell"></a>Django控制台Django Shell</h3><p>执行以下命令可以打开django的控制台</p>
-<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py shell
-</code></pre><p>查询所有的博客文章</p>
-<pre><code>&gt;&gt;&gt; from blog.models import Post
+<pre><code class="line-numbers language-bash">(myvenv) [mango@centos00 mysite]$ python manage.py shell
+</code></pre>
+<p>查询所有的博客文章</p>
+<pre><code class="line-numbers language-python">&gt;&gt;&gt; from blog.models import Post
 &gt;&gt;&gt; Post.objects.all()
 []
-</code></pre><p>这时候肯定是空的，因为我们还没有任何数据。</p>
+</code></pre>
+<p>这时候肯定是空的，因为我们还没有任何数据。</p>
 <p>下面我们去新建几篇文章</p>
 <p>先要创建一个用户，因为Post里面有User外键</p>
-<pre><code>&gt;&gt;&gt; from django.contrib.auth.models import User
+<pre><code class="line-numbers language-python">&gt;&gt;&gt; from django.contrib.auth.models import User
 &gt;&gt;&gt; User.objects.create(username=&#39;ola&#39;)
 &lt;User: ola&gt;
 &gt;&gt;&gt; User.objects.all()
 [&lt;User: ola&gt;]
-</code></pre><p>然后添加文章：</p>
-<pre><code>&gt;&gt;&gt; user = User.objects.get(username=&#39;ola&#39;)
+</code></pre>
+<p>然后添加文章：</p>
+<pre><code class="line-numbers language-python">&gt;&gt;&gt; user = User.objects.get(username=&#39;ola&#39;)
 &gt;&gt;&gt; Post.objects.create(author = user, title = &#39;Sample title&#39;, text = &#39;Test&#39;)
 &lt;Post: Sample title&gt;
 &gt;&gt;&gt; Post.objects.all()
 [&lt;Post: Sample title&gt;]
-</code></pre><p><strong>文章过滤</strong></p>
+</code></pre>
+<p><strong>文章过滤</strong></p>
 <p>先像前面那样再添加几篇文章，此处省略七十二个字….</p>
-<pre><code>&gt;&gt;&gt; Post.objects.filter(author=user)
+<pre><code class="line-numbers language-none">&gt;&gt;&gt; Post.objects.filter(author=user)
 [&lt;Post: Sample title&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Happy boy&gt;]
 &gt;&gt;&gt; Post.objects.filter(title__contains=&#39;LiLei&#39;)
 [&lt;Post: LiLei and Hanmeimei&gt;]
 &gt;&gt;&gt; Post.objects.filter(published_date__isnull=False)
 []
-</code></pre><p>最后的输出表示所有的文章published_date都是空的。我想改变这个情况。可以这样做</p>
-<pre><code>&gt;&gt;&gt; post = Post.objects.get(id=1)
+</code></pre>
+<p>最后的输出表示所有的文章published_date都是空的。我想改变这个情况。可以这样做</p>
+<pre><code class="line-numbers language-none">&gt;&gt;&gt; post = Post.objects.get(id=1)
 &gt;&gt;&gt; post.publish()
 &gt;&gt;&gt; Post.objects.filter(published_date__isnull=False)
 [&lt;Post: Sample title&gt;]
-</code></pre><p><strong>结果排序</strong></p>
+</code></pre>
+<p><strong>结果排序</strong></p>
 <p>还可以根据某个或某几个字段来排序检索结果</p>
-<pre><code>&gt;&gt;&gt; Post.objects.order_by(&#39;created_date&#39;)
+<pre><code class="line-numbers language-none">&gt;&gt;&gt; Post.objects.order_by(&#39;created_date&#39;)
 [&lt;Post: Sample title&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Happy boy&gt;]
 &gt;&gt;&gt; Post.objects.order_by(&#39;-created_date&#39;)
 [&lt;Post: Happy boy&gt;, &lt;Post: LiLei and Hanmeimei&gt;, &lt;Post: Cool day Aha&gt;, &lt;Post: Sample title&gt;]
-</code></pre><p>OK，目前为止你应该对django的ORM有了大体的了解了。</p>
+</code></pre>
+<p>OK，目前为止你应该对django的ORM有了大体的了解了。</p>
 <p>请用exit()退出django的控制台</p>
-<pre><code>&gt;&gt;&gt; exit()
-</code></pre><h3 id="利用django-admin修改模型"><a href="#利用django-admin修改模型" class="headerlink" title="利用django admin修改模型"></a>利用django admin修改模型</h3><p>在上面我们已经创建了Post模型并且通过django控制台来添加修改模型。
+<pre><code class="line-numbers language-none">&gt;&gt;&gt; exit()
+</code></pre>
+<h3 id="利用django-admin修改模型"><a href="#利用django-admin修改模型" class="headerlink" title="利用django admin修改模型"></a>利用django admin修改模型</h3><p>在上面我们已经创建了Post模型并且通过django控制台来添加修改模型。
 然后我们使用django自带的web管理界面admin来在页面上修改模型数据。</p>
 <h3 id="模型注册"><a href="#模型注册" class="headerlink" title="模型注册"></a>模型注册</h3><p>首先我们需要在admin中注册对应的模型，打开blog/admin.py文件，修改如下</p>
 <pre><code class="line-numbers language-python">from django.contrib import admin
@@ -325,18 +340,20 @@ admin.site.register(Post)
 </code></pre>
 <p>注意上面的from .models import Post，使用到了python3的相对导入。</p>
 <h3 id="运行服务器"><a href="#运行服务器" class="headerlink" title="运行服务器"></a>运行服务器</h3><p>一切都这么简单，接下来我们启动服务器</p>
-<pre><code>(myvenv) [mango@centos mysite]$ python manage.py runserver 192.168.203.95:8000
-</code></pre><p>打开链接：<a href="http://192.168.203.95:8000/admin/" target="_blank" rel="noopener">http://192.168.203.95:8000/admin/</a></p>
+<pre><code class="line-numbers language-bash">(myvenv) [mango@centos mysite]$ python manage.py runserver 192.168.203.95:8000
+</code></pre>
+<p>打开链接：<a href="http://192.168.203.95:8000/admin/" target="_blank" rel="noopener">http://192.168.203.95:8000/admin/</a></p>
 <p>看到下面的界面：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj002.jpg" alt></p>
 <h3 id="添加管理员"><a href="#添加管理员" class="headerlink" title="添加管理员"></a>添加管理员</h3><p>不过你需要一个管理员才能登录。运行python manage.py createsuperuser可以创建管理员账号。</p>
-<pre><code>(myvenv) [mango@centos00 mysite]$ python manage.py createsuperuser
+<pre><code class="line-numbers language-bash">(myvenv) [mango@centos00 mysite]$ python manage.py createsuperuser
 Username (leave blank to use &#39;mango&#39;): admin
 Email address: admin@gmail.com
 Password:
 Password (again):
 Superuser created successfully.
-</code></pre><p>我创建了一个admin/admin的账户。这时候登录</p>
+</code></pre>
+<p>我创建了一个admin/admin的账户。这时候登录</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj003.jpg" alt></p>
 <p>点击Posts修改或者增加等等，确保里面至少2个又published_date，这个后面会用到。</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/dj004.jpg" alt></p>

@@ -207,7 +207,7 @@ Web...">
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-websocket01.png" alt></p>
 <h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>前提条件是你有一个域名，并且申请好了证书。</p>
 <p>新建nginx配置文件<code>/etc/nginx/conf.d/websocket.conf</code>，内容如下：</p>
-<pre><code>map $http_upgrade $connection_upgrade {
+<pre><code class="line-numbers language-nginx">map $http_upgrade $connection_upgrade {
     default upgrade;
     &#39;&#39; close;
 }
@@ -235,19 +235,23 @@ server {
     ssl_certificate /etc/letsencrypt/live/test.enzhico.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/test.enzhico.net/privkey.pem;
 }
-</code></pre><p>之类解释一下关键配置部分：</p>
+</code></pre>
+<p>之类解释一下关键配置部分：</p>
 <p>最重要的就是在反向代理的配置中增加了如下两行，其它的部分和普通的HTTP反向代理没有任何差别。</p>
-<pre><code>proxy_set_header Upgrade $http_upgrade;
+<pre><code class="line-numbers language-nginx">proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $connection_upgrade;
-</code></pre><p>这里面的关键部分在于HTTP的请求中多了如下头部：</p>
-<pre><code>Upgrade: websocket
+</code></pre>
+<p>这里面的关键部分在于HTTP的请求中多了如下头部：</p>
+<pre><code class="line-numbers language-none">Upgrade: websocket
 Connection: Upgrade
-</code></pre><p>这两个字段表示请求服务器升级协议为WebSocket。服务器处理完请求后，响应如下报文：</p>
-<pre><code># 状态码为101
+</code></pre>
+<p>这两个字段表示请求服务器升级协议为WebSocket。服务器处理完请求后，响应如下报文：</p>
+<pre><code class="line-numbers language-none"># 状态码为101
 HTTP/1.1 101 Switching Protocols
 Upgrade: websocket
 Connection: upgrade
-</code></pre><p>告诉客户端已成功切换协议，升级为Websocket协议。握手成功之后，服务器端和客户端便角色对等，就像普通的Socket一样，能够双向通信。
+</code></pre>
+<p>告诉客户端已成功切换协议，升级为Websocket协议。握手成功之后，服务器端和客户端便角色对等，就像普通的Socket一样，能够双向通信。
 不再进行HTTP的交互，而是开始WebSocket的数据帧协议实现数据交换。</p>
 <p>这里使用map指令可以将变量组合成为新的变量，会根据客户端传来的连接中是否带有Upgrade头来决定是否给源站传递Connection头，
 这样做的方法比直接全部传递upgrade更加优雅。</p>
@@ -270,10 +274,11 @@ Connection: upgrade
 </blockquote>
 <h2 id="多次代理转发"><a href="#多次代理转发" class="headerlink" title="多次代理转发"></a>多次代理转发</h2><p>工作中遇见过一种情况，就是某个域名在移动网络下面访问不了，这样的话我需要通过一个前段代理服务器做转发，这样就涉及到两次代理。</p>
 <p>比如访问的websocket服务URL为：</p>
-<pre><code>wss://test.enzhico.net
-</code></pre><p>这个在腾讯云公网IP上面，所有网络都能访问。另外一个域名<code>board.xncoding.com</code>解析到电信网络，部署在网关中心，这个域名腾讯云可以访问到。</p>
+<pre><code class="line-numbers language-none">wss://test.enzhico.net
+</code></pre>
+<p>这个在腾讯云公网IP上面，所有网络都能访问。另外一个域名<code>board.xncoding.com</code>解析到电信网络，部署在网关中心，这个域名腾讯云可以访问到。</p>
 <p>在腾讯云主机上面：</p>
-<pre><code>map $http_upgrade $connection_upgrade {
+<pre><code class="line-numbers language-nginx">map $http_upgrade $connection_upgrade {
     default upgrade;
     &#39;&#39; close;
 }
@@ -298,9 +303,10 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 
-</code></pre><p>上面唯一要注意的是忙，把<code>proxy_set_header Host $host;</code>这一行注释掉了。</p>
+</code></pre>
+<p>上面唯一要注意的是忙，把<code>proxy_set_header Host $host;</code>这一行注释掉了。</p>
 <p>而在网关中心主机上面：</p>
-<pre><code>map $http_upgrade $connection_upgrade {
+<pre><code class="line-numbers language-nginx">map $http_upgrade $connection_upgrade {
     default upgrade;
     &#39;&#39; close;
 }
@@ -324,7 +330,8 @@ server {
         proxy_set_header Connection $connection_upgrade;
     }
 }
-</code></pre><p>只需要最外层使用wss协议，里面的交互都使用ws协议，所以监听80端口即可。</p>
+</code></pre>
+<p>只需要最外层使用wss协议，里面的交互都使用ws协议，所以监听80端口即可。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li><a href="http://pankajmalhotra.com/Websockets-SSL-TLS-Termination-Using-NGINX-Proxy" target="_blank" rel="noopener">Websockets SSL/TLS Termination Using NGINX Proxy</a></li>
 <li><a href="https://www.hi-linux.com/posts/42176.html" target="_blank" rel="noopener">配置Nginx反向代理WebSocket</a></li>

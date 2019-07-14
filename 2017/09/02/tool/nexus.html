@@ -210,22 +210,26 @@ Nexus是一个强大的Maven仓库管...">
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>我的环境是centos7.2 + JDK8 + Maven3，首先需要安装 JDK8 和 Maven3，这里不多讲。</p>
 <p>去官网下载最新的 <a href="https://www.sonatype.com/download-oss-sonatype" target="_blank" rel="noopener">download nexus</a></p>
 <p>下载文件nexus-3.6.0-02-unix.tar.gz，解压缩。</p>
-<pre><code>tar zxf nexus-3.6.0-02-unix.tar.gz -C /usr/local/
+<pre><code class="line-numbers language-bash">tar zxf nexus-3.6.0-02-unix.tar.gz -C /usr/local/
 cd /usr/local/
 mv nexus-3.6.0-02/ nexus
-</code></pre><p>启动：</p>
-<pre><code>./nexus/bin/nexus start
-</code></pre><p>默认端口8081，如果开了防火墙，就把这个端口放开：</p>
-<pre><code>firewall-cmd --zone=public --add-port=8081/tcp --permanent
-</code></pre><p>启动之后，运行命令<code>lsof -i:8081</code>可查看是否成功启动了。</p>
+</code></pre>
+<p>启动：</p>
+<pre><code class="line-numbers language-bash">./nexus/bin/nexus start
+</code></pre>
+<p>默认端口8081，如果开了防火墙，就把这个端口放开：</p>
+<pre><code class="line-numbers language-bash">firewall-cmd --zone=public --add-port=8081/tcp --permanent
+</code></pre>
+<p>启动之后，运行命令<code>lsof -i:8081</code>可查看是否成功启动了。</p>
 <p>Nexus默认的端口是8081，可以在etc/nexus-default.properties配置中修改。</p>
 <p>Nexus默认的用户名密码是admin/admin123</p>
 <p>当遇到奇怪问题时，重启nexus，重启后web界面要1分钟左右后才能访问。</p>
 <p>Nexus的工作目录是<code>sonatype-work</code>（路径一般在nexus同级目录下），日志文件也在这里。</p>
-<pre><code>ls sonatype-work/nexus3/
+<pre><code class="line-numbers language-bash">ls sonatype-work/nexus3/
 backup  blobs  cache  db  elasticsearch  etc  generated-bundles  
 health-check  instances  keystores  lock  log  orient  port  tmp
-</code></pre><p>访问：<a href="http://localhost:8081" target="_blank" rel="noopener">http://localhost:8081</a>，效果如下：</p>
+</code></pre>
+<p>访问：<a href="http://localhost:8081" target="_blank" rel="noopener">http://localhost:8081</a>，效果如下：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/nexus01.png" alt></p>
 <p>使用默认的管理员admin/admin123登录，进入管理界面：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/nexus02.png" alt></p>
@@ -354,7 +358,7 @@ health-check  instances  keystores  lock  log  orient  port  tmp
 <p>上次成功后再去私服仓库查询快照版发现已经成功上传：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/nexus13.png" alt></p>
 <p><strong> 第三方Jar上传到Nexus </strong></p>
-<pre><code>mvn deploy:deploy-file \
+<pre><code class="line-numbers language-bash">mvn deploy:deploy-file \
     -DgroupId=&lt;group-id&gt; \
     -DartifactId=&lt;artifact-id&gt; \
     -Dversion=&lt;version&gt; \
@@ -362,7 +366,8 @@ health-check  instances  keystores  lock  log  orient  port  tmp
     -Dfile=&lt;path-to-file&gt; \
     -DrepositoryId=&lt;server-id-settings.xml&gt; \
     -Durl=&lt;url-of-the-repository-to-deploy&gt;
-</code></pre><p><code>-DrepositoryId</code>的值即为在<code>setttings.xml</code>里面配置的server id。</p>
+</code></pre>
+<p><code>-DrepositoryId</code>的值即为在<code>setttings.xml</code>里面配置的server id。</p>
 <h2 id="上次不同JDK版本"><a href="#上次不同JDK版本" class="headerlink" title="上次不同JDK版本"></a>上次不同JDK版本</h2><p>pom.xml里面配置多个profile，其中一个默认的：</p>
 <pre><code class="line-numbers language-xml">&lt;build&gt;
     &lt;plugins&gt;
@@ -432,11 +437,12 @@ health-check  instances  keystores  lock  log  orient  port  tmp
 &lt;/profiles&gt;
 </code></pre>
 <p>上面我定义了两个profile，那么打包或者发布的时候可指定不同的JDK版本：</p>
-<pre><code># 默认版本JDK1.8
+<pre><code class="line-numbers language-bash"># 默认版本JDK1.8
 mvn clean &amp;&amp; mvn deploy
 # JDK1.6版本
 mvn clean &amp;&amp; mvn deploy -P jdk16
-</code></pre><p>第一条命令打包使用默认的profile，编译的版本是1.8，生成的文件是xxx-SNAPSHOT.jar；
+</code></pre>
+<p>第一条命令打包使用默认的profile，编译的版本是1.8，生成的文件是xxx-SNAPSHOT.jar；
 而第二条命令打包指定使用jdk16这个profile，编译版本是1.6，生成的文件是xxx-SNAPSHOT-jdk16.jar。</p>
 <p>项目中引用的时候可通过指定classifier：</p>
 <pre><code class="line-numbers language-xml">&lt;dependency&gt;
@@ -517,8 +523,9 @@ mvn clean &amp;&amp; mvn deploy -P jdk16
 </code></pre>
 <p>发布javadoc的时候，每个方法注释必须遵循规范，比如参数、返回值、异常都应该有说明。</p>
 <p>打包或发布的时候如果想跳过测试，加一个参数：</p>
-<pre><code>mvn clean &amp;&amp; mvn deploy -DskipTests=true
+<pre><code class="line-numbers language-bash">mvn clean &amp;&amp; mvn deploy -DskipTests=true
 </code></pre>
+
     </div>
     
     <div class="post-footer">

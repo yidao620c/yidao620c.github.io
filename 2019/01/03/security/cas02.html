@@ -210,7 +210,7 @@ tomcat服务器：SpringBoot内置/tomcat8
 </ul>
 <p>Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。</p>
 <h2 id="Maven镜像配置"><a href="#Maven镜像配置" class="headerlink" title="Maven镜像配置"></a>Maven镜像配置</h2><p>华为和Sonatype 联合发布中国官方 Maven 仓库，特意试了试，感觉速度挺快的，比阿里的快。这里贴一下配置：</p>
-<pre><code>  &lt;servers&gt;
+<pre><code class="line-numbers language-xml">  &lt;servers&gt;
     &lt;server&gt;
       &lt;id&gt;huaweicloud&lt;/id&gt;
       &lt;username&gt;anonymous&lt;/username&gt;
@@ -232,14 +232,17 @@ tomcat服务器：SpringBoot内置/tomcat8
           &lt;url&gt;https://mirrors.huaweicloud.com/repository/maven/&lt;/url&gt;
         &lt;/mirror&gt;
     &lt;/mirrors&gt;
-</code></pre><h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>Maven地址：<a href="https://github.com/apereo/cas-overlay-template" target="_blank" rel="noopener">https://github.com/apereo/cas-overlay-template</a></p>
+</code></pre>
+<h2 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h2><p>Maven地址：<a href="https://github.com/apereo/cas-overlay-template" target="_blank" rel="noopener">https://github.com/apereo/cas-overlay-template</a></p>
 <p>Gradle地址：<a href="https://github.com/apereo/cas-gradle-overlay-template" target="_blank" rel="noopener">https://github.com/apereo/cas-gradle-overlay-template</a></p>
 <p>我下载的是5.3分支：</p>
-<pre><code>git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
-</code></pre><h2 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h2><p>将下载Overlay解压，默认配置就可以直接构筑能用的 war 包：</p>
-<pre><code>cd cas-overlay-template/
+<pre><code class="line-numbers language-bash">git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
+</code></pre>
+<h2 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h2><p>将下载Overlay解压，默认配置就可以直接构筑能用的 war 包：</p>
+<pre><code class="line-numbers language-bash">cd cas-overlay-template/
 ./build.sh package
-</code></pre><h2 id="证书生成"><a href="#证书生成" class="headerlink" title="证书生成"></a>证书生成</h2><p>由于CAS服务器需要HTTPS访问，所以需要生产证书并导入JRE中。</p>
+</code></pre>
+<h2 id="证书生成"><a href="#证书生成" class="headerlink" title="证书生成"></a>证书生成</h2><p>由于CAS服务器需要HTTPS访问，所以需要生产证书并导入JRE中。</p>
 <p>创建一个cas目录，cd进入cas目录之后执行如下命令</p>
 <p>注意要点</p>
 <ul>
@@ -249,7 +252,7 @@ tomcat服务器：SpringBoot内置/tomcat8
 <li>别名：cas.server.com</li>
 </ul>
 <p><strong>使用java自带keytool创建本地密钥库</strong></p>
-<pre><code>[root@ecs-hw01 cas]# keytool -genkey -alias cas.server.com -keyalg RSA -keystore casServer.keystore
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas]# keytool -genkey -alias cas.server.com -keyalg RSA -keystore casServer.keystore
 Enter keystore password:  
 Re-enter new password: 
 What is your first and last name?
@@ -272,14 +275,16 @@ Enter key password for &lt;cas.server.com&gt;
 
 Warning:
 The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using &quot;keytool -importkeystore -srckeystore casServer.keystore -destkeystore casServer.keystore -deststoretype pkcs12&quot;.
-</code></pre><p><strong>把密钥库导出成证书文件</strong></p>
-<pre><code>[root@ecs-hw01 cas]# keytool -export -alias cas.server.com -keystore casServer.keystore -file casServer.crt -storepass changeit
+</code></pre>
+<p><strong>把密钥库导出成证书文件</strong></p>
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas]# keytool -export -alias cas.server.com -keystore casServer.keystore -file casServer.crt -storepass changeit
 Certificate stored in file &lt;casServer.crt&gt;
 
 Warning:
 The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS12 which is an industry standard format using &quot;keytool -importkeystore -srckeystore casServer.keystore -destkeystore casServer.keystore -deststoretype pkcs12&quot;.
-</code></pre><p><strong>查看证书</strong></p>
-<pre><code>[root@ecs-hw01 cas]# keytool -printcert -file casServer.crt
+</code></pre>
+<p><strong>查看证书</strong></p>
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas]# keytool -printcert -file casServer.crt
 Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
 Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
 Serial number: 6f53fb64
@@ -301,8 +306,9 @@ KeyIdentifier [
 0010: 66 4D E1 AF                                        fM..
 ]
 ]
-</code></pre><p><strong>将创建过的证书导入到java证书库</strong></p>
-<pre><code>[root@ecs-hw01 cas]# keytool -import -keystore &quot;/usr/local/jdk/jre/lib/security/cacerts&quot; -file &quot;/root/cas/casServer.crt&quot; -alias cas.server.com
+</code></pre>
+<p><strong>将创建过的证书导入到java证书库</strong></p>
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas]# keytool -import -keystore &quot;/usr/local/jdk/jre/lib/security/cacerts&quot; -file &quot;/root/cas/casServer.crt&quot; -alias cas.server.com
 Enter keystore password:  
 Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
 Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
@@ -328,8 +334,9 @@ KeyIdentifier [
 
 Trust this certificate? [no]:  y
 Certificate was added to keystore
-</code></pre><p><strong>查看JDK证书内容</strong></p>
-<pre><code>[root@ecs-hw01 cas]# keytool -list -v -keystore /usr/local/jdk/jre/lib/security/cacerts -alias cas.server.com
+</code></pre>
+<p><strong>查看JDK证书内容</strong></p>
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas]# keytool -list -v -keystore /usr/local/jdk/jre/lib/security/cacerts -alias cas.server.com
 Enter keystore password:  
 Alias name: cas.server.com
 Creation date: Feb 17, 2019
@@ -356,12 +363,14 @@ KeyIdentifier [
 0010: 66 4D E1 AF                                        fM..
 ]
 ]
-</code></pre><p><strong>根据 alias 别名删除 JDK 证书</strong></p>
+</code></pre>
+<p><strong>根据 alias 别名删除 JDK 证书</strong></p>
 <p>做完实验后如果你想删除JDK证书，可使用如下命令：</p>
-<pre><code>keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/cacerts
-</code></pre><h2 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h2><p>第一步，先将上面创建的证书文件 <code>casServer.crt</code>、<code>casServer.keystore</code> 拷贝到项目的/etc/cas/目录中。</p>
+<pre><code class="line-numbers language-bash">keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/cacerts
+</code></pre>
+<h2 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h2><p>第一步，先将上面创建的证书文件 <code>casServer.crt</code>、<code>casServer.keystore</code> 拷贝到项目的/etc/cas/目录中。</p>
 <p>第二步，然后修改<code>cas.properties</code>文件</p>
-<pre><code>cas.server.name: https://cas.server.com:8443
+<pre><code class="line-numbers language-properties">cas.server.name: https://cas.server.com:8443
 cas.server.prefix: https://cas.server.com:8443/cas
 
 cas.adminPagesSecurity.ip=127\.0\.0\.1
@@ -373,17 +382,21 @@ server.ssl.keyStore=file:/etc/cas/casServer.keystore
 server.ssl.keyStorePassword=changeit
 server.ssl.keyPassword=changeit
 server.ssl.key-alias=cas.server.com
-</code></pre><p>第三步，修改log4j2.xml 日志文件</p>
+</code></pre>
+<p>第三步，修改log4j2.xml 日志文件</p>
 <p>在<code>cas-overlay-template-master</code>项目中，创建一个logs目录，用于存放日志文件，
 默认cas在项目根目录下生成日志，日志多了不方便管理，修改log4j2.xml文件，将日志目录做调整。</p>
 <p>比如将<code>fileName=&quot;${sys:cas.log.dir}/cas.log&quot;</code> 修改为 <code>fileName=&quot;${sys:cas.log.dir}/logs/cas.log&quot;</code></p>
 <p>第四步，将项目的/etc/cas复制到操作系统的/etc/命令中</p>
-<pre><code>[root@ecs-hw01 cas-overlay-template]# cp -r etc/cas/ /etc/
-</code></pre><h2 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h2><pre><code>[root@ecs-hw01 cas-overlay-template]# ./build.sh run
-</code></pre><p>如果是windows本地开发就在terminal中执行<code>build run</code></p>
+<pre><code class="line-numbers language-bash">[root@ecs-hw01 cas-overlay-template]# cp -r etc/cas/ /etc/
+</code></pre>
+<h2 id="运行测试"><a href="#运行测试" class="headerlink" title="运行测试"></a>运行测试</h2><pre><code class="line-numbers language-bash">[root@ecs-hw01 cas-overlay-template]# ./build.sh run
+</code></pre>
+<p>如果是windows本地开发就在terminal中执行<code>build run</code></p>
 <p>本地修改host文件</p>
-<pre><code>xx.xx.xx.xx cas.server.com
-</code></pre><p>访问地址：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
+<pre><code class="line-numbers language-none">xx.xx.xx.xx cas.server.com
+</code></pre>
+<p>访问地址：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
 <p>默认账号：<code>casuser</code>默认密码：<code>Mellon</code> </p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190221-01.png" alt></p>
 <p>登录成功后页面：</p>
@@ -395,14 +408,15 @@ server.ssl.key-alias=cas.server.com
 <p>然后把上面mvn package命令生成的cas.war复制到webapps/目录中。</p>
 <p><strong>配置SSL</strong></p>
 <p>修改tomcat的配置文件server.xml，找到下面的代码：</p>
-<pre><code>&lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot;
+<pre><code class="line-numbers language-xml">&lt;Connector port=&quot;8443&quot; protocol=&quot;org.apache.coyote.http11.Http11NioProtocol&quot;
            maxThreads=&quot;150&quot; SSLEnabled=&quot;true&quot;&gt;
     &lt;SSLHostConfig&gt;
         &lt;Certificate certificateKeystoreFile=&quot;/etc/cas/casServer.keystore&quot;
                      certificateKeystoreType=&quot;JKS&quot; certificateKeystorePassword=&quot;changeit&quot; /&gt;
     &lt;/SSLHostConfig&gt;
 &lt;/Connector&gt;
-</code></pre><p>完了后去bin目录执行start.sh即可。访问：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
+</code></pre>
+<p>完了后去bin目录执行start.sh即可。访问：<a href="https://cas.server.com:8443/cas" target="_blank" rel="noopener">https://cas.server.com:8443/cas</a></p>
 <p>效果一样，完成验证！</p>
 
     </div>

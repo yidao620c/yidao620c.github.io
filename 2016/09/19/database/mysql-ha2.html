@@ -203,11 +203,12 @@ mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Ga
 对于小公司，一般推荐使用keepalived+双主，简单。</p>
 <h2 id="Mysql数据库复制原理"><a href="#Mysql数据库复制原理" class="headerlink" title="Mysql数据库复制原理"></a>Mysql数据库复制原理</h2><p>当主从复制正在进行中时，如果想查看从库两个线程运行状态，
 可以通过执行在从库里执行 <code>show slave status\G</code> 语句，以下的字段可以给你想要的信息：</p>
-<pre><code>Master_Log_File       — 上一个从主库拷贝过来的binlog文件
+<pre><code class="line-numbers language-none">Master_Log_File       — 上一个从主库拷贝过来的binlog文件
 Read_Master_Log_Pos   — 主库的binlog文件被拷贝到从库的relay log中的位置
 Relay_Master_Log_File — SQL线程当前处理中的relay log文件
 Exec_Master_Log_Pos   — 当前binlog文件正在被执行的语句的位置
-</code></pre><p>整个主从复制的流程可以通过以下图示理解：</p>
+</code></pre>
+<p>整个主从复制的流程可以通过以下图示理解：</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql-copy.png" alt></p>
 <p>步骤说明：</p>
 <ol>
@@ -266,31 +267,37 @@ Exec_Master_Log_Pos   — 当前binlog文件正在被执行的语句的位置
 <p>在Docker启动容器后执行systemctl命令遇到的坑记录一下。</p>
 <p>解决 CentOS7 容器 <code>Failed to get D-Bus connection: Operation not permitted</code></p>
 <p>首先要先在后台启动一个 CentOS7 容器（注意不要少参数）： </p>
-<pre><code>docker run -d -e &quot;container=docker&quot; --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup --name node001 centos7.2-mysql /usr/sbin/init
-</code></pre><p>然后再进入这个容器即可： </p>
-<pre><code>docker exec -it node001 /bin/bash
-</code></pre><h2 id="安装必要软件"><a href="#安装必要软件" class="headerlink" title="安装必要软件"></a>安装必要软件</h2><pre><code>yum install -y net-tools iproute
-</code></pre><h2 id="安装MySQL双主结构"><a href="#安装MySQL双主结构" class="headerlink" title="安装MySQL双主结构"></a>安装MySQL双主结构</h2><p>安装mysql5.7的步骤请参考我的另一篇 <a href="https://www.xncoding.com/2016/09/17/database/mysql.html">《MySQL核心知识整理》</a></p>
+<pre><code class="line-numbers language-bash">docker run -d -e &quot;container=docker&quot; --privileged=true -v /sys/fs/cgroup:/sys/fs/cgroup --name node001 centos7.2-mysql /usr/sbin/init
+</code></pre>
+<p>然后再进入这个容器即可： </p>
+<pre><code class="line-numbers language-bash">docker exec -it node001 /bin/bash
+</code></pre>
+<h2 id="安装必要软件"><a href="#安装必要软件" class="headerlink" title="安装必要软件"></a>安装必要软件</h2><pre><code class="line-numbers language-bash">yum install -y net-tools iproute
+</code></pre>
+<h2 id="安装MySQL双主结构"><a href="#安装MySQL双主结构" class="headerlink" title="安装MySQL双主结构"></a>安装MySQL双主结构</h2><p>安装mysql5.7的步骤请参考我的另一篇 <a href="https://www.xncoding.com/2016/09/17/database/mysql.html">《MySQL核心知识整理》</a></p>
 <p>安装好之后要对mysql进行配置。</p>
 <p>重要提示：创建好数据库后，请再创建业务数据库访问用户，只给有限的权限。不要使用super权限的用户比如root来进行业务访问。</p>
 <h3 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><p>master1中有关复制的配置如下，<code>vim /etc/my.cnf</code></p>
-<pre><code>[mysqld]
+<pre><code class="line-numbers language-none">[mysqld]
 # master-master cluster settings --added by Xiong Neng
 log-bin=mysql-bin
 server-id=1
 log_slave_updates=1
 secure_file_priv=&quot;&quot;
-</code></pre><p>master2中相关配置如下，<code>vim /etc/my.cnf</code></p>
-<pre><code>[mysqld]
+</code></pre>
+<p>master2中相关配置如下，<code>vim /etc/my.cnf</code></p>
+<pre><code class="line-numbers language-none">[mysqld]
 # master-master cluster settings --added by Xiong Neng
 log-bin=mysql-bin
 server-id=2
 log_slave_updates=1
 read_only=1
-</code></pre><h3 id="创建复制用户"><a href="#创建复制用户" class="headerlink" title="创建复制用户"></a>创建复制用户</h3><p>先登录mysql：</p>
-<pre><code>mysql -u root -p
-</code></pre><p>master1中创建：</p>
-<pre><code>mysql&gt; CREATE USER &#39;repl&#39;@&#39;172.17.0.3&#39; IDENTIFIED BY &#39;_vsMysql0&#39;;
+</code></pre>
+<h3 id="创建复制用户"><a href="#创建复制用户" class="headerlink" title="创建复制用户"></a>创建复制用户</h3><p>先登录mysql：</p>
+<pre><code class="line-numbers language-bash">mysql -u root -p
+</code></pre>
+<p>master1中创建：</p>
+<pre><code class="line-numbers language-none">mysql&gt; CREATE USER &#39;repl&#39;@&#39;172.17.0.3&#39; IDENTIFIED BY &#39;_vsMysql0&#39;;
 
 # 查一下加密后的密码
 mysql&gt; select password(&#39;_vsMysql0&#39;);
@@ -310,12 +317,14 @@ mysql&gt; show master status;
 | mysql-bin.000001 |     4364 |              |                  |                   |
 +------------------+----------+--------------+------------------+-------------------+
 # 请记住上面的File和Position，在另外一个节点上面配置master的时候需要用到
-</code></pre><p>如果创建的用户输错了，就把用户drop掉：</p>
-<pre><code>use mysql
+</code></pre>
+<p>如果创建的用户输错了，就把用户drop掉：</p>
+<pre><code class="line-numbers language-none">use mysql
 mysql&gt; select user,host from user;
 mysql&gt; drop user &#39;repl&#39;@&#39;172.17.0.3&#39;;
-</code></pre><p>master2中创建：</p>
-<pre><code>mysql&gt; CREATE USER &#39;repl&#39;@&#39;172.17.0.2&#39; IDENTIFIED BY &#39;_vsMysql0&#39;;
+</code></pre>
+<p>master2中创建：</p>
+<pre><code class="line-numbers language-none">mysql&gt; CREATE USER &#39;repl&#39;@&#39;172.17.0.2&#39; IDENTIFIED BY &#39;_vsMysql0&#39;;
 mysql&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#39;repl&#39;@&#39;172.17.0.2&#39; IDENTIFIED BY PASSWORD &#39;*225F5795D77E27308BB5158C81B21A1023DEACDB&#39;;
 mysql&gt; flush privileges;
 mysql&gt; show master status;
@@ -325,34 +334,42 @@ mysql&gt; show master status;
 | mysql-bin.000001 |     2259 |              |                  |                   |
 +------------------+----------+--------------+------------------+-------------------+
 # 请记住上面的File和Position，在另外一个节点上面配置master的时候需要用到
-</code></pre><h3 id="执行CHANGE-MASTER-TO语句"><a href="#执行CHANGE-MASTER-TO语句" class="headerlink" title="执行CHANGE MASTER TO语句"></a>执行CHANGE MASTER TO语句</h3><p>因是从头搭建MySQL主从复制集群，所以不需要获取全局读锁来得到二进制日志文件的位置，直接根据<code>show master status</code>的输出来确认。</p>
+</code></pre>
+<h3 id="执行CHANGE-MASTER-TO语句"><a href="#执行CHANGE-MASTER-TO语句" class="headerlink" title="执行CHANGE MASTER TO语句"></a>执行CHANGE MASTER TO语句</h3><p>因是从头搭建MySQL主从复制集群，所以不需要获取全局读锁来得到二进制日志文件的位置，直接根据<code>show master status</code>的输出来确认。</p>
 <p>master1上执行：</p>
-<pre><code>mysql&gt; CHANGE MASTER TO
+<pre><code class="line-numbers language-none">mysql&gt; CHANGE MASTER TO
     -&gt; MASTER_HOST=&#39;172.17.0.3&#39;,
     -&gt; MASTER_USER=&#39;repl&#39;,
     -&gt; MASTER_PASSWORD=&#39;_vsMysql0&#39;,
     -&gt; MASTER_LOG_FILE=&#39;mysql-bin.000001&#39;,
     -&gt; MASTER_LOG_POS=2259;
-</code></pre><p>master2上执行：</p>
-<pre><code>mysql&gt; CHANGE MASTER TO
+</code></pre>
+<p>master2上执行：</p>
+<pre><code class="line-numbers language-none">mysql&gt; CHANGE MASTER TO
     -&gt; MASTER_HOST=&#39;172.17.0.2&#39;,
     -&gt; MASTER_USER=&#39;repl&#39;,
     -&gt; MASTER_PASSWORD=&#39;_vsMysql0&#39;,
     -&gt; MASTER_LOG_FILE=&#39;mysql-bin.000001&#39;,
     -&gt; MASTER_LOG_POS=4364;
-</code></pre><h3 id="执行start-slave语句"><a href="#执行start-slave语句" class="headerlink" title="执行start slave语句"></a>执行start slave语句</h3><p>分别在两个节点上执行：</p>
-<pre><code>mysql&gt; start slave;
-</code></pre><p>如果出现下列错误：</p>
-<pre><code>ERROR 1872 (HY000): Slave failed to initialize relay log info structure from the repository
-</code></pre><p>执行：</p>
-<pre><code>mysql&gt; reset slave;
+</code></pre>
+<h3 id="执行start-slave语句"><a href="#执行start-slave语句" class="headerlink" title="执行start slave语句"></a>执行start slave语句</h3><p>分别在两个节点上执行：</p>
+<pre><code class="line-numbers language-none">mysql&gt; start slave;
+</code></pre>
+<p>如果出现下列错误：</p>
+<pre><code class="line-numbers language-none">ERROR 1872 (HY000): Slave failed to initialize relay log info structure from the repository
+</code></pre>
+<p>执行：</p>
+<pre><code class="line-numbers language-none">mysql&gt; reset slave;
 mysql&gt; start slave;
-</code></pre><p>然后执行下面语句查看复制是否搭建成功：</p>
-<pre><code>show slave status\G
-</code></pre><p>成功标准：</p>
-<pre><code>Slave_IO_Running: Yes
+</code></pre>
+<p>然后执行下面语句查看复制是否搭建成功：</p>
+<pre><code class="line-numbers language-none">show slave status\G
+</code></pre>
+<p>成功标准：</p>
+<pre><code class="line-numbers language-none">Slave_IO_Running: Yes
 Slave_SQL_Running: Yes
-</code></pre><h2 id="配置Keepalived"><a href="#配置Keepalived" class="headerlink" title="配置Keepalived"></a>配置Keepalived</h2><p>安装Keepalived：</p>
+</code></pre>
+<h2 id="配置Keepalived"><a href="#配置Keepalived" class="headerlink" title="配置Keepalived"></a>配置Keepalived</h2><p>安装Keepalived：</p>
 <pre><code>yum install -y rsyslog
 yum install -y keepalived
 </code></pre><h3 id="master1的配置"><a href="#master1的配置" class="headerlink" title="master1的配置"></a>master1的配置</h3><p>在master1上面，修改Keepalived的配置文件 <code>vim /etc/keepalived/keepalived.conf</code>：</p>
