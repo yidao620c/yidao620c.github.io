@@ -1,0 +1,451 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="npm,">
+
+
+    <meta name="description" content="初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。
+NPM中的版本号规则版本的格式major.minor.patch
+主版本号.次版本号.修补版本号
+版本匹配规则version
+必须匹配某个版本
+如：1.1.2，表示必须依赖1.1.2版
+&gt;versio...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>NPM版本号规则以及更新策略 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="NPM版本号规则以及更新策略">
+            
+                NPM版本号规则以及更新策略
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/web">
+            web
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/npm" title='npm'>
+                        npm
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/05/07</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。</p>
+<h2 id="NPM中的版本号规则"><a href="#NPM中的版本号规则" class="headerlink" title="NPM中的版本号规则"></a>NPM中的版本号规则</h2><h3 id="版本的格式"><a href="#版本的格式" class="headerlink" title="版本的格式"></a>版本的格式</h3><p>major.minor.patch</p>
+<p>主版本号.次版本号.修补版本号</p>
+<h3 id="版本匹配规则"><a href="#版本匹配规则" class="headerlink" title="版本匹配规则"></a>版本匹配规则</h3><p><strong>version</strong></p>
+<p>必须匹配某个版本</p>
+<p>如：1.1.2，表示必须依赖1.1.2版</p>
+<p><strong>&gt;version</strong></p>
+<p>必须大于某个版本</p>
+<p>如：&gt;1.1.2，表示必须大于1.1.2版</p>
+<p><strong>&gt;=version</strong></p>
+<p>可大于或等于某个版本</p>
+<p>如：&gt;=1.1.2，表示可以等于1.1.2，也可以大于1.1.2版本</p>
+<p><strong>&lt;version</strong></p>
+<p>必须小于某个版本 </p>
+<p>如：&lt;1.1.2，表示必须小于1.1.2版本</p>
+<p><strong>&lt;=version</strong></p>
+<p>可以小于或等于某个版本</p>
+<p>如：&lt;=1.1.2，表示可以等于1.1.2，也可以小于1.1.2版本</p>
+<p><strong>~version</strong></p>
+<p>大概匹配某个版本</p>
+<p>如果minor版本号指定了，那么minor版本号不变，而patch版本号任意</p>
+<p>如果minor和patch版本号未指定，那么minor和patch版本号任意</p>
+<p>如：~1.1.2，表示&gt;=1.1.2 &lt;1.2.0，可以是1.1.2，1.1.3，1.1.4，…..，1.1.n </p>
+<p>如：~1.1，表示&gt;=1.1.0 &lt;1.2.0，可以是同上</p>
+<p>如：~1，表示&gt;=1.0.0 &lt;2.0.0，可以是1.0.0，1.0.1，1.0.2，…..，1.0.n，1.1.n，1.2.n，…..，1.n.n</p>
+<p><strong>^version</strong></p>
+<p>兼容某个版本</p>
+<p>版本号中最左边的非0数字的右侧可以任意</p>
+<p>如果缺少某个版本号，则这个版本号的位置可以任意</p>
+<p>如：^1.1.2 ，表示&gt;=1.1.2 &lt;2.0.0，可以是1.1.2，1.1.3，…..，1.1.n，1.2.n，…..，1.n.n</p>
+<p>如：^0.2.3 ，表示&gt;=0.2.3 &lt;0.3.0，可以是0.2.3，0.2.4，…..，0.2.n</p>
+<p>如：^0.0，表示 &gt;=0.0.0 &lt;0.1.0，可以是0.0.0，0.0.1，…..，0.0.n</p>
+<p><strong>x标识符</strong></p>
+<p>x的位置表示任意版本</p>
+<p>如：1.2.x，表示可以1.2.0，1.2.1，…..，1.2.n</p>
+<p><strong>*标识符</strong></p>
+<p>任意版本，””也表示任意版本</p>
+<p>如：*，表示&gt;=0.0.0的任意版本</p>
+<p><strong>version1 - version2</strong></p>
+<p>大于等于version1，小于等于version2</p>
+<p>如：1.1.2 - 1.3.1，表示包括1.1.2和1.3.1以及他们件的任意版本</p>
+<p><strong>range1 || range2</strong></p>
+<p>满足range1或者满足range2，可以多个范围</p>
+<p>如：&lt;1.0.0 || &gt;=2.3.1 &lt;2.4.5 || &gt;=2.5.2 &lt;3.0.0，表示满足这3个范围的版本都可以</p>
+<h2 id="install和update区别"><a href="#install和update区别" class="headerlink" title="install和update区别"></a>install和update区别</h2><p>The difference between npm install and npm update handling of package versions specified in package.json:</p>
+<pre><code class="line-numbers language-json">{
+  &quot;name&quot;:          &quot;my-project&quot;,
+  &quot;version&quot;:       &quot;1.0&quot;,                             // install   update
+  &quot;dependencies&quot;:  {                                  // ------------------
+    &quot;already-installed-versionless-module&quot;:  &quot;*&quot;,     // ignores   &quot;1.0&quot; -&gt; &quot;1.1&quot;
+    &quot;already-installed-semver-module&quot;:       &quot;^1.4.3&quot; // ignores   &quot;1.4.3&quot; -&gt; &quot;1.5.2&quot;
+    &quot;already-installed-versioned-module&quot;:    &quot;3.4.1&quot;  // ignores   ignores
+    &quot;not-yet-installed-versionless-module&quot;:  &quot;*&quot;,     // installs  installs
+    &quot;not-yet-installed-semver-module&quot;:       &quot;^4.2.1&quot; // installs  installs
+    &quot;not-yet-installed-versioned-module&quot;:    &quot;2.7.8&quot;  // installs  installs
+  }
+}
+</code></pre>
+<p>总结: 两者最大的区别是在对待已经安装过的模糊版本时候</p>
+<ul>
+<li>npm install会忽略模糊版本</li>
+<li>npm update会更新模糊版本至最新</li>
+</ul>
+<p>另外: install and update 处理 devDependencies 方式也不同</p>
+<ul>
+<li>npm install 会安装/更新devDependencies，除非你指定 –production标志</li>
+<li>npm update 会忽略 devDependencies，除非你指定 –dev 标志</li>
+</ul>
+<p>来自 <a href="https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference" target="_blank" rel="noopener">https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference</a></p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/05/07/web/npm-version.html">NPM版本号规则以及更新策略</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/05/22/docker/softwares.html" class="pre-post btn btn-default" title='Docker安装常用软件'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Docker安装常用软件</span>
+        </a>
+    
+    
+        <a href="/2018/04/05/java/reactor.html" class="next-post btn btn-default" title='聊聊Reactor I/O模型'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">聊聊Reactor I/O模型</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#NPM中的版本号规则"><span class="toc-text">NPM中的版本号规则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#版本的格式"><span class="toc-text">版本的格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#版本匹配规则"><span class="toc-text">版本匹配规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#install和update区别"><span class="toc-text">install和update区别</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>
