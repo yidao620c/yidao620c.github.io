@@ -43,7 +43,7 @@ https://apereo.github.io/cas/5.3.x/installation/JSON-Service-Management.html
 这里我只允许http://localhost开头请求的service才能认证。
 
 在resources/services下新建文件localhost-10000002.json，内容如下：
-```
+``` json
 {
   "@class": "org.apereo.cas.services.RegexRegisteredService",
   "serviceId": "^(http)://localhost.*",
@@ -73,7 +73,7 @@ json文件解释：
 
 上面新建了json文件cas还不知道要去识别json，需要打开开关.
 
-```
+``` properties
 #开启识别json文件，默认false
 cas.serviceRegistry.initFromJson=true
 #自动扫描服务配置，默认开启
@@ -91,7 +91,7 @@ cas.serviceRegistry.initFromJson=true
 https://apereo.github.io/cas/5.3.x/installation/Configuration-Properties.html
 
 另外还需要在 pom.xml 文件中加入依赖配置
-```
+``` xml
 <!--json服务注册-->
 <dependency>
     <groupId>org.apereo.cas</groupId>
@@ -116,7 +116,7 @@ https://apereo.github.io/cas/5.3.x/installation/Configuration-Properties.html
 
 ### 接入服务指定主题
 
-```
+``` json
 {
   "@class" : "org.apereo.cas.services.RegexRegisteredService",
   "serviceId" : "^(http|https)://app1.*",
@@ -130,7 +130,7 @@ https://apereo.github.io/cas/5.3.x/installation/Configuration-Properties.html
 
 ### 修改默认主题
 
-```
+``` properties
 cas.theme.defaultThemeName=app1
 ```
 
@@ -148,7 +148,7 @@ h3 {
 
 app1.properties
 
-```
+``` properties
 css.file=/themes/app1/css/main.css
 pageTitle= 这是APP 1 网站
 

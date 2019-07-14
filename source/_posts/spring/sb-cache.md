@@ -346,7 +346,7 @@ public class UserServiceTest {
 
 下面是测试的打印日志一部分：
 
-```
+``` none
 创建用户start..., user.id=444
 ==>  Preparing: INSERT INTO t_user ( id, username, `password` ) VALUES ( ?, ?, ? )
 ==> Parameters: 444(Integer), admin(String), admin(String)

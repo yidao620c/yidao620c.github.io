@@ -45,7 +45,7 @@ sudo alternatives --config java
 
 得到以下输出，选择刚刚安装的jdk8即可：
 
-```
+``` none
 There are 3 programs which provide 'java'.
 
   Selection    Command

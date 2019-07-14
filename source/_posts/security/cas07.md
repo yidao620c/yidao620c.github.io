@@ -26,7 +26,7 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 
 本地hosts文件配置如下:
 
-```
+``` none
 127.0.0.1    cas.server.com
 127.0.0.1    sso.server.com
 127.0.0.1    app1.com
@@ -67,7 +67,7 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 
 如果需要使用rest的请求方式，就需要添加下面的依赖。
 
-```
+``` xml
 <!--开启cas server的rest支持-->
 <dependency>
     <groupId>org.apereo.cas</groupId>
@@ -80,7 +80,7 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 
 一些常规依赖，主要是redis
 
-```
+``` xml
 <!--HttpClient-->
 <dependency>
    <groupId>org.apache.httpcomponents</groupId>
@@ -106,7 +106,7 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server
 
 主要改动了一下login.html登录页面。增加一个拦截器判断用户是否登录
 
-```
+``` js
 $(document).ready(function() {
     var service = GetQueryString("service");
     // 如果为空，表示直接进入登录页面
@@ -151,7 +151,7 @@ $(document).ready(function() {
 
 登录form提交的URL是 sso server的地址：
 
-```
+``` html
 <div id="loginDiv" style="display: none">
     <form action="http://sso.server.com:9000/sso/user/login" method="post">
         <table>

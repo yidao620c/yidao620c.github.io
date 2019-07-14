@@ -60,7 +60,7 @@ pip install Jinja2 redis
 
 ### 第1步：创建文件夹
 首先创建下面这样结构的文件夹：
-```
+``` none
 /shortly
     /static
     /templates

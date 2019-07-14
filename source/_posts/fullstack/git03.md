@@ -43,12 +43,12 @@ git clone https://github.com/yidao620c/gitdemo.git
 
 ## 添加远程库
 先有本地库，后有远程库的时候，如何关联远程库呢？就使用`git remote add`命令:
-```
+``` bash
 git remote add origin https://github.com/yidao620c/gitdemo.git
 ```
 
 查看远程库信息:
-```
+``` bash
 [root@controller161 gitdemo]# git remote -v
 origin	https://github.com/yidao620c/gitdemo.git (fetch)
 origin	https://github.com/yidao620c/gitdemo.git (push)
@@ -58,11 +58,11 @@ origin	https://github.com/yidao620c/gitdemo.git (push)
 ## 推送分支
 推送分支，就是把该分支上的所有本地提交推送到远程库。推送时要指定本地分支，
 Git就会把该分支推送到远程库对应的远程分支上:
-```
+``` bash
 git push origin master
 ```
 如果推送的是dev分支就要这样写:
-```
+``` bash
 git push origin dev
 ```
 但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
@@ -77,7 +77,7 @@ git push origin dev
 
 这里我新创建的远程仓库还没有dev分支，这时候我先在本地创建dev分支，再push上去。
 在dev分支上面，修改README.md内容如下:
-```
+``` bash
 # gitdemo
 just for gitdemo test
 
@@ -95,7 +95,7 @@ dev branch add by "自己"
 ```
 
 现在，模拟另外一个协作着，可以在另一个目录下克隆：
-```
+``` bash
 mkdir -p /root/work1 && cd /root/work1
 git clone https://github.com/yidao620c/gitdemo.git
 # 克隆单个分支

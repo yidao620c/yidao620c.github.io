@@ -461,7 +461,7 @@ public String index(HttpServletRequest request, Model model) {
 可以在Thymeleaf模板中使用shiro的权限标签来控制某些菜单或按钮是否显示。
 
 maven中添加依赖，这个前面已经有了：
-```
+``` xml
 <!-- thymeleaf模板中shiro标签-->
 <dependency>
     <groupId>com.github.theborakompanioni</groupId>

@@ -30,7 +30,7 @@ node -v
 
 **换淘宝源**
 
-```
+``` none
 npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 之后使用cnpm命令代替npm命令
@@ -56,7 +56,7 @@ gitbook 的基本用法非常简单，基本上就只有几个命令：
 
 首先，创建如下目录结构：
 
-```
+``` none
 $ tree book/
 book/
 ├── README.md
@@ -67,7 +67,7 @@ book/
 
 EADME.md 和 SUMMARY.md 是两个必须文件，README.md 是对书籍的简单介绍：
 
-```
+``` none
 $ cat book/README.md 
 # README
 
@@ -75,7 +75,7 @@ This is a book powered by [GitBook](https://github.com/GitbookIO/gitbook).
 ```
 
 SUMMARY.md 是书籍的目录结构。内容如下：
-```
+``` none
 $ cat book/SUMMARY.md 
 # SUMMARY
 
@@ -87,7 +87,7 @@ $ cat book/SUMMARY.md
 
 创建了这两个文件后，使用 `gitbook init`，它会为我们创建 `SUMMARY.md` 中的目录结构
 
-```
+``` none
 $ cd book
 $ gitbook init
 $ tree
@@ -105,7 +105,7 @@ $ tree
 ```
 
 书籍目录结构创建完成以后，就可以使用 gitbook serve 来编译和预览书籍了：
-```
+``` none
 [root@VM_170_150_centos book]# gitbook serve
 Live reload server started on port: 35729
 Press CTRL+C to quit ...
@@ -192,7 +192,7 @@ gitbook还支持许多插件，用户可以从 [NPM](https://www.npmjs.com/) 上
 
 接下来我推荐几个比较好用的插件
 
-```
+``` bash
 cnpm i -g gitbook-plugin-disqus
 cnpm i -g gitbook-plugin-multipart
 cnpm i -g gitbook-plugin-toggle-chapters
@@ -256,7 +256,7 @@ Disqus 是一个非常流行的为网站集成评论系统的工具，同样，g
 由于 gitbook 书籍可以通过 gitbook 本地构建出 site 格式，所以可以直接将构建好的书籍直接放到 GitHub Pages 中托管，
 之后，可以通过如下地址访问书籍：
 
-```
+``` none
 http://<username>.github.io/<project>
 ```
 
@@ -365,7 +365,7 @@ fonts目录放入的字体：
 * fontawesome-webfont.woff2
 
 css目录放入的样式文件：
-```
+``` none
 font-awesome.css
 font-awesome.css.map
 font-awesome.min.css

@@ -154,6 +154,7 @@ user = relationship("User", back_populates="addresses")
 ``` python
 addresses = relationship("Address", order_by=Address.id, back_populates="user")
 ```
+
 注意两个类中都通过`relationship()`方法指明相互关系。
 
 通过几个例子来操作一对多的关系映射

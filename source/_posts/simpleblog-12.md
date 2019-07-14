@@ -35,10 +35,11 @@ LOCALE_PATHS = (
     os.path.join(BASE_DIR, "locale"),
 )
 ```
+
 通过`LANGUAGES`执行语言列表，`LOCALE_PATHS`指定国际化目录。
 
 在项目根目录下面创建一个locale文件夹，然后使用命令创建国际化文件：
-```
+``` bash
 django-admin.py makemessages -l zh_CN
 ```
 
@@ -89,7 +90,7 @@ msgstr "下一页"
 将你页面上面需要翻译的内容写到这里面来即可。比如`previous`要翻译成`上一页`。
 
 写好了所有的翻译后，再执行：
-```
+``` bash
 django-admin.py compilemessages
 ```
 这时候会生成文件`zh_CN/LC_MESSAGES/django.mo`，这个是最终的目标文件了。
@@ -129,7 +130,7 @@ django-admin.py compilemessages
 ```
 
 注意
-```
+``` html
 <title>@% trans 'Simple Blog'%@</title>
 ```
 这句，如果用户选择中文，那么就会被翻译成`极简博客`。这个在django.po文件中定义过。其他的内容也是类似，就不多说了。

@@ -122,7 +122,7 @@ setup(
 3. cmdclass       build或install的时候执行的额外操作
 
 还有一个文件`MANIFEST.in`定义了打源码包的时候需要包含的文件，一个示例如下：
-```
+``` none
 include LICENSE
 include README.rst
 include README.md
@@ -150,7 +150,7 @@ pip install wheel
 如果没有账号需要先在PyPI网站上注册账号。
 在您的本机用户下创建~/.pypirc文件，此文件中配置PyPI访问地址和账号。下面是我的.pypirc文件内容请根据自己的账号来修改。
 
-```
+``` none
 [distutils]
 index-servers = pypi
 
@@ -161,7 +161,8 @@ password=********
 ```
 
 ### 注册项目
-```
+
+``` bash
 python setup.py register
 ```
 
@@ -189,11 +190,12 @@ twine register dist/xnrpc-1.0.0-py2-none-any.whl
 # 安装了twine使用
 twine upload dist/*
 ```
+
 通过上面.pypirc文件中的配置，上传打包文件，可以在PyPI上看到上传的项目文件：
 ![](https://xnstatic-1253397658.file.myqcloud.com/pysetup003.png)
 
 恭喜你成功将你的软件包上传至PyPI上面，全世界的人都可以通过pip来安装了：
-```
+``` bash
 pip install xnrpc
 ```
 
@@ -204,7 +206,7 @@ pip install vanity
 ```
 
 使用:
-```
+``` none
 vanity xnrpc
 vanity xnrpc==1.0.0
 ```

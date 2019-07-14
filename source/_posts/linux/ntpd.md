@@ -16,7 +16,7 @@ NTP是网络时间协议(Network Time Protocol)，它是用来同步网络中各
 
 ### 安装NTP服务
 
-```
+``` bash
 yum install -y ntp
 ```
 
@@ -26,7 +26,7 @@ yum install -y ntp
 
 编辑 /etc/ntp.conf，增加时间同步服务器：
 
-```
+``` none
 server 0.asia.pool.ntp.org
 server 1.asia.pool.ntp.org
 server 2.asia.pool.ntp.org
@@ -37,7 +37,7 @@ fudge 127.127.1.0 stratum 10 #这个值不能太高0-15，太高会报错
 
 添加允许访问的ip段
 
-```
+``` bash
 restrict 192.168.217.0 mask 255.255.255.0 nomodify notrap
 restrict 192.168.212.0 mask 255.255.255.0 nomodify notrap
 ```
@@ -46,14 +46,14 @@ restrict 192.168.212.0 mask 255.255.255.0 nomodify notrap
 
 开启防火墙ntp默认端口udp123
 
-```
+``` bash
 firewall-cmd --permanent --zone=public --add-port=123/udp
 firewall-cmd --reload
 ```
 
 ### 开机启动服务
 
-```
+``` bash
 systemctl enable ntpd
 systemctl start ntpd
 systemctl status ntpd
@@ -61,7 +61,7 @@ systemctl status ntpd
 
 ### 验证NTP服务
 
-```
+``` bash
 ntpq -p
 date -R
 ```
@@ -74,7 +74,7 @@ date -R
 
 将上面的NTP服务器作为客户端同步NTP时间服务器，`vim /etc/ntp.conf`
 
-```
+``` none
 #配置允许NTP Server时间服务器主动修改本机的时间
 restrict 192.168.217.161 nomodify notrap noquery
 #注释掉其他时间服务器
@@ -88,7 +88,7 @@ server 192.168.217.161
 
 ### 与NTP server服务器同步一下时间
 
-```
+``` bash
 ntpdate -u 192.168.217.161
 ```
 
@@ -96,7 +96,7 @@ ntpdate -u 192.168.217.161
 
 能看到已经成功同步
 
-```
+``` bash
 ntpq -p
 date -R
 ```
@@ -105,7 +105,7 @@ date -R
 
 最后讲一下怎样修改linux的时区
 
-```
+``` bash
 rm -rf /etc/localtime    #删除当前默认时区
 ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime 
 ```

@@ -17,7 +17,7 @@ abbrlink: 10613
 ## hello world
 
 这里使用 python 的pika来演示，先安装pika:
-```
+``` bash
 pip install pika
 ```
 

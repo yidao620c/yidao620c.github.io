@@ -128,6 +128,7 @@ public class MyDateFormatDeserializer extends DateFormatDeserializer {
         }
     }
 ```
+
 User类
 ``` java
 public class User {
@@ -144,7 +145,8 @@ public class User {
     public Date birthday;
 }
 ```
-测试下：
+
+测试如下：
 ``` java
 /**
  * @param args

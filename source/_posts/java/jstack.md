@@ -37,7 +37,7 @@ hprof	 | hprof能够展现CPU使用率，统计堆内存使用情况
 
 示例：
 
-```
+``` bash
 [root@CZT-FS1 board-api]# jps -lvm
 67136 board-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms1024m -Xmx1024m
 100547 board-web-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms512m
@@ -55,7 +55,7 @@ hprof	 | hprof能够展现CPU使用率，统计堆内存使用情况
 除了常用的打印所有进程使用资源外，还可以对单独的进程，打印线程资源排行榜，按T键可对TIME倒序排列，
 也就是CPU运行时间。TIME列就是各个Java线程耗费的CPU时间，我们线程pid为67163的线程作为后续线程研究对象
 
-```
+``` bash
 [root@CZT-FS1 board-api]# top -Hp 67136
 top - 11:22:26 up 166 days, 17:06,  1 user,  load average: 0.07, 0.02, 0.00
 Tasks: 140 total,   0 running, 140 sleeping,   0 stopped,   0 zombie
@@ -86,7 +86,7 @@ Swap:  8175612k total,   461868k used,  7713744k free,  7831512k cached
 
 jstack主要用来查看某个Java进程内的线程堆栈信息。语法格式如下：
 
-```
+``` bash
 jstack [option] pid
 ```
 
@@ -95,7 +95,7 @@ jstack [option] pid
 1. -l	long listings，会打印出额外的锁信息，在发生死锁时可以用jstack -l pid来观察锁持有情况
 2. -m	mixed mode，不仅会输出Java堆栈信息，还会输出C/C++堆栈信息（比如Native方法）
 
-```
+``` bash
 [root@CZT-FS1 board-api]# jstack -l 67136 | more
 Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):
 
@@ -128,14 +128,14 @@ Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):
 
 使用`printf "%x\n"`，获得线程ID=的十六进制值。
 
-```
+``` bash
 [root@CZT-FS1 board-api]# printf "%x\n" 67163
 1065b
 ```
 
 查看该线程的堆栈：
 
-```
+``` bash
 [root@CZT-FS1 board-api]# jstack -l 67136 | grep 1065b -A20
 "System Clock" #17 daemon prio=5 os_prio=0 tid=0x00007f322d089000 nid=0x1065b runnable [0x00007f320487c000]
    java.lang.Thread.State: TIMED_WAITING (parking)

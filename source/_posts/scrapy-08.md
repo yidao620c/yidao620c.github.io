@@ -63,8 +63,9 @@ IMAGES_THUMBS = {
 IMAGES_MIN_HEIGHT = 110
 IMAGES_MIN_WIDTH = 110
 ```
+
 一个使用了缩略图的下载例子会生成如下图片：
-```
+``` none
 <IMAGES_STORE>/full/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
 <IMAGES_STORE>/thumbs/small/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
 <IMAGES_STORE>/thumbs/big/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg

@@ -36,7 +36,7 @@ channel.exchange_declare(exchange='logs',
 fanout类型的将消息广播给它所知道的所有队列。
 
 列出所有的交换机命令：
-```
+``` bash
 sudo rabbitmqctl list_exchanges
 ``
 
@@ -57,7 +57,7 @@ result = channel.queue_declare()
 
 然后就可以通过`result.method.queue`获取临时队列名称，提供给消费者使用。
 另外消费者用完后需要销毁，可添加一个`exclusive`选项：
-```
+``` python
 result = channel.queue_declare(exclusive=True)
 ```
 
@@ -74,7 +74,7 @@ channel.queue_bind(exchange='logs',
 这时候，`logs`交换机就会将它接收到的消息发送给我们的临时队列了。
 
 查看系统所有的绑定命令：
-```
+``` bash
 rabbitmqctl list_binding
 ```
 
@@ -140,41 +140,38 @@ python receive_logs.py > test.log
 ```
 
 如果只想打印到控制台：
-```
+``` bash
 python receive_logs.py
 ```
 
 然后开始启动日志发送者进程：
-```
+``` bash
 python emit_log.py
 ```
 
 演示结果：
 
 第一个窗口
-```
+``` bash
 rabbitmqctl list_bindings
 ```
-查看test.log内容：
-```
-
-```
+查看test.log内容
 
 第二个窗口：
-```
+``` bash
 $ python receive_logs.py
  [*] Waiting for logs. To exit press CTRL+C
  [x] b'info: Hello World!'
 ```
 
 发送者窗口：
-```
+``` bash
 $ python emit_log.py
  [x] Sent 'info: Hello World!'
 ```
 
 最后，运行如下命令来确认绑定的确建立了：
-```
+``` bash
 [root@controller161 ~]# rabbitmqctl list_bindings
 Listing bindings ...
 	exchange	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	queue	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	[]

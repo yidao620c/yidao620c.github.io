@@ -45,12 +45,14 @@ sphinx-quickstart
 ```
 下面是我填写的，其他基本上默认即可：
 
+``` none
 > Separate source and build directories (y/n) [n]:y
 > Project name: scrapy-cookbook
 > Author name(s): Xiong Neng
 > Project version []: 0.2
 > Project release [1.0]: 0.2.2
 > Project language [en]: zh_CN
+```
 
 安装软件tree查看目录树结构：
 ``` bash
@@ -58,7 +60,8 @@ yum install tree
 ```
 
 然后运行 `tree -C .` 查看生成的sphinx结构:
-```
+
+``` none
 .
 ├── build
 ├── make.bat
@@ -71,13 +74,13 @@ yum install tree
 ```
 
 添加一篇文章，在source目录下新建hello.rst，内容如下:
-```
+``` none
 hello,world
 =============
 ```
 
 `index.rst` 修改如下:
-```
+``` none
 Contents:
 .. toctree::
    :maxdepth: 2
@@ -98,7 +101,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 ![](https://xnstatic-1253397658.file.myqcloud.com/rtd01.png)
 
 toctree 支持多级目录,比如要想将python.rst,java.rst笔记在不同的目录,toctree这样设置:
-```
+``` none
 Contents:
 
 .. toctree::
@@ -337,7 +340,7 @@ sphinx.environment.BuildEnvironment.warn_node = _warn_node
 将图片下载到source/images目录，然后改链接为相对路径。
 
 如要居中显示图片，使用:
-```
+``` none
 <center>![scrapy架构图](/images/scrapy.png)</center>
 ```
 
@@ -346,7 +349,7 @@ sphinx.environment.BuildEnvironment.warn_node = _warn_node
 **自动生成标题问题**
 
 修改`conf.py`将manual改成howto
-```
+``` none
 latex_documents = [
     (master_doc, 'scrapy-cookbook.tex', u'scrapy-cookbook Documentation',
      u'Xiong Neng', 'howto'),
@@ -402,7 +405,7 @@ xelatex scrapy-cookbook.tex
 
 编辑tex文件，在导言区的内容如下：
 
-```
+``` none
 前面省略...
 \title{《Python Cookbook》第三版}
 \date{Dec 09, 2017}
@@ -457,15 +460,9 @@ xelatex scrapy-cookbook.tex
 ...
 ```
 
-在 `\section{第一章：数据结构和算法}` 前插入
-```
-\normaltocdepth
-```
+在 `\section{第一章：数据结构和算法}` 前插入 `\normaltocdepth`
 
-在 `\section{附录A}` 前插入
-```
-\specialtocdepth
-```
+在 `\section{附录A}` 前插入 `\specialtocdepth`
 
 另外执行下面命令，删除每个章节多余的Contents和下面的一行空格：
 ``` bash
@@ -473,6 +470,6 @@ sed -i '/Contents:/,+1 d' python3-cookbook.tex
 ```
 
 再次运行生成命令即可(最好执行2次)：
-```
+``` none
 xelatex python3-cookbook.tex
 ```

@@ -33,7 +33,7 @@ WebSocket工作在HTTP的80和443端口并使用前缀ws://或者wss://进行协
 
 新建nginx配置文件`/etc/nginx/conf.d/websocket.conf`，内容如下：
 
-```
+``` nginx
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;
@@ -68,21 +68,21 @@ server {
 
 最重要的就是在反向代理的配置中增加了如下两行，其它的部分和普通的HTTP反向代理没有任何差别。
 
-```
+``` nginx
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection $connection_upgrade;
 ```
 
 这里面的关键部分在于HTTP的请求中多了如下头部：
 
-```
+``` none
 Upgrade: websocket
 Connection: Upgrade
 ```
 
 这两个字段表示请求服务器升级协议为WebSocket。服务器处理完请求后，响应如下报文：
 
-```
+``` none
 # 状态码为101
 HTTP/1.1 101 Switching Protocols
 Upgrade: websocket
@@ -121,7 +121,7 @@ Connection: upgrade
 
 比如访问的websocket服务URL为：
 
-```
+``` none
 wss://test.enzhico.net
 ```
 
@@ -129,7 +129,7 @@ wss://test.enzhico.net
 
 在腾讯云主机上面：
 
-```
+``` nginx
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;
@@ -161,7 +161,7 @@ server {
 
 而在网关中心主机上面：
 
-```
+``` nginx
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;

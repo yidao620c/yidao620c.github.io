@@ -52,7 +52,7 @@ windows用户到 <http://www.gpg4win.org/download.html> 去下载Gpg4win-Vanilla
 
 下载之后执行：
 
-```
+``` bash
 gpg --gen-key
 ```
 
@@ -208,14 +208,14 @@ gpg --gen-key
 
 待构件编写完成，就可以进行上传、发布了。在命令行进入项目pom.xml所在路径，执行：
 
-```
+``` bash
 mvn clean deploy -P release
 ```
 
 在稍后些时候会要你输入gpg密钥库的密码，输入即可完成上传。
 当然有时候不会弹出输入密码的输入框，只是提示需要输入密码，根据gpg插件的官网解释，需要加上密码作为参数执行命令，即：
 
-```
+``` bash
 mvn clean deploy -P release -Dgpg.passphrase=密码
 ```
 
@@ -228,13 +228,13 @@ mvn clean deploy -P release -Dgpg.passphrase=密码
 
 我再close过程中出现过验证签名失败的问题：
 
-```
+``` none
  No public key: Key with id: (xxxx) was not able to be located on http://keyserver.ubuntu.com:11371
 ```
 
 只需要在本地执行：
 
-```
+``` bash
 gpg --keyserver hkp://keyserver.ubuntu.com --send-keys xxxx
 ```
 

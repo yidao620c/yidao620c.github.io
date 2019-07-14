@@ -75,7 +75,7 @@ source myvenv/bin/activate
 这时候可以使用python来代替python3了。
 
 6，在虚拟环境中安装django1.9
-```
+``` none
 (myvenv) ~$ pip install django==1.9.5
 Downloading/unpacking django==1.9.5
 Installing collected packages: django
@@ -96,12 +96,13 @@ OK，到此为止，django环境已经搞定了。
 在windows下面运行命令：`myvenv\Scripts\activate`，在苹果或linnux环境下运行命令：`source myvenv/bin/activate`
 
 假设你已经在刚刚的simpleblog目录中了，那么执行下面的命令：
-```
+``` none
 (myvenv) [mango@centos00 simpleblog]$ django-admin.py startproject mysite
 ```
+
 会自动在simpleblog目录中生成一个mysite目录，进入mysite目录，会是下面的结构：
-```
-myste
+``` none
+mysite
 ├───manage.py
 └───mysite
         settings.py
@@ -119,7 +120,7 @@ myste
 我们可以试着去修改下`setting.py`配置文件中的时区配置，改为你所在的地区的时区。
 关于时区可以参考：<http://en.wikipedia.org/wiki/List_of_tz_database_time_zones>
 因为我现在在中国大陆地区，所以把它改成了这样：
-```
+``` none
 LANGUAGE_CODE = 'zh-cn'
 TIME_ZONE = 'Asia/Shanghai'
 ```
@@ -136,12 +137,12 @@ DATABASES = {
 ```
 
 为我们的博客系统生成数据库，我们需要运行下面的命令：
-```
+``` bash
 (myvenv) [mango@centos00 mysite]$ python manage.py migrate
 ```
 
 出现如下的信息表示成功了：
-```
+``` none
 Operations to perform:
   Apply all migrations: sessions, contenttypes, admin, auth
 Running migrations:
@@ -153,7 +154,7 @@ Running migrations:
 
 ### 运行服务器
 接下来我们通过manage.py来运行服务器
-```
+``` bash
 (myvenv) [mango@centos mysite]$ python manage.py runserver 192.168.203.95:8000
 ```
 

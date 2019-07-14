@@ -30,7 +30,7 @@ ceph osd lspools
 ## 创建pool
 
 创建pool之前可更改两个pg默认配置：
-```
+``` bash
 osd pool default pg num = 100
 osd pool default pgp num = 100
 ```
@@ -100,7 +100,7 @@ ceph osd pool set {pool-name} {key} {value}
 
 ## 获取pool的空间使用情况
 
-```
+``` bash
 [root@node001 ~]# ceph df
 GLOBAL:
     SIZE     AVAIL     RAW USED     %RAW USED

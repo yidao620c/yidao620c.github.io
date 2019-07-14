@@ -154,14 +154,14 @@ print(" [.] Got %r" % response)
 
 rpc_server.py
 
-```
+``` none
  [x] Awaiting RPC requests
  [.] fib(30)
 ```
 
 rpc_client.py
 
-```
+``` none
  [x] Requesting fib(30)
  [.] Got 832040
 ```

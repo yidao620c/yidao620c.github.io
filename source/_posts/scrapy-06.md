@@ -10,7 +10,8 @@ abbrlink: 40609
 ---
 
 当一个item被蜘蛛爬取到之后会被发送给Item Pipeline，然后多个组件按照顺序处理这个item。
-每个Item Pipeline组件其实就是一个实现了一个简单方法的Python类。他们接受一个item并在上面执行逻辑，还能决定这个item到底是否还要继续往下传输，如果不要了就直接丢弃。
+每个Item Pipeline组件其实就是一个实现了一个简单方法的Python类。他们接受一个item并在上面执行逻辑，
+还能决定这个item到底是否还要继续往下传输，如果不要了就直接丢弃。
 
 使用Item Pipeline的常用场景：
 
@@ -116,6 +117,7 @@ class DuplicatesPipeline(object):
 ```
 
 ## 激活一个Item Pipeline组件
+
 你必须在配置文件中将你需要激活的Pipline组件添加到`ITEM_PIPELINES`中
 ``` python
 ITEM_PIPELINES = {
@@ -123,21 +125,26 @@ ITEM_PIPELINES = {
     'myproject.pipelines.JsonWriterPipeline': 800,
 }
 ```
+
 后面的数字表示它的执行顺序，从低到高执行，范围0-1000
 
 ## Feed exports
+
 这里顺便提下Feed exports，一般有的爬虫直接将爬取结果序列化到文件中，并保存到某个存储介质中。只需要在settings里面设置几个即可：
-```
+``` none
 * FEED_FORMAT= json # json|jsonlines|csv|xml|pickle|marshal
 * FEED_URI= file:///tmp/export.csv|ftp://user:pass@ftp.example.com/path/to/export.csv|s3://aws_key:aws_secret@mybucket/path/to/export.csv|stdout:
 * FEED_EXPORT_FIELDS = ["foo", "bar", "baz"] # 这个在导出csv的时候有用
 ```
 
 ## 请求和响应
-Scrapy使用`Request`和`Response`对象来爬取网站。`Request`对象被蜘蛛生成，然后被传递给下载器，之后下载器处理这个`Request`后返回`Response`对象，然后返回给生成`Request`的这个蜘蛛。
+Scrapy使用`Request`和`Response`对象来爬取网站。`Request`对象被蜘蛛生成，然后被传递给下载器，
+之后下载器处理这个`Request`后返回`Response`对象，然后返回给生成`Request`的这个蜘蛛。
 
 ### 给回调函数传递额外的参数
-`Request`对象生成的时候会通过关键字参数`callback`指定回调函数，`Response`对象被当做第一个参数传入，有时候我们想传递额外的参数，比如我们构建某个Item的时候，需要两步，第一步是链接属性，第二步是详情属性，可以指定`Request.meta`
+
+`Request`对象生成的时候会通过关键字参数`callback`指定回调函数，`Response`对象被当做第一个参数传入，
+有时候我们想传递额外的参数，比如我们构建某个Item的时候，需要两步，第一步是链接属性，第二步是详情属性，可以指定`Request.meta`
 ``` python
 def parse_page1(self, response):
     item = MyItem()
@@ -189,7 +196,8 @@ class LoginSpider(scrapy.Spider):
 ```
 
 ### Response子类
-一个`scrapy.http.Response`对象代表了一个HTTP相应，通常是被下载器下载后得到，并交给Spider做进一步的处理。Response也有很多默认的子类，用于表示各种不同的响应类型。
+一个`scrapy.http.Response`对象代表了一个HTTP相应，通常是被下载器下载后得到，并交给Spider做进一步的处理。
+Response也有很多默认的子类，用于表示各种不同的响应类型。
 
 * TextResponse 在基本`Response`类基础之上增加了编码功能，专门用于二进制数据比如图片、声音或其他媒体文件
 * HtmlResponse 此类是`TextResponse`的子类，通过查询HTML的`meta http-equiv `属性实现了编码自动发现

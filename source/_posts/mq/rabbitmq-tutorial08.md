@@ -103,7 +103,7 @@ channel.start_consuming()
 
 运行结果：
 
-```
+``` none
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:04:46.977268 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:04:51.987554 [x] Finished b'[disk.error] Hello World! 111111'
@@ -160,7 +160,7 @@ channel.start_consuming()
 ```
 
 运行结果：
-```
+``` none
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:07:58.486085 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:07:58.487085 [x] Received b'[disk.error] Hello World! 222222'
@@ -198,7 +198,7 @@ def callback(ch, method, properties, body):
 ```
 
 运行结果：
-```
+``` none
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:13:53.637398 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:13:53.637398 [x] Received b'[disk.error] Hello World! 222222'

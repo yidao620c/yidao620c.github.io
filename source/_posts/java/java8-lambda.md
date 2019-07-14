@@ -66,6 +66,7 @@ double highestScore = students.
         }).
         max();
 ```
+
 这种迭代形式已经具备了函数式特征。
 
 优点：
@@ -147,6 +148,7 @@ class SessionManager {
     boolean checkExpiry(long time, long expiry) { ... }
 }
 ```
+
 #### 类型推断
 
 很多情况下，编译器都可以根据目标函数式接口的方法签名来推断参数类型。
@@ -154,16 +156,19 @@ class SessionManager {
 ``` java
 static T void sort(List<T> l, Comparator<? super T> c);
 ```
+
 正常来讲，应该这么写：
 ``` java
 List<String> list = getList();
 Collections.sort(list, (String x, String y) -> x.length() - y.length());
 ```
+
 借助类型推断，可以简化为：
 ``` java
 List<String> list = getList();
 Collections.sort(list, (x, y) -> x.length() - y.length());
 ```
+
 #### 方法引用
 
 方法引用可以让我们将一个方法作为一个Lambda表达式重复利用。
@@ -172,6 +177,7 @@ Collections.sort(list, (x, y) -> x.length() - y.length());
 ``` java
 boolean accept(File pathname);
 ```
+
 正常的Lambda表达式用法：
 ``` java
 FileFilter x = File f -> f.canRead();
@@ -183,7 +189,7 @@ FileFilter x = File::canRead;
 ```
 
 方法引用语法格式有以下三种：
-```
+``` none
 objectName::instanceMethod
 ClassName::staticMethod
 ClassName::instanceMethod
@@ -208,6 +214,7 @@ ClassName::instanceMethod
 ``` java
 Factory<List<String>> f = () -> return new ArrayList<String>();
 ```
+
 通过构造器引用，可以简化为：
 ``` java
 Factory<List<String>> f = ArrayList<String>::new;

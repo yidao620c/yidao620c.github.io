@@ -14,24 +14,24 @@ abbrlink: 1244
 下面讲解如何在已经安装过后再次添加新的模块。
 
 1、找到安装nginx的源码根目录(即安装包存放目录)，如果没有的话下载新的源码并解压
-```
+``` bash
 cd software
 ls
 nginx-1.10.2  nginx-1.10.2.tar.gz
 ```
  
 2、查看nginx版本极其编译参数
-```
+``` bash
 /usr/local/nginx/sbin/nginx -V
 ```
  
 3、进入nginx源码目录
-```
+``` bash
 cd nginx-1.10.2
 ```
  
 4、重新编译的代码和模块
-```
+``` bash
 ./configure --prefix=/usr/local/nginx --with-http_ssl_module
 ```
  
@@ -39,30 +39,30 @@ cd nginx-1.10.2
 make完之后在/software/nginx-1.10.2/objs目录下就多了个nginx，这个就是新版本的程序了。
 
 6、备份旧的nginx程序
-```
+``` bash
 cd /usr/local/nginx/sbin/
 mv nginx nginx_bak
 ```
 
 7、把新的nginx程序复制到/usr/local/nginx/sbin/下
-```
+``` bash
 cp /software/nginx-1.10.2/objs/nginx /usr/local/nginx/sbin/
 ```
 
 8、测试新的nginx程序是否正确
-```
+``` bash
 /usr/local/nginx/sbin/nginx -t
 nginx: the configuration file /usr/local/nginx/conf/nginx.conf syntax is ok
 nginx: configuration file /usr/local/nginx/conf/nginx.conf test is successful
 ```
 
 9、平滑启动服务
-```
+``` bash
 /usr/local/nginx/sbin/nginx -s reload
 ```
 
 10、查看模块是否已安装
-```
+``` bash
 /usr/local/nginx/sbin/nginx -V
 nginx version: nginx/1.10.2
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-4) (GCC)
@@ -72,7 +72,7 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module
 ```
 
 11、重启Nginx
-```
+``` bash
 ./nginx -s quit
 ./nginx
 ```

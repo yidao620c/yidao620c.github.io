@@ -61,19 +61,22 @@ Scrapy使用css和xpath选择器来定位元素，它有四个基本方法：
  </body>
 </html>
 ```
+
 首先我们打开shell
 ``` bash
 scrapy shell http://doc.scrapy.org/en/latest/_static/selectors-sample1.html
 ```
+
 运行
-```
+``` none
 >>> response.xpath('//title/text()')
 [<Selector (text) xpath=//title/text()>]
 >>> response.css('title::text')
 [<Selector (text) xpath=//title/text()>]
 ```
+
 结果可以看出,`xpath()`和`css()`方法返回的是`SelectorList`实例，是一个选择器列表，你可以选择嵌套的数据：
-```
+``` none
 >>> response.css('img').xpath('@src').extract()
 [u'image1_thumb.jpg',
  u'image2_thumb.jpg',
@@ -81,23 +84,27 @@ scrapy shell http://doc.scrapy.org/en/latest/_static/selectors-sample1.html
  u'image4_thumb.jpg',
  u'image5_thumb.jpg']
 ```
+
 必须使用`.extract()`才能提取最终的数据，如果你只想获得第一个匹配的，可以使用`.extract_first()`
-```
+``` none
 >>> response.xpath('//div[@id="images"]/a/text()').extract_first()
 u'Name: My image 1 '
 ```
+
 如果没有找到，会返回`None`，还可选择默认值
-```
+``` none
 >>> response.xpath('//div[@id="not-exists"]/text()').extract_first(default='not-found')
 'not-found'
 ```
+
 而CSS选择器还可以使用CSS3标准：
-```
+``` none
 >>> response.css('title::text').extract()
 [u'Example website']
 ```
+
 下面是几个比较全面的示例：
-```
+``` none
 >>> response.xpath('//base/@href').extract()
 [u'http://example.com/']
 
@@ -136,7 +143,7 @@ u'Name: My image 1 '
 
 ## 嵌套选择器
 `xpath()`和`css()`返回的是选择器列表，所以你可以继续使用它们的方法。举例来讲：
-```
+``` none
 >>> links = response.xpath('//a[contains(@href, "image")]')
 >>> links.extract()
 [u'<a href="image1.html">Name: My image 1 <br><img src="image1_thumb.jpg"></a>',
@@ -155,9 +162,10 @@ Link number 2 points to url [u'image3.html'] and image [u'image3_thumb.jpg']
 Link number 3 points to url [u'image4.html'] and image [u'image4_thumb.jpg']
 Link number 4 points to url [u'image5.html'] and image [u'image5_thumb.jpg']
 ```
+
 ## 使用正则表达式
 `Selector`有一个`re()`方法通过正则表达式提取数据，它返回的是unicode字符串列表，你不能再去嵌套使用
-```
+``` none
 >>> response.xpath('//a[contains(@href, "image")]/text()').re(r'Name:\s*(.*)')
 [u'My image 1',
  u'My image 2',
@@ -171,7 +179,7 @@ u'My image 1'
 
 ## XPath相对路径
 当你嵌套使用XPath时候，不要使用`/`开头的，因为这个会相对文档根节点开始算起，需要使用相对路径
-```
+``` none
 >>> divs = response.xpath('//div')
 >>> for p in divs.xpath('.//p'):  # extracts all <p> inside
 ...     print p.extract()
@@ -184,8 +192,9 @@ u'My image 1'
 ## XPath建议
 
 ### 使用text作为条件时
+
 避免使用`.//text()`,直接使用`.`
-```
+``` none
 >>> sel.xpath("//a[contains(., 'Next Page')]").extract()
 [u'<a href="#">Click here to go to the <strong>Next Page</strong></a>']
 ```
@@ -196,7 +205,7 @@ u'My image 1'
 * (//node)[1]: 选择所有的node节点，然后返回结果中的第一个node节点
 
 ### 通过class查找时优先考虑CSS
-```
+``` none
 >> from scrapy import Selector
 >>> sel = Selector(text='<div class="hero shout"><time datetime="2014-07-23 19:00">Special date</time></div>')
 >>> sel.css('.shout').xpath('./time/@datetime').extract()

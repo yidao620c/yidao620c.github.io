@@ -53,6 +53,7 @@ abbrlink: 40067
 </body>
 </html>
 ```
+
 在base.html中，将…块替换成下面的：
 ``` html
 <body>
@@ -85,10 +86,12 @@ abbrlink: 40067
     </div>
 @% endfor %@
 ```
+
 然后添加这句到post_list.html页面的最开始部分：
-```
+``` none
 @% extends 'blog/base.html' %@
 ```
+
 这句话的意思就是该模板继承自blog/base.html模板
 
 还有一步就是要将刚刚的内容放到@% raw %@@% block content %@和

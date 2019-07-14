@@ -135,14 +135,14 @@ channel.start_consuming()
 运行效果：
 
 日志生产者：
-```
+``` none
  [x] Sent 'info':'[INFO] Hello World!'
  [x] Sent 'error':'[ERROR] Hello World!'
  [x] Sent 'warning':'[WARNING] Hello World!'
 ```
 
 日志消费者：
-```
+``` none
  [*] Waiting for logs. To exit press CTRL+C
  [x] 'error':b'[ERROR] Hello World!'
  [x] 'warning':b'[WARNING] Hello World!'

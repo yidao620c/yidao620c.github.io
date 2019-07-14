@@ -122,7 +122,7 @@ channel.start_consuming()
 
 emit_log_topic.py
 
-```
+``` none
  [x] Sent 'disk.error':'[disk.info] Hello World!'
  [x] Sent 'disk.warning':'[disk.warning] Hello World!'
  [x] Sent 'test.error':'[test.error] Hello World!'
@@ -130,7 +130,7 @@ emit_log_topic.py
 
 receive_logs_topic.py
 
-```
+``` none
  [*] Waiting for logs. To exit press CTRL+C
  [x] 'disk.error':b'[disk.info] Hello World!'
  [x] 'disk.warning':b'[disk.warning] Hello World!'

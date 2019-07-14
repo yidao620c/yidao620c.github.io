@@ -22,6 +22,7 @@ abbrlink: 17738
 ``` html
 <h1><a href="/">Django Girls Blog</a></h1>
 ```
+
 的上面一行添加如下链接：
 ``` html
 <a href="@% url 'post_draft_list' %@" class="top-menu">
@@ -67,7 +68,8 @@ def post_draft_list(request):
 第一步在页面上添加一个链接或Form表单，这里我们添加一个链接。
 
 打开blog/template/blog/post_detail.html，将下面这段
-```
+
+``` none
 @% if post.published_date %@
     @@ post.published_date @@
 @% endif %@
@@ -115,10 +117,12 @@ def post_publish(request, pk):
 <a class="btn btn-default" href="@% url 'post_remove' pk=post.pk %@">
 <span class="glyphicon glyphicon-remove"></span></a>
 ```
+
 第二步配置urls映射，打开blog/urls.py，添加如下一行：
 ``` python
 url(r'^post/(?P<pk>[0-9]+)/remove/$', views.post_remove, name='post_remove'),
 ```
+
 第三步添加视图view，打开blog/views.py，添加一个视图函数：
 ``` python
 def post_remove(request, pk):

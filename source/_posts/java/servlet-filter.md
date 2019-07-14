@@ -48,8 +48,8 @@ FilterConfig会被容器用来给Filter提供初始化参数以及Servlet Contex
 ``` java
 doFilter(ServletRequest paramServletRequest, ServletResponse paramServletResponse, FilterChain paramFilterChain)
 ```
-这个方法在每次执行过滤的时候被调用，request和response被作为参数传递进来，
-FilterChain表示过滤器链，这是典型的责任链模式的实现例子。
+
+这个方法在每次执行过滤的时候被调用，request和response被作为参数传递进来，FilterChain表示过滤器链，这是典型的责任链模式的实现例子。
 ``` java
 void destroy()
 ```
@@ -109,6 +109,7 @@ Password: <input type="password" name="pwd">
 </body>
 </html>
 ```
+
 LoginServlet负责验证客户端是否已经登录：
 ``` java LoginServlet.java
 package com.journaldev.servlet.session;
@@ -159,6 +160,7 @@ public class LoginServlet extends HttpServlet {
     }
 }
 ```
+
 验证通过后跳转到LoginSuccess.jsp：
 ``` jsp LoginSuccess.jsp
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
@@ -194,6 +196,7 @@ User=<%=user %>
 </body>
 </html>
 ```
+
 退出时我们并不需要进行验证，退出页面为：
 ``` jsp CheckoutPage.jsp
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
@@ -223,6 +226,7 @@ for(Cookie cookie : cookies){
 </body>
 </html>
 ```
+
 LogoutServlet在用户点击退出按钮时执行：
 ``` java LogoutServlet.java
 package com.journaldev.servlet.session;
@@ -266,6 +270,7 @@ public class LogoutServlet extends HttpServlet {
   
 } 
 ```
+
 现在我们来创建日志和登录认证的两个filter：
 ``` java RequestLoggingFilter.java
 package com.journaldev.servlet.filters;

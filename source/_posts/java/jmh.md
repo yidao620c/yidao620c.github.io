@@ -105,7 +105,7 @@ public class StringBuilderBenchmark {
 一般对于大型的测试，需要测试时间比较久，线程比较多的话，就需要去写好了丢到linux程序里执行，
 不然本机执行很久时间什么都干不了了。
 
-```
+``` bash
 mvn clean package
 java -jar target/benchmarks.jar
 ```
@@ -131,7 +131,7 @@ public static void main(String[] args) throws RunnerException {
 
 我们跑一下这个基准测试，完成后打开`E:/Benchmark.log`，结果如下：
 
-```
+``` none
 # JMH version: 1.20
 # VM version: JDK 1.8.0_131, VM 25.131-b11
 # VM invoker: C:\Program Files\Java\jdk1.8.0_131\jre\bin\java.exe

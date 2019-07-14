@@ -338,7 +338,7 @@ public class JsonSerializeBenchmark {
 
 说明一下，上面的代码中
 
-```
+``` java
 ResultExporter.exportResult("JSON序列化性能", results, "count", "秒");
 ```
 

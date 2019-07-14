@@ -30,7 +30,7 @@ stackoverflow网站使用Redis做为缓存服务器。
 
 #### requirements.txt
 添加如下内容，方便以后安装软件依赖，由于在pythonanywhere上面并不能安装redis服务，所以本章只能在本地测试。
-```
+``` none
 redis==2.10.5
 django-redis==4.4.2
 APScheduler==3.1.0

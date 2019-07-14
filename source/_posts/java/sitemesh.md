@@ -54,6 +54,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
     </decorator>
 </decorators>
 ```
+
 不用过滤/static/目录下的文件，然后指定了装饰器：/WEB-INF/layouts/default.jsp。
 
 ### default.jsp模板
@@ -91,6 +92,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 </body>
 </html>
 ```
+
 首先引入了SiteMesh标签
 
 * `<sitemesh:title/>`会自动替换为被过滤页面的title

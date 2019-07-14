@@ -42,12 +42,12 @@ String sql = "SELECT * FROM user WHERE username='"+username+"' AND password='"+p
 ```
 
 如果用户的输入的用户名如下，密码任意：
-```
+``` none
 myuser' or 'foo' = 'foo' --
 ```
 
 那么我们的SQL变成了如下所示：
-```
+``` sql
 SELECT * FROM user WHERE username='myuser' or 'foo' = 'foo' --'' AND password='xxx'
 ```
 
@@ -55,14 +55,14 @@ SELECT * FROM user WHERE username='myuser' or 'foo' = 'foo' --'' AND password='x
 
 对于MSSQL还有更加危险的一种SQL注入，就是控制系统，
 下面这个可怕的例子将演示如何在某些版本的MSSQL数据库上执行系统命令:
-```
+``` none
 sql:="SELECT * FROM products WHERE name LIKE '%"+prod+"%'"
 Db.Exec(sql)
 ```
 
 如果攻击提交 `a%' exec master..xp_cmdshell 'net user test testpass /ADD' --` 作为变量 prod的值，那么sql将会变成
 
-```
+``` sql
 sql:="SELECT * FROM products WHERE name LIKE '%a%' exec master..xp_cmdshell 'net user test testpass /ADD'--%'"
 ```
 

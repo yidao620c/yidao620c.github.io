@@ -92,7 +92,7 @@ server {
 保存退出
 
 执行`nginx -t`检查，如果没问题的话就重启nginx
-```
+``` none
 nginx: [emerg] the "ssl" parameter requires ngx_http_ssl_module in /usr/local/nginx/conf/nginx.conf:99
 ```
 原因也很简单，nginx缺少http_ssl_module模块，编译安装的时候带上`--with-http_ssl_module`配置就行了，
@@ -105,13 +105,13 @@ nginx: [emerg] the "ssl" parameter requires ngx_http_ssl_module in /usr/local/ng
 /usr/local/nginx/sbin/nginx -V
 ```
 结果如下：
-```
+``` none
 nginx version: nginx/1.10.3
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-11) (GCC)
 configure arguments:
 ```
 那么我们的新配置信息就应该这样写，在configure arguments基础上面加：
-```
+``` bash
 ./configure --prefix=/usr/local/nginx --with-http_ssl_module
 ```
 运行上面的命令即可，等配置完，运行命令:
@@ -121,11 +121,11 @@ make
 这里不要进行`make install`，否则就是覆盖安装。
 
 然后备份原有已安装好的nginx
-```
+``` bash
 cp /usr/local/nginx/sbin/nginx /usr/local/nginx/sbin/nginx.bak
 ```
 然后将刚刚编译好的nginx覆盖掉原有的nginx（这个时候nginx要停止状态）:
-```
+``` bash
 systemctl stop nginx.service
 cp ./objs/nginx /usr/local/nginx/sbin/
 ```
@@ -136,7 +136,7 @@ cp ./objs/nginx /usr/local/nginx/sbin/
 /usr/local/nginx/sbin/nginx -V
 ```
 结果:
-```
+``` none
 nginx version: nginx/1.10.3
 built by gcc 4.8.5 20150623 (Red Hat 4.8.5-11) (GCC)
 built with OpenSSL 1.0.1e-fips 11 Feb 2013
@@ -151,7 +151,7 @@ configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module
 
 ## HTTPS配置实例
 
-```
+``` nginx
 server {
     listen       443 ssl http2;
     listen       [::]:443 ssl http2;
@@ -179,14 +179,14 @@ server {
 有时候我们需要在同一台主机上面托管多个应用，每个应用访问域名不同，这里我们可以使用基于域名的虚拟主机来实现。
 
 假设我们在本地开发有3个项目，分别在hosts里映射到本地的127.0.0.1上：
-```
+``` none
 127.0.0.1 www.xiongneng.com xiongneng.com
 127.0.0.1 api.xiongneng.com
 127.0.0.1 admin.xiongneng.com
 ```
 
 有这样3个项目，分别对应于web根目录下的3个文件夹，我们用域名对应文件夹名字，这样子好记：
-```
+``` none
 /home/xiongneng/www/www.xiongneng.com/
 /home/xiongneng/www/api.xiongneng.com/
 /home/xiongneng/www/admin.xiongneng.com/

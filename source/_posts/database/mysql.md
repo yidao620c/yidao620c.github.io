@@ -17,27 +17,27 @@ abbrlink: 58473
 在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。
 
 从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 `wget` 下载：
-```
+``` bash
 wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
 ```
 
 安装 yum Repository
-```
+``` bash
 yum -y install mysql57-community-release-el7-8.noarch.rpm
 ```
 
 搜索 mysql server
-```
+``` bash
 yum search mysql-com
 ```
 
 安装
-```
+``` bash
 yum -y install mysql-community-server.x86_64
 ```
 
 启动、停止、查看状态、开机启动等
-```
+``` bash
 systemctl start mysqld.service
 systemctl stop mysqld.service
 systemctl status mysqld.service
@@ -48,24 +48,24 @@ systemctl enable mysqld.service
 
 MySQL5.7.6 之后会在启动 mysql 进程的时候生成一个用户密码，首次登陆需要这个密码才行。
 密码保存在 mysql 进程的日志里，即`/var/log/mysqld.log`
-```
+``` bash
 cat /var/log/mysqld.log | grep 'password'
 # 登录
 mysql -uroot -p
 ```
 
 修改root密码，先登录进去后：
-```
+``` none
 mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
 ```
 
 最后，安装完了可以删除 MySQL 的 Repository ，这样可以减少 yum 检查更新的时间，使用下面的命令：
-```
+``` bash
 yum -y remove mysql57-community-release-el7-8.noarch
 ```
 
 修改权限，让其他的机器也能访问：
-```
+``` none
 mysql> GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY 'mysql';
 mysql> flush privileges;
 ```
@@ -74,31 +74,31 @@ mysql> flush privileges;
 ## 常见数据库操作
 
 创建新的数据库并制定UTF-8编码
-```
+``` none
 drop database fastloan3;
 create database fastloan3 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ```
 
 通过sql脚本文件执行sql：
-```
+``` bash
 mysql -uroot -p... fastloan3 < t_invoice.sql
 ```
 
 导出数据库
-```
+``` bash
 mysqldump -u... -p... mydb > mydb_tables.sql
 mysqldump -u... -p... mydb t1 t2 t3 > mydb_tables.sqlhe
 ```
 
 查看表空间占用大小
-```
+``` none
 mysql> use information_schema;
 mysql> SELECT TABLE_NAME,DATA_LENGTH+INDEX_LENGTH,TABLE_ROWS
 FROM TABLES WHERE TABLE_SCHEMA='数据库名' //AND TABLE_NAME='表名'
 ```
 
 查看详细表结构，包括注释
-```
+``` none
 show full columns from <table_name>
 SELECT COLUMN_NAME, COLUMN_TYPE, EXTRA, COLUMN_COMMENT
 FROM information_schema.columns
@@ -214,7 +214,7 @@ SELECT name FROM TableB
 
 结果集（注意下面没有重复项）
 
-```
+``` none
 HaHa
 HeiHei
 WaWa
@@ -233,7 +233,7 @@ SELECT name FROM TableB
 
 结果集
 
-```
+``` none
 HaHa
 HeiHei
 WaWa
@@ -296,7 +296,7 @@ Adams     |2000
 
 
 现在我要求"Bush" 或 "Adams" 拥有超过 1500 的订单平均金额：
-```
+``` sql
 SELECT Customer,SUM(OrderPrice) FROM Orders
 WHERE Customer='Bush' OR Customer='Adams'
 GROUP BY Customer

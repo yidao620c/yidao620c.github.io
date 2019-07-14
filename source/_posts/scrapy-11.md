@@ -79,7 +79,9 @@ def post_login(self, response):
 def after_login(self, response):
     pass
 ```
-`FormRequest.from_response()`方法让你指定提交的url，请求头还有form表单值，注意我们还通过`meta`传递了cookie标识。它同样有个回调函数，登录成功后调用。下面我们来实现它
+
+`FormRequest.from_response()`方法让你指定提交的url，请求头还有form表单值，注意我们还通过`meta`传递了cookie标识。
+它同样有个回调函数，登录成功后调用。下面我们来实现它
 ``` python
 def after_login(self, response):
     # 登录之后，开始进入我要爬取的私信页面
@@ -87,10 +89,14 @@ def after_login(self, response):
         # 因为我们上面定义了Rule，所以只需要简单的生成初始爬取Request即可
         yield Request(url, meta={'cookiejar': response.meta['cookiejar']})
 ```
-这里我通过`start_urls`定义了开始页面，然后生成Request，具体爬取的规则和`下一页`规则在前面的Rule里定义了。注意这里我继续传递`cookiejar`，访问初始页面时带上cookie信息。
+
+这里我通过`start_urls`定义了开始页面，然后生成Request，具体爬取的规则和`下一页`规则在前面的Rule里定义了。
+注意这里我继续传递`cookiejar`，访问初始页面时带上cookie信息。
 
 ### 重写_requests_to_follow
-有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的`_requests_to_follow()`方法解决了这个问题
+
+有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，
+而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的`_requests_to_follow()`方法解决了这个问题
 ``` python
 def _requests_to_follow(self, response):
     """重写加入cookiejar的更新"""

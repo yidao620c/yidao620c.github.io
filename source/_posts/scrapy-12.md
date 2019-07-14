@@ -8,6 +8,7 @@ tags:
   - scrapy
 abbrlink: 42468
 ---
+
 前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。
 但是如今的互联网大部分的web页面都是动态的，经常逛的网站例如京东、淘宝等，商品列表都是js，并有Ajax渲染，
 下载某个链接得到的页面里面含有异步加载的内容，这样再使用之前的方式我们根本获取不到异步加载的这些网页内容。
@@ -43,7 +44,7 @@ $ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 
 ```
 
 打开`/etc/apt/sources.list.d/docker.list`，如果没有就创建一个，然后删除任何已存在的内容，再增加下面一句
-```
+``` bash
 deb https://apt.dockerproject.org/repo ubuntu-precise main
 ```
 
@@ -55,7 +56,7 @@ $ apt-cache policy docker-engine
 ```
 
 安装
-``` bash docker engine
+``` bash
 $ sudo apt-get install docker-engine
 ```
 
@@ -224,12 +225,14 @@ class TestSpider(scrapy.Spider):
         logging.info(u"find：%s" % guessyou)
         logging.info(u'---------------success----------------')
 ```
+
 然后运行结果：
 ```
 2016-04-18 14:42:44 test_spider.py[line:20] INFO ---------我这个是简单的直接获取京东网首页测试---------
 2016-04-18 14:42:44 test_spider.py[line:22] INFO find：None
 2016-04-18 14:42:44 test_spider.py[line:23] INFO ---------------success----------------
 ```
+
 我找不到那个"猜你喜欢"这四个字
 
 接下来我使用splash来爬取
@@ -259,11 +262,13 @@ class JsSpider(scrapy.Spider):
         logging.info(u"find：%s" % guessyou)
         logging.info(u'---------------success----------------')
 ```
+
 运行结果：
 ```
 2016-04-18 14:42:51 js_spider.py[line:36] INFO ----------使用splash爬取京东网首页异步加载内容-----------
 2016-04-18 14:42:51 js_spider.py[line:38] INFO find：猜你喜欢
 2016-04-18 14:42:51 js_spider.py[line:39] INFO ---------------success----------------
 ```
+
 可以看出结果里面已经找到了这个"猜你喜欢"，说明异步加载内容爬取成功！
 

@@ -31,7 +31,7 @@ MQTT（MQ Telemetry Transport），消息队列遥测传输协议，轻量级的
 #### 1，先加入yum源：
 
 在`/etc/yum.repos.d/`目录中新建一个`mosquitto.repo`文件，里面写入：
-```
+``` none
 [home_oojah_mqtt]
 name=mqtt (CentOS_CentOS-6)
 type=rpm-md
@@ -51,7 +51,7 @@ sudo yum install mosquitto mosquitto-clients libmosquitto-devel libmosquittopp-d
 
 安装完成之后，所有配置文件会被放置于/etc/mosquitto/目录下，
 其中最重要的就是Mosquitto的配置文件，即mosquitto.conf，以下是详细的配置参数说明。
-```
+``` none
 # =================================================================
 # General configuration
 # =================================================================
@@ -249,7 +249,7 @@ sudo /etc/init.d/mosquitto start
 消息推送的发布和订阅要有主题，选项[-t] 主题，即：mosquitto -t 主题
 
 如需指定用户名称则加选项[-i] 用户名，即：mosquitto_sub -t 主题 -i 订阅端
-```
+``` bash
 mosquitto_sub -t mqtt
 ```
 
@@ -257,12 +257,12 @@ mosquitto_sub -t mqtt
 
 指定消息推送的主题，发布端用户名和消息：
 
-```
+``` bash
 mosquitto_pub -t 主题 -i 发布端 -h 主机 -m 你好
 ```
 
 *注意：如果消息中间有空格则消息要用引号括起来。
-```
+``` bash
 mosquitto_pub -t 主题 -i 发布端 -h host -m '我是发布端，你好。'
 mosquitto_pub -h localhost -t mqtt -m "hello world."
 ```

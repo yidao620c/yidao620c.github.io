@@ -288,7 +288,7 @@ public class UserController {
 
 控制台打印异常：
 
-```
+``` none
 Caused by: java.lang.RuntimeException: runtime
 	at com.xncoding.trans.service.UserService.errMethod(UserService.java:32) ~[classes/:na]
 	at com.xncoding.trans.service.UserService.updateUserError(UserService.java:27) ~[classes/:na]

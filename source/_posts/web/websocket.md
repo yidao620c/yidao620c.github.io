@@ -26,7 +26,7 @@ WebSocket是HTML5开始提供的一种浏览器与服务器间进行全双工通
 
 协议标识符是ws（如果加密，则为wss），服务器网址就是 URL
 
-```
+``` none
 ws://xncoding.com:80/some/path
 ```
 
@@ -37,7 +37,7 @@ ws://xncoding.com:80/some/path
 Websocket其实是一个新协议，借用了HTTP的协议来完成一部分握手，只是为了兼容现有浏览器的握手规范而已。
 
 一个典型的Websocket握手（借用Wikipedia）
-```
+``` none
 GET /chat HTTP/1.1
 Host: server.example.com
 Upgrade: websocket
@@ -49,7 +49,7 @@ Origin: http://example.com
 ```
 
 其中的
-```
+``` none
 Upgrade: websocket
 Connection: Upgrade
 ```
@@ -57,7 +57,7 @@ Connection: Upgrade
 注意啦，我发起的是Websocket协议，快点帮我找到对应的助理处理~不是那个老土的HTTP。
 
 服务器返回：
-```
+``` none
 HTTP/1.1 101 Switching Protocols
 Upgrade: websocket
 Connection: Upgrade

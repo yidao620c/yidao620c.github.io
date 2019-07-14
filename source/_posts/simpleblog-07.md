@@ -153,6 +153,7 @@ PostForm需要继承自forms.ModelForm，这样django就能实现某些神奇的
 ``` python
 url(r'^post/new/$', views.post_new, name='post_new'),
 ```
+
 现在它的内容应该是这样的：
 ``` python
 from django.conf.urls import patterns, include, url
@@ -170,6 +171,7 @@ urlpatterns = patterns('',
 ``` python
 from .forms import PostForm
 ```
+
 然后增加视图：
 ``` python
 def post_new(request):
@@ -241,6 +243,7 @@ django已经自动帮我们做了验证，是不是很酷呢？
 <a class="btn btn-default" href="@% url 'post_edit' pk=post.pk %@">
 <span class="glyphicon glyphicon-pencil"></span></a>
 ```
+
 现在它的内容是这样的：
 ``` html
 @% extends 'blog/base.html' %@

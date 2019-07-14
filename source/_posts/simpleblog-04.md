@@ -139,7 +139,7 @@ Django中的模板使用HTML文件，至于神马是HTML，这个去参考下W3C
 首先在blog目录下创建templates目录，然后再在templates目录下创建blog目录，至于为啥要这么做，
 先不用管，django里面很多目录都是约定好的，这个就跟maven是一样的，约定高于配置。
 所以你先照着做就是了。目录结构如下：
-```
+``` none
 blog
 └───templates
     └───blog
@@ -232,7 +232,7 @@ HTML页面只识别HTML标签，那么怎样让生成动态的内容呢？答案
 ### 别忘了一件事
 别忘了把它push到pythonanywhere上面去。
 
-```
+``` bash
 git add .
 git commit -m '动态文章列表首页'
 git push origin master

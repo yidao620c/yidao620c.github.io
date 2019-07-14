@@ -41,7 +41,7 @@ $ git config --global user.email yidao620@gmail.com
 
 Git会追踪这个目录下所有文件和文件夹的更改，但是有一些文件我们希望Git忽略它。
 为此，我们可以在系统根目录下创建一个命名为`.gitignore`的文件。打开编辑器，创建新文件并写入以下内容：
-```
+``` none
 myvenv
 .idea/
 *.pyc
@@ -53,7 +53,7 @@ migrations
 whoosh_index/
 ```
 最后保存我们的更改。转到你的控制台并运行这些命令：
-```bash
+``` bash
 $ git add --all .
 $ git commit -m "My simple blog first commit"
 ```

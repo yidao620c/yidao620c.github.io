@@ -102,7 +102,7 @@ class HuxiuSpider(scrapy.Spider):
 
 ## 运行爬虫
 在根目录执行下面的命令，其中huxiu是你定义的spider名字：
-```
+``` bash
 scrapy crawl huxiu
 ```
 如果一切正常，应该可以打印出每一个新闻

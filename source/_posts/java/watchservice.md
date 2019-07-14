@@ -115,7 +115,7 @@ public class DirectoryWatcherExample {
 
 测试一下，在用户目录新建一个文件，然后重命名为`www.txt`，看看输出结果：
 
-```
+``` none
 Event kind:ENTRY_CREATE. File affected: 新建文本文档.txt.
 Event kind:ENTRY_MODIFY. File affected: 新建文本文档.txt.
 Event kind:ENTRY_DELETE. File affected: 新建文本文档.txt.

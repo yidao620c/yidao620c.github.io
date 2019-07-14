@@ -57,7 +57,7 @@ date: 2017-12-13 09:30:22
 ![](https://xnstatic-1253397658.file.myqcloud.com/ma003.png)
 
 小程序A跳转到B的示例代码：
-```
+``` js
 wx.navigateToMiniProgram({
   appId: 'APPID',
   path: 'pages/index/index?id=123',
@@ -73,7 +73,7 @@ wx.navigateToMiniProgram({
 
 同时还可以给小程序B传递参数，通过`extraData`这个参数，小程序B接受参数的方法：
 
-```
+``` js
 App({
   onLaunch: function(options) {
     wx.setStorageSync('fromAppId', options.referrerInfo.appId)
@@ -93,7 +93,7 @@ App({
 ```
 
 小程序B处理完成后返回小程序A的方式：
-```
+``` js
 console.log('支付成功啦啦啦啦。。。。。')
 wx.navigateBackMiniProgram({
   extraData: {
@@ -106,14 +106,14 @@ wx.navigateBackMiniProgram({
 ```
 
 然后小程序A在`App.js`中接受到返回值：
-```
+``` js
 onShow: function (options) {
     wx.setStorageSync('payResult', options.referrerInfo.extraData.payResult)
 },
 ```
 
 然后在相应的页面就能处理结果值了，这里还是用onShow函数：
-```
+``` js
 onShow: function (options) {
     this.setData({
       'lalala': wx.getStorageSync('payResult')
@@ -125,7 +125,7 @@ onShow: function (options) {
 
 小程序B需要实现微信支付功能，还需要有一个后端系统，我这里通过一个SpringBoot工程搭建后端系统，
 另外引入一个微信支付的依赖：
-```
+``` xml
 <dependency>
     <groupId>com.github.binarywang</groupId>
     <artifactId>weixin-java-pay</artifactId>
@@ -148,7 +148,7 @@ onShow: function (options) {
 服务器域名只能是https开头，所以需要先去给你的网站申请一个SSL证书，配置一下nginx来代理转发即可，
 比如我的域名为`https://aggrepay.enzhico.cn/`，这里我申请的是lets encrypted证书：
 
-```
+``` nginx
 server {
     listen 443 ssl;
     server_name aggrepay.enzhico.cn;
@@ -192,7 +192,7 @@ server {
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/ma004.png)
 
-```
+``` js
   onLoad: function () {
     var that = this
     //登陆获取code
@@ -225,7 +225,7 @@ server {
 ```
 
 对应后台代码：
-```
+``` java
 /**
  * get openid
  *
@@ -248,7 +248,7 @@ public String openid(@RequestParam(value = "code") String code) throws Exception
 ```
 
 获取到openid后就可以调用统一下单接口了：
-```
+``` js
   /**生成商户订单 */
   generateOrder: function (openid) {
     var that = this
@@ -317,7 +317,7 @@ private String createSign(WxPayMpOrderResultVO p, String mchKey) {
 ```
 
 拿到预支付订单后，小程序B就能调用支付了，支付成功后返回到小程序A中，并将支付结果通过`extraData`参数回传过去：
-```
+``` js
 /* 支付   */
 pay: function (param) {
   console.log("支付")
