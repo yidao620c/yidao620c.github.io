@@ -457,7 +457,7 @@ SpringBoot会为我们自动配置`GuavaCacheManager`这个Bean。
 
 最后还提一点，本篇采用Redis作为缓存技术，添加了依赖：
 
-```xml
+``` xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-redis</artifactId>

@@ -232,19 +232,21 @@ if(在60秒之内有10000个keys发生变化时){
 ## 操作Redis
 
 ### 插入数据
-```bash
+``` bash
 redis 127.0.0.1:6379> set name wwl //设置一个key-value对
 ```
 ### 查询数据
-```bash
+``` bash
 redis 127.0.0.1:6379> get name //取出key所对应的value
 ```
+
 ### 删除键值
-```bash
+``` bash
 redis 127.0.0.1:6379> del name //删除这个key以及对应的value
 ```
+
 ### 验证键是否存在
-```bash
+``` bash
 redis 127.0.0.1:6379> exists name // 其中0，代表此key不存在;1代表存在
 ```
 

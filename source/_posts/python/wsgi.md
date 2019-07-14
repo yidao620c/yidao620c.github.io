@@ -41,7 +41,7 @@ server端会先收到用户的请求，然后会根据规范的要求调用appli
 
 接下来，server端需要知道去哪里找application的入口。这个需要在server端指定一个Python模块，也就是Python应用中的一个文件，并且这个模块中需要包含一个名称为application的可调用对象（函数和类都可以），这个application对象就是这个应用程序的唯一入口了。WSGI还定义了application对象的形式：
 
-```python
+``` python
 def simple_app(environ, start_response):
     pass
 ```
@@ -51,14 +51,14 @@ def simple_app(environ, start_response):
 我们来看具体的例子。假设我们的应用程序的入口文件是/var/www/index.py，那么我们就需要在server端配置好这个路径（如何配置取决于server端的实现），然后在index.py中的代码如下所示：
 
 使用标准库，也就是python内置的一个wsgi参考实现，实现了标准的wsgi协议（这个只是demo）
-```python
+``` python
 import wsgiref
 
 application = wsgiref.simple_server.demo_app
 ```
 
 使用django框架
-```python
+``` python
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
@@ -69,13 +69,15 @@ application = get_wsgi_application()
 不管哪种方式，文件中都需要有一个名字为`application`的可调用对象，server端会找到这个文件，然后调用这个对象。
 
 #### application对象需要做什么
+
 application对象需要是一个可调用对象，而且其定义需要满足如下形式：
-```python
+``` python
 def simple_app(environ, start_response):
     pass
 ```
+
 比如去查看django框架源码，就会发现`get_wsgi_application()`返回了一个`WSGIHandler`可调用对象，这个对象有下面的方法：
-```python
+``` python
 def __call__(self, environ, start_response):
     # Set up middleware if needed. We couldn't do this earlier, because
     # settings weren't available.
@@ -133,14 +135,15 @@ exc_info（可选）: 用于出错时，server需要返回给浏览器的信息
 application对象的返回值用于为HTTP响应提供body，如果没有body，那么可以返回None。如果有body的化，那么需要返回一个可迭代的对象。server端通过遍历这个可迭代对象可以获得body的全部内容。
 
 上面我分析的django源码的注释可以看到
-```python
+``` python
 start_response(force_str(status), response_headers)
 ```
+
 这一步发送HTTP响应的Header，注意Header只能发送一次，也就是只能调用一次start_response()函数。start_response()函数接收两个参数，一个是HTTP响应码，一个是一组list表示的HTTP Header，每个Header用一个包含两个str的tuple表示。
 通常情况下，都应该把Content-Type头发送给浏览器。其他很多常用的HTTP Header也应该发送。
 
 最后面一句返回body，也可以为空。
-```python
+``` python
 return response
 ```
 
@@ -182,7 +185,7 @@ Apache和mod_wsgi之间通过程序内部接口传递信息，mod_wsgi会实现W
 Python内置了一个WSGI服务器，这个模块叫wsgiref，它是用纯Python编写的WSGI服务器的参考实现。所谓“参考实现”是指该实现完全符合WSGI标准，但是不考虑任何运行效率，仅供开发和测试使用。
 
 我们先编写hello.py，实现Web应用程序的WSGI处理函数：
-```python
+``` python
 # hello.py
 
 def application(environ, start_response):
@@ -193,7 +196,7 @@ def application(environ, start_response):
 ```
 
 然后，再编写一个server.py，负责启动WSGI服务器，加载application()函数：
-```python
+``` python
 # server.py
 # 从wsgiref模块导入:
 from wsgiref.simple_server import make_server

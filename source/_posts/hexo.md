@@ -506,7 +506,7 @@ npm install --save hexo-algolia
 ![](https://xnstatic-1253397658.file.myqcloud.com/hexo20.png)
 
 编辑站点配置文件，新增以下配置：
-```yml
+``` yml
 algolia:
   applicationID: 'IQUD4IM8MM'
   indexName: 'blogindex'

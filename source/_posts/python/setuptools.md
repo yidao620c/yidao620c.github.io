@@ -172,7 +172,7 @@ Server response (403): Must access using HTTPS instead of HTTP
 解决方法：
 
 使用<https://github.com/pypa/twine>
-```bash
+``` bash
 pip install twine
 ```
 

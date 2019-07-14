@@ -202,7 +202,7 @@ Usage：bash clean.sh your-image-name
 
 需要安装jq，jq是终端解析json输出的利器
 
-```bash
+``` bash
 #!/usr/bin/env bash
 
 ACCEPT_HEADER="Accept: application/vnd.docker.distribution.manifest.v2+json"
