@@ -629,19 +629,11 @@ hexo clean && hexo g && hexo s
 
 这是因为代码中包含`{紧挨着{`这种双大括号引起的，特别是django模板里面大量的这样代码。然后我把所有的大括号改成了@。
 
-另外出现一个错误：hexo-renderer-pandoc，我卸载后重新安装最新的：
-
-```
-npm remove --save hexo-renderer-pandoc
-npm install --save hexo-renderer-pandoc
-```
-
 后面又出现：` pandoc exited with code null`，发现所有博客头部不能有引号。我勒个去，于是把所有的引号去掉。
-后来又经常出现这个错误，可能是因为hexo包损坏，于是我重新安装了hexo：
+后来又经常出现这个错误，是因为hexo-renderer-pandoc的包的问题，直接卸载，整个世界清静了：
 
 ``` none
-npm remove --save hexo
-npm install --save hexo
+npm remove --save hexo-renderer-pandoc
 ```
 
 参考这篇文章：<https://www.zfl9.com/hexo-code.html>
