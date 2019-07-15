@@ -1,0 +1,543 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="redis,">
+
+
+    <meta name="description" content="Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，一个master带多个slave，另外一种是cluster模式，由多组master-slave组成。
+主从模式准备一个目录，比如/root/redis-ms
+安装docker这里省略
+在docker库获取镜像：redi...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Docker容器安装Redis集群 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Docker容器安装Redis集群">
+            
+                Docker容器安装Redis集群
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/cache">
+            cache
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/redis" title='redis'>
+                        redis
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/09/02</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，一个master带多个slave，另外一种是cluster模式，由多组master-slave组成。</p>
+<h2 id="主从模式"><a href="#主从模式" class="headerlink" title="主从模式"></a>主从模式</h2><p>准备一个目录，比如<code>/root/redis-ms</code></p>
+<h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><p>这里省略</p>
+<h3 id="在docker库获取镜像：redis，ruby"><a href="#在docker库获取镜像：redis，ruby" class="headerlink" title="在docker库获取镜像：redis，ruby"></a>在docker库获取镜像：redis，ruby</h3><pre><code class="line-numbers language-bash">docker pull redis
+</code></pre>
+<h3 id="主redis服务"><a href="#主redis服务" class="headerlink" title="主redis服务"></a>主redis服务</h3><p>配置文件<code>redis_master.conf</code></p>
+<pre><code class="line-numbers language-none">daemonize no
+pidfile &quot;/var/run/redis.pid&quot;
+port 6379
+timeout 300
+loglevel warning
+logfile &quot;redis.log&quot;
+databases 16
+rdbcompression yes
+dbfilename &quot;redis.rdb&quot;
+dir &quot;/data&quot;
+requirepass password
+masterauth password
+maxclients 10000
+maxmemory 1000mb
+maxmemory-policy allkeys-lru
+appendonly no
+appendfsync always
+</code></pre>
+<p>启动主redis服务</p>
+<pre><code class="line-numbers language-bash"> docker run --name redis_master -v $(pwd)/redis_master.conf:/data/redis_master.conf --restart=always -d redis redis-server /data/redis_master.conf
+</code></pre>
+<h3 id="从redis服务"><a href="#从redis服务" class="headerlink" title="从redis服务"></a>从redis服务</h3><p>配置文件<code>redis_slave.conf</code></p>
+<pre><code class="line-numbers language-none">daemonize no
+pidfile &quot;/var/run/redis.pid&quot;
+port 6379
+timeout 300
+loglevel warning
+logfile &quot;redis.log&quot;
+databases 16
+rdbcompression yes
+dbfilename &quot;redis.rdb&quot;
+dir &quot;/data&quot;
+requirepass password
+masterauth password
+maxclients 10000
+maxmemory 1000mb
+maxmemory-policy allkeys-lru
+appendonly no
+appendfsync always
+slaveof 172.17.0.4 6379
+</code></pre>
+<p>注意上面的IP地址172.17.0.4就是主redis服务容器地址，然后启动从redis服务：</p>
+<pre><code class="line-numbers language-bash">docker run --name redis_slave -v $(pwd)/redis_slave.conf:/data/redis_slave.conf --restart=always -d redis:latest redis-server /data/redis_slave.conf
+</code></pre>
+<h3 id="哨兵服务"><a href="#哨兵服务" class="headerlink" title="哨兵服务"></a>哨兵服务</h3><p>配置文件sentinel.conf</p>
+<pre><code class="line-numbers language-none">daemonize no
+port 26379
+dir &quot;/tmp&quot;
+sentinel monitor mymaster 172.17.0.4 6379 2
+sentinel down-after-milliseconds mymaster 60000
+sentinel auth-pass mymaster password
+sentinel config-epoch mymaster 0
+sentinel leader-epoch mymaster 0
+
+# Generated by CONFIG REWRITE
+sentinel known-slave mymaster 172.17.0.3 6379
+sentinel current-epoch 0
+</code></pre>
+<p>启动哨兵服务：</p>
+<pre><code class="line-numbers language-bash">docker run --name sentinel -v $(pwd)/sentinel.conf:/data/sentinel.conf --restart=always -d redis redis-sentinel /data/sentinel.conf
+</code></pre>
+<h3 id="最后验证"><a href="#最后验证" class="headerlink" title="最后验证"></a>最后验证</h3><pre><code class="line-numbers language-bash">docker inspect redis_master | grep IPA
+docker run -it redis redis-cli -h 172.17.0.4
+172.17.0.4:6379&gt; info
+NOAUTH Authentication required.
+172.17.0.4:6379&gt; auth password
+OK
+172.17.0.4:6379&gt; info
+# Server
+redis_version:3.0.7
+redis_git_sha1:00000000
+redis_git_dirty:0
+...
+</code></pre>
+<h2 id="集群模式"><a href="#集群模式" class="headerlink" title="集群模式"></a>集群模式</h2><h3 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h3><p>准备一个目录，比如<code>/root/redis-cluster</code></p>
+<h3 id="安装docker-1"><a href="#安装docker-1" class="headerlink" title="安装docker"></a>安装docker</h3><p>这里省略</p>
+<h3 id="在docker库获取镜像：redis，ruby-1"><a href="#在docker库获取镜像：redis，ruby-1" class="headerlink" title="在docker库获取镜像：redis，ruby"></a>在docker库获取镜像：redis，ruby</h3><pre><code class="line-numbers language-bash">docker pull redis
+docker pull ruby
+</code></pre>
+<h3 id="下载最新redis源码包"><a href="#下载最新redis源码包" class="headerlink" title="下载最新redis源码包"></a>下载最新redis源码包</h3><pre><code class="line-numbers language-bash">wget https://github.com/antirez/redis/archive/unstable.zip
+</code></pre>
+<p>下载完成后解压到当前文件夹</p>
+<h3 id="redis配置文件模板"><a href="#redis配置文件模板" class="headerlink" title="redis配置文件模板"></a>redis配置文件模板</h3><p>找到一份原始的redis.conf文件，将其重命名为：redis-cluster.tmpl，并配置如下几个参数，此文件的目的是生成每一个redis实例的redis.conf:</p>
+<pre><code class="line-numbers language-none"># bind 127.0.0.1
+port ${PORT}
+daemonize no
+dir /data/redis
+appendonly yes
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 15000
+</code></pre>
+<h2 id="构建一个redis集群管理镜像"><a href="#构建一个redis集群管理镜像" class="headerlink" title="构建一个redis集群管理镜像"></a>构建一个redis集群管理镜像</h2><pre><code class="line-numbers language-dockerfile">FROM ruby
+MAINTAINER xn&lt;xiongneng@gmail.com&gt;
+RUN gem install redis
+RUN mkdir /redis
+WORKDIR /redis
+ADD ./redis-unstable /redis/redis-unstable
+WORKDIR /redis/redis-unstable
+RUN make &amp;&amp; make install
+RUN ls /redis/redis-unstable/src/redis-cli
+RUN redis-cli --version
+</code></pre>
+<p>制作镜像： <code>docker build -t redis-cluster .</code></p>
+<h2 id="创建集群"><a href="#创建集群" class="headerlink" title="创建集群"></a>创建集群</h2><p>创建docker network</p>
+<pre><code class="line-numbers language-bash"># 创建docker内部网络
+docker network create redis-cluster-net
+</code></pre>
+<p>接下来编写自动脚本：</p>
+<pre><code class="line-numbers language-bash">#!/bin/bash
+
+# 创建 master 和 slave 文件夹
+rm -rf ./master ./slave
+for port in `seq 7000 7005`; do
+    ms=&quot;master&quot;
+    if [ $port -ge 7003 ]; then
+        ms=&quot;slave&quot;
+    fi
+    mkdir -p ./$ms/$port/ &amp;&amp; mkdir -p ./$ms/$port/data \
+    &amp;&amp; PORT=$port envsubst &lt; ./redis-cluster.tmpl &gt; ./$ms/$port/redis.conf;
+done
+
+# 运行docker redis 的 master 和 slave 实例
+for port in `seq 7000 7005`; do
+    ms=&quot;master&quot;
+    if [ $port -ge 7003 ]; then
+        ms=&quot;slave&quot;
+    fi
+    docker run -d -p $port:$port -p 1$port:1$port \
+    -v $PWD/$ms/$port/redis.conf:/data/redis.conf \
+    -v $PWD/$ms/$port/data:/data/redis \
+    --restart always --name redis-$ms-$port --net redis-cluster-net \
+    redis redis-server /data/redis.conf;
+done
+
+# 组装masters : slaves 节点参数
+matches=&quot;&quot;
+for port in `seq 7000 7005`; do
+    ms=&quot;master&quot;
+    if [ $port -ge 7003 ]; then
+        ms=&quot;slave&quot;
+    fi
+    matches=$matches$(docker inspect --format &#39;{{(index .NetworkSettings.Networks "redis-cluster-net").IPAddress}}&#39; &quot;redis-$ms-${port}&quot;):${port}&quot; &quot;;
+done
+
+# 创建docker-cluster
+docker run -it --rm --net redis-cluster-net redis-cluster redis-cli --cluster create --cluster-replicas 1 $matches
+</code></pre>
+<p>运行后会让你确认一下，输入yes即可。</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>进入容器：</p>
+<pre><code class="line-numbers language-bash">docker exec -it redis-master-7000 /bin/bash
+</code></pre>
+<p>连接redis：</p>
+<pre><code class="line-numbers language-bash">172.19.0.2:7000&gt; set a aaa
+-&gt; Redirected to slot [15495] located at 172.19.0.4:7002
+OK
+</code></pre>
+<p>注意上面的<code>Redirected to slot</code>，表明分配到集群中的其他机器上了。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/09/02/cache/redis-cluster.html">Docker容器安装Redis集群</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/09/17/tool/maven-site.html" class="pre-post btn btn-default" title='Maven site发布多模块的项目站点'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">Maven site发布多模块的项目站点</span>
+        </a>
+    
+    
+        <a href="/2018/08/23/web/html-load.html" class="next-post btn btn-default" title='HTML页面性能指标'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">HTML页面性能指标</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#主从模式"><span class="toc-text">主从模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装docker"><span class="toc-text">安装docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在docker库获取镜像：redis，ruby"><span class="toc-text">在docker库获取镜像：redis，ruby</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#主redis服务"><span class="toc-text">主redis服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#从redis服务"><span class="toc-text">从redis服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#哨兵服务"><span class="toc-text">哨兵服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最后验证"><span class="toc-text">最后验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#集群模式"><span class="toc-text">集群模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#准备环境"><span class="toc-text">准备环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#安装docker-1"><span class="toc-text">安装docker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#在docker库获取镜像：redis，ruby-1"><span class="toc-text">在docker库获取镜像：redis，ruby</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#下载最新redis源码包"><span class="toc-text">下载最新redis源码包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#redis配置文件模板"><span class="toc-text">redis配置文件模板</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#构建一个redis集群管理镜像"><span class="toc-text">构建一个redis集群管理镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#创建集群"><span class="toc-text">创建集群</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#验证"><span class="toc-text">验证</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>

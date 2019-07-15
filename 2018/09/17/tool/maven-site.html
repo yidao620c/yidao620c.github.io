@@ -1,0 +1,1056 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="maven,">
+
+
+    <meta name="description" content="本地生成预览修改父模块的pom.xml:
+&lt;site&gt;
+    &lt;id&gt;${project.artifactId}-site&lt;/id&gt;
+    &lt;url&gt;file://./&lt;/url&gt;
+&lt;/site&gt;
+
+执行
+mvn cl...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>Maven site发布多模块的项目站点 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="Maven site发布多模块的项目站点">
+            
+                Maven site发布多模块的项目站点
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/开发工具">
+            开发工具
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/maven" title='maven'>
+                        maven
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2018/09/17</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <h2 id="本地生成预览"><a href="#本地生成预览" class="headerlink" title="本地生成预览"></a>本地生成预览</h2><p>修改父模块的pom.xml:</p>
+<pre><code class="line-numbers language-xml">&lt;site&gt;
+    &lt;id&gt;${project.artifactId}-site&lt;/id&gt;
+    &lt;url&gt;file://./&lt;/url&gt;
+&lt;/site&gt;
+</code></pre>
+<p>执行</p>
+<pre><code class="line-numbers language-bash">mvn clean &amp;&amp; mvn site:site &amp;&amp; mvn site:stage
+</code></pre>
+<p>目标站点在target/stage目录下面</p>
+<h2 id="部署到服务器"><a href="#部署到服务器" class="headerlink" title="部署到服务器"></a>部署到服务器</h2><h3 id="使用scp协议"><a href="#使用scp协议" class="headerlink" title="使用scp协议"></a>使用scp协议</h3><p>如果使用scp协议，底层使用ssh协议，则需要配置操作系统用户认证</p>
+<p>编辑maven的settings.xml文件，增加一个server配置</p>
+<pre><code class="line-numbers language-xml">&lt;server&gt;
+    &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+    &lt;username&gt;name&lt;/username&gt;
+    &lt;password&gt;password&lt;/password&gt;
+&lt;/server&gt;
+</code></pre>
+<p>修改父模块的pom.xml:</p>
+<pre><code class="line-numbers language-xml">&lt;plugin&gt;
+    &lt;artifactId&gt;maven-site-plugin&lt;/artifactId&gt;
+    &lt;version&gt;3.7.1&lt;/version&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;&lt;!-- add support for ssh/scp --&gt;
+            &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
+            &lt;artifactId&gt;wagon-ssh&lt;/artifactId&gt;
+            &lt;version&gt;3.3.2&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/plugin&gt;
+
+&lt;site&gt;
+    &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+    &lt;url&gt;scp://xx.xncoding.com/data/tomcat/webapps/xx/&lt;/url&gt;
+&lt;/site&gt;
+</code></pre>
+<h3 id="使用dav协议"><a href="#使用dav协议" class="headerlink" title="使用dav协议"></a>使用dav协议</h3><p>首先需要对tomcat进行配置，开启WebDAV的支持。</p>
+<p>1、在Tomcat的webapps目录下新建security文件夹，并在此文件夹下新建WEB-INF\web.xml文件。内容如下：</p>
+<pre><code class="line-numbers language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+    xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd&quot;
+    id=&quot;WebApp_ID&quot; version=&quot;3.0&quot;&gt;
+    &lt;display-name&gt;security sdk&lt;/display-name&gt;
+    &lt;servlet&gt;
+        &lt;servlet-name&gt;webdav&lt;/servlet-name&gt;
+        &lt;servlet-class&gt;org.apache.catalina.servlets.WebdavServlet&lt;/servlet-class&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;debug&lt;/param-name&gt;
+            &lt;param-value&gt;0&lt;/param-value&gt;
+        &lt;/init-param&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;listings&lt;/param-name&gt;
+            &lt;param-value&gt;true&lt;/param-value&gt;
+        &lt;/init-param&gt;
+        &lt;!-- Read-Write Access Settings --&gt;
+        &lt;init-param&gt;
+            &lt;param-name&gt;readonly&lt;/param-name&gt;
+            &lt;param-value&gt;false&lt;/param-value&gt;
+        &lt;/init-param&gt;
+    &lt;/servlet&gt;
+    &lt;!-- URL Mapping --&gt;
+    &lt;servlet-mapping&gt;
+        &lt;servlet-name&gt;webdav&lt;/servlet-name&gt;
+        &lt;url-pattern&gt;/webdav/*&lt;/url-pattern&gt;
+    &lt;/servlet-mapping&gt;
+    &lt;security-constraint&gt;
+        &lt;web-resource-collection&gt;
+            &lt;web-resource-name&gt;webdav&lt;/web-resource-name&gt;
+            &lt;!-- Detect WebDAV Methods in URL For Whole Application --&gt;
+            &lt;url-pattern&gt;/webdav/*&lt;/url-pattern&gt;
+            &lt;http-method&gt;PROPFIND&lt;/http-method&gt;
+            &lt;http-method&gt;PROPPATCH&lt;/http-method&gt;
+            &lt;http-method&gt;COPY&lt;/http-method&gt;
+            &lt;http-method&gt;MOVE&lt;/http-method&gt;
+            &lt;http-method&gt;LOCK&lt;/http-method&gt;
+            &lt;http-method&gt;UNLOCK&lt;/http-method&gt;
+        &lt;/web-resource-collection&gt;
+        &lt;!-- Restrict access by role --&gt;
+        &lt;auth-constraint&gt;
+            &lt;role-name&gt;*&lt;/role-name&gt;
+        &lt;/auth-constraint&gt;
+    &lt;/security-constraint&gt;
+    &lt;login-config&gt;
+        &lt;auth-method&gt;BASIC&lt;/auth-method&gt;
+        &lt;realm-name&gt;webdav&lt;/realm-name&gt;
+    &lt;/login-config&gt;
+    &lt;security-role&gt;
+        &lt;description&gt;WebDAV User&lt;/description&gt;
+        &lt;role-name&gt;webdav&lt;/role-name&gt;
+    &lt;/security-role&gt;
+&lt;/web-app&gt;
+</code></pre>
+<p>根据上面权限名称，在Tomcat账号体系中增加账号密码，编辑/conf/tomcat-users.xml，内容如下：</p>
+<pre><code class="line-numbers language-xml">&lt;role rolename=&quot;tomcat&quot;/&gt;
+&lt;role rolename=&quot;admin-gui&quot;/&gt;
+&lt;role rolename=&quot;admin-script&quot;/&gt;
+&lt;role rolename=&quot;manager-gui&quot;/&gt;
+&lt;role rolename=&quot;webdav&quot;/&gt;
+&lt;user username=&quot;tomcat&quot; password=&quot;tomcat&quot; roles=&quot;tomcat,admin-gui,admin-script,manager-gui,webdav&quot;/&gt;
+</code></pre>
+<p>提示：权限名称必须和web.xml文件配置的一一对应。</p>
+<p>2、然后跟上面一样，去本地配置maven的配置：</p>
+<pre><code class="line-numbers language-xml">&lt;server&gt;
+    &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+    &lt;username&gt;tomcat&lt;/username&gt;
+    &lt;password&gt;tomcat&lt;/password&gt;
+&lt;/server&gt;
+</code></pre>
+<p>然后maven的pom.xml配置：</p>
+<pre><code class="line-numbers language-xml">&lt;plugin&gt;
+    &lt;artifactId&gt;maven-site-plugin&lt;/artifactId&gt;
+    &lt;version&gt;3.7.1&lt;/version&gt;
+    &lt;dependencies&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
+            &lt;artifactId&gt;wagon-webdav-jackrabbit&lt;/artifactId&gt;
+            &lt;version&gt;3.2.0&lt;/version&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+&lt;/plugin&gt;
+
+&lt;site&gt;
+    &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+    &lt;url&gt;dav:https://xx.xncoding.com/security/webdav/&lt;/url&gt;
+&lt;/site&gt;
+</code></pre>
+<h2 id="配置示例"><a href="#配置示例" class="headerlink" title="配置示例"></a>配置示例</h2><p>主要是两个配置，一个是pom依赖：</p>
+<pre><code class="line-numbers language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;xx.yy.xncoding.com&lt;/groupId&gt;
+    &lt;artifactId&gt;xx-sdk&lt;/artifactId&gt;
+    &lt;packaging&gt;pom&lt;/packaging&gt;
+    &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;modules&gt;
+        &lt;module&gt;xx-sdk-base&lt;/module&gt;
+        &lt;module&gt;xx-sdk-foo&lt;/module&gt;
+        &lt;module&gt;xx-sdk-bar&lt;/module&gt;
+    &lt;/modules&gt;
+    &lt;name&gt;xx-sdk&lt;/name&gt;
+    &lt;description&gt;description&lt;/description&gt;
+    &lt;url&gt;http://xx.xncoding.com/&lt;/url&gt;
+
+    &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+        &lt;maven.compiler.source&gt;1.8&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;1.8&lt;/maven.compiler.target&gt;
+        &lt;servlet-api.version&gt;3.1.0&lt;/servlet-api.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+                &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+                &lt;version&gt;1.7.25&lt;/version&gt;
+                &lt;scope&gt;provided&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+                &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+                &lt;version&gt;${servlet-api.version}&lt;/version&gt;
+                &lt;scope&gt;provided&lt;/scope&gt;
+            &lt;/dependency&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;junit&lt;/groupId&gt;
+                &lt;artifactId&gt;junit&lt;/artifactId&gt;
+                &lt;version&gt;4.11&lt;/version&gt;
+                &lt;scope&gt;test&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+
+    &lt;build&gt;
+        &lt;pluginManagement&gt;&lt;!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) --&gt;
+            &lt;plugins&gt;
+                &lt;!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle --&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-clean-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.1.0&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging --&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-resources-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.0.2&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.8.0&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;2.22.1&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.0.2&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-source-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.0.1&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-javadoc-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.1.0&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-install-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;2.5.2&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-deploy-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;2.8.2&lt;/version&gt;
+                &lt;/plugin&gt;
+                &lt;!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle --&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-site-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.7.1&lt;/version&gt;
+                    &lt;dependencies&gt;
+                        &lt;!--
+                        &lt;dependency&gt;&lt;!-- add support for ssh/scp --&gt;
+                            &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
+                            &lt;artifactId&gt;wagon-ssh&lt;/artifactId&gt;
+                            &lt;version&gt;3.3.2&lt;/version&gt;
+                        &lt;/dependency&gt;
+                        --&gt;
+                        &lt;dependency&gt;
+                            &lt;groupId&gt;org.apache.maven.wagon&lt;/groupId&gt;
+                            &lt;artifactId&gt;wagon-webdav-jackrabbit&lt;/artifactId&gt;
+                            &lt;version&gt;3.2.0&lt;/version&gt;
+                        &lt;/dependency&gt;
+                    &lt;/dependencies&gt;
+                &lt;/plugin&gt;
+                &lt;plugin&gt;
+                    &lt;artifactId&gt;maven-project-info-reports-plugin&lt;/artifactId&gt;
+                    &lt;version&gt;3.0.0&lt;/version&gt;
+                &lt;/plugin&gt;
+            &lt;/plugins&gt;
+        &lt;/pluginManagement&gt;
+    &lt;/build&gt;
+
+    &lt;reporting&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;artifactId&gt;maven-javadoc-plugin&lt;/artifactId&gt;
+                &lt;configuration&gt;
+                    &lt;failOnError&gt;false&lt;/failOnError&gt;
+                &lt;/configuration&gt;
+                &lt;reportSets&gt;
+                    &lt;reportSet&gt;
+                        &lt;id&gt;default&lt;/id&gt;
+                        &lt;reports&gt;
+                            &lt;!--&lt;report&gt;javadoc&lt;/report&gt;--&gt;
+                        &lt;/reports&gt;
+                        &lt;configuration&gt;
+                            &lt;aggregate&gt;true&lt;/aggregate&gt;
+                        &lt;/configuration&gt;
+                    &lt;/reportSet&gt;
+                    &lt;reportSet&gt;&lt;!-- aggregate reportSet, to define in poms having modules --&gt;
+                        &lt;id&gt;aggregate&lt;/id&gt;
+                        &lt;inherited&gt;false&lt;/inherited&gt;&lt;!-- don&#39;t run aggregate in child modules --&gt;
+                        &lt;reports&gt;
+                            &lt;report&gt;aggregate&lt;/report&gt;
+                        &lt;/reports&gt;
+                    &lt;/reportSet&gt;
+                &lt;/reportSets&gt;
+            &lt;/plugin&gt;
+            &lt;plugin&gt;
+                &lt;artifactId&gt;maven-project-info-reports-plugin&lt;/artifactId&gt;
+                &lt;configuration&gt;
+                    &lt;customBundle&gt;${project.basedir}/src/site/custom/project-info-reports.properties&lt;/customBundle&gt;
+                &lt;/configuration&gt;
+                &lt;reportSets&gt;
+                    &lt;reportSet&gt;
+                        &lt;reports&gt;&lt;!-- select reports --&gt;
+                            &lt;report&gt;index&lt;/report&gt;
+                            &lt;report&gt;summary&lt;/report&gt;
+                            &lt;report&gt;dependency-info&lt;/report&gt;
+                            &lt;report&gt;dependency-management&lt;/report&gt;
+                            &lt;report&gt;modules&lt;/report&gt;
+                            &lt;report&gt;plugin-management&lt;/report&gt;
+                            &lt;report&gt;team&lt;/report&gt;
+                        &lt;/reports&gt;
+                    &lt;/reportSet&gt;
+                &lt;/reportSets&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/reporting&gt;
+
+    &lt;distributionManagement&gt;
+        &lt;snapshotRepository&gt;
+            &lt;id&gt;snapshot&lt;/id&gt;
+            &lt;name&gt;Snapshot&lt;/name&gt;
+            &lt;url&gt;http://xxxxxxx
+            &lt;/url&gt;
+        &lt;/snapshotRepository&gt;
+
+        &lt;!--&lt;site&gt;--&gt;
+        &lt;!--&lt;id&gt;${project.artifactId}-site&lt;/id&gt;--&gt;
+        &lt;!--&lt;url&gt;file://./&lt;/url&gt;--&gt;
+        &lt;!--&lt;/site&gt;--&gt;
+        &lt;!--
+        &lt;site&gt;
+            &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+            &lt;url&gt;scp://xx.xncoding.com/data/tomcat/webapps/xx/&lt;/url&gt;
+        &lt;/site&gt;
+        --&gt;
+        &lt;site&gt;
+            &lt;id&gt;xx.xncoding.com&lt;/id&gt;
+            &lt;url&gt;dav:https://xx.xncoding.com/security/webdav/&lt;/url&gt;
+        &lt;/site&gt;
+    &lt;/distributionManagement&gt;
+
+    &lt;developers&gt;
+        &lt;developer&gt;
+            &lt;id&gt;xn&lt;/id&gt;
+            &lt;name&gt;XN&lt;/name&gt;
+            &lt;email&gt;xx&lt;/email&gt;
+            &lt;url&gt;http://www.xncoding.com&lt;/url&gt;
+            &lt;organization&gt;XX&lt;/organization&gt;
+            &lt;organizationUrl&gt;http://xx.com&lt;/organizationUrl&gt;
+            &lt;roles&gt;
+                &lt;role&gt;architect&lt;/role&gt;
+                &lt;role&gt;developer&lt;/role&gt;
+            &lt;/roles&gt;
+        &lt;/developer&gt;
+    &lt;/developers&gt;
+&lt;/project&gt;
+</code></pre>
+<p>然后就是site.xml</p>
+<pre><code class="line-numbers language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;project xmlns=&quot;http://maven.apache.org/DECORATION/1.8.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/DECORATION/1.8.0 http://maven.apache.org/xsd/decoration-1.8.0.xsd&quot;
+         name=&quot;Security SDK&quot;&gt;
+
+    &lt;bannerLeft&gt;
+        &lt;name&gt;Project Name&lt;/name&gt;
+        &lt;src&gt;https://maven.apache.org/images/apache-maven-project.png&lt;/src&gt;
+        &lt;href&gt;https://maven.apache.org/&lt;/href&gt;
+    &lt;/bannerLeft&gt;
+    &lt;bannerRight&gt;
+        &lt;src&gt;https://maven.apache.org/images/maven-logo-black-on-white.png&lt;/src&gt;
+    &lt;/bannerRight&gt;
+    &lt;publishDate position=&quot;right&quot;/&gt;
+    &lt;version position=&quot;right&quot;/&gt;
+    &lt;poweredBy&gt;
+        &lt;logo name=&quot;Maven&quot; href=&quot;https://maven.apache.org/&quot;
+              img=&quot;https://maven.apache.org/images/logos/maven-feather.png&quot;/&gt;
+    &lt;/poweredBy&gt;
+
+    &lt;body&gt;
+        &lt;head&gt;
+            &lt;![CDATA[&lt;link rel=&quot;shotcut icon&quot; href=&quot;/security/favicon.ico&quot;/&gt;]]&gt;
+            &lt;!-- Workaround for https://issues.apache.org/jira/browse/DOXIA-571 --&gt;
+            &lt;![CDATA[&lt;script type=&quot;text/javascript&quot;&gt;
+                $(document).ready(function () {
+                    $(&quot;.source&quot;).addClass(&quot;prettyprint&quot;);
+                    prettyPrint();
+                });
+            &lt;/script&gt;]]&gt;
+        &lt;/head&gt;
+        &lt;!--&lt;links&gt;--&gt;
+        &lt;!--&lt;item name=&quot;Apache&quot; href=&quot;http://www.apache.org&quot;/&gt;--&gt;
+        &lt;!--&lt;item name=&quot;Maven&quot; href=&quot;https://maven.apache.org&quot;/&gt;--&gt;
+        &lt;!--&lt;/links&gt;--&gt;
+        &lt;breadcrumbs&gt;
+            &lt;item name=&quot;Documentation&quot; href=&quot;index.html&quot;/&gt;
+            &lt;item name=&quot;Examples&quot; href=&quot;examples/auditlog.html&quot;/&gt;
+        &lt;/breadcrumbs&gt;
+        &lt;menu name=&quot;Overview&quot;&gt;
+            &lt;item name=&quot;1 SDK简介&quot; href=&quot;index.html&quot; collapse=&quot;true&quot;&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;2 集成指导&quot; href=&quot;integrate.html&quot; collapse=&quot;true&quot;&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;3 运行日志&quot; href=&quot;sdk/run-log/index.html&quot; collapse=&quot;true&quot;&gt;
+                &lt;item name=&quot;3.1 介绍&quot; href=&quot;sdk/run-log/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;item name=&quot;3.2 使用方法&quot; href=&quot;sdk/run-log/usage.html&quot; collapse=&quot;true&quot;/&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;4 审计日志&quot; href=&quot;sdk/operation-log/index.html&quot; collapse=&quot;true&quot;&gt;
+                &lt;item name=&quot;4.1 介绍&quot; href=&quot;sdk/operation-log/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;item name=&quot;4.2 使用方法&quot; href=&quot;sdk/operation-log/usage.html&quot; collapse=&quot;true&quot;/&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;5 加密/解密&quot; href=&quot;sdk/crypto/index.html&quot; collapse=&quot;true&quot;&gt;
+                &lt;item name=&quot;5.1 介绍&quot; href=&quot;sdk/crypto/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;item name=&quot;5.2 使用方法&quot; href=&quot;sdk/crypto/usage.html&quot; collapse=&quot;true&quot;/&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;9 工具集&quot; href=&quot;sdk/tools/index.html&quot; collapse=&quot;true&quot;&gt;
+                &lt;item name=&quot;9.1 解压缩&quot; href=&quot;sdk/tools/compress/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.1.1 介绍&quot; href=&quot;sdk/tools/compress/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.1.2 使用方法&quot; href=&quot;sdk/tools/compress/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.2 CSV校验&quot; href=&quot;sdk/tools/csv/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.2.1 介绍&quot; href=&quot;sdk/tools/csv/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.2.2 使用方法&quot; href=&quot;sdk/tools/csv/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.3 HTTP工具&quot; href=&quot;sdk/tools/http/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.3.1 介绍&quot; href=&quot;sdk/tools/http/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.3.2 使用方法&quot; href=&quot;sdk/tools/http/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.4 随机数&quot; href=&quot;sdk/tools/random/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.4.1 介绍&quot; href=&quot;sdk/tools/random/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.4.2 使用方法&quot; href=&quot;sdk/tools/random/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.5 字符数组&quot; href=&quot;sdk/tools/char-array/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.5.1 介绍&quot; href=&quot;sdk/tools/char-array/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.5.2 使用方法&quot; href=&quot;sdk/tools/char-array/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.6 字符串&quot; href=&quot;sdk/tools/string/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.6.1 介绍&quot; href=&quot;sdk/tools/string/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.6.2 使用方法&quot; href=&quot;sdk/tools/string/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.7 XML&quot; href=&quot;sdk/tools/xml/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.7.1 介绍&quot; href=&quot;sdk/tools/xml/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.7.2 使用方法&quot; href=&quot;sdk/tools/xml/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.8 URL&quot; href=&quot;sdk/tools/url/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.8.1 介绍&quot; href=&quot;sdk/tools/url/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.8.2 使用方法&quot; href=&quot;sdk/tools/url/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+                &lt;item name=&quot;9.9 命令执行&quot; href=&quot;sdk/tools/command/index.html&quot; collapse=&quot;true&quot;&gt;
+                    &lt;item name=&quot;9.9.1 介绍&quot; href=&quot;sdk/tools/command/introduce.html&quot; collapse=&quot;true&quot;/&gt;
+                    &lt;item name=&quot;9.9.2 使用方法&quot; href=&quot;sdk/tools/command/usage.html&quot; collapse=&quot;true&quot;/&gt;
+                &lt;/item&gt;
+            &lt;/item&gt;
+            &lt;item name=&quot;10 FAQ&quot; href=&quot;faq.html&quot; collapse=&quot;true&quot;&gt;
+            &lt;/item&gt;
+        &lt;/menu&gt;
+        &lt;menu name=&quot;Documentation&quot;&gt;
+            &lt;item name=&quot;JAVA DOC&quot; href=&quot;apidocs/index.html&quot; target=&quot;_blank&quot;/&gt;
+        &lt;/menu&gt;
+        &lt;!--&lt;menu name=&quot;Examples&quot;&gt;--&gt;
+        &lt;!--&lt;item name=&quot;上传操作日志&quot; href=&quot;examples/auditlog.html&quot;/&gt;--&gt;
+        &lt;!--&lt;item name=&quot;获取客户端IP&quot; href=&quot;examples/clientip.html&quot;/&gt;--&gt;
+        &lt;!--&lt;item name=&quot;执行OS命令&quot; href=&quot;examples/command.html&quot;/&gt;--&gt;
+        &lt;!--&lt;/menu&gt;--&gt;
+        &lt;menu name=&quot;PROJECT DOCUMENTATION&quot;&gt;
+            &lt;item name=&quot;Project Infomation&quot; href=&quot;project-info.html&quot; collapse=&quot;true&quot;&gt;
+                &lt;item name=&quot;Index&quot; href=&quot;index.html&quot;/&gt;
+                &lt;item name=&quot;Summary&quot; href=&quot;summary.html&quot;/&gt;
+                &lt;item name=&quot;Dependency Infomation&quot; href=&quot;dependency-info.html&quot;/&gt;
+                &lt;item name=&quot;Dependency Management&quot; href=&quot;dependency-management.html&quot;/&gt;
+                &lt;item name=&quot;Plugin Management&quot; href=&quot;plugin-management.html&quot;/&gt;
+                &lt;item name=&quot;Team&quot; href=&quot;team.html&quot;/&gt;
+            &lt;/item&gt;
+        &lt;/menu&gt;
+        &lt;!--&lt;menu ref=&quot;reports&quot;/&gt;--&gt;
+        &lt;!--&lt;menu ref=&quot;modules&quot;/&gt;--&gt;
+    &lt;/body&gt;
+
+    &lt;skin&gt;
+        &lt;groupId&gt;org.apache.maven.skins&lt;/groupId&gt;
+        &lt;artifactId&gt;maven-fluido-skin&lt;/artifactId&gt;
+        &lt;version&gt;1.7&lt;/version&gt;
+    &lt;/skin&gt;
+    &lt;custom&gt;
+        &lt;fluidoSkin&gt;
+            &lt;sourceLineNumbersEnabled&gt;true&lt;/sourceLineNumbersEnabled&gt;
+        &lt;/fluidoSkin&gt;
+    &lt;/custom&gt;
+&lt;/project&gt;
+</code></pre>
+<p>自定义一些现实字段：<code>/src/site/custom/project-info-reports.properties</code></p>
+<h2 id="源文档视图"><a href="#源文档视图" class="headerlink" title="源文档视图"></a>源文档视图</h2><pre><code class="line-numbers language-none">src
+└─site
+    │  site.xml
+    │
+    ├─custom
+    │      project-info-reports.properties
+    │
+    ├─markdown
+    │  │  faq.md
+    │  │  index.md
+    │  │  integrate.md
+    │  │  source.md
+    │  │
+    │  ├─examples
+    │  │      auditlog.md
+    │  │      clientip.md
+    │  │      runlog.md
+    │  │
+    │  └─sdk
+    │      ├─crypto
+    │      │      index.md
+    │      │      introduce.md
+    │      │      usage.md
+    │      │
+    │      ├─operation-log
+    │      │      index.md
+    │      │      introduce.md
+    │      │      usage.md
+    │      │
+    │      ├─run-log
+    │      │      index.md
+    │      │      introduce.md
+    │      │      usage.md
+    │      │
+    │      └─tools
+    │          │  index.md
+    │          │
+    │          ├─char-array
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─command
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─compress
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─csv
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─http
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─random
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─string
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          ├─url
+    │          │      index.md
+    │          │      introduce.md
+    │          │      usage.md
+    │          │
+    │          └─xml
+    │                  index.md
+    │                  introduce.md
+    │                  usage.md
+    │
+    └─resources
+        │  favicon.ico
+        │
+        ├─css
+        │      site.css
+        │
+        └─sdk
+            ├─operation-log
+            │      design01.png
+            │
+            └─tools
+                └─char-array
+                        design.png
+</code></pre>
+<p>每个文件夹中index.md示例：</p>
+<pre><code class="line-numbers language-none">## Summary
+
+安全工具集合
+
+* [字符数组检查](char-array/index.html)
+* [CSV文件检查](csv/index.html)
+* [HTTP工具](http/index.html)
+* [IO工具](io/index.html)
+* [随机数生成](random/index.html)
+* [字符串操作工具](string/index.html)
+* [文件解压缩](compress/index.html)
+* [XML文档安全读取](xml/index.html)
+</code></pre>
+<h2 id="执行命令"><a href="#执行命令" class="headerlink" title="执行命令"></a>执行命令</h2><p>执行</p>
+<pre><code class="line-numbers language-bash">mvn clean &amp;&amp; mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true site-deploy
+</code></pre>
+<h2 id="代码高亮和网站图标"><a href="#代码高亮和网站图标" class="headerlink" title="代码高亮和网站图标"></a>代码高亮和网站图标</h2><p>在site.xml的body中添加如下片段，注意/security/是根据tomcat部署的子文件夹路径来的，如果部署在根路径下就是/favicon.ico即可:</p>
+<pre><code class="line-numbers language-html">&lt;body&gt;
+        &lt;head&gt;
+            &lt;![CDATA[&lt;link rel=&quot;shotcut icon&quot; href=&quot;/security/favicon.ico&quot;/&gt;]]&gt;
+            &lt;!-- Workaround for https://issues.apache.org/jira/browse/DOXIA-571 --&gt;
+            &lt;![CDATA[&lt;script type=&quot;text/javascript&quot;&gt;
+                $(document).ready(function () {
+                    $(&quot;.source&quot;).addClass(&quot;prettyprint&quot;);
+                    prettyPrint();
+                });
+            &lt;/script&gt;]]&gt;
+        &lt;/head&gt;
+&lt;/body&gt;
+</code></pre>
+<h2 id="自定义CSS"><a href="#自定义CSS" class="headerlink" title="自定义CSS"></a>自定义CSS</h2><p>创建样式文件：src/site/resources/css/site.css，这个文件会被自动引入。内容如下：</p>
+<pre><code class="line-numbers language-css">body {
+    font-size: 15px;
+}
+
+h3 {
+    font-size: 22.5px;
+}
+
+p {
+    width: 70%;
+}
+
+.mytable {
+    width: 70%;
+    table-layout: fixed;
+    border: 1px solid #3333336b;
+}
+
+.mytable th {
+    background-color: rgb(210, 226, 255);
+}
+
+.mytable th, .mytable td {
+    vertical-align: middle;
+    word-wrap:break-word;
+    word-break:break-all;
+}
+
+.thname {
+    width: 15%
+}
+
+.thtype {
+    width: 15%
+}
+
+.thmust {
+    width: 8%
+}
+
+.thdesc {
+    width: 40%
+}
+
+.thscope {
+    width: 22%
+}
+
+pre.source {
+    width: 70%;
+    word-wrap: normal;
+    white-space: pre;
+    overflow-x: auto;
+    display: inline-block;
+}
+
+pre.prettyprint {
+    margin-bottom: 0;
+}
+</code></pre>
+<p>自定义表格：</p>
+<pre><code class="line-numbers language-html">&lt;table class=&quot;table table-bordered table-condensed mytable&quot; border=&quot;1&quot;&gt;
+    &lt;tr&gt;
+        &lt;th class=&quot;thname&quot;&gt;参数名称&lt;/th&gt;
+        &lt;th class=&quot;thtype&quot;&gt;参数类型&lt;/th&gt;
+        &lt;th class=&quot;thmust&quot;&gt;是否必须&lt;/th&gt;
+        &lt;th class=&quot;thdesc&quot;&gt;参数描述&lt;/th&gt;
+        &lt;th class=&quot;thscope&quot;&gt;参数范围&lt;/th&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+</code></pre>
+<h2 id="markdown语法说明"><a href="#markdown语法说明" class="headerlink" title="markdown语法说明"></a>markdown语法说明</h2><p>参考：<a href="http://masikkk.com/article/MarkDown/" target="_blank" rel="noopener">http://masikkk.com/article/MarkDown/</a></p>
+<p>几个注意点:</p>
+<ol>
+<li>代码引用一定要使用反引号引起来</li>
+<li>如果是直接写html标签语法，比如在table中写代码，则那些特殊字符比如泛型的写法&lt;&gt;，请使用&lt;和&gt;来代替</li>
+</ol>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2018/09/17/tool/maven-site.html">Maven site发布多模块的项目站点</a>
+            </div>
+            <div>
+                
+                    转载声明：商业转载请联系作者获得授权,非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/weixin.png" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2018/09/28/linux/proxy-passwd.html" class="pre-post btn btn-default" title='设置代理时候保护个人密码'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">设置代理时候保护个人密码</span>
+        </a>
+    
+    
+        <a href="/2018/09/02/cache/redis-cluster.html" class="next-post btn btn-default" title='Docker容器安装Redis集群'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">Docker容器安装Redis集群</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#本地生成预览"><span class="toc-text">本地生成预览</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#部署到服务器"><span class="toc-text">部署到服务器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用scp协议"><span class="toc-text">使用scp协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用dav协议"><span class="toc-text">使用dav协议</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置示例"><span class="toc-text">配置示例</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#源文档视图"><span class="toc-text">源文档视图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行命令"><span class="toc-text">执行命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码高亮和网站图标"><span class="toc-text">代码高亮和网站图标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义CSS"><span class="toc-text">自定义CSS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#markdown语法说明"><span class="toc-text">markdown语法说明</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/weixin.png" alt="微信号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">微信号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>
