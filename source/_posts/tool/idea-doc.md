@@ -1,6 +1,6 @@
 ---
 title: IDEA自定义带JavaDoc的get/set模板
-date: '2019-10-20 19:08:12 +0800'
+date: '2018-10-20 19:08:12 +0800'
 comments: true
 toc: true
 categories: 开发工具
