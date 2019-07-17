@@ -252,20 +252,23 @@ channel.basic_consume(callback,
 print(&#39; [*] Waiting for messages. To exit press CTRL+C&#39;)
 channel.start_consuming()
 </code></pre><p>出现的问题：</p>
-<pre><code>pika.exceptions.ProbableAuthenticationError
-</code></pre><p>查看日志：<code>/var/log/rabbitmq/deploy_rabbitmq.log</code></p>
+<pre><code class="line-numbers language-none">pika.exceptions.ProbableAuthenticationError
+</code></pre>
+<p>查看日志：<code>/var/log/rabbitmq/deploy_rabbitmq.log</code></p>
 <p>发现里面的错误是这样的</p>
-<pre><code>=ERROR REPORT==== 23-May-2017::10:57:22 ===
+<pre><code class="line-numbers language-none">=ERROR REPORT==== 23-May-2017::10:57:22 ===
 Error on AMQP connection &lt;0.460.0&gt; (10.10.111.230:58575 -&gt; 192.168.217.161:5673, state: starting):
 PLAIN login refused: user &#39;guest&#39; - invalid credentials
-</code></pre><p>解决办法是，修改guest的密码：</p>
-<pre><code>[root@controller161 ~]# rabbitmqctl list_users
+</code></pre>
+<p>解决办法是，修改guest的密码：</p>
+<pre><code class="line-numbers language-bash">[root@controller161 ~]# rabbitmqctl list_users
 Listing users ...
 guest    [administrator]
 test    [administrator]
 [root@controller161 ~]# rabbitmqctl change_password guest guest
 Changing password for user &quot;guest&quot; ...
-</code></pre><p>再次发送就没有问题了。</p>
+</code></pre>
+<p>再次发送就没有问题了。</p>
 <p>发送者发完消息就退出去了，而接受者会永久循环，测试完成通过“Ctrl+C”来结束进程。</p>
 <h2 id="任务队列"><a href="#任务队列" class="headerlink" title="任务队列"></a>任务队列</h2><p>任务队列（或者叫工作队列）的思想是对于处理那些非常耗时的任务的时候，通过异步消息队列来处理，
 而不是等待所有的工作处理完成才返回。将每一个任务封装成一个消息，将它发送到一个队列。
