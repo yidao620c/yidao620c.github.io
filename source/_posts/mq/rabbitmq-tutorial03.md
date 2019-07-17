@@ -33,6 +33,7 @@ abbrlink: 59466
 channel.exchange_declare(exchange='logs',
                          type='fanout')
 ```
+
 fanout类型的将消息广播给它所知道的所有队列。
 
 列出所有的交换机命令：
@@ -181,5 +182,6 @@ Listing bindings ...
 logs	exchange	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	queue	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	[]
 logs	exchange	amq.gen-TlEpq9mpE7zlfa3Qq6qFMA	queue	amq.gen-TlEpq9mpE7zlfa3Qq6qFMA	[]
 ```
+
 很清楚，交换机`logs`里面的消息被发送给两个由服务器生成的名字的队列中去了，这正是我们想要的。
 

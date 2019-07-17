@@ -210,7 +210,7 @@ public class AxisHelloWorldImpl implements AxisHelloWorld {
 
 正确的返回WSDL文件，并且里面会有我定义的一个服务：
 
-```
+``` xml
 <wsdl:service name="axisHelloWorld">
 ```
 
@@ -227,7 +227,7 @@ wsdl2java.bat命令可以在<Axis2安装目录>/bin目录中找到。
 
 然后再任意一个目录执行：
 
-```
+``` none
 >wsdl2java -uri http://localhost:8080/services/axisHelloWorld?wsdl  -p com.xncoding.axis2.client -s -o stub
 ```
 

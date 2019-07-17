@@ -90,21 +90,22 @@ channel.start_consuming()
 
 出现的问题：
 
-```
+``` none
 pika.exceptions.ProbableAuthenticationError
 ```
 
 查看日志：`/var/log/rabbitmq/deploy_rabbitmq.log`
 
 发现里面的错误是这样的
-```
+
+``` none
 =ERROR REPORT==== 23-May-2017::10:57:22 ===
 Error on AMQP connection <0.460.0> (10.10.111.230:58575 -> 192.168.217.161:5673, state: starting):
 PLAIN login refused: user 'guest' - invalid credentials
 ```
 
 解决办法是，修改guest的密码：
-```
+``` bash
 [root@controller161 ~]# rabbitmqctl list_users
 Listing users ...
 guest	[administrator]
@@ -112,6 +113,7 @@ test	[administrator]
 [root@controller161 ~]# rabbitmqctl change_password guest guest
 Changing password for user "guest" ...
 ```
+
 再次发送就没有问题了。
 
 发送者发完消息就退出去了，而接受者会永久循环，测试完成通过“Ctrl+C”来结束进程。

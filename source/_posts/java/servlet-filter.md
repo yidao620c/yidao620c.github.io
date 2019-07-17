@@ -379,6 +379,7 @@ public class AuthenticationFilter implements Filter {
     }
 }
 ```
+
 注意我们并不会对任何静态html页面或LoginServlet进行验证，下面我们在web.xml文件中配置：
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>

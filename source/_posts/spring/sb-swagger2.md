@@ -280,7 +280,7 @@ filterChainDefinitionMap.put("/swagger-ui.html", "anon");
 
 另外修改下surefire插件，增加2个系统属性，也就是swagger.json和adoc文件生成的位置：
 
-```
+``` xml
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-surefire-plugin</artifactId>
@@ -352,26 +352,26 @@ public class Swagger2MarkupTest {
 
 执行之后会在`resources/swagger/`下面生成`swagger.adoc`，在`swagger.adoc`的顶部加入：
 
-```
+``` none
 :toclevels: 3
 :numbered:
 ```
 
 注意有个空行分割，目的是左边导航菜单是3级，并且自动加序号。为了美化显示，根据你的需要调整表格宽度，比如
 
-```
+``` none
 cols=".^2,.^3,.^9,.^4,.^2"
 ```
 
 替换成：
 
-```
+``` none
 cols=".^2,.^3,.^6,.^4,.^5"
 ```
 
 然后在/resources目录下面执行：
 
-```
+``` none
 asciidoctor-pdf -r asciidoctor-pdf-cjk-kai_gen_gothic -a pdf-style=KaiGenGothicCN swagger/swagger.adoc
 ```
 

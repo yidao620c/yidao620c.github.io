@@ -20,6 +20,7 @@ abbrlink: 11718
 channel.queue_bind(exchange=exchange_name,
                    queue=queue_name)
 ```
+
 简单讲就是这个队列对这个交换机上面的消息很感兴趣。
 
 绑定需要指定一个关键字参数叫`routing_key`，为了不跟`basic_publish`搞混，

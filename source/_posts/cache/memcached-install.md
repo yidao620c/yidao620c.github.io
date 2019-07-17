@@ -60,8 +60,9 @@ make install
 ``` bash
 /usr/local/memcached/bin/memcached -d -m 256 -u root -p 11211 -c 1024 –P /tmp/memcached.pid
 ```
+
 启动参数说明：
-```
+``` none
 -d 选项是启动一个守护进程。
 -u root 表示启动memcached的用户为root。
 -m 是分配给Memcache使用的内存数量，单位是MB，默认64MB。
@@ -73,7 +74,7 @@ make install
 ```
 
 另外还有个更详细的参数说明：
-```
+``` none
 memcached 1.4.2
 -p <num监听的TCP端口(默认: 11211)
 -U <num监听的UDP端口(默认: 11211, 0表示不监听)

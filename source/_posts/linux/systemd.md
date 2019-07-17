@@ -18,11 +18,12 @@ CentOS 7的服务systemctl脚本存放在：/usr/lib/systemd/，有系统 system
 ## 配置文件
 
 这里我们先要说明一下unit的文件位置，一般主要有三个目录：
-```
+``` none
 /lib/systemd/system
 /run/systemd/system
 /etc/systemd/system
 ```
+
 这三个目录的配置文件优先级依次从低到高，如果同一选项三个地方都配置了，优先级高的会覆盖优先级低的。
 系统安装时，默认会将unit文件放在`/lib/systemd/system`目录。如果我们想要修改系统默认的配置，比如`nginx.service`，一般有两种方法：
 
@@ -33,7 +34,7 @@ CentOS 7的服务systemctl脚本存放在：/usr/lib/systemd/，有系统 system
 
 ## 服务配置
 每一个服务以`.service`结尾，一般会分为3部分：[Unit]、[Service]和[Install]，就以nginx为例吧，具体内容如下：
-```
+``` none
 [Unit]
 Description=nginx - high performance web server
 Documentation=http://nginx.org/en/docs/
