@@ -18,7 +18,11 @@ comments: false
 * 邮件: <yidao620@gmail.com>
 * GitHub: <https://github.com/yidao620c>
 
+### 公众号
+
+2019年开通个人微信公众号"飞污熊"，分享个人学习笔记与心得，有兴趣的可以扫码关注。
+
 ----------
 
-<center>![](/images/weixin.png)</center>
+<center>![](/images/wuxiong.jpg)</center>
 
