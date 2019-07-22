@@ -104,7 +104,7 @@ comments: false
             <a target="_blank" href="https://item.jd.com/12445838.html">《码出高效：Java开发手册》</a>
         </td>
         <td>
-            <a target="_blank" href="https://item.jd.com/12368970.html">《Java高并发编程详解：多线程与架构设计》</a>
+            <a target="_blank" href="https://item.jd.com/12184434.html">《Java多线程编程实战指南（核心篇）》</a>
         </td>
     </tr>
     <tr>
@@ -112,7 +112,7 @@ comments: false
             <img src="https://xnstatic-1253397658.file.myqcloud.com/book09.jpg" alt=""/>
         </td>
         <td>
-            <img src="https://xnstatic-1253397658.file.myqcloud.com/book10.jpg" alt=""/>
+            <img src="https://xnstatic-1253397658.file.myqcloud.com/book24.jpg" alt=""/>
         </td>
     </tr>
 </table>
@@ -167,6 +167,9 @@ comments: false
         <td>
             <a target="_blank" href="https://item.jd.com/12453318.html">《Docker技术入门与实战（第3版）》</a>
         </td>
+        <td>
+            <a target="_blank" href="https://item.jd.com/12052716.html">《Docker 容器与容器云（第2版）》</a>
+        </td>
     </tr>
     <tr>
         <td>
@@ -174,6 +177,9 @@ comments: false
         </td>
         <td>
             <img src="https://xnstatic-1253397658.file.myqcloud.com/book15.jpg" alt=""/>
+        </td>
+        <td>
+            <img src="https://xnstatic-1253397658.file.myqcloud.com/book23.jpg" alt=""/>
         </td>
     </tr>
 </table>
