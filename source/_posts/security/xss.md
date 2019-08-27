@@ -1,11 +1,12 @@
 ---
-title: XSS攻击介绍
+title: 小白讲安全 - XSS攻击介绍
 date: 2016-07-24 18:36:08 +0800
 comments: true
 toc: true
 categories: 网络安全
 tags:
   - XSS
+  - 小白讲安全
 abbrlink: 27828
 ---
 

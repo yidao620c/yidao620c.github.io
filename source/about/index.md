@@ -15,8 +15,10 @@ comments: false
 
 ### 联系方式
 
-* 邮件: <yidao620@gmail.com>
-* GitHub: <https://github.com/yidao620c>
+<ul>
+    <li class="contactme">邮件: <a href="mailto:yidao620@gmail.com" target="_blank" rel="noopener">yidao620@gmail.com</a></li>
+    <li class="contactme">GitHub: <a href="https://github.com/yidao620c" target="_blank" rel="noopener">https://github.com/yidao620c</a></li>
+</ul>
 
 ### 公众号
 

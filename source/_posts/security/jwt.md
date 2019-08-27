@@ -1,11 +1,12 @@
 ---
-title: JWT介绍和安全防范
+title: 小白讲安全 - JWT介绍和安全防范
 date: 2017-06-22 19:12:35 +0800
 comments: true
 toc: true
 categories: 网络安全
 tags:
   - jwt
+  - 小白讲安全
 abbrlink: 21652
 ---
 

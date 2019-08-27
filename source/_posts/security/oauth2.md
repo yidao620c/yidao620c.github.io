@@ -1,11 +1,12 @@
 ---
-title: 简单介绍OAuth2.0的授权流程
+title: 小白讲安全 - 简单介绍OAuth2.0的授权流程
 date: 2017-03-29 12:52:17 +0800
 comments: true
 toc: true
 categories: 网络安全
 tags:
   - oauth
+  - 小白讲安全
 abbrlink: 16054
 ---
 
