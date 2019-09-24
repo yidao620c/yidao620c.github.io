@@ -1,5 +1,5 @@
 ---
-title: 小白讲安全 - 聊聊Web会话管理
+title: 【安全贴士】聊聊Web会话管理
 date: 2017-06-20 09:55:19 +0800
 comments: true
 toc: true
@@ -9,7 +9,7 @@ tags:
   - cookie
   - jwt
   - token
-  - 小白讲安全
+  - 安全贴士
 abbrlink: 4461
 ---
 

@@ -8,6 +8,7 @@ tags:
   - swagger
 abbrlink: 61300
 ---
+
 REST API都是要对外提供服务的，那么文档是必须的。Swagger是一个简单但功能强大的API表达工具。
 它具有地球上最大的API工具生态系统，数以千计的开发人员，使用几乎所有的现代编程语言，
 都在支持和使用Swagger。使用Swagger生成API，我们可以得到交互式文档，自动生成代码的SDK以及API的发现特性等。
