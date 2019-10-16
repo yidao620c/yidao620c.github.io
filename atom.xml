@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://www.xncoding.com/"/>
-  <updated>2019-07-14T15:20:33.831Z</updated>
+  <updated>2019-10-16T16:28:23.731Z</updated>
   <id>https://www.xncoding.com/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一分钟了解Python3.8新特性</title>
+    <link href="https://www.xncoding.com/2019/10/15/python/python38.html"/>
+    <id>https://www.xncoding.com/2019/10/15/python/python38.html</id>
+    <published>2019-10-15T11:02:42.000Z</published>
+    <updated>2019-10-16T16:28:23.731Z</updated>
+    
+    <content type="html"><![CDATA[<p>今天Python3.8版本刚刚发布，添加了很多新功能。这里介绍几个我觉得最酷的特性，感受一下小Python的美。更全面的特性请直接去官网看：<a href="https://docs.python.org/3.8/whatsnew/3.8.html" target="_blank" rel="noopener">https://docs.python.org/3.8/whatsnew/3.8.html</a></p><h2 id="赋值表达式"><a href="#赋值表达式" class="headerlink" title="赋值表达式"></a>赋值表达式</h2><p>新增一个新的赋值语法<code>:=</code>，它将赋给左边变量并将赋值语句转换成一个表达式。该特性编号为<a href="https://www.python.org/dev/peps/pep-0572" target="_blank" rel="noopener">PEP 572</a>就是赋值表达式，也叫“海象运算符”。可以看到这个操作符看上去像一只横躺着的海象。</p><p>比如下面这个例子中，使用赋值表达式可以防止你调用两次<code>len()</code>方法</p><pre><code class="line-numbers language-python">if (n := len(a)) &gt; 10:    print(f&quot;List is too long ({n} elements, expected &lt;= 10)&quot;)</code></pre><h2 id="强制位置参数"><a href="#强制位置参数" class="headerlink" title="强制位置参数"></a>强制位置参数</h2><p>在函数的参数中增加一个<code>/</code>可以强制前面的参数必须使用位置参数调用，不能使用关键字参数。比如下面的函数中，a跟b必须使用位置参数调用，c和d随便，e和f必须使用关键字参数</p><pre><code class="line-numbers language-python">def f(a, b, /, c, d, *, e, f):    print(a, b, c, d, e, f)</code></pre><p>更多请参考<a href="https://www.python.org/dev/peps/pep-0570" target="_blank" rel="noopener">PEP 570</a></p><h2 id="运行时的审计钩子"><a href="#运行时的审计钩子" class="headerlink" title="运行时的审计钩子"></a>运行时的审计钩子</h2><p><a href="https://www.python.org/dev/peps/pep-0578" target="_blank" rel="noopener">PEP 578</a> 添加了一个审计钩子和一个确认开放钩子。</p><pre><code class="line-numbers language-python">import sysimport urlib.requestdef audit_hook(event, args):    if event in [&#39;urllib.Request&#39;]:        print(f&#39;Network {event=} {args=}&#39;)sys.addaudithook(audit_hook</code></pre><p>目前支持审计的事件名字和API可以看PEP文档， urllib.Request是其中之一。另外还可以自定义事件。</p><h2 id="跨进程内存共享"><a href="#跨进程内存共享" class="headerlink" title="跨进程内存共享"></a>跨进程内存共享</h2><p>在multiprocessing添加了一个shared_memory模块，支持跨进程间的内存共享。</p><h2 id="全新第三方包读取模块"><a href="#全新第三方包读取模块" class="headerlink" title="全新第三方包读取模块"></a>全新第三方包读取模块</h2><p>新模块<code>importlib.metadata</code>提供了读取第三方包原信息的能力。比如它能从第三方包中读取版本号、实体列表</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; # Note following example requires that the popular &quot;requests&quot;&gt;&gt;&gt; # package has been installed.&gt;&gt;&gt;&gt;&gt;&gt; from importlib.metadata import version, requires, files&gt;&gt;&gt; version(&#39;requests&#39;)&#39;2.22.0&#39;&gt;&gt;&gt; list(requires(&#39;requests&#39;))[&#39;chardet (&lt;3.1.0,&gt;=3.0.2)&#39;]&gt;&gt;&gt; list(files(&#39;requests&#39;))[:5][PackagePath(&#39;requests-2.22.0.dist-info/INSTALLER&#39;), PackagePath(&#39;requests-2.22.0.dist-info/LICENSE&#39;), PackagePath(&#39;requests-2.22.0.dist-info/METADATA&#39;), PackagePath(&#39;requests-2.22.0.dist-info/RECORD&#39;), PackagePath(&#39;requests-2.22.0.dist-info/WHEEL&#39;)]</code></pre><h2 id="functools改进"><a href="#functools改进" class="headerlink" title="functools改进"></a>functools改进</h2><p>现在functools.lru_cache()注解可以不用加括号了，下面的两种写法都支持</p><pre><code class="line-numbers language-python">@lru_cachedef f(x):    pass@lru_cache(maxsize=256)def f(x):    pass</code></pre><h2 id="unittest改进"><a href="#unittest改进" class="headerlink" title="unittest改进"></a>unittest改进</h2><p>增加了一个AsyncMock支持异步mock，并增加了一些新的断言函数。新增了<code>addModuleCleanup()</code> 和 <code>addClassCleanup()</code>，对应的用来清理<code>setUpModule()</code>和<code>setUpClass()</code></p><p>同时还支持对于协程的模拟测试，只需要测试用例继承自<code>unittest.IsolatedAsyncioTestCase</code></p><pre><code class="line-numbers language-python">import unittestclass TestRequest(unittest.IsolatedAsyncioTestCase):    async def asyncSetUp(self):        self.connection = await AsyncConnection()    async def test_get(self):        response = await self.connection.get(&quot;https://example.com&quot;)        self.assertEqual(response.status_code, 200)    async def asyncTearDown(self):        await self.connection.close()if __name__ == &quot;__main__&quot;:    unittest.main()</code></pre><h2 id="venv"><a href="#venv" class="headerlink" title="venv"></a>venv</h2><p>venv现在包含了一个<code>Activate.ps1</code>的脚本，可以在PowerShell Core 6.1环境中激活虚拟环境。</p><h2 id="math"><a href="#math" class="headerlink" title="math"></a>math</h2><p>math模块中中添加了一个函数<code>math.dist()</code>用来计算两点之间的欧几里德距离。</p><p><code>math.hypot()</code>现在可以处理多维数据，之前仅支持2-D场景。</p><p>新增一个<code>math.prod()</code>函数，跟累积求和类似，是一个累积乘积函数。</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; prior = 0.8&gt;&gt;&gt; likelihoods = [0.625, 0.84, 0.30]&gt;&gt;&gt; math.prod(likelihoods, start=prior)0.126</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;今天Python3.8版本刚刚发布，添加了很多新功能。这里介绍几个我觉得最酷的特性，感受一下小Python的美。
+更全面的特性请直接去官网看：&lt;a href=&quot;https://docs.python.org/3.8/whatsnew/3.8.html&quot; target=&quot;_b
+      
+    
+    </summary>
+    
+      <category term="python" scheme="https://www.xncoding.com/categories/python/"/>
+    
+    
+      <category term="python" scheme="https://www.xncoding.com/tags/python/"/>
+    
+  </entry>
   
   <entry>
     <title>CAS教程 - Restful API方式实现SSO</title>
@@ -545,32 +571,6 @@ pom.xml.v
     
     
       <category term="docker" scheme="https://www.xncoding.com/tags/docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>NPM版本号规则以及更新策略</title>
-    <link href="https://www.xncoding.com/2018/05/07/web/npm-version.html"/>
-    <id>https://www.xncoding.com/2018/05/07/web/npm-version.html</id>
-    <published>2018-05-06T16:21:18.000Z</published>
-    <updated>2019-07-14T16:27:28.233Z</updated>
-    
-    <content type="html"><![CDATA[<p>初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。</p><h2 id="NPM中的版本号规则"><a href="#NPM中的版本号规则" class="headerlink" title="NPM中的版本号规则"></a>NPM中的版本号规则</h2><h3 id="版本的格式"><a href="#版本的格式" class="headerlink" title="版本的格式"></a>版本的格式</h3><p>major.minor.patch</p><p>主版本号.次版本号.修补版本号</p><h3 id="版本匹配规则"><a href="#版本匹配规则" class="headerlink" title="版本匹配规则"></a>版本匹配规则</h3><p><strong>version</strong></p><p>必须匹配某个版本</p><p>如：1.1.2，表示必须依赖1.1.2版</p><p><strong>&gt;version</strong></p><p>必须大于某个版本</p><p>如：&gt;1.1.2，表示必须大于1.1.2版</p><p><strong>&gt;=version</strong></p><p>可大于或等于某个版本</p><p>如：&gt;=1.1.2，表示可以等于1.1.2，也可以大于1.1.2版本</p><p><strong>&lt;version</strong></p><p>必须小于某个版本 </p><p>如：&lt;1.1.2，表示必须小于1.1.2版本</p><p><strong>&lt;=version</strong></p><p>可以小于或等于某个版本</p><p>如：&lt;=1.1.2，表示可以等于1.1.2，也可以小于1.1.2版本</p><p><strong>~version</strong></p><p>大概匹配某个版本</p><p>如果minor版本号指定了，那么minor版本号不变，而patch版本号任意</p><p>如果minor和patch版本号未指定，那么minor和patch版本号任意</p><p>如：~1.1.2，表示&gt;=1.1.2 &lt;1.2.0，可以是1.1.2，1.1.3，1.1.4，…..，1.1.n </p><p>如：~1.1，表示&gt;=1.1.0 &lt;1.2.0，可以是同上</p><p>如：~1，表示&gt;=1.0.0 &lt;2.0.0，可以是1.0.0，1.0.1，1.0.2，…..，1.0.n，1.1.n，1.2.n，…..，1.n.n</p><p><strong>^version</strong></p><p>兼容某个版本</p><p>版本号中最左边的非0数字的右侧可以任意</p><p>如果缺少某个版本号，则这个版本号的位置可以任意</p><p>如：^1.1.2 ，表示&gt;=1.1.2 &lt;2.0.0，可以是1.1.2，1.1.3，…..，1.1.n，1.2.n，…..，1.n.n</p><p>如：^0.2.3 ，表示&gt;=0.2.3 &lt;0.3.0，可以是0.2.3，0.2.4，…..，0.2.n</p><p>如：^0.0，表示 &gt;=0.0.0 &lt;0.1.0，可以是0.0.0，0.0.1，…..，0.0.n</p><p><strong>x标识符</strong></p><p>x的位置表示任意版本</p><p>如：1.2.x，表示可以1.2.0，1.2.1，…..，1.2.n</p><p><strong>*标识符</strong></p><p>任意版本，””也表示任意版本</p><p>如：*，表示&gt;=0.0.0的任意版本</p><p><strong>version1 - version2</strong></p><p>大于等于version1，小于等于version2</p><p>如：1.1.2 - 1.3.1，表示包括1.1.2和1.3.1以及他们件的任意版本</p><p><strong>range1 || range2</strong></p><p>满足range1或者满足range2，可以多个范围</p><p>如：&lt;1.0.0 || &gt;=2.3.1 &lt;2.4.5 || &gt;=2.5.2 &lt;3.0.0，表示满足这3个范围的版本都可以</p><h2 id="install和update区别"><a href="#install和update区别" class="headerlink" title="install和update区别"></a>install和update区别</h2><p>The difference between npm install and npm update handling of package versions specified in package.json:</p><pre><code class="line-numbers language-json">{  &quot;name&quot;:          &quot;my-project&quot;,  &quot;version&quot;:       &quot;1.0&quot;,                             // install   update  &quot;dependencies&quot;:  {                                  // ------------------    &quot;already-installed-versionless-module&quot;:  &quot;*&quot;,     // ignores   &quot;1.0&quot; -&gt; &quot;1.1&quot;    &quot;already-installed-semver-module&quot;:       &quot;^1.4.3&quot; // ignores   &quot;1.4.3&quot; -&gt; &quot;1.5.2&quot;    &quot;already-installed-versioned-module&quot;:    &quot;3.4.1&quot;  // ignores   ignores    &quot;not-yet-installed-versionless-module&quot;:  &quot;*&quot;,     // installs  installs    &quot;not-yet-installed-semver-module&quot;:       &quot;^4.2.1&quot; // installs  installs    &quot;not-yet-installed-versioned-module&quot;:    &quot;2.7.8&quot;  // installs  installs  }}</code></pre><p>总结: 两者最大的区别是在对待已经安装过的模糊版本时候</p><ul><li>npm install会忽略模糊版本</li><li>npm update会更新模糊版本至最新</li></ul><p>另外: install and update 处理 devDependencies 方式也不同</p><ul><li>npm install 会安装/更新devDependencies，除非你指定 –production标志</li><li>npm update 会忽略 devDependencies，除非你指定 –dev 标志</li></ul><p>来自 <a href="https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference" target="_blank" rel="noopener">https://stackoverflow.com/questions/12478679/npm-install-vs-update-whats-the-difference</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。&lt;/p&gt;
-&lt;h2 id=&quot;NPM中的版本号规则&quot;&gt;&lt;a href=&quot;#NPM中的版本号规则&quot; class=&quot;headerlink&quot; title=&quot;NPM中的版本号规则&quot;&gt;&lt;/a&gt;NPM中的
-      
-    
-    </summary>
-    
-      <category term="web" scheme="https://www.xncoding.com/categories/web/"/>
-    
-    
-      <category term="npm" scheme="https://www.xncoding.com/tags/npm/"/>
     
   </entry>
   
