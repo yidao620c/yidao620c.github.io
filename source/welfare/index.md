@@ -6,6 +6,15 @@ comments: false
 
 这里分享一下个人读过的一些好书推荐，持续更新...
 
+个人建议如果经济条件允许，看书还是买纸质版。如果想要电子书，可以关注下面的"飞污熊"公众号，
+回复"电子书"即可免费获取我收藏的所有电子书。
+
+<div style="text-align: center;">![](/images/wuxiong.jpg)</div>
+
+电子书的部分截图
+
+<div style="text-align: center;">![](/images/pythonbooks.png)</div>
+
 ## Python
 
 **基础入门**

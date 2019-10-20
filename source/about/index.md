@@ -26,5 +26,5 @@ comments: false
 
 ----------
 
-<center>![](/images/wuxiong.jpg)</center>
+<div style="text-align: center;">![](/images/wuxiong.jpg)</div>
 
