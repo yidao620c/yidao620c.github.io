@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 每天5分钟玩转Python（05） - 基本数据类型（上）
-date: '2019-09-05 20:10:35 +0800'
+date: '2019-06-05 20:10:35 +0800'
 toc: true
 categories: python
 tags:

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 每天5分钟玩转Python（01） - 入门简介
-date: '2019-09-01 12:30:20 +0800'
+date: '2019-06-01 12:30:20 +0800'
 toc: true
 categories: python
 tags:

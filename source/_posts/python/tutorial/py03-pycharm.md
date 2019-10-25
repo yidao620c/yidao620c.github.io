@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 每天5分钟玩转Python（03） - 安装Pycharm
-date: '2019-09-03 12:03:21 +0800'
+date: '2019-06-03 12:03:21 +0800'
 toc: true
 categories: python
 tags:
