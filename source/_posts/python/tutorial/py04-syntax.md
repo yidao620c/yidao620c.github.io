@@ -252,7 +252,10 @@ def add(x):
 ```
 
 ## 条件和循环
-这些跟C语言和Java一样，只不过Python语法是用:和缩进来控制，不适用大括号
+这些跟C语言和Java一样，只不过Python语法是用`:`和缩进来控制，不适用大括号
+
+下面是使用if语句进行条件判断：
+
 ```python
 age = int(input("Input your age: "))
 
@@ -262,6 +265,34 @@ elif age < 20:
     print('10 ~ 20')
 else:
     print('> 20')
+```
+
+循环分成for和while两种类型循环。
+
+for循环使用`for x in xxx`的语法，xxx表示一个可迭代对象，关于可迭代对象后续会讲解，
+这里你只需要认为是一种可以产出一种序列的对象。
+```python
+sum = 0
+for x in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
+    sum = sum + x
+print(sum)
+```
+
+还有一种是通过`range()`函数生成序列，然后在序列上面做循环
+```python
+for x in range(5):
+    print(x)
+```
+
+另外一种就是while循环，条件满足时候一直不断循环，条件不满足时退出循环。
+比如我们要计算100以内所有奇数之和，可以用while循环实现：
+```python
+sum = 0
+n = 99
+while n > 0:
+    sum = sum + n
+    n = n - 2
+print(sum)
 ```
 
 ## Python的main函数
