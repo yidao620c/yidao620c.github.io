@@ -43,11 +43,70 @@
   </entry>
   
   <entry>
+    <title>每天5分钟玩转Python（11） - 生成器（上）</title>
+    <link href="https://www.xncoding.com/2019/06/11/python/tutorial/py11-generator.html"/>
+    <id>https://www.xncoding.com/2019/06/11/python/tutorial/py11-generator.html</id>
+    <published>2019-06-11T13:27:10.000Z</published>
+    <updated>2019-11-06T16:16:43.102Z</updated>
+    
+    <content type="html"><![CDATA[<p>这篇开始要展示python这门语言真正的魅力所在了。python有一些高级功能，让我们的代码写起来超级爽，所以才会有这么多人喜欢它。</p><p>这篇先介绍生成器这个东东，学会你就知道它有多强大了，不过对于生成器的讲解稍微有点长，可能看完不止5分钟，所以我分了上下两篇。建议读者耐心看完，这是进阶的必经之路。</p><h2 id="列表推导"><a href="#列表推导" class="headerlink" title="列表推导"></a>列表推导</h2><p>在讲生成器之前，先讲讲python里面常用的几个常见的推导式：</p><p><em>列表推导式（list comprehension）</em></p><pre><code class="line-numbers language-python">my_list = [f(x) for x in sequence if cond(x)]</code></pre><p>返回一个新的列表，列表中每个元素是原来列表中满足<code>cond(x)</code>条件的元素经过函数<code>f(x)</code>转换后的值。</p><p><em>字典推导式（dictionary comprehension）</em></p><pre><code class="line-numbers language-python">my_dict = {k(x): v(x) for x in sequence if cond(x)}</code></pre><p><em>集合推导式（set comprehension）</em></p><pre><code class="line-numbers language-python">my_set = {f(x) for x in sequence if cond(x)}</code></pre><p>几种推导式原理都一样，我只讲列表推导就可以了。它是python内置用来生成新列表的语法。除了上面的单层循环，你还能使用双层循环。比如打印9*9乘法表。一句话搞定：</p><pre><code class="line-numbers language-python">print(&quot;\n&quot;.join(&quot;\t&quot;.join([&quot;{} * {} = {}&quot;.format(y, x, x*y) for y in range(1, x+1)]) for x in range(1, 10)))</code></pre><ol><li><code>&quot;\t&quot;.join([&quot;{} * {} = {}&quot;.format(y, x, x*y) for y in range(1, x+1)])</code>这句是一个将以推导式的形式生成的列表转换成字符串，以制表符分隔；单独这一句代码不能执行，因为x还未赋值，我们可以假设它有一个值，这一行代码最终结果是打印99乘法表的每一行。</li><li>剩下的代码则是外层循环，列表推导式，转换字符串，以换行符分隔，跟第１步一样。注意外层的join操作对象并没有再使用<code>[]</code>转成列表，加上也可以。</li></ol><p>输出结果：</p><pre><code>1 * 1 = 11 * 2 = 2    2 * 2 = 41 * 3 = 3    2 * 3 = 6    3 * 3 = 91 * 4 = 4    2 * 4 = 8    3 * 4 = 12    4 * 4 = 161 * 5 = 5    2 * 5 = 10    3 * 5 = 15    4 * 5 = 20    5 * 5 = 251 * 6 = 6    2 * 6 = 12    3 * 6 = 18    4 * 6 = 24    5 * 6 = 30    6 * 6 = 361 * 7 = 7    2 * 7 = 14    3 * 7 = 21    4 * 7 = 28    5 * 7 = 35    6 * 7 = 42    7 * 7 = 491 * 8 = 8    2 * 8 = 16    3 * 8 = 24    4 * 8 = 32    5 * 8 = 40    6 * 8 = 48    7 * 8 = 56    8 * 8 = 641 * 9 = 9    2 * 9 = 18    3 * 9 = 27    4 * 9 = 36    5 * 9 = 45    6 * 9 = 54    7 * 9 = 63    8 * 9 = 72    9 * 9 = 81</code></pre><h2 id="生成器的优势"><a href="#生成器的优势" class="headerlink" title="生成器的优势"></a>生成器的优势</h2><p>列表推导会将所有元素都生成后填充到列表中，这样当元素非常多的时候就会很耗内存。如果列表元素不需要一次性就初始化，而是在使用它的时候再算出来，这就是经常说的懒加载技术。这种一遍循环一遍计算元素值得机制称为生成器（generator）。</p><h2 id="创建生成器"><a href="#创建生成器" class="headerlink" title="创建生成器"></a>创建生成器</h2><p>创建生成器的方式有两种方式。</p><p>第一种方式是将列表推导的<code>[]</code>改成<code>()</code>就可以了。比如</p><pre><code class="line-numbers language-python">_list = [x for x in range(6)]print(_list)_list_generator = (x for x in range(6))print(_list_generator)</code></pre><p>打印结果如下：</p><pre><code>[0, 1, 2, 3, 4, 5]&lt;generator object &lt;genexpr&gt; at 0x0000029AC6221820&gt;</code></pre><p>注意下面的是一个对象，类型为<code>generator</code></p><p>另外一种方式是通过<code>yield</code>关键字定义。如果在python的函数中出现了一个<code>yield</code>关键字，那么python不会把它当做普通函数看待了，而是将它当做是一个生成器generator。比如我定义一个斐波拉契数列的函数：</p><pre><code class="line-numbers language-python">def fib(max):    n, a, b = 0, 0, 1    while n &lt; max:        yield b        a, b = b, a + b        n = n + 1    yield &#39;done&#39;</code></pre><h2 id="使用生成器"><a href="#使用生成器" class="headerlink" title="使用生成器"></a>使用生成器</h2><p>拿到生成器对象后，我怎么使用这个生成器呢？很简单，可以通过不断的调用next()方法来获取它的下一个元素：</p><pre><code class="line-numbers language-python">_list_generator = (x for x in range(3))print(next(_list_generator))print(next(_list_generator))print(next(_list_generator))print(next(_list_generator))</code></pre><p>结果如下：</p><pre><code>012Traceback (most recent call last):  File &quot;/core-python/ch02_function/my_slice.py&quot;, line 43, in &lt;module&gt;    print(next(_list_generator))StopIteration</code></pre><p><code>`</code></p><p>怎么到了第四行出现一个异常了呢？因为我把它所有的元素都消耗完了，只有3个元素。第四次再访问就会抛<code>StopIteration</code>异常出来。</p><p>这一篇讲了生成器的基本用法，下一篇再继续深入讲解<code>yield</code>关键字以及python中的协程原理。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;这篇开始要展示python这门语言真正的魅力所在了。python有一些高级功能，
+让我们的代码写起来超级爽，所以才会有这么多人喜欢它。&lt;/p&gt;
+&lt;p&gt;这篇先介绍生成器这个东东，学会你就知道它有多强大了，不过对于生成器的讲解稍微有点长，
+可能看完不止5分钟，所以我分了上下两篇
+      
+    
+    </summary>
+    
+      <category term="python" scheme="https://www.xncoding.com/categories/python/"/>
+    
+    
+      <category term="python教程" scheme="https://www.xncoding.com/tags/python%E6%95%99%E7%A8%8B/"/>
+    
+      <category term="5分钟" scheme="https://www.xncoding.com/tags/5%E5%88%86%E9%92%9F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>每天5分钟玩转Python（10） - 迭代器</title>
+    <link href="https://www.xncoding.com/2019/06/10/python/tutorial/py10-iterator.html"/>
+    <id>https://www.xncoding.com/2019/06/10/python/tutorial/py10-iterator.html</id>
+    <published>2019-06-10T02:36:12.000Z</published>
+    <updated>2019-11-06T16:16:43.103Z</updated>
+    
+    <content type="html"><![CDATA[<p>迭代(iteration)指的是去获取元素的一种方式，一个接一个。当你显式或隐式的使用循环来遍历某个元素集的时候，那就是迭代。</p><p>之前我们学习for循环迭代的时候知道，操作对象可以是list、tuple、dict、set、str类型。实际上除了这几类内置类型外，for循环还能操作generator类型，也就是迭代器类型。</p><p>generator类型包括生成器和带<code>yield的</code>生成器函数。</p><p>在Python里面，可迭代对象(iterable)和迭代器(iterator)有着特殊的含义。</p><ol><li><code>iterable</code>是实现了<code>__iter__()</code>方法的对象，该方法会返回一个<code>iterator</code>对象</li><li><code>iterator</code>是实现了<code>__iter__()</code>和<code>__next__()</code>方法的对象，<code>__iter__()</code>方法返回的是<code>iterator</code>对象本身</li></ol><p>由此可见，<code>iterable</code>和<code>iterator</code>的本质区别就是后者多了一个<code>__next__()</code>方法。也就是说一个<code>iterator</code>对象必定是一个<code>iterable</code>对象。</p><p>当你使用一个<code>for</code>循环或者<code>map</code>，或着一个列表推导，那么会先通过iter()获取相应的迭代器，然后每次循环自动通过<code>next</code>方法调用这个迭代器(iterator)，从中获取每一个元素，从而完成迭代过程。</p><p>在一个<code>iterable</code>对象上执行<code>iter</code>会返回一个<code>iterator</code>对象, 比如<code>iter(obj)</code> </p><p>下面一个例子可以非常清晰的解释清楚：</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; s = &#39;cat&#39;      # s is an ITERABLE&gt;&gt;&gt; t = iter(s)    # t is an ITERATOR                   # t has state (it starts by pointing at the &quot;c&quot;)                   # t has a next() method and an __iter__() method&gt;&gt;&gt; next(t)        # the next() function returns the next value and advances the state&#39;c&#39;&gt;&gt;&gt; next(t)        # the next() function returns the next value and advances&#39;a&#39;&gt;&gt;&gt; next(t)        # the next() function returns the next value and advances&#39;t&#39;&gt;&gt;&gt; next(t)        # next() raises StopIteration to signal that iteration is completeTraceback (most recent call last):...StopIteration&gt;&gt;&gt; iter(t) is t   # the iterator is self-iterable</code></pre><p>可以使用isinstance()判断一个对象是否是Iterable对象：</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; from collections import Iterable&gt;&gt;&gt; isinstance([], Iterable)True&gt;&gt;&gt; isinstance({}, Iterable)True&gt;&gt;&gt; isinstance(&#39;abc&#39;, Iterable)True&gt;&gt;&gt; isinstance((x for x in range(10)), Iterable)True&gt;&gt;&gt; isinstance(100, Iterable)False</code></pre><p>可以使用isinstance()判断一个对象是否是Iterator对象：</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; from collections import Iterator&gt;&gt;&gt; isinstance((x for x in range(10)), Iterator)True&gt;&gt;&gt; isinstance([], Iterator)False&gt;&gt;&gt; isinstance({}, Iterator)False&gt;&gt;&gt; isinstance(&#39;abc&#39;, Iterator)False</code></pre><p>生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。</p><p>把list、dict、str等Iterable变成Iterator可以使用iter()函数：</p><pre><code class="line-numbers language-python">&gt;&gt;&gt; isinstance(iter([]), Iterator)True&gt;&gt;&gt; isinstance(iter(&#39;abc&#39;), Iterator)True</code></pre><p>你可能会问，为什么list、dict、str等数据类型不是Iterator？</p><p>这是因为Python的Iterator对象表示的是一个数据流，Iterator对象可以被next()函数调用并不断返回下一个数据，直到没有数据时抛出StopIteration错误。可以把这个数据流看做是一个有序序列，但我们却不能提前知道序列的长度，只能不断通过next()函数实现按需计算下一个数据，所以Iterator的计算是惰性的，只有在需要返回下一个数据时它才会计算。</p><p>Iterator甚至可以表示一个无限大的数据流，例如全体自然数。而使用list是永远不可能存储全体自然数的。</p><p><strong>小结</strong></p><p>凡是可作用于for循环的对象都是Iterable类型；</p><p>凡是可作用于next()函数的对象都是Iterator类型，它们表示一个惰性计算的序列；</p><p>集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()函数获得一个Iterator对象。</p><p>Python的for循环本质上就是通过不断调用next()函数实现的，例如：</p><pre><code class="line-numbers language-python">for x in [1, 2, 3, 4, 5]:    pass</code></pre><p>实际上完全等价于：</p><pre><code class="line-numbers language-python"># 首先获得Iterator对象:it = iter([1, 2, 3, 4, 5])# 循环:while True:    try:        # 获得下一个值:        x = next(it)    except StopIteration:        # 遇到StopIteration就退出循环        break</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;迭代(iteration)指的是去获取元素的一种方式，一个接一个。当你显式或隐式的使用循环来遍历某个元素集的时候，那就是迭代。&lt;/p&gt;
+&lt;p&gt;之前我们学习for循环迭代的时候知道，操作对象可以是list、tuple、dict、set、str类型。
+实际上除了这几类内置类型外
+      
+    
+    </summary>
+    
+      <category term="python" scheme="https://www.xncoding.com/categories/python/"/>
+    
+    
+      <category term="python教程" scheme="https://www.xncoding.com/tags/python%E6%95%99%E7%A8%8B/"/>
+    
+      <category term="5分钟" scheme="https://www.xncoding.com/tags/5%E5%88%86%E9%92%9F/"/>
+    
+  </entry>
+  
+  <entry>
     <title>每天5分钟玩转Python（09） - 切片</title>
     <link href="https://www.xncoding.com/2019/06/09/python/tutorial/py09-slice.html"/>
     <id>https://www.xncoding.com/2019/06/09/python/tutorial/py09-slice.html</id>
     <published>2019-06-09T01:56:22.000Z</published>
-    <updated>2019-11-04T14:49:18.583Z</updated>
+    <updated>2019-11-04T14:54:04.277Z</updated>
     
     <content type="html"><![CDATA[<p>我们经常会遇见只取列表、元组或者字符串中一部分的场景。比如一个列表如下：</p><pre><code class="line-numbers language-python">_list = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</code></pre><p>如果只想取前面3个元素咋整。最笨的方法就是创建一个新的列表，通过下标引用来填充这个列表：</p><pre><code class="line-numbers language-python">sub_list = [_list[0], _list[1], _list[2]]</code></pre><p>这样几个元素还好，如果几百个元素你还不得累死。有人说我可以用循环啊，就像下面这样：</p><pre><code class="line-numbers language-python">sub_list = []for i in range(3):    sub_list.append(_list[i])</code></pre><p>其实对于这种常见的操作，Python早就为我们准备好了倚天剑 - 切片操作。</p><p>通过使用切片，一行代码搞定上面的循环：</p><pre><code class="line-numbers language-python">sub_list = _list[0:3]</code></pre><p><code>_list[0:3]</code>表示从索引0开始，一直到3（不包含）为止。如果第一个索引为0，还可以省略，这样写效果也一样：</p><pre><code class="line-numbers language-python">sub_list = _list[:3]</code></pre><p>如果最后一个索引是结尾，则后面的索引也可以省略，比如我想取全部的列表值，其实这个就是复制列表的效果。则可以这样写：</p><pre><code class="line-numbers language-python">copy_list = _list[:]</code></pre><p>另外，还支持从后往前取元素，最后一个元素的索引是-1，倒数第二个索引是-2，以此类推。比如我要从倒数第二个开始，取3个元素。就这样写：</p><pre><code class="line-numbers language-python">sub_list = _list[-1:-4]</code></pre><p>取最后3个元素：</p><pre><code class="line-numbers language-python">sub_list = _list[-3:]</code></pre><p>除了顺序外，还可以加一个步长参数。默认步长是1。如果我想每2个取一次呢，可以这样写：</p><pre><code class="line-numbers language-python">sub_list = _list[0:5:2]</code></pre><p>倒叙取的时候也能加上步长，比如逆序每隔2个取一个数，注意逆序的时候因为是每次往后退2步，那么步数应该写-2：</p><pre><code class="line-numbers language-python">sub_list = _list[-1::-2]</code></pre><p>上面演示的都是对列表list的切片操作，其实对元组tuple、字符串str都可以适用。</p><pre><code class="line-numbers language-python">_tuple = (&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;)sub_tuple = _tuple[-1::-2]_str = &#39;abcde&#39;sub_str = _str[-1::-2]print(sub_list)print(sub_str)</code></pre><p>打印结果如下：</p><pre><code>(&#39;e&#39;, &#39;c&#39;, &#39;a&#39;)eca</code></pre><p>对于切片的内部原理以及自定义切片等高级操作，我会在Python进阶教程中详细讲解。</p>]]></content>
     
@@ -75,7 +134,7 @@
     <link href="https://www.xncoding.com/2019/06/08/python/tutorial/py08-function.html"/>
     <id>https://www.xncoding.com/2019/06/08/python/tutorial/py08-function.html</id>
     <published>2019-06-08T14:13:33.000Z</published>
-    <updated>2019-10-31T14:56:18.880Z</updated>
+    <updated>2019-11-04T14:54:04.276Z</updated>
     
     <content type="html"><![CDATA[<p>函数是组织好的、可重复使用的、用来实现单一或相关联功能的代码段。函数能提高应用的模块性，和代码的重复利用率。你已经知道Python提供了许多内建函数，比如<code>print()</code>。但你也可以自己创建函数，这被叫做用户自定义函数。</p><h2 id="定义函数"><a href="#定义函数" class="headerlink" title="定义函数"></a>定义函数</h2><p>在python中定义函数使用<code>def</code>开头，紧接着就是函数名称和圆括号<code>()</code>，在括号可以增加参数。函数第一行语句可使用三引号格式的文档字符串来定义函数的说明。使用return语句定义函数返回值。</p><pre><code class="line-numbers language-python">def hello(name):    &quot;&quot;&quot;    hello world    &quot;&quot;&quot;    print(&#39;hello world, &#39; + name)    return name</code></pre><p>注意如果没有调用return语句，那么默认运行到最后会返回<code>None</code></p><p>如果你还没想好函数的实现，可以再函数体内写个<code>pass</code>来定义一个空函数</p><pre><code class="line-numbers language-python">def nothing():    pass</code></pre><p>关键字<code>pass</code>是一个用来占位置的东西，很多时候语法要求一些地方必须有些语句才能编译通过。但是你还没想好这里写啥，那就可以写个pass。比如下面的：</p><pre><code class="line-numbers language-python">if age &lt; 15:    pass</code></pre><h2 id="返回多个值"><a href="#返回多个值" class="headerlink" title="返回多个值"></a>返回多个值</h2><p>python中的函数一个很灵活的地方是可以返回多个值。实际上返回的是一个元组（tuple），看着是返回了多个值。</p><pre><code class="line-numbers language-python">def multi_result(a, b, c):    return a + 1, b + 1, c + 1r = multi_result(1, 2, 3)print(r)</code></pre><h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><p>python中的函数定义非常灵活，最重要是因为参数的定义上。除了必选的位置参数外，还有关键字参数、默认参数、可变参数。满足多种场景的应用。</p><h3 id="位置参数"><a href="#位置参数" class="headerlink" title="位置参数"></a>位置参数</h3><p>这是最常见的参数，比如定义一个求差的函数如下</p><pre><code class="line-numbers language-python">def my_subtract(x, y):    return x - y</code></pre><p>调用这个函数的时候，必选传入x和y的值，并且顺序不能变。</p><pre><code class="line-numbers language-python">print(my_subtract(5, 3))  #打印2</code></pre><h3 id="默认参数"><a href="#默认参数" class="headerlink" title="默认参数"></a>默认参数</h3><p>如果想让某个参数有个默认值，如果调用的时候没有传这个参数就使用默认值。则可以使用如下格式定义这个函数</p><pre><code class="line-numbers language-python">def my_subtract(x, y=0):    return x - y</code></pre><p>其中参数y有个默认值为0。这时候如果你调用的时候传入了y的值就使用真实的y值，如果没有传y就使用默认值0</p><pre><code class="line-numbers language-python">print(my_subtract(5, 3))  #打印2print(my_subtract(5))  #打印5</code></pre><p>对于默认参数，有个约束就是必选的位置参数在前面，默认参数在后面。还有一个强烈建议就是，默认参数所指的对象一定要是一个不可变对象。</p><h3 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h3><p>可变参数的意思就是传入的参数个数是可以变化的。python中使用<code>func(*args)</code>来定义可变参数。比如如果要实现对于多个数的相加运算，你可能首先想到的是将这多个数放到一个列表中，然后将这个列表当做参数传给某个函数。</p><pre><code class="line-numbers language-python">def calc(numbers):    sum = 0    for n in numbers:        sum = sum + n * n    return sum</code></pre><p>调用的时候，先将多个数拼装成一个list或tuple，然后再调用这个函数：</p><pre><code class="line-numbers language-python">calc([1, 2, 3])</code></pre><p>其实我们可以将这个numbers参数变成可变参数，只需要在这个参数前面加上<code>*</code>即可。</p><pre><code class="line-numbers language-python">def calc(*numbers):    sum = 0    for n in numbers:        sum = sum + n * n    return sum</code></pre><p>然后你调用的时候就简单了</p><pre><code class="line-numbers language-python">calc(1, 2, 3)</code></pre><p>但如果你已经有了一个list对象，也想调用这个方法，咋办呢？Python允许你在list或tuple前面加一个<code>*</code>号，把list或tuple的元素变成可变参数传进去：</p><pre><code class="line-numbers language-python">nums = [1, 2, 3]calc(*nums)14</code></pre><p><code>*nums</code>表示把<code>nums</code>这个list的所有元素作为可变参数传进去。这种写法相当有用，而且很常见。</p><h3 id="关键字参数"><a href="#关键字参数" class="headerlink" title="关键字参数"></a>关键字参数</h3><p>python中通过在变量的前面加<code>**</code>将参数变成关键字参数。关键字参数允许你传入含参数名的参数，这些关键字参数在函数内部自动组装为一个dict，比如：</p><pre><code class="line-numbers language-python">def person(name, age, **kw):    print(&#39;name:&#39;, name, &#39;age:&#39;, age, &#39;other:&#39;, kw)</code></pre><p>在这个函数里，前面两个参数是必选的位置参数。后面的<code>kw</code>是关键字参数。传入的时候使用<code>name=value</code>的形式。比如</p><pre><code class="line-numbers language-python">person(&#39;XiongNeng&#39;, 24, city=&#39;XiAn&#39;, job=&#39;Engineer&#39;)</code></pre><p>实际调用中，<code>kw</code>变成了dict对象，值为<code>{&#39;city&#39;: &#39;XiAn&#39;, &#39;job&#39;: &#39;Engineer&#39;}</code></p><p>如果已经有了一个dict对象，然后又想去调用这个方法咋整。类似可变参数，可以再这个dict对象前面加<code>**</code>作为关键字参数传入进去即可。</p><pre><code class="line-numbers language-python">param={&#39;city&#39;: &#39;XiAn&#39;, &#39;job&#39;: &#39;Engineer&#39;}person(&#39;name&#39;, 24, **param)</code></pre><p>输出：</p><pre><code>name: name age: 24 other: {&#39;city&#39;: &#39;XiAn&#39;, &#39;job&#39;: &#39;Engineer&#39;}</code></pre><h3 id="命名关键字参数"><a href="#命名关键字参数" class="headerlink" title="命名关键字参数"></a>命名关键字参数</h3><p>如果你还想控制调用方传入的关键字参数名，可使用如下语法：</p><pre><code class="line-numbers language-python">def person(name, age, *, city, job):    print(name, age, city, job)</code></pre><p>和关键字参数<code>**kw</code>不同，命名关键字参数需要一个特殊分隔符<code>*</code>，<code>*</code>后面的参数被视为命名关键字参数。</p><p>调用方式跟上面一样，只不过这次你传入的关键字参数必行是<code>city</code>和<code>job</code>。如果是其他的就会报错</p><pre><code class="line-numbers language-python">person(&#39;XiongNeng&#39;, 24, city=&#39;XiAn&#39;, job=&#39;Engineer&#39;)</code></pre><p>如果函数定义中已经有了一个可变参数，后面跟着的命名关键字参数就不再需要一个特殊分隔符*了：</p><pre><code class="line-numbers language-python">def person(name, age, *args, city, job):    print(name, age, args, city, job)</code></pre><p>命名关键字参数必须传入参数名和参数值，不过你可以给命名关键字参数加上默认值，那这时候就不是必须传了。</p><pre><code class="line-numbers language-python">def person(name, age, *, city=&#39;Beijing&#39;, job):    print(name, age, city, job)</code></pre><p>调用的时候，不需要传入city参数</p><pre><code class="line-numbers language-python">person(&#39;XiongNeng&#39;, 24, job=&#39;Engineer&#39;)</code></pre><h3 id="参数组合"><a href="#参数组合" class="headerlink" title="参数组合"></a>参数组合</h3><p>在Python中定义函数，可以用必选参数、默认参数、可变参数、关键字参数和命名关键字参数，这5种参数都可以组合使用。但是请注意，参数定义的顺序必须是：必选参数、默认参数、可变参数、命名关键字参数和关键字参数。</p><pre><code class="line-numbers language-python">def f1(a, b, c=0, *args, **kw):    print(&#39;a =&#39;, a, &#39;b =&#39;, b, &#39;c =&#39;, c, &#39;args =&#39;, args, &#39;kw =&#39;, kw)def f2(a, b, c=0, *, d, **kw):    print(&#39;a =&#39;, a, &#39;b =&#39;, b, &#39;c =&#39;, c, &#39;d =&#39;, d, &#39;kw =&#39;, kw)</code></pre><p>在函数调用的时候，Python解释器自动按照参数位置和参数名把对应的参数传进去。</p><p>对于任意函数，都可以通过类似<code>func(*args, **kw)</code>的形式调用它，无论它的参数是如何定义的。</p><p>注意：使用<code>*args</code>和<code>**kw</code>是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。</p><p>函数的基础部分讲解完了。Python中函数式一等公民，所以后续还会讲解对于更高阶的使用方式。</p>]]></content>
     
@@ -105,7 +164,7 @@
     <link href="https://www.xncoding.com/2019/06/07/python/tutorial/py07-datatype3.html"/>
     <id>https://www.xncoding.com/2019/06/07/python/tutorial/py07-datatype3.html</id>
     <published>2019-06-07T03:35:12.000Z</published>
-    <updated>2019-10-28T13:41:37.306Z</updated>
+    <updated>2019-11-04T14:54:04.278Z</updated>
     
     <content type="html"><![CDATA[<p>继续上一篇的数据结构讲解，这篇讲解Set（集合）和Dictionary（字典）的使用方法。</p><h2 id="Set（集合）"><a href="#Set（集合）" class="headerlink" title="Set（集合）"></a>Set（集合）</h2><p>大家都知道数学中集合的定义为：将数个对象归类而分成为一个或数个形态各异的大小整体。一个集合中，任何两个元素都认为是不相同的，即每个元素只能出现一次。</p><p>Python中通过内置函数set()可获取到集合这种数据类型。参数可以是一个list</p><pre><code class="line-numbers language-python">s = set([1, 2, 3])</code></pre><p>通过add(key)方法可以添加元素到set中，可以重复添加，但不会有效果：</p><pre><code class="line-numbers language-python">s.add(4)</code></pre><p>通过remove(key)方法可以删除元素：</p><pre><code class="line-numbers language-python">s.remove(4)</code></pre><p>既然是集合，那么就应该支持数学上的集合运算。两个set可以做数学意义上的交集、并集、差集、异或集等操作：</p><pre><code class="line-numbers language-python">s1 = set([1, 2, 3])s2 = set([2, 3, 4])s1 &amp; s2 #集合的交集运算s1 | s2 #集合的并集运算s1 - s2 #集合的差集运算s1 ^ s2 #集合的异或运算，也就是不同时存在的元素。（要么只在s1中有，要么只在s2中有）</code></pre><p>有一点要注意的是，set里面是不能放入可变对象的。因为无法判断两个可变对象是否相等，也就无法保证set内部“不会有重复元素”。比如往set里面添加list就会报错，而添加str类型的就正常。</p><h2 id="Dictionary（字典）"><a href="#Dictionary（字典）" class="headerlink" title="Dictionary（字典）"></a>Dictionary（字典）</h2><p>字典就是一个键值对的数据结构，这个在编程中非常常见。比如通过学号对应一个学生，那么学号可以作为key，而学生信息作为value。</p><p>Python内置了字典的支持，初始化一个字典对象很简单。</p><pre><code class="line-numbers language-python">d = {} #初始化一个空的字典d = {&#39;1001&#39;: &#39;张三&#39;, &#39;1002&#39;: &#39;李四&#39;} # 带初始值的字典</code></pre><p>添加新的键值对也非常简单：</p><pre><code class="line-numbers language-python">d[&#39;1003&#39;] = &#39;王五&#39;</code></pre><p>由于一个key只能对应一个value，所以，多次对一个key放入value，后面的值会把前面的值冲掉，这时候就是相当于更新这个键值对了：</p><pre><code class="line-numbers language-python">d[&#39;1003&#39;] = &#39;赵六&#39;</code></pre><p>如果访问字典的时候key不存在，dict就会报错：</p><pre><code class="line-numbers language-python">print(d[&#39;9999&#39;])</code></pre><p>报错：</p><pre><code>Traceback (most recent call last):&lt;class &#39;dict&#39;&gt;  File &quot;D:/projects/python/core-python/test.py&quot;, line 20, in &lt;module&gt;    print(d[&#39;9999&#39;])KeyError: &#39;9999&#39;</code></pre><p>要避免key不存在的错误，有两种办法。</p><p>第一种是在访问字典之前，先通过in判断key是否存在，如果存在再访问：</p><pre><code class="line-numbers language-python">if &#39;9999&#39; in d:    print(d[&#39;9999&#39;])</code></pre><p>第二种是调用dict提供的get()方法，传入一个默认值。如果key不存在则返回默认值</p><pre><code class="line-numbers language-python">print(d.get(&#39;9999&#39;, &#39;default&#39;))</code></pre><p>要从字典中删除一个key，可以使用<code>pop()</code>方法，对应的key/value对也会从dict中删除：</p><pre><code class="line-numbers language-python">print(d)result = d.pop(&#39;1002&#39;)print(d)</code></pre><p>输出结果：</p><pre><code>{&#39;1001&#39;: &#39;张三&#39;, &#39;1002&#39;: &#39;李四&#39;}{&#39;1001&#39;: &#39;张三&#39;}</code></pre><p>还有一点需要注意的是，dict内部存放的顺序和key放入的顺序是没有关系的。并且dict中的key跟集合一样必须是不可变对象。</p><h2 id="可变和不可变对象"><a href="#可变和不可变对象" class="headerlink" title="可变和不可变对象"></a>可变和不可变对象</h2><p>上面讲到集合和字典的时候都提到了可变对象、不可变对象。那么这两者到底有啥区别。其实从字面含义上就已经很容易理解，不可变对象就是只对象一旦初始化后，其状态或内容都不允许发生改变了。而不可变对象随时都可以改变状态和内容。</p><p>比如字符串str类型就是不可变对象，而列表list类型就是可变对象。</p><pre><code class="line-numbers language-python">str1 = &#39;123456&#39;str2 = str1.replace(&#39;1&#39;, &#39;9&#39;)print(str1)print(str2)list = [&#39;1&#39;, &#39;2&#39;]print(list)list.append(&#39;3&#39;)print(list)</code></pre><p>输出如下</p><pre><code>123456923456[&#39;1&#39;, &#39;2&#39;][&#39;1&#39;, &#39;2&#39;, &#39;3&#39;]</code></pre><p>可以看到，变量str1指向的对象内容始终是<code>123456</code>。即使在上面进行了一次替换操作，这次替换操作会返回一个新的str对象。而列表list对象在对它进行操作后，内容以及改变了。</p><p>对于不变对象来说，调用对象自身的任意方法，也不会改变该对象自身的内容。一般来讲这些方法会创建新的对象并返回，这样，就保证了不可变对象本身永远是不可变的。</p><p>OK，关于Python基本数据类型介绍到这里。喝杯小酒歇会吧！</p>]]></content>
     
@@ -522,70 +581,6 @@ CAS是一个单点登
     
     
       <category term="maven" scheme="https://www.xncoding.com/tags/maven/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>IDEA自定义带JavaDoc的get/set模板</title>
-    <link href="https://www.xncoding.com/2018/10/20/tool/idea-doc.html"/>
-    <id>https://www.xncoding.com/2018/10/20/tool/idea-doc.html</id>
-    <published>2018-10-20T11:08:12.000Z</published>
-    <updated>2019-07-15T15:59:01.355Z</updated>
-    
-    <content type="html"><![CDATA[<p>IDEA里面按Alt+Insert可弹出生成getter/setter方法模板的提示，默认的模板并不会带JavaDoc。可自定义模板</p><p><img src="https://xnstatic-1253397658.file.myqcloud.com/idea-getter.jpg" alt></p><h3 id="getter模板"><a href="#getter模板" class="headerlink" title="getter模板"></a>getter模板</h3><pre><code class="line-numbers language-none">/** * Gets the value of $field.name * @return the value of $field.name */public ###if($field.modifierStatic)static ###end$field.type ###set($name = $StringUtil.capitalizeWithJavaBeanConvention($StringUtil.sanitizeJavaIdentifier($helper.getPropertyName($field, $project))))#if ($field.boolean &amp;&amp; $field.primitive)  is###else  get###end${name}() {  return $field.name;}</code></pre><h3 id="setter模板"><a href="#setter模板" class="headerlink" title="setter模板"></a>setter模板</h3><pre><code class="line-numbers language-none">/** * Sets the $field.name * &lt;p&gt;You can use get$StringUtil.capitalizeWithJavaBeanConvention($StringUtil.sanitizeJavaIdentifier($helper.getPropertyName($field, $project)))() to get the value of $field.name&lt;/p&gt; * @param $field.name $field.name */#set($paramName = $helper.getParamName($field, $project))public ###if($field.modifierStatic)    static ###endvoid set$StringUtil.capitalizeWithJavaBeanConvention($StringUtil.sanitizeJavaIdentifier($helper.getPropertyName($field, $project)))($field.type $paramName) {#if ($field.name == $paramName)    #if (!$field.modifierStatic)        this.##    #else        $classname.##    #end#end$field.name = $paramName;}</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;IDEA里面按Alt+Insert可弹出生成getter/setter方法模板的提示，默认的模板并不会带JavaDoc。可自定义模板&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;https://xnstatic-1253397658.file.myqcloud.com/idea-ge
-      
-    
-    </summary>
-    
-      <category term="开发工具" scheme="https://www.xncoding.com/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"/>
-    
-    
-      <category term="idea" scheme="https://www.xncoding.com/tags/idea/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>gitignore文件示例</title>
-    <link href="https://www.xncoding.com/2018/10/06/fullstack/gitignore.html"/>
-    <id>https://www.xncoding.com/2018/10/06/fullstack/gitignore.html</id>
-    <published>2018-10-06T13:22:18.000Z</published>
-    <updated>2019-07-15T15:57:58.017Z</updated>
-    
-    <content type="html"><![CDATA[<p>个人比较常用的.gitignore文件如下：</p><pre><code>#idea.idea/target/*.iml*.ipr*.iws*.log#eclipse.project.classpath.classpath.logpom.xml.versionsBackup.settings#gradle.gradle/build/gradle-app.setting.gradletasknamecache#nodejsnode_modules/package-lock.json## others.svn/rebel.xml.rebel-remote.xml.*</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;个人比较常用的.gitignore文件如下：&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;#idea
-.idea/
-target/
-*.iml
-*.ipr
-*.iws
-*.log
-
-#eclipse
-.project
-.classpath
-.classpath.log
-pom.xml.v
-      
-    
-    </summary>
-    
-      <category term="fullstack" scheme="https://www.xncoding.com/categories/fullstack/"/>
-    
-    
-      <category term="git" scheme="https://www.xncoding.com/tags/git/"/>
     
   </entry>
   
