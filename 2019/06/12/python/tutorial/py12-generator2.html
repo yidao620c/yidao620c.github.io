@@ -238,7 +238,7 @@ def is_prime(number):
     return False
 </code></pre>
 <p>上面任何一个<code>get_primes()</code>都能满足要求，所以我们告诉老板任务完成了。老板测试后觉得很满意，符合她的期望。</p>
-<h3 id="处理无限序列"><a href="#处理无限序列" class="headerlink" title="处理无限序列"></a>处理无限序列</h3><p>不过麻烦又来了，过了几天我们老板又跑来了，说她要遇到个小麻烦，她想这个<code>get_primes()</code>能处理超大的列表，
+<h2 id="处理无限序列"><a href="#处理无限序列" class="headerlink" title="处理无限序列"></a>处理无限序列</h2><p>不过麻烦又来了，过了几天我们老板又跑来了，说她要遇到个小麻烦，她想这个<code>get_primes()</code>能处理超大的列表，
 这个列表太多以至于直接在内存中初始化会撑爆内存。
 所以她希望用一个起始值<code>start</code>来调用这个函数，然后返回所有的比它大的素数。
 （可能她要尝试去解决<a href="http://projecteuler.net/problem=10" target="_blank" rel="noopener">欧拉猜想</a>）</p>
@@ -267,7 +267,7 @@ def is_prime(number):
 <p>很明显，<code>get_primes()</code>函数遇到3的时候就返回了，在第4行，但是第二次调用的时候，它又返回了3。
 我们需要一种机制，下一次再调用它的时候，能从第4行开始获取下一个数，但是你再次调用函数时，
 它又重新开始运行，因为函数只有一个入口，就是第一行。</p>
-<h3 id="走进生成器"><a href="#走进生成器" class="headerlink" title="走进生成器"></a>走进生成器</h3><p>这类问题非常普遍，Python于是引入了新的一种机制来解决它：生成器。一个生成器负责生产数据，
+<h2 id="走进生成器"><a href="#走进生成器" class="headerlink" title="走进生成器"></a>走进生成器</h2><p>这类问题非常普遍，Python于是引入了新的一种机制来解决它：生成器。一个生成器负责生产数据，
 可以通过简单的调用生成器函数来创建一个生成器。</p>
 <p>一个生成器函数定义跟普通函数类似，唯一区别是，它通过<code>yield</code>关键字生产数据，而不是用<code>return</code>关键字返回。
 如果在一个<code>def</code>函数定义内有出现了一个<code>yield</code>关键字，那么这个函数就变成了生成器函数（就算它还包含return语句）。</p>
@@ -292,7 +292,7 @@ next(our_generator)
 </code></pre>
 <p>请注意，这里的<code>simple_generator_function</code>仍然是一个函数只不过由于调用这个函数后会返回一个生成器对象，
 所以我们叫这个函数为生成器函数。</p>
-<h3 id="神奇的背后"><a href="#神奇的背后" class="headerlink" title="神奇的背后"></a>神奇的背后</h3><p>那么这是怎么一回事呢。当生成器函数调用<code>yield</code>语句的时候，生成器函数的状态被冻结，所有变量值都被保存，
+<h2 id="神奇的背后"><a href="#神奇的背后" class="headerlink" title="神奇的背后"></a>神奇的背后</h2><p>那么这是怎么一回事呢。当生成器函数调用<code>yield</code>语句的时候，生成器函数的状态被冻结，所有变量值都被保存，
 下一条要执行的语句被记录下来，直到下一次的<code>next()</code>调用来临。
 一旦再遇到<code>next()</code>调用，生成器函数就被激活，而如果<code>next()</code>永远不再调用，那么最后记录的状态也就被丢弃了。</p>
 <p>我们使用生成器函数重新改写下<code>get_primes()</code>函数，这次我们不再需要<code>magical_infinite_range()</code>函数了。
@@ -306,7 +306,7 @@ next(our_generator)
 <p>如果一个生成器函数调用了<code>return</code>语句或者到了最后一条语句，就会抛出一个<code>StopIteration</code>异常，
 它表明不能再调用<code>next()</code>了。因此我们使用<code>while</code>循环就能保证它永远不会达到最后，
 所以只要我们不断的调用<code>next()</code>，它就能源源不断的为我们产生新的值。这也是我们在处理无限序列时常用的做法。</p>
-<h3 id="程序控制流"><a href="#程序控制流" class="headerlink" title="程序控制流"></a>程序控制流</h3><p>我们重新来看看代码<code>solve_number_10</code>，它在调用<code>get_primes()</code>时究竟发生了什么：</p>
+<h2 id="程序控制流"><a href="#程序控制流" class="headerlink" title="程序控制流"></a>程序控制流</h2><p>我们重新来看看代码<code>solve_number_10</code>，它在调用<code>get_primes()</code>时究竟发生了什么：</p>
 <pre><code class="line-numbers language-python">def solve_number_10():
     total = 2
     for next_prime in get_primes(3):
@@ -342,7 +342,7 @@ next(our_generator)
 这时候，number的值+1变成4，然后重新while循环，我们不断的增加这个number的值直到它是一个素数5，
 这时候，<code>yield</code>将这个5传递给<code>solve_number_10</code>中的<code>for</code>循环。
 这个过程不断的重复，直到for循环停止了（遇到素数大于2000000）。</p>
-<h3 id="更强大的生成器"><a href="#更强大的生成器" class="headerlink" title="更强大的生成器"></a>更强大的生成器</h3><p>在<a href="http://www.python.org/dev/peps/pep-0342/" target="_blank" rel="noopener">PEP 342</a>中，我们可以向生成器传递数据，它让生成器有了三种能力：</p>
+<h2 id="更强大的生成器"><a href="#更强大的生成器" class="headerlink" title="更强大的生成器"></a>更强大的生成器</h2><p>在<a href="http://www.python.org/dev/peps/pep-0342/" target="_blank" rel="noopener">PEP 342</a>中，我们可以向生成器传递数据，它让生成器有了三种能力：</p>
 <ol>
 <li>可以生产一个数（前面讲过）</li>
 <li>接受一个数，这个数是任意的</li>
@@ -406,7 +406,7 @@ next(our_generator)
 <li>最后一句<code>c.send(&#39;Goodbye&#39;)</code>，又跳到myfunc()中的上次保存点去，n接收值’Goodbye’，然后打印<code>get n = Goodbye</code>，
 它会继续往下执行一定要找到一个<code>yield</code>语句并返回到caller()中，否则抛出<code>StopIteration</code>异常。</li>
 </ol>
-<h3 id="Python中的协程"><a href="#Python中的协程" class="headerlink" title="Python中的协程"></a>Python中的协程</h3><p>现在我们已经对生成器和<code>yield</code>原理有了理解。让我们再看看<code>yield</code>还有什么是可以做的。
+<h2 id="Python中的协程"><a href="#Python中的协程" class="headerlink" title="Python中的协程"></a>Python中的协程</h2><p>现在我们已经对生成器和<code>yield</code>原理有了理解。让我们再看看<code>yield</code>还有什么是可以做的。
 尽管send确实可以像上面那样用，但是生产简单的序列的时候我们基本不会那样用。下面再举一个例子看看send使用的常见场景：</p>
 <pre><code class="line-numbers language-python">import random
 
@@ -456,7 +456,7 @@ if __name__ == &#39;__main__&#39;:
 转而执行另一个，再在恰当的时候（可以控制）回来执行。用法很灵活。</p>
 <p>produce和consumer协同合作，过程清晰可控，在一个线程中执行，不需要锁，也就不会出现死锁情况。</p>
 <p>其实Python用生成器对协程的实现并不完整，不过可以用一些第三方库，比如greenlet，毕竟Python最大的优势就是库多嘛。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>看完这篇文章，我希望你能记住下面这几点就足够了：</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>看完这篇文章，我希望你能记住下面这几点就足够了：</p>
 <ul>
 <li>生成器是用来生产序列的</li>
 <li><code>yield</code>就相对于是生成器函数的<code>return</code></li>
@@ -564,7 +564,7 @@ if __name__ == &#39;__main__&#39;:
     <div class="widget">
         <h3 class="title">文章目录</h3>
         
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#yield关键字"><span class="toc-text">yield关键字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#有趣的素数"><span class="toc-text">有趣的素数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#处理无限序列"><span class="toc-text">处理无限序列</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#走进生成器"><span class="toc-text">走进生成器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#神奇的背后"><span class="toc-text">神奇的背后</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#程序控制流"><span class="toc-text">程序控制流</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#更强大的生成器"><span class="toc-text">更强大的生成器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Python中的协程"><span class="toc-text">Python中的协程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol></li></ol>
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#yield关键字"><span class="toc-text">yield关键字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#有趣的素数"><span class="toc-text">有趣的素数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#处理无限序列"><span class="toc-text">处理无限序列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#走进生成器"><span class="toc-text">走进生成器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#神奇的背后"><span class="toc-text">神奇的背后</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#程序控制流"><span class="toc-text">程序控制流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#更强大的生成器"><span class="toc-text">更强大的生成器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python中的协程"><span class="toc-text">Python中的协程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
         
     </div>
 
