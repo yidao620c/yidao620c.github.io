@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 52308
 ---
 
 继续上一篇的数据结构讲解，这篇讲解Set（集合）和Dictionary（字典）的使用方法。

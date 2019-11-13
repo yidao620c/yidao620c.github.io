@@ -284,6 +284,12 @@ for x in range(5):
     print(x)
 ```
 
+如果你还想在迭代的时候访问下标，则可以使用内置的`enumerate()`函数。它可以把一个list变成索引-元素对。
+```python
+for i, value in enumerate(['A', 'B', 'C']):
+    print(i, value)
+```
+
 另外一种就是while循环，条件满足时候一直不断循环，条件不满足时退出循环。
 比如我们要计算100以内所有奇数之和，可以用while循环实现：
 ```python
