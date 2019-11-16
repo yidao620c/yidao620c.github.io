@@ -198,7 +198,7 @@ func_wrapper
 
 我们期望的输出应该是`get_text`，`get_text`的`__name__`、`__doc__` 和 `__module__`已经被包装函数覆盖了。
 
-### 使用functools来解决
+## 使用functools来解决
 
 幸运的是python2.5版本以上有了一个functools包可以来解决这个问题。只需要简单在包装函数上标注`@wrap`标签即可。
 
