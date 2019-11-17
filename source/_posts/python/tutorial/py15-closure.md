@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 27824
 ---
 
 闭包跟函数式紧密联系在一起的，介绍闭包之前先了解一下python中函数的高阶用法。比如嵌套函数、变量作用域等等。

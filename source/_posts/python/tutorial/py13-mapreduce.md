@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 57181
 ---
 
 函数式（Functional Programming）编程是一种抽象程度非常高的编程范式，纯粹的函数式编程中没有变量。

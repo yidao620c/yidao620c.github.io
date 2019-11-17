@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 48355
 ---
 
 Python有着强大的表达式语法和函数特性，其中一个我的最爱便是装饰器。
