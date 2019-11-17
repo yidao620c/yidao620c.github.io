@@ -1,0 +1,493 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+    <!--Setting-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta http-equiv="Cache-Control" content="no-siteapp">
+    <meta http-equiv="Cache-Control" content="no-transform">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no,email=no,adress=no">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <link rel="dns-prefetch" href="https://www.xncoding.com">
+    <!--SEO-->
+
+    <meta name="keywords" content="python教程,5分钟,">
+
+
+    <meta name="description" content="闭包跟函数式紧密联系在一起的，介绍闭包之前先了解一下python中函数的高阶用法。比如嵌套函数、变量作用域等等。
+变量作用域变量作用域是程序运行时变量可被访问的范围，定义在函数内的变量是局部变量，
+局部变量的作用范围只能是函数内部范围内，它不能在函数外引用。
+def test():
+    n...">
+
+
+<meta name="robots" content="all">
+<meta name="google" content="all">
+<meta name="googlebot" content="all">
+<meta name="verify" content="all">
+    <!--Title-->
+
+
+<title>每天5分钟玩转Python（15） - 闭包 | 飞污熊博客</title>
+
+
+    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
+
+
+    <link rel="icon" href="/images/favicon.ico">
+
+    
+
+
+    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+
+
+<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
+<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+
+
+
+
+    
+
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+
+    
+
+    <link rel="stylesheet" href="/js/prism/prism.css">
+</head>
+
+</html>
+<!--[if lte IE 8]>
+<style>
+    html{ font-size: 1em }
+</style>
+<![endif]-->
+<!--[if lte IE 9]>
+<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
+<![endif]-->
+
+<body>
+    
+    <nav class="main-navigation">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
+                    <span class="sr-only"></span>
+                        <i class="fa fa-bars"></i>
+                    </span>
+                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
+                </div>
+                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
+                    <ul class="menu">
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
+                            </li>
+                        
+                            <li role="presentation" class="text-center">
+                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<a href="https://github.com/yidao620c">
+    <img style="position: absolute; top: 0; left: 0; border: 0;"
+        src="/img/fork-me.png" alt="Fork me on GitHub">
+</a>
+
+    <section class="content-wrap">
+        <div class="container">
+            <div class="row">
+                <main class="col-md-9 main-content m-post">
+                    <p id="process"></p>
+<article class="post">
+    <div class="post-head">
+        <h1 id="每天5分钟玩转Python（15） - 闭包">
+            
+                每天5分钟玩转Python（15） - 闭包
+            
+        </h1>
+        <div class="post-meta">
+    
+    
+    <span class="categories-meta fa-wrap">
+        <i class="fa fa-folder-open-o"></i>
+        <a href="/categories/python">
+            python
+        </a>
+    </span>
+    
+
+    
+    <span class="fa-wrap">
+        <i class="fa fa-tags"></i>
+        <span class="tags-meta">
+            
+                
+                    <a href="/tags/python教程" title='python教程'>
+                        python教程
+                    </a>
+                
+                    <a href="/tags/5分钟" title='5分钟'>
+                        5分钟
+                    </a>
+                
+            
+        </span>
+    </span>
+    
+
+    
+        
+        <span class="fa-wrap">
+            <i class="fa fa-clock-o"></i>
+            <span class="date-meta">2019/06/15</span>
+        </span>
+        
+            <span class="fa-wrap">
+                <i class="fa fa-eye"></i>
+                <span id="busuanzi_value_page_pv"></span>
+            </span>
+        
+    
+</div>
+
+        
+        
+    </div>
+    
+    <div class="post-body post-content">
+        <p>闭包跟函数式紧密联系在一起的，介绍闭包之前先了解一下python中函数的高阶用法。比如嵌套函数、变量作用域等等。</p>
+<h2 id="变量作用域"><a href="#变量作用域" class="headerlink" title="变量作用域"></a>变量作用域</h2><p>变量作用域是程序运行时变量可被访问的范围，定义在函数内的变量是局部变量，
+局部变量的作用范围只能是函数内部范围内，它不能在函数外引用。</p>
+<pre><code class="line-numbers language-python">def test():
+    num = 10 # 局部变量
+print(num)  # NameError: name &#39;num&#39; is not defined
+</code></pre>
+<p>定义在模块最外层的变量是全局变量，它是全局范围内可见的，当然在函数里面也可以读取到全局变量的。例如：</p>
+<pre><code class="line-numbers language-python">num = 10 # 全局变量
+def test():
+    print(num)  # 10
+</code></pre>
+<p>再来一个示例</p>
+<pre><code class="line-numbers language-python">outer = 6
+def test(arg):
+    print(arg)
+    print(outer)  # 当函数执行到这一步会报错
+                  # UnboundLocalError: local variable &#39;outer&#39; referenced before assignment
+    outer = 9     # 注意这里有了一行对于变量outer的赋值
+test(1)
+</code></pre>
+<p>执行这个示例会报错，Python在编译函数时，发现对 outer 有赋值的操作，它判定 outer 是一个局部变量，
+所以在打印 outer 时，它会去查询局部变量outer，发现并没有赋值，所以会抛出异常。</p>
+<p>Python 就是这样设计的，它认为如果在函数体中对变量有赋值操作，则证明这个变量是一个局部变量，
+并且它只会从局部变量中去读取数据。这样设计可以避免对全局变量的误操作。</p>
+<p>可以使用 <code>global</code> 关键字来解决这个问题：</p>
+<pre><code class="line-numbers language-python">outer = 6
+def test(arg):
+    print(arg)
+    global outer
+    print(outer)  # 6
+    outer = 9 
+    print(outer)  # 9
+test(1)
+</code></pre>
+<h2 id="嵌套函数"><a href="#嵌套函数" class="headerlink" title="嵌套函数"></a>嵌套函数</h2><p>函数不仅可以定义在模块的最外层，还可以定义在另外一个函数的内部，
+像这种定义在函数里面的函数称之为嵌套函数（nested function）例如：</p>
+<pre><code class="line-numbers language-python">def print_msg():
+    # print_msg 是外围函数
+    msg = &quot;hello python&quot;
+    def printer():
+        # printer是嵌套函数
+        print(msg)
+    printer()
+# 输出 hello python
+print_msg()
+</code></pre>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>当我们在函数内定义一个函数时，如果这个内部函数使用了外部函数的临时变量，
+且外部函数的返回值是内部函数的引用时，那么返回的这个内部函数引用就是一个闭包。</p>
+<p>有点绕口，直接上代码比较直观：</p>
+<pre><code class="line-numbers language-python">def simple_avg():
+    scores = []  #外部临时变量
+
+    def inner_avg(val):  # 内部函数，用于计算平均值
+        scores.append(val)  # 使用外部函数的临时变量
+        return sum(scores) / len(scores)  # 返回计算出的平均值
+
+    return inner_avg  # 外部函数返回内部函数引用
+
+
+avg = simple_avg()
+print(avg(10))  # 10
+print(avg(11))  # 10.5
+</code></pre>
+<h2 id="nonlocal-关键字"><a href="#nonlocal-关键字" class="headerlink" title="nonlocal 关键字"></a>nonlocal 关键字</h2><p>上面的代码有一个小缺陷，就是有很多重复的计算，当我们传入一个新的值想要得到新的平均值时，
+总是先将列表中所有值都计算求和，再求平均值，其实已经求和过的结果可以保存起来，
+下一次只需要加最新的那个数就可以了。一般我们会想到这样修改：</p>
+<pre><code class="line-numbers language-python">def simple_avg():
+    scores = 0  # 将外部临时变量由 list 改为一个 整型数值
+    count = 0   # 同时新增一个变量，记录个数
+
+    def inner_avg(val):  # 内部函数，用于计算平均值
+        scores += val  # 使用外部函数的临时变量
+        count += 1
+        return scores / count  # 返回计算出的平均值
+
+    return inner_avg  # 外部函数返回内部函数引用
+
+avg = simple_avg()
+print(avg(10))  # 10
+print(avg(11))  # 10.5
+</code></pre>
+<p>运行后报错：</p>
+<pre><code>UnboundLocalError: local variable &#39;scores&#39; referenced before assignment
+</code></pre><p>这里报错的原因是因为 <code>scores += val</code>，有了赋值操作，则认为 <code>scores</code> 是局部变量了。
+而我们也没办法使用 <code>global</code> 关键字，因为此时 <code>score</code>s 和 <code>count</code> 是定义在 <code>get_avg</code> 函数内的，
+它们俩也是一个局部变量。而为什么我们使用 list 时，没有出现这个问题呢？也是很好理解的，
+因为我们使用的是 <code>list.append()</code> 方法，它没有赋值操作。</p>
+<p>在 Python 3 中引入了一个关键词 nonlocal 解决了这一个问题：</p>
+<pre><code class="line-numbers language-python">def simple_avg():
+    scores = 0  # 将外部临时变量由 list 改为一个 整型数值
+    count = 0   # 同时新增一个变量，记录个数
+
+    def inner_avg(val):  # 内部函数，用于计算平均值
+        nonlocal scores, count
+        scores += val  # 使用外部函数的临时变量
+        count += 1
+        return scores / count  # 返回计算出的平均值
+
+    return inner_avg  # 外部函数返回内部函数引用
+
+avg = simple_avg()
+print(avg(10))  # 10
+print(avg(11))  # 10.5
+</code></pre>
+<p>结果正确返回。</p>
+<h2 id="闭包的应用"><a href="#闭包的应用" class="headerlink" title="闭包的应用"></a>闭包的应用</h2><p>应用最多的就是装饰器，这个会在后面专门讲装饰器。</p>
+<p>另外还有一个比较常用的应用就是惰性求值，具体的可以看下Django里面QuerySet的实现源码。</p>
+
+    </div>
+    
+    <div class="post-footer">
+        <div class="col-sm-10">
+            <div>
+                <b>本文链接</b>：<a href="/2019/06/15/python/tutorial/py15-closure.html">每天5分钟玩转Python（15） - 闭包</a>
+            </div>
+            <div>
+                
+                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
+如转载至微信公众号，请在文末添加作者公众号二维码。
+                
+            </div>
+            <div>
+                
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <img src="/images/wuxiong.jpg" width=100%/>
+        </div>
+    </div>
+</article>
+
+<div class="article-nav prev-next-wrap clearfix">
+    
+        <a href="/2019/06/16/python/tutorial/py16-decorator.html" class="pre-post btn btn-default" title='每天5分钟玩转Python（16） - 装饰器'>
+            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
+            <span class="hidden-xs">每天5分钟玩转Python（16） - 装饰器</span>
+        </a>
+    
+    
+        <a href="/2019/06/14/python/tutorial/py14-filtersorted.html" class="next-post btn btn-default" title='每天5分钟玩转Python（14） - 函数式编程之filter/sorted'>
+            <span class="hidden-lg">下一篇</span>
+            <span class="hidden-xs">每天5分钟玩转Python（14） - 函数式编程之filter/sorted</span><i class="fa fa-angle-right fa-fw"></i>
+        </a>
+    
+</div>
+
+
+    <div id="comments">
+        
+	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: window.location.pathname,
+        owner:"yidao620c",
+        repo:"comments",
+        oauth: {
+          client_id:"608d980b75fc48a1873e",
+          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
+        },
+        perPage:"10",
+    });
+    gitment.render('comments');
+</script>
+
+    </div>
+
+
+
+
+
+                </main>
+                
+                    <aside role="navigation" class="col-md-3 sidebar">
+    
+        <div class="widget">
+            <h3 class="title">搜索</h3>
+            <div id="search-form">
+                <div id="result-mask" class="hide"></div>
+                <div class="search-area">
+                    
+                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
+                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
+                    
+                    
+                </div>
+                <div id="result-wrap" class="hide">
+                    <div id="search-result"></div>
+                </div>
+                <div class="hide">
+                    <template id="search-tpl">
+                        <div class="item">
+                            <a href="/{path}" title="{title}">
+                                <div class="title">{title}</div>
+                                <div class="content">{content}</div>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    
+
+    <div class="widget">
+        <h3 class="title">文章目录</h3>
+        
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#变量作用域"><span class="toc-text">变量作用域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#嵌套函数"><span class="toc-text">嵌套函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#闭包"><span class="toc-text">闭包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nonlocal-关键字"><span class="toc-text">nonlocal 关键字</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#闭包的应用"><span class="toc-text">闭包的应用</span></a></li></ol>
+        
+    </div>
+
+    
+        <div class="widget">
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
+                </div>
+                <div class="col-md-7">
+                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
+                    <ul style="margin-left: -15px;">
+                        <li>技术干货推送</li>
+                        <li><b>为什么我划船不用桨<br/></b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    
+</aside>
+
+                
+            </div>
+        </div>
+    </section>
+    <footer class="main-footer">
+    <div class="container">
+        <div class="row">
+        </div>
+    </div>
+</footer>
+
+<a id="back-to-top" class="icon-btn hide">
+	<i class="fa fa-chevron-up"></i>
+</a>
+<script src="/js/prism/clipboard.min.js"></script>
+<script src="/js/prism/prism.js" async></script>
+
+
+    <div class="copyright">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="busuanzi">
+    
+        访问量:
+        <strong id="busuanzi_value_site_pv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+        &nbsp; | &nbsp;
+        访客数:
+        <strong id="busuanzi_value_site_uv">
+            <i class="fa fa-spinner fa-spin"></i>
+        </strong>
+    
+</div>
+
+            </div>
+            <div class="col-sm-12">
+                <span>Copyright &copy; 2016
+                </span> |
+                <span>
+                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
+                </span> |
+                <span>
+                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+	<script src="/js/search.js?rev=@@hash"></script>
+
+
+
+
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+<script src="/js/app.js?rev=@@hash"></script>
+
+</body>
+</html>
