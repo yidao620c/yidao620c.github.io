@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 23098
 ---
 
 面向对象编程（OOP）跟面向过程编程是两种程序设计思想，OOP将计算机程序视为一组对象的集合，

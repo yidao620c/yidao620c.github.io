@@ -7,6 +7,7 @@ categories: python
 tags:
   - python教程
   - 5分钟
+abbrlink: 61769
 ---
 
 这一篇开始讲解面向对象中最核心的基础知识，包含了继承、多态以及对象的属性访问等。
