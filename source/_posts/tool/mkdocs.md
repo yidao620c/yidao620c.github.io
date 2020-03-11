@@ -82,7 +82,7 @@ echo 'This is about me page'　> docs/about.md
 ```
 
 在配置文件mkdocs.yml中配置增加的页面
-```
+```yaml
 site_name: myproject
 nav:
 - Home: index.md
@@ -90,7 +90,7 @@ nav:
 ```
 
 增加多级文档
-```
+```yaml
 site_name: myproject
 nav:
 - Home: index.md
@@ -101,8 +101,10 @@ nav:
 ```
 
 更改文档主题，修改配置文件mkdocs.yml中的theme值
-```
+```yaml
 site_name: core-algorithm
+site_description: 算法的python实现
+copyright: Copyright © 2020 [XiongNeng](https://www.xncoding.com/)
 
 nav:
 - Home: index.md
@@ -112,14 +114,22 @@ nav:
     - Tutorial: chapters/tutorial.md
 
 theme:
-  name: readthedocs
+  name: mkdocs
+  nav_style: light
+  custom_dir: docs/resources/
   highlightjs: true
   hljs_languages:
     - yaml
-  navigation_depth: 2
-  titles_only: true
-```
 
+markdown_extentions:
+  - admonition
+
+plugins:
+  - search
+
+extra_css:
+  - resources/css/extra.css
+```
 
 ## 内部子页面
 
@@ -131,5 +141,115 @@ theme:
 ```
 [进入子页面](../subpage/)
 ```
+
+## 使用主题的custom_dir
+主题的custom_dir配置选项可用于指向覆盖父主题目录中的文件。父主题将是主题中name配置选项定义的主题。 
+custom_dir中与父主题中的文件同名的任何文件都将替换父主题中同名文件。custom_dir中的任何其他文件都将添加到父主题中。
+custom_dir的内容应该镜像父主题的目录结构。您可以包含模板、JavaScript文件、CSS文件、图像、字体或主题中包含的任何其他媒体文件。
+
+例如，mkdocs主题包含以下目录结构（部分）：
+```
+- css\
+- fonts\
+- img\
+  - favicon.ico
+  - grid.png
+- js\
+- 404.html
+- base.html
+- content.html
+- nav-sub.html
+- nav.html
+- toc.html
+```
+
+要覆盖该主题中包含的任何文件，在docs目录下面新建一个resources目录，然后配置
+```yaml
+theme:
+  name: mkdocs
+  nav_style: light
+  custom_dir: docs/resources/
+```
+
+## 自定义模板
+
+内置主题在模板块中实现了许多部分，可以在main.html模板中单独覆盖。只需在custom_dir中创建一个main.html模板文件，
+并在该文件中定义替换块。 只要确保main.html扩展base.html。例如，要更改MkDocs主题的标题，替换的main.html模板将包含以下内容：
+```
+{% extends "base.html" %}
+
+{% block htmltitle %}
+<title>Custom title goes here</title>
+{% endblock %}
+```
+
+ 在上面的例子中，将使用自定义main.html文件中定义的htmltitle块代替父主题中定义的默认htmltitle块。
+ MkDocs和ReadTheDocs主题提供以下块：
+ 
+* site_meta：包含文档头中的元标记。
+* htmltitle：包含文档头中的页面标题。
+* styles：包含样式表的链接标记。
+* libs：包含页眉中包含的JavaScript库（jQuery等）。
+* scripts：包含应在页面加载后执行的JavaScript脚本。
+* analytics：包含分析脚本。
+* extrahead：<head>中的空块，用于插入自定义标记/脚本/等。
+* site_name：包含导航栏中的站点名称。
+* site_nav：包含导航栏中的站点导航。
+* search_box：包含导航栏中的搜索框。
+* next_prev：包含导航栏中的下一个和上一个按钮。
+* repo：包含导航栏中的GitHub存储库链接。
+* content：包含页面的页面内容和目录。
+* footer：包含页脚。
+
+## 自定义JS脚本
+将JavaScript库添加到custom_dir将使其可用，但系统不会自动将其包含在MkDocs生成的页面中。因此，需要从模板中添加链接到库。
+比如你需要自定义一个my.js脚本给每个页面使用，必须通过如下方式来使用。
+
+首先将js文件放到`docs/resources/js/my.js`，然后修改`docs/resources/main.html`模板：
+```
+{% extends "base.html" %}
+
+{% block htmltitle %}
+    <title>Custom title goes here</title>
+{% endblock %}
+
+{% block libs %}
+    {{ super() }}
+    <script src="{{ base_url }}/js/my.js"></script>
+{% endblock %}
+```
+
+请注意，base_url模板变量用于确保链接始终相对于当前页面。现在生成的页面将包含指向模板提供的库的链接以及custom_dir中包含的库。
+
+## 自定义CSS
+CSS的自定义比较简单，直接通过配置即可，不需要改动模板：
+```yaml
+extra_css:
+  - resources/css/extra.css
+```
+
+## admonition扩展
+
+[admonition](https://python-markdown.github.io/extensions/admonition/)是个很好玩的东西，
+是一个markdown文档的扩展，可通过不同颜色现实告警、备注信息，非常好用。
+
+配置
+```yaml
+markdown_extentions:
+  - admonition
+```
+
+使用方式，
+```
+!!! note
+    this is a tip
+```
+
+可以使用这些：attention, caution, danger, error, hint, important, note, tip, and warning。
+
+
+## 优秀案例
+
+有个mkdocs的非官方中文文档项目，里面的配置值得学习。地址：<https://github.com/zimocode/mkdocs-docs-zh/>
 
 
