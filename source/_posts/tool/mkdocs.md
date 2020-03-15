@@ -297,8 +297,8 @@ theme:
   name: 'material'
   language: 'zh'  # 配置语言
   palette:  # 颜色
-    primary: 'cyan'
-    accent: 'red'
+    primary: 'light blue'
+    accent: 'indigo'
   feature:
     tabs: true  # 横向导航
   custom_dir: 'docs/resources/'
@@ -344,28 +344,45 @@ extra_css:
 则可以设置为true，这时候根据nav的设置分成两级导航。注意的是对于nav中的所有一级页面全部归属为一个组。
 就是刚进来的index.md这个组，如果你不设置index.md主页，则这个组就看不到了。所以一定要有一个index.md的链接。
 
-## 语法习惯
+### extra.css示例
+
+比如我想自定义表头的背景颜色。可通过F12查看源码，把原来的css定义复制到`docs/resource/css/extra.css`下，再修改下
+```css
+.md-typeset table:not([class]) th {
+    min-width: 5rem;
+    padding: .6rem .8rem;
+    background-color: #9facf6;
+    color: #fff;
+    vertical-align: top;
+}
+```
+
+### 语法习惯
 
 1. 使用H1做title
 
 2. 文本修饰（带 ^^下划线^^ 的可修饰行内或段落）
 
-* 加粗`**bold**`, 高亮`==mark me==`
-* 下划线`^^Insert me^^`
-* 删除线`~~Delete me~~`
-* ^^增加^^`{+ + add + +}`, ^^修改^^`{~ ~ is ~> are ~ ~}`
-* ^^删除^^`{- - del - -}`
-* ^^高亮^^`{= = highlight = =}`
-* ^^注释^^`{> > comment < <}`
-* 上标`H^2^0`, `text^a\ superscript^`
-* 下标`CH~3~CH~2~OH`, `text~a\ subscript~`
-* 行内代码高亮：`:::language mycode` or `#!language mycode`
+* 加粗 **bold**
+* 斜体字 _斜体字_
+* 加粗斜体 ___粗斜体___
+* 下划线 ^^Insert me^^
+* 删除线 ~~Delete me~~
+* 增加 {++ add ++}
+* 修改 {~~ is ~> are ~~}
+* 删除 {-- del --}
+* 高亮 {== highlight ==}
+* 注释 {>> comment <<}
+* 上标 H^2^O, text^a\ superscript^
+* 下标 CH~3~CH~2~OH, text~a\ subscript~
+* 行内代码高亮：`:::java System.out.println("hello");` or `#!python println('hello')`
+* 键盘快捷键标签：++ctrl+alt+f++
 
-符号参见[SmartSymbols](https://github.com/islibra/wiki/blob/master/docs/coding/writing/mkdocs.md#smartsymbols)
+更多有趣的符号参见[PyMdown](https://facelessuser.github.io/pymdown-extensions/)
 
-3. 注释块使用>
+3. 注释块使用`>`
 
-4. 代码块添加tab="xxx"分组，添加hl_lines="3 4"高亮行
+4. 代码块添加`tab="xxx"`分组，添加`hl_lines="3 4"`高亮行
 
 代码块嵌套在列表中，==缩进4个空格==
 ```
@@ -378,16 +395,21 @@ extra_css:
 - list2
 ```
 
-5. 提示块[admonition](https://python-markdown.github.io/extensions/admonition/)
+5. 提示块[Admonition](https://python-markdown.github.io/extensions/admonition/)
 
-示例，==前后要有空行== ，如果嵌套在列表中，==缩进4个空格==
 ```
 !!! note "custom title or blank"
     text
 
 # 可折叠，+默认打开
-???+ note "custom title or blank"
-    text
+???+ danger highlight blink "custom title or blank"
+    text vtext text, text, v<br>
+    text vtext text, text, v
+    ```python
+    text1 = "Hello, "
+    text2 = "world!"
+    print text1 + text2
+    ```
 ```
 
 类型说明
@@ -407,14 +429,29 @@ extra_css:
 ```
 
 6. 列表使用
+
 * 一级列表使用`-`
 * 二级列表使用`*`
 * 三级列表使用`+`
 * 子级列表缩进4个空格
 * 使用复选框：`- [x] item`
-* 列表内容换行： ==行尾2个空格==
+* 列表内容换行：行尾2个空格。Admonition中的换行也是一样，结尾2个空格
+
+复选框列表示例，其中`[ ]`表示不打勾，`[x]`表示打勾
+
+```
+- [x] Lorem ipsum dolor sit amet, consectetur adipiscing elit
+- [x] Curabitur elit nibh, euismod et ullamcorper at, iaculis feugiat est
+- [ ] Vestibulum convallis sit amet nisi a tincidunt
+    - [x] In hac habitasse platea dictumst
+    - [x] Sed egestas felis quis elit dapibus, ac aliquet turpis mattis
+    - [ ] Praesent sed risus massa
+- [x] Aenean pretium efficitur erat, donec pharetra, ligula non scelerisque
+- [ ] Nulla vel eros venenatis, imperdiet enim id, faucibus nisi
+```
 
 7.表格
+
 ```
 First Header | Second Header | Third Header
 :----------- |:-------------:| -----------:
