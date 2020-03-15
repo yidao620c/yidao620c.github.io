@@ -136,10 +136,10 @@ extra_css:
 注意并不需要将所有的页面都放到nav导航上面，只需要将你要显示的菜单放到导航上面。
 内部页面可通过页面上的链接过去非常方便，但是要注意最好使用相对路径进行链接。
 
-比如我想进入跟当前页面同级的某个页面叫subpage.md，则使用如下的方式：
+比如我想进入跟当前页面同级的某个页面叫subpage.md，则使用如下的方式，mkdoc会自己处理这个链接的实际地址：
 
 ```
-[进入子页面](../subpage/)
+[进入子页面](subpage.md)
 ```
 
 ## 使用主题的custom_dir
@@ -246,6 +246,180 @@ markdown_extentions:
 ```
 
 可以使用这些：attention, caution, danger, error, hint, important, note, tip, and warning。
+
+## material主题
+
+这个主题更加强大一点，比如它支持中文全局搜索。
+
+首先安装主题和一些常用插件，比如导出pdf
+```
+# 第一步先下载安装gtk3-runtime-3.xxx-ts-win64.exe，去下面的路径下载最新的然后安装
+# https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases
+pip install --upgrade setuptools
+pip install mkdocs-material
+#pip install mkdocs-pdf-export-plugin #这个插件有点晚问题，等它更新了再玩
+```
+
+注意：安装tgk3后，自动会将它的bin加入到PATH中，但是后面运行的时候回出现异常`cannot load library 'libcairo.so':`。
+解决办法是将这个bin路径放到PATH的第一个位置即可。太机智了
+
+完整配置
+```yaml
+site_name: 'core-algorithm'
+site_author: '熊能'
+site_description: '看我七十二变'
+site_url: 'https://www.xncoding.com/'
+copyright: Copyright © 2020 XiongNeng
+
+# 源码地址
+#repo_name: 'yidao620c/core-algorithm'
+#repo_url: 'https://github.com/yidao620c/core-algorithm'
+#edit_uri: 'blob/master/docs/'
+
+nav:
+- Index: index.md
+- Documents:
+  - 第一部分:
+    - 数据结构: chapters/chapter1/post01.md
+    - IO操作: chapters/chapter1/post02.md
+  - 第二部分:
+    - 多线程: chapters/chapter2/post03.md
+    - 面向对象编程: chapters/chapter2/post04.md
+    - 网络编程: chapters/chapter2/post05.md
+    - 备忘录:
+        - 我爱你: chapters/chapter2/temp/temp01.md
+        - 买个锤子: chapters/chapter2/temp/temp02.md
+- 关于我们:
+  - About: about.md
+
+#主题
+theme:
+  name: 'material'
+  language: 'zh'  # 配置语言
+  palette:  # 颜色
+    primary: 'cyan'
+    accent: 'red'
+  feature:
+    tabs: true  # 横向导航
+  custom_dir: 'docs/resources/'
+
+markdown_extensions:
+  - admonition  # 提示块
+  - footnotes  # 脚注
+  - meta  # 定义元数据，通过文章上下文控制，如disqus
+  - pymdownx.caret  # 下划线上标
+  - pymdownx.tilde  # 删除线下标
+  - pymdownx.critic  # 增加删除修改高亮注释，可修饰行内或段落
+  - pymdownx.details  # 提示块可折叠
+  - pymdownx.inlinehilite  # 行内代码高亮
+  - pymdownx.mark  # 文本高亮
+  - pymdownx.smartsymbols  # 符号转换
+  - pymdownx.superfences  # 代码嵌套在列表里
+  - codehilite:    # 代码高亮，显示行号
+      guess_lang: false
+      linenums: true
+  - toc:  # 锚点
+      permalink: true
+#  - pymdownx.arithmatex  # 数学公式
+  - pymdownx.betterem:  # 对加粗和斜体更好的检测
+      smart_enable: all
+#  - pymdownx.emoji:  # 表情
+#      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+#  - pymdownx.magiclink  # 自动识别超链接
+  - pymdownx.tasklist:  # 复选框checklist
+      custom_checkbox: true
+
+# PDF导出插件
+plugins:
+  - search
+#  - pdf-export #这个插件还有点问题，没有更新
+
+#扩展样式
+extra_css:
+  - resources/css/extra.css
+```
+
+这里说明一下`tabs: true  # 横向导航`，material主题支持将一级横向和二级纵向导航。
+默认为false表示只支持左边纵向导航，效果也不错。如果是手机小屏幕则可以选择此选项。如果文档是写给电脑大屏看的，
+则可以设置为true，这时候根据nav的设置分成两级导航。注意的是对于nav中的所有一级页面全部归属为一个组。
+就是刚进来的index.md这个组，如果你不设置index.md主页，则这个组就看不到了。所以一定要有一个index.md的链接。
+
+## 语法习惯
+
+1. 使用H1做title
+
+2. 文本修饰（带 ^^下划线^^ 的可修饰行内或段落）
+
+* 加粗`**bold**`, 高亮`==mark me==`
+* 下划线`^^Insert me^^`
+* 删除线`~~Delete me~~`
+* ^^增加^^`{+ + add + +}`, ^^修改^^`{~ ~ is ~> are ~ ~}`
+* ^^删除^^`{- - del - -}`
+* ^^高亮^^`{= = highlight = =}`
+* ^^注释^^`{> > comment < <}`
+* 上标`H^2^0`, `text^a\ superscript^`
+* 下标`CH~3~CH~2~OH`, `text~a\ subscript~`
+* 行内代码高亮：`:::language mycode` or `#!language mycode`
+
+符号参见[SmartSymbols](https://github.com/islibra/wiki/blob/master/docs/coding/writing/mkdocs.md#smartsymbols)
+
+3. 注释块使用>
+
+4. 代码块添加tab="xxx"分组，添加hl_lines="3 4"高亮行
+
+代码块嵌套在列表中，==缩进4个空格==
+```
+- list1
+    - sublist1
+        ```
+        code
+        ```
+    - sublist2
+- list2
+```
+
+5. 提示块[admonition](https://python-markdown.github.io/extensions/admonition/)
+
+示例，==前后要有空行== ，如果嵌套在列表中，==缩进4个空格==
+```
+!!! note "custom title or blank"
+    text
+
+# 可折叠，+默认打开
+???+ note "custom title or blank"
+    text
+```
+
+类型说明
+```
+??? abstract "摘要，总结" abstract, summary, tldr
+??? tip "贴士" tip, hint, important
+??? note "注释，代码片段，说明" note, snippet, seealso
+??? example "举例，列表" example
+??? quote "引用，参考链接" quote, cite
+??? info "提示，TODO" info, todo
+??? warning "警告" warning, caution, attention
+??? danger "危险" danger, error
+??? success "成功，勾选，完成" success, check, done
+??? fail "失败" failure, fail, missing
+??? faq "问题，疑问，帮助" question, help, faq
+??? bug "BUG" bug
+```
+
+6. 列表使用
+* 一级列表使用`-`
+* 二级列表使用`*`
+* 三级列表使用`+`
+* 子级列表缩进4个空格
+* 使用复选框：`- [x] item`
+* 列表内容换行： ==行尾2个空格==
+
+7.表格
+```
+First Header | Second Header | Third Header
+:----------- |:-------------:| -----------:
+Left         | Center        | Right
+```
 
 
 ## 优秀案例
