@@ -10,4 +10,12 @@
 
 ### 更新索引
 
+```
 hexo algolia
+```
+
+### 发布
+```
+hexo clean && hexo g && hexo d
+```
+
