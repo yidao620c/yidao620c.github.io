@@ -12,13 +12,13 @@ abbrlink: 17610
 迭代(iteration)指的是去获取元素的一种方式，一个接一个。当你显式或隐式的使用循环来遍历某个元素集的时候，那就是迭代。
 
 在Python里面，可迭代对象(iterable)和迭代器(iterator)有着特殊的含义。
-<!-- more -->
 
 * `iterable`是实现了`__iter__()`方法的对象，该方法会返回一个`iterator`对象
 * `iterator`是实现了`__iter__()`和`__next__()`方法的对象，`__iter__()`方法返回的是`iterator`对象本身
 
 由此可见，`iterable`和`iterator`的本质区别就是后者多了一个`__next__()`方法。
 也就是说一个`iterator`对象必定是一个`iterable`对象。
+<!-- more -->
 
 当你使用一个`for`循环或者`map`，或着一个列表推导，那么会先通过iter()获取相应的迭代器，
 然后每次循环自动通过`next`方法调用这个迭代器(iterator)，从中获取每一个元素，从而完成迭代过程。

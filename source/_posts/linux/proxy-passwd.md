@@ -18,7 +18,6 @@ export ftp_proxy = http://username:password@yourproxy:8080/
 ```
 
 但是这种直接在配置文件里面写自己域账号的明文密码很不安全，如果是几个人共享一台机器，其他人可以直接看到你的密码。
-<!-- more -->
 
 解决办法是将自己的域密码进行加密存储，步骤如下：
 
@@ -28,6 +27,7 @@ export ftp_proxy = http://username:password@yourproxy:8080/
 openssl enc -aes-256-cbc -in /etc/profile.d/pw.txt -out /etc/profile.d/pw.bin
 ```
 得到加密后的密文，然后删除明文密码文件pw.txt。
+<!-- more -->
 
 接下来在`/etc/profile`中创建2个别名命令：
 

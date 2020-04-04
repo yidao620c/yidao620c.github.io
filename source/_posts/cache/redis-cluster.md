@@ -8,7 +8,9 @@ tags: redis
 abbrlink: 26224
 ---
 
-Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，一个master带多个slave，另外一种是cluster模式，由多组master-slave组成。
+Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，一个master带多个slave，
+另外一种是cluster模式，由多组master-slave组成。
+<!-- more -->
 
 ## 主从模式
 
@@ -17,7 +19,6 @@ Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，
 ### 安装docker
 
 这里省略
-<!-- more -->
 
 ### 在docker库获取镜像：redis，ruby
 

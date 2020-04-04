@@ -8,8 +8,6 @@ tags: java
 abbrlink: 32455
 ---
 
-**用缓存器操纵数据**
-
 Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。
 下表是用于设置和复位索引以及查询它们的方法：
 

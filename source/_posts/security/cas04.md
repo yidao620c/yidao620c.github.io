@@ -10,16 +10,13 @@ abbrlink: 60619
 ---
 
 通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。
+统一使用 SpringBoot+Meven 构建。
 
-## 项目架构
-
-统一使用 SpringBoot+Meven 构建
-
-项目                        | 地址                                | 说明
-----------------------------|------------------------------------|-------------------
-cas-overlay                 | https://cas.server.com:8443/cas    | cas-server 服务端
-cas-app1                    | http://app1.com:8181               | cas-client 客户端1
-cas-app2                    | http://app2.com:8282               | cas-client 客户端2
+| 项目                        | 地址                              | 说明 |
+|--------------------------- |----------------------------------|------------------|
+| cas-overlay                | https://cas.server.com:8443/cas  | cas-server 服务端 |
+| cas-app1                   | http://app1.com:8181             | cas-client 客户端1 |
+| cas-app2                   | http://app2.com:8282             | cas-client 客户端2 |
 
 接下来，老夫就要开始飙车了。
 <!-- more -->

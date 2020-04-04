@@ -13,7 +13,6 @@ date: 2017-04-03 08:26:12
 
 hello-world 是 Docker 官方提供的一个镜像，通常用来验证 Docker 是否安装成功。
 我先从这个最小镜像开始说下，之前已经把它下载下来了。
-<!-- more -->
 
 hello-world 的 Dockerfile 内容如下：
 ```
@@ -23,6 +22,7 @@ CMD ["/hello"]  # 容器启动时，执行 /hello
 ```
 
 镜像 hello-world 中就只有一个可执行文件 “hello”，其功能就是打印出 “Hello from Docker ......” 等信息。
+<!-- more -->
 
 /hello 就是文件系统的全部内容，连最基本的 /bin，/usr, /lib, /dev 都没有。
 

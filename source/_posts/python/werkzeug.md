@@ -12,7 +12,6 @@ Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在P
 这里稍微说一下，werkzeug不是一个web服务器，也不是一个web框架，而是一个工具包，
 官方的介绍说是一个WSGI工具包，它可以作为一个Web框架的底层库，
 因为它封装好了很多Web框架的东西，例如 Request，Response 等等。
-<!-- more -->
 
 例如我最常用的Flask框架就是以Werkzeug为基础开发的，这也是我要专门探究Werkzeug底层的原因，
 因为我想知道Flask的实现逻辑以及底层控制。这篇文章没有涉及到Flask的相关内容，
@@ -22,6 +21,7 @@ Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在P
 
 另外我还提一下python里面另一个函数库就是[Requests](http://python-requests.org/)，这是一个HTTP客户端库。
 跟Werkzeug没有可比性，一个客户端库，一个服务器端库。
+<!-- more -->
 
 ## WSGI
 关于WSGI我这里再不重复讲了，专门写了篇[《WGSI简易教程》](https://www.xncoding.com/2016/04/22/python/wsgi.html)说明，

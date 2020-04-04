@@ -10,12 +10,12 @@ abbrlink: 56478
 
 你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录，
 这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！
+<!-- more -->
 
 ## 编辑和删除的认证
 我们需要保护post_new, post_edit和post_publish这三个视图，只有登录用户才有权去执行。
 django为我们提供了很好的帮助类，其实就是利用了python中的decorators技术。
 django中认证的装饰器位于模块django.contrib.auth.decorators中，名称叫login_required。
-<!-- more -->
 
 编辑blog/views.py文件，在import部分添加如下的导入语句：
 ```python

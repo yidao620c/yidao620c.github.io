@@ -10,7 +10,6 @@ abbrlink: 41580
 ---
 
 先备份
-
 ```bash
 mv /etc/yum.repos.d/CentOS-Base.repo{,.bak}
 ```

@@ -14,16 +14,13 @@ abbrlink: 64400
 
 完整源码请参考 [GitHub源码](https://github.com/yidao620c/thinking-java/tree/master/src/main/java/ch02utils/crypto)
 
-## 对称加密算法
-
-**对称加密算法概念**
+对称加密算法概念
 
 加密密钥和解密密钥相同，大部分算法加密揭秘过程互逆。
 
 特点：算法公开、（相比非对称加密）计算量小、加密速度快、效率高。
 
 弱点：双方都使用同样的密钥，安全性得不到保证。
-<!-- more -->
 
 常用对称加密算法
 
@@ -32,6 +29,7 @@ abbrlink: 64400
 * AES（Advanced Encryption Standard，3DES加强版）
 
 这里只列出最常用的AES算法实现，也是安全等级最高，推荐使用的对称加密算法，其他实现请参考我的GitHub上的源码。
+<!-- more -->
 
 ```java
 /**

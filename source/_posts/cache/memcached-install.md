@@ -13,16 +13,14 @@ abbrlink: 7044
 memcached下载地址：[memcached-1.4.15.tar.gz](http://memcached.googlecode.com/files/memcached-1.4.15.tar.gz)
 
 libevent下载地址：[libevent-2.0.21-stable.tar.gz](https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz)
-<!-- more -->
 
-### 具体安装步骤
-
-#### 安装libevent
+安装libevent
 
 1. 由于memcached依赖于libevent，因此需要安装libevent。由于linux系统可能默认已经安装libevent，执行命令：
 ```bash
 rpm -qa|grep libevent 
 ```
+<!-- more -->
 1. 查看系统是否带有该安装软件，如果有执行命令:
 ```bash
 # 由于系统自带的版本旧，忽略依赖删除
@@ -36,7 +34,7 @@ cd libevent-2.0.21-stable
 make
 make install
 ```
-至此libevent安装完毕；
+至此libevent安装完毕。
 
 #### 安装memcached
 

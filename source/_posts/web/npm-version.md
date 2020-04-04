@@ -10,6 +10,7 @@ abbrlink: 48779
 ---
 
 初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。
+<!-- more -->
 
 ## NPM中的版本号规则
 
@@ -18,7 +19,6 @@ abbrlink: 48779
 major.minor.patch
 
 主版本号.次版本号.修补版本号
-<!-- more -->
 
 ### 版本匹配规则
 

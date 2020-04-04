@@ -13,13 +13,14 @@ abbrlink: 64830
 在IDEA里面只能看到依赖A，不管咋样都看不到依赖httpclient。
 
 我在IDEA的项目B里面，打包后在控制台发现一个告警：
-<!-- more -->
 
 ```
-the POM for A is invalid, transitive dependencies (if any) will not be available, enable debug logging for more details
+the POM for A is invalid, transitive dependencies (if any) will not be available, 
+enable debug logging for more details
 ```
 
 原来是jar包A的pom依赖有问题。
+<!-- more -->
 
 ## 问题排查
 

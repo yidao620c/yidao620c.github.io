@@ -9,13 +9,9 @@ date: 2018-05-22 12:35:12
 
 这里总结常用软件的容器化安装步骤，环境为CentOS7。
 
-环境准备要先安装Docker软件，配置好国内加速镜像，这个可以参考我的Docker教程入门篇。
-这里不再多讲。
-
-## MySQL
+环境准备要先安装Docker软件，配置好国内加速镜像，这个可以参考我的Docker教程入门篇。这里不再多讲。
 
 这里演示如何在CentOS7上面通过Docker安装MySQL8版本。
-<!-- more -->
 
 拉取镜像文件：
 ```
@@ -30,6 +26,7 @@ docker run -d -p 13306:3306 --name mysql \
 -v /data/mysql/data:/var/lib/mysql \
 mysql/mysql-server
 ```
+<!-- more -->
 
 首先执行下面命令查看容器日志，找到MySql的root账户的密码：
 ```

@@ -14,7 +14,6 @@ abbrlink: 32465
 ```python
 my_list = [f(x) for x in sequence if cond(x)]
 ```
-<!-- more -->
 
 *字典推导式（dictionary comprehension）*
 ```python
@@ -35,6 +34,7 @@ my_generator = (f(x) for x in sequence if cond(x))
 这篇文章我想深入的讲解这个`yield`关键字，它到底是个什么东西，为什么它如此的重要，以及我们该如何去使用它。
 
 注意：近些年来，随着越来越多的特性被加入到PEP中，生成器变得越来越强大。我在下一篇文章会深入讲解协程、多任务协作和异步I/O这些高阶知识，来见识下`yield`的威力。
+<!-- more -->
 
 ### yield关键字
 当我们调用一个普通的函数时，执行过程从第一条语句开始，直到碰到一个`return`语句或者遇到一个异常抛出，

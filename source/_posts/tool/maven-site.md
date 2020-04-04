@@ -9,9 +9,7 @@ tags:
 abbrlink: 36871
 ---
 
-## 本地生成预览
-
-修改父模块的pom.xml:
+本地生成预览，修改父模块的pom.xml:
 ```xml
 <site>
     <id>${project.artifactId}-site</id>
@@ -24,7 +22,7 @@ abbrlink: 36871
 mvn clean && mvn site:site && mvn site:stage
 ```
 
-目标站点在target/stage目录下面
+目标站点在`target/stage`目录下面
 <!-- more -->
 
 ## 部署到服务器

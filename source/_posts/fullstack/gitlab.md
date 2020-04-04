@@ -11,12 +11,9 @@ abbrlink: 54935
 内部需要搭建一个源码管理控制环境，选择开源的gitlab，环境为centos7。这个平台类似于github，使用起来非常方便。
 现在将搭建的步骤记录下来，因为官网上面提供的是ubuntu的流程。
 
-全部命令都是在 root 用户下执行
+全部命令都是在 root 用户下执行。安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。
 
-安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。
-<!-- more -->
-
-## 安装和添加基础工具
+安装和添加基础工具
 ```bash
 yum install wget
 ```
@@ -27,6 +24,7 @@ yum install epel-release
 wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://www.fedoraproject.org/static/0608B895.txt
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 ```
+<!-- more -->
 
 添加RemiRPM仓库
 ```bash

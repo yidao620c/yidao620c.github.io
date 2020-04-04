@@ -11,14 +11,11 @@ abbrlink: 48915
 
 这一篇会介绍git的一些常用技巧，开发中经常会遇到的问题，让我们感受git的强大之处。
 
-## cherry-pick
-
-我直接把它翻译成'摘樱桃'可以不？
+**cherry-pick**我直接把它翻译成'摘樱桃'可以不？
 
 `git cherry-pick`可以选择某一个分支中的一个或几个commit(s)来进行操作。假设我们有个稳定版本的分支master，
 另外还有个开发版本的分支dev，我们不能直接把两个分支合并，这样会导致稳定版本混乱，但是又想增加一个dev中的功能到master中，
 这里就可以使用cherry-pick了，其实也就是对已经存在的commit 进行再次提交。
-<!-- more -->
 
 简单用法：
 
@@ -29,6 +26,7 @@ git cherry-pick <commit id>
 注意：当执行完 cherry-pick 以后，将会生成一个新的提交；这个新的提交的哈希值和原来的不同，但描述一样；
 
 做一个简单演示，一个readme.txt文件、两个分支（master/dev）
+<!-- more -->
 
 master的提交历史如下：
 

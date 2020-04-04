@@ -13,7 +13,6 @@ abbrlink: 22433
 我们可以使用多线程来并行的处理任务，也可以使用spring提供的异步处理方式@Async。
 
 Spring异步线程池的接口类，其实质是`java.util.concurrent.Executor`。
-<!-- more -->
 
 Spring 已经实现的异常线程池：
 
@@ -24,6 +23,7 @@ Spring 已经实现的异常线程池：
 5. `ThreadPoolTaskExecutor`：最常使用，推荐。其实质是对`java.util.concurrent.ThreadPoolExecutor`的包装
 
 在异步处理的方法上添加注解`@Async`，就会启动一个新的线程去执行。
+<!-- more -->
 
 ## 开启异步配置
 

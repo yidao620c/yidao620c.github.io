@@ -13,9 +13,7 @@ abbrlink: 58473
 
 开源数据库里面mysql的份额最高，也是最流行的，其实性能也非常高，所以一直用它。
 
-## 安装和配置
 在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。
-<!-- more -->
 
 从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 `wget` 下载：
 ```bash
@@ -26,6 +24,7 @@ wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
 ```bash
 yum -y install mysql57-community-release-el7-8.noarch.rpm
 ```
+<!-- more -->
 
 搜索 mysql server
 ```bash

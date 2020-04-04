@@ -12,7 +12,6 @@ abbrlink: 6532
 而网上的一些教程很多都过时了。最近看到一个外文的教程非常不错，网址是：<http://tutorial.simpleblog.org/>，
 这个是基于django1.9和python3.4，通俗易懂，非常适合新手入门。
 那么我自己参考这个整理了一下这个教程，同时还将源码上传到GitHub上去了。希望对于大家有帮助。教程中如果有不足之处希望大家不吝赐教 ^_^
-<!-- more -->
 
 参考教程：<http://tutorial.simpleblog.org/>
 
@@ -21,6 +20,7 @@ GitHub项目地址：<https://github.com/yidao620c/simpleblog>
 演示地址：<https://yidao620.pythonanywhere.com/>
 
 非常期待有人合作一起完成正式版1.0。目前有74个人fork，但暂时还木有收到任何的pull requests。→_→
+<!-- more -->
 
 ### Django是神马？
 

@@ -8,14 +8,13 @@ tags: redis
 abbrlink: 6110
 ---
 
-1）strings类型及操作
+strings类型及操作
 
 string是最简单的类型，你可以理解成与Memcached是一模一样的类型，一个key对应一个value，
 其上支持的操作与Memcached的操作类似。但它的功能更丰富。
 
 string类型是二进制安全的。意思是redis的string可以包含任何数据，比如jpg图片或者序列化的对象。
 从内部实现来看其实string可以看作byte数组，最大上限是1G字节，下面是string类型的定义:
-<!-- more -->
 
 ```c
 struct sdshdr {
@@ -25,6 +24,7 @@ struct sdshdr {
 };
 ```
 len是buf数组的长度。
+<!-- more -->
 
 free是数组中剩余可用字节数，由此可以理解为什么string类型是二进制安全的了，因为它本质上就是个byte数组，当然可以包含任何数据了
 

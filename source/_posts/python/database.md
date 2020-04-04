@@ -13,15 +13,15 @@ abbrlink: 28821
 
 对于安装MySQL就不做介绍了，安装完后，还需要安装去驱动。因为需要支持Python的MySQL驱动来连接到MySQL服务器。
 MySQL的驱动有多种实现，比如纯python实现的pymysql和mysql-connector，或者mysql-python也就是MySQLdb。
-<!-- more -->
 
 这里我通过mysql-connector来介绍使用方法：
-```python
+```bash
 pip install mysql-connector
 ```
+<!-- more -->
 
 我们演示如何连接到MySQL服务器的test数据库：
-```python
+```
 # 导入MySQL驱动:
 >>> import mysql.connector
 # 注意把password设为你的root口令:

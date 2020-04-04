@@ -13,7 +13,6 @@ abbrlink: 58127
 datetime是python处理日期和时间的标准库。
 
 python中有一个datetime模块，里面有个datetime类，这里大家先要弄清楚，很容易搞混。
-<!-- more -->
 
 所以我们获取当前日期和时间的代码如下：
 ```python
@@ -23,9 +22,9 @@ print(now)
 print(type(now))
 # <class 'datetime.datetime'>
 ```
-如果仅导入import datetime，则必须引用全名datetime.datetime
-
-datetime.now()返回当前日期和时间，其类型是datetime 
+如果仅导入·import datetime·，则必须引用全名`datetime.datetime`。
+`datetime.now()`返回当前日期和时间，其类型是datetime 
+<!-- more -->
 
 ## 获取指定日期和时间
 要指定某个日期和时间，我们直接用参数构造一个datetime

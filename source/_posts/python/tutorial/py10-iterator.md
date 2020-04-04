@@ -16,12 +16,12 @@ abbrlink: 56932
 实际上除了这几类内置类型外，for循环还能操作generator类型，也就是迭代器类型。
 
 generator类型包括生成器和带`yield的`生成器函数。
-<!-- more -->
 
 在Python里面，可迭代对象(iterable)和迭代器(iterator)有着特殊的含义。
 
 1. `iterable`是实现了`__iter__()`方法的对象，该方法会返回一个`iterator`对象
 1. `iterator`是实现了`__iter__()`和`__next__()`方法的对象，`__iter__()`方法返回的是`iterator`对象本身
+<!-- more -->
 
 由此可见，`iterable`和`iterator`的本质区别就是后者多了一个`__next__()`方法。
 也就是说一个`iterator`对象必定是一个`iterable`对象。

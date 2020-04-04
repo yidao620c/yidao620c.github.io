@@ -16,9 +16,6 @@ mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Ga
 
 我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。
 对于小公司，一般推荐使用keepalived+双主，简单。
-<!-- more -->
-
-## Mysql数据库复制原理
 
 当主从复制正在进行中时，如果想查看从库两个线程运行状态，
 可以通过执行在从库里执行 `show slave status\G` 语句，以下的字段可以给你想要的信息：
@@ -29,6 +26,7 @@ Read_Master_Log_Pos   — 主库的binlog文件被拷贝到从库的relay log中
 Relay_Master_Log_File — SQL线程当前处理中的relay log文件
 Exec_Master_Log_Pos   — 当前binlog文件正在被执行的语句的位置
 ```
+<!-- more -->
 
 整个主从复制的流程可以通过以下图示理解：
 

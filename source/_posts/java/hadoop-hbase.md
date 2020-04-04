@@ -14,10 +14,8 @@ abbrlink: 23240
 在linux环境安装Hadoop之前，我们需要使用到ssh，所以要先安装ssh，并且创建一个hadoop用户
 
 **备注：** 下面所有的命令中，以#开头的表示是root用户，以$开头的是普通用户
-<!-- more -->
 
-### 安装SSH
-先切换到root用户，执行下列步骤
+安装SSH，先切换到root用户，执行下列步骤
 ```bash
 rpm -qa |grep ssh  #检查是否装了SSH包
 yum install openssh-server  #安装ssh
@@ -25,6 +23,7 @@ chkconfig --list sshd #检查SSHD是否设置为开机启动
 chkconfig --level 2345 sshd on  #如果没设置启动就设置下.
 service sshd restart  #重新启动
 ```
+<!-- more -->
 
 ### 创建hadoop用户
 ```bash
