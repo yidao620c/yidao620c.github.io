@@ -359,12 +359,35 @@ Spring Batch框架提供了一个JobLauncher的实现类SimpleJobLauncher。</p>
 <h2 id="并发执行多个Job"><a href="#并发执行多个Job" class="headerlink" title="并发执行多个Job"></a>并发执行多个Job</h2><p>SpringBatch批处理框架默认使用单线程完成所有任务的执行，官方推荐配置任务执行器来并发执行，
 提高批处理的效率。</p>
 <p>Spring Core 为我们提供了多种执行器实现（包括多种异步执行器），我们可以根据实际情况灵活选择使用。</p>
-<p>类名                         | 描述                                        | 是否异步
--------------------------|---------------------------------------------|-------------------------
-SyncTaskExecutor         | 简单同步执行器                               | 否
-SimpleAsyncTaskExecutor     | 简单异步执行器，提供最基本的异步实现          | 是
-WorkManagerTaskExecutor  | 该类作为通过 JCA 规范进行任务执行的实现       | 是
-ThreadPoolTaskExecutor   | 线程池任务执行器                             | 是</p>
+<table>
+<thead>
+<tr>
+<th>类名</th>
+<th>描述</th>
+<th>是否异步</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SyncTaskExecutor</td>
+<td>简单同步执行器</td>
+<td>否</td>
+</tr>
+<tr>
+<td>SimpleAsyncTaskExecutor</td>
+<td>简单异步执行器，提供最基本的异步实现</td>
+<td>是</td>
+</tr>
+<tr>
+<td>WorkManagerTaskExecutor</td>
+<td>该类作为通过 JCA 规范进行任务执行的实现</td>
+<td>是</td>
+</tr>
+<tr>
+<td>ThreadPoolTaskExecutor</td>
+<td>线程池任务执行器</td>
+<td>是</td>
+</tr>
+</tbody></table>
 <p>配置线程池执行Job：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> ThreadPoolTaskExecutor <span class="title">taskExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ThreadPoolTaskExecutor taskExecutor = <span class="keyword">new</span> ThreadPoolTaskExecutor();</span><br><span class="line">    taskExecutor.setCorePoolSize(<span class="number">5</span>);</span><br><span class="line">    taskExecutor.setMaxPoolSize(<span class="number">10</span>);</span><br><span class="line">    taskExecutor.setQueueCapacity(<span class="number">200</span>);</span><br><span class="line">    <span class="keyword">return</span> taskExecutor;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> SimpleJobLauncher <span class="title">jobLauncher</span><span class="params">(ThreadPoolTaskExecutor taskExecutor, DruidDataSource dataSource,</span></span></span><br><span class="line"><span class="function"><span class="params">                                     PlatformTransactionManager transactionManager)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    SimpleJobLauncher jobLauncher = <span class="keyword">new</span> SimpleJobLauncher();</span><br><span class="line">    jobLauncher.setTaskExecutor(taskExecutor);</span><br><span class="line">    jobLauncher.setJobRepository(jobRepository(dataSource, transactionManager));</span><br><span class="line">    <span class="keyword">return</span> jobLauncher;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 

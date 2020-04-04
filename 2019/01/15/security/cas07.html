@@ -241,20 +241,43 @@
 <a id="more"></a>
 
 <h2 id="系统架构"><a href="#系统架构" class="headerlink" title="系统架构"></a>系统架构</h2><p>统一使用 SpringBoot+Meven，app1 和 app2 内容一致。</p>
-<p>文件名           | 域名                              | 功能
-----------------|-----------------------------------|----------------------------------
-cas-app1        | http://app1.com:8181/fire         | 客户端1[cas-client在此]
-cas-app2        | http://app2.com:8282/water        | 客户端2[cas-client在此]
-sso-server      | http://sso.server.com:8889/sso    | 自定义SSO服务，管理单点登录的用户
-cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server</p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>域名</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cas-app1</td>
+<td><a href="http://app1.com:8181/fire" target="_blank" rel="noopener">http://app1.com:8181/fire</a></td>
+<td>客户端1[cas-client在此]</td>
+</tr>
+<tr>
+<td>cas-app2</td>
+<td><a href="http://app2.com:8282/water" target="_blank" rel="noopener">http://app2.com:8282/water</a></td>
+<td>客户端2[cas-client在此]</td>
+</tr>
+<tr>
+<td>sso-server</td>
+<td><a href="http://sso.server.com:8889/sso" target="_blank" rel="noopener">http://sso.server.com:8889/sso</a></td>
+<td>自定义SSO服务，管理单点登录的用户</td>
+</tr>
+<tr>
+<td>cas-server-rest</td>
+<td><a href="http://cas.server.com:8484/cas" target="_blank" rel="noopener">http://cas.server.com:8484/cas</a></td>
+<td>CAS-Server</td>
+</tr>
+</tbody></table>
 <p>本地hosts文件配置如下:</p>
 <figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span>    cas.server.com</span><br><span class="line"><span class="number">127.0.0.1</span>    sso.server.com</span><br><span class="line"><span class="number">127.0.0.1</span>    app1.com</span><br><span class="line"><span class="number">127.0.0.1</span>    app2.com</span><br></pre></td></tr></table></figure>
 
 <p>其实是将cas-server中的TGT管理，单独使用自定义的sso-server进行管理了，这种架构推荐的最佳方式。</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/cas20190317-01.jpg" alt=""></p>
 <h2 id="操作流程"><a href="#操作流程" class="headerlink" title="操作流程"></a>操作流程</h2><ol>
-<li>用户访问受限资源 http://app1.com:8181/fire/books.html </li>
-<li>由于未登录，跳转自定义的登录界面 http://app1.com:8181/fire/login.html?service=http%3A%2F%2Fapp1.com%3A8181%2Ffire%2Fbooks.html</li>
+<li>用户访问受限资源 <a href="http://app1.com:8181/fire/books.html" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html</a> </li>
+<li>由于未登录，跳转自定义的登录界面 <a href="http://app1.com:8181/fire/login.html?service=http%3A%2F%2Fapp1.com%3A8181%2Ffire%2Fbooks.html" target="_blank" rel="noopener">http://app1.com:8181/fire/login.html?service=http%3A%2F%2Fapp1.com%3A8181%2Ffire%2Fbooks.html</a></li>
 <li>登录页面首先向 sso-server 发起 jsonp 的登录验证请求（提交sso-server域名下的cookie），根据 Cookie 判断是否登录过</li>
 </ol>
 <pre><code>未登录返回：jQuery33109023589333109241_1524470965614({&quot;status&quot;:0,&quot;data&quot;:&quot;nothing&quot;})
@@ -262,14 +285,14 @@ cas-server-rest | http://cas.server.com:8484/cas    | CAS-Server</p>
 <ol>
 <li>未登录，渲染登录表单，用户进行username、password、service 登录，登录地址提交到 sso-server 的 login 接口</li>
 <li>login 接口通过账号密码调用 cas-server 服务的 v1/tickets 接口，获取 TGT，然后根据用户名规则，将 TGT 保存到 Cookie 和 Redis 缓存中</li>
-<li>login 接口通过 TGT 获取 ST，拼接成 http://app1.com:8181/fire/books.html?ticket=ST值，进行redirect 该字符串作为响应</li>
-<li>http://app1.com:8181/fire/books.html?ticket=ST值由 app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
+<li>login 接口通过 TGT 获取 ST，拼接成 <a href="http://app1.com:8181/fire/books.html?ticket=ST值，进行redirect" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值，进行redirect</a> 该字符串作为响应</li>
+<li><a href="http://app1.com:8181/fire/books.html?ticket=ST值由" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值由</a> app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
 <li>验证通过，建立成功的SessionId</li>
 </ol>
 <p>（2）已登录</p>
 <ol>
-<li>已登录，接收 jsonp 响应的值 http://app1.com:8181/fire/books.html?ticket=ST值，并进行 JS 的重定向</li>
-<li>http://app1.com:8181/fire/books.html?ticket=ST值  由 app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
+<li>已登录，接收 jsonp 响应的值 <a href="http://app1.com:8181/fire/books.html?ticket=ST值，并进行" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值，并进行</a> JS 的重定向</li>
+<li><a href="http://app1.com:8181/fire/books.html?ticket=ST值" target="_blank" rel="noopener">http://app1.com:8181/fire/books.html?ticket=ST值</a>  由 app 中的 cas-client 过滤器进行验证 ST 的正确性</li>
 <li>验证通过，建立成功的SessionId</li>
 </ol>
 <h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="cas-server-配置"><a href="#cas-server-配置" class="headerlink" title="cas-server 配置"></a>cas-server 配置</h3><p>如果需要使用rest的请求方式，就需要添加下面的依赖。</p>

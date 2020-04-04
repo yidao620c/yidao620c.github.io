@@ -243,25 +243,67 @@
 <h2 id="Spring缓存支持"><a href="#Spring缓存支持" class="headerlink" title="Spring缓存支持"></a>Spring缓存支持</h2><p>Spring定义了<code>org.springframework.cache.CacheManager</code> 和 <code>org.springframework.cache.Cache</code> 接口来统一不同缓存技术。
 其中CacheManager是Spring提供的各种缓存技术抽象接口，内部使用Cache接口进行缓存的增删改查操作，我们一般不会直接和Cache打交道。</p>
 <p>针对不同的缓存技术，Spring有不同的CacheManager实现类，定义如下表：</p>
-<p>CacheManager                   | 描述
--------------------------------|--------------------------------------------------------------------
-SimpleCacheManager             | 使用简单的Collection存储缓存数据，用来做测试用
-ConcurrentMapCacheManager      | 使用ConcurrentMap存储缓存数据
-EhCacheCacheManager            | 使用EhCache作为缓存技术
-GuavaCacheManager              | 使用Google Guava的GuavaCache作为缓存技术
-JCacheCacheManager             | 使用JCache(JSR-107)标准的实现作为缓存技术，比如Apache Commons JCS
-RedisCacheManager              | 使用Redis作为缓存技术</p>
+<table>
+<thead>
+<tr>
+<th>CacheManager</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SimpleCacheManager</td>
+<td>使用简单的Collection存储缓存数据，用来做测试用</td>
+</tr>
+<tr>
+<td>ConcurrentMapCacheManager</td>
+<td>使用ConcurrentMap存储缓存数据</td>
+</tr>
+<tr>
+<td>EhCacheCacheManager</td>
+<td>使用EhCache作为缓存技术</td>
+</tr>
+<tr>
+<td>GuavaCacheManager</td>
+<td>使用Google Guava的GuavaCache作为缓存技术</td>
+</tr>
+<tr>
+<td>JCacheCacheManager</td>
+<td>使用JCache(JSR-107)标准的实现作为缓存技术，比如Apache Commons JCS</td>
+</tr>
+<tr>
+<td>RedisCacheManager</td>
+<td>使用Redis作为缓存技术</td>
+</tr>
+</tbody></table>
 <p>在我们使用任意一个实现的CacheManager的时候，需要注册实现Bean：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * EhCache的配置</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> EhCacheCacheManager <span class="title">cacheManager</span><span class="params">(CacheManager cacheManager)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> EhCacheCacheManager(cacheManager);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>当然，各种缓存技术都有很多其他配置，但是配置cacheManager是必不可少的。</p>
 <h2 id="声明式缓存注解"><a href="#声明式缓存注解" class="headerlink" title="声明式缓存注解"></a>声明式缓存注解</h2><p>Spring提供4个注解来声明缓存规则，如下表所示：</p>
-<p>注解           | 说明
----------------|-------------------------
-@Cacheable     | 方法执行前先看缓存中是否有数据，如果有直接返回。如果没有就调用方法，并将方法返回值放入缓存
-@CachePut      | 无论怎样都会执行方法，并将方法返回值放入缓存
-@CacheEvict    | 将数据从缓存中删除
-@Caching       | 可通过此注解组合多个注解策略在一个方法上面</p>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@Cacheable</td>
+<td>方法执行前先看缓存中是否有数据，如果有直接返回。如果没有就调用方法，并将方法返回值放入缓存</td>
+</tr>
+<tr>
+<td>@CachePut</td>
+<td>无论怎样都会执行方法，并将方法返回值放入缓存</td>
+</tr>
+<tr>
+<td>@CacheEvict</td>
+<td>将数据从缓存中删除</td>
+</tr>
+<tr>
+<td>@Caching</td>
+<td>可通过此注解组合多个注解策略在一个方法上面</td>
+</tr>
+</tbody></table>
 <p>@Cacheable 、@CachePut 、@CacheEvict都有value属性，指定要使用的缓存名称，而key属性指定缓存中存储的键。</p>
 <h2 id="集成Redis缓存"><a href="#集成Redis缓存" class="headerlink" title="集成Redis缓存"></a>集成Redis缓存</h2><p>接下来将讲解如何集成redis来实现缓存，现在使用的是最新的SpringBoot 2，改动还是比较大的。</p>
 <h3 id="安装redis"><a href="#安装redis" class="headerlink" title="安装redis"></a>安装redis</h3><p>安装和配置redis服务器网上很多教程，这里就不多讲了。在linux服务器上面安装一个redis，启动后端口号为默认的6379。</p>
@@ -288,25 +330,79 @@ RedisCacheManager              | 使用Redis作为缓存技术</p>
 <h2 id="缓存注解"><a href="#缓存注解" class="headerlink" title="缓存注解"></a>缓存注解</h2><p>缓存是通过注解实现的，这里详细讲解一下这几个缓存注解，以及注解参数含义。</p>
 <h3 id="Cacheable"><a href="#Cacheable" class="headerlink" title="@Cacheable"></a>@Cacheable</h3><p>这个注解含义是方法结果会被放入缓存，并且一旦缓存后，下一次调用此方法，会通过key去查找缓存是否存在，如果存在就直接取缓存值，不再执行方法。</p>
 <p>这个注解有几个参数值，定义如下</p>
-<p>参数          | 解释
--------------|------------------------------------------------------
-cacheNames   | 缓存名称
-value        | 缓存名称的别名
-condition    | Spring SpEL 表达式，用来确定是否缓存
-key          | SpEL 表达式，用来动态计算key
-keyGenerator | Bean 名字，用来自定义key生成算法，跟key不能同时用
-unless       | SpEL 表达式，用来否决缓存，作用跟condition相反
-sync         | 多线程同时访问时候进行同步</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cacheNames</td>
+<td>缓存名称</td>
+</tr>
+<tr>
+<td>value</td>
+<td>缓存名称的别名</td>
+</tr>
+<tr>
+<td>condition</td>
+<td>Spring SpEL 表达式，用来确定是否缓存</td>
+</tr>
+<tr>
+<td>key</td>
+<td>SpEL 表达式，用来动态计算key</td>
+</tr>
+<tr>
+<td>keyGenerator</td>
+<td>Bean 名字，用来自定义key生成算法，跟key不能同时用</td>
+</tr>
+<tr>
+<td>unless</td>
+<td>SpEL 表达式，用来否决缓存，作用跟condition相反</td>
+</tr>
+<tr>
+<td>sync</td>
+<td>多线程同时访问时候进行同步</td>
+</tr>
+</tbody></table>
 <p>在计算key、condition或者unless的值得时候，可以使用到以下的特有的SpEL表达式</p>
-<p>表达式                | 解释
----------------------|-----------------------------------------------
-#result              | 表示方法的返回结果
-#root.method         | 当前方法
-#root.target         | 目标对象
-#root.caches         | 被影响到的缓存列表
-#root.methodName     | 方法名称简称
-#root.targetClass    | 目标类
-#root.args[x]        | 方法的第x个参数</p>
+<table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>#result</td>
+<td>表示方法的返回结果</td>
+</tr>
+<tr>
+<td>#root.method</td>
+<td>当前方法</td>
+</tr>
+<tr>
+<td>#root.target</td>
+<td>目标对象</td>
+</tr>
+<tr>
+<td>#root.caches</td>
+<td>被影响到的缓存列表</td>
+</tr>
+<tr>
+<td>#root.methodName</td>
+<td>方法名称简称</td>
+</tr>
+<tr>
+<td>#root.targetClass</td>
+<td>目标类</td>
+</tr>
+<tr>
+<td>#root.args[x]</td>
+<td>方法的第x个参数</td>
+</tr>
+</tbody></table>
 <h3 id="CachePut"><a href="#CachePut" class="headerlink" title="@CachePut"></a>@CachePut</h3><p>该注解在执行完方法后会触发一次缓存put操作，参数跟@Cacheable一致</p>
 <h3 id="CacheEvict"><a href="#CacheEvict" class="headerlink" title="@CacheEvict"></a>@CacheEvict</h3><p>该注解在执行完方法后会触发一次缓存evict操作，参数除了@Cacheable里的外，还有个特殊的<code>allEntries</code>，
 表示将清空缓存中所有的值。</p>
