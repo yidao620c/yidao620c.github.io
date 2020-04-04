@@ -10,12 +10,16 @@ abbrlink: 13805
 ---
 
 Java与C++之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。
-按照《Java虚拟机规范(第2版)》的规定，Java虚拟机所管理的内存将包括以下几个运行时数据区域，来个图更加直观点，如下图所示：
-![](https://xnstatic-1253397658.file.myqcloud.com/jvm.png)
+按照《Java虚拟机规范(第2版)》的规定，Java虚拟机所管理的内存将包括以下几个运行时数据区域。
 
+来个图更加直观点，如下图所示：
+![](https://xnstatic-1253397658.file.myqcloud.com/jvm.png)
+<!-- more -->
 
 ### 程序计数器
-Program Counter Register是一块较小的内存空间，它的作用可以看做是当前线程所执行的字节码的行号指示器。 每个线程都有一个独立的程序计数器，各个线程之间计数器互不影响，独立存储。此内存区域是唯一一个在Java虚拟机规范中没有规定任何OutOfMemoryError情况的区域。
+Program Counter Register是一块较小的内存空间，它的作用可以看做是当前线程所执行的字节码的行号指示器。
+每个线程都有一个独立的程序计数器，各个线程之间计数器互不影响，独立存储。
+此内存区域是唯一一个在Java虚拟机规范中没有规定任何OutOfMemoryError情况的区域。
 
 ### Java虚拟机栈
 也是线程私有的，它的生命周期与线程相同。每个方法被执行的时候会同时创建一个栈帧（Stack Frame）用于存储局部变量表、操作栈、动态链接、方法出口等信息。每个方法被调用直至执行完成的过程，就对应着一个栈帧在虚拟机中从入栈到出栈的过程。
@@ -47,7 +51,7 @@ Java堆用于存储对象实例，我们只要不断创建对象，并且保证G
 VM Args: -Xms10m -Xmx10m -XX:+HeapDumpOnOutOfMemoryError
 ```
 `XX:+HeapDumpOnOutOfMemoryError`这个参数可以让虚拟机在出现内存溢出异常时Dump出当前的内存堆转储快照以便事后进行分析。
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +93,7 @@ at com.baoxian.HeapOOM.main(HeapOOM.java:22)
 
 #### 虚拟机栈和本地方法栈溢出
 -Xoss参数设置本地方法栈大小，对于HotSpot没用。栈容量只由-Xss参数设定
-``` java
+```java
 /**
  * VM Args: -Xss128k
  * @author Administrator
@@ -126,7 +130,7 @@ at com.baoxian.JavaVMStackSOF.stackLeak(JavaVMStackSOF.java:12)。。。。
 
 #### 运行时常量池溢出
 运行时常量池分配在方法区内，可以通过 -XX:PermSize和 -XX:MaxPermSize限制方法区大小，从而间接限制其中常量池的容量。
-``` java
+```java
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,7 +174,7 @@ at java.lang.String.intern(Native Method)
 
 #### 本机直接内存溢出
 DirectMemory容量可以通过-XX:MaxDirectMemorySize指定，如果不指定，则默认与Java堆的最大值-Xmx指定一样。
-``` java
+```java
 /**
  * VM Args: -Xmx20M -XX:MaxDirectMemorySize=10M
  * @author Administrator

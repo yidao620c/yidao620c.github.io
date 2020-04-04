@@ -12,12 +12,14 @@ abbrlink: 56538
 Django是一个非常强大的web框架，能让你快速的构建应用，它本身包含了一个简单的服务器程序，让你在开发环境里调试用。
 但是在生产环境中就需要将其部署到更专业的web服务器里去了，比如Apache、Nginx等。
 
-对于Django这个框架的教程我之前的博客已经有一个系列了，这里就不多说，我假设你已经创建好了一个Django工程，这里我已自己的zspace工程来说明。
+对于Django这个框架的教程我之前的博客已经有一个系列了，这里就不多说，我假设你已经创建好了一个Django工程，
+这里我已自己的zspace工程来说明。
+<!-- more -->
 
 ### 安装必要的软件
 
 Apache应该默认会安装，如果没有就请安装
-``` bash
+```bash
 # 开启EPEL
 sudo yum install epel-release
 # 安装软件
@@ -37,13 +39,13 @@ sudo systemctl stop httpd
 ```
 
 安装mod_wsgi、pip等
-``` bash
+```bash
 sudo yum install python-pip mod_wsgi
 ```
 
 ### 配置Python虚拟环境
 
-``` bash
+```bash
 sudo pip install virtualenv
 mkdir ~/myproject
 cd ~/myproject
@@ -52,7 +54,7 @@ source py27/bin/activate
 ```
 
 这样你就进入了虚拟环境，然后在虚拟环境下使用pip安装django以及应用的其他依赖
-``` bash
+```bash
 pip install django
 pip install django-crispy-forms
 ```
@@ -90,7 +92,7 @@ WSGIScriptAlias / /home/orhcard/myproject/zspace/wsgi.py
 ### 权限的配置
 下面我们还需要配置一些用户和目录的权限来是的apache用户可以放到到我们工程文件，因为httpd进程是以apache用户启动的。
 这些设置是最基本的linux知识，就不多解释了。
-``` bash
+```bash
 sudo usermod -a -G orhcard apache
 chmod 710 /home/orhcard
 chmod 664 ~/myproject/db.sqlite3

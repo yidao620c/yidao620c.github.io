@@ -14,6 +14,7 @@ abbrlink: 59466
 
 这里我通过一个简单的日志系统来说明，消息生产者会将日志发送给队列，然后多个订阅者可以接收到这条日志显示到不同的地方，
 比如可以打印到文件中，同时打印到控制台上面。
+<!-- more -->
 
 ## Exchanges
 前面都是直接向某个队列发送/接受消息，现在是时候构建一个RabbitMQ中完整的消息模型了。
@@ -29,7 +30,7 @@ abbrlink: 59466
 
 有很多种交换机类型：direct、topic, headers 和 fanout。
 这篇重点关注最后一个`fanout`类型。声明一个交换机：
-``` python
+```python
 channel.exchange_declare(exchange='logs',
                          type='fanout')
 ```
@@ -37,14 +38,14 @@ channel.exchange_declare(exchange='logs',
 fanout类型的将消息广播给它所知道的所有队列。
 
 列出所有的交换机命令：
-``` bash
+```bash
 sudo rabbitmqctl list_exchanges
 ``
 
 你会发现里面有很多`amq.*`开头的和一个空名字的默认交换机，这些都是系统自带的。
 
 现在使用我们前面自己创建的交换机：
-``` python
+```python
 channel.basic_publish(exchange='logs',
                       routing_key='',
                       body=message)
@@ -52,13 +53,13 @@ channel.basic_publish(exchange='logs',
 
 ## 临时队列
 我们需要每次连接至mq的时候使用一个新队列，使用完了就销毁，这里可使用临时队列：
-``` python
+```python
 result = channel.queue_declare()
 ```
 
 然后就可以通过`result.method.queue`获取临时队列名称，提供给消费者使用。
 另外消费者用完后需要销毁，可添加一个`exclusive`选项：
-``` python
+```python
 result = channel.queue_declare(exclusive=True)
 ```
 
@@ -67,7 +68,7 @@ result = channel.queue_declare(exclusive=True)
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/rb03.png)
 
-``` python
+```python
 channel.queue_bind(exchange='logs',
                    queue=result.method.queue)
 ```
@@ -75,7 +76,7 @@ channel.queue_bind(exchange='logs',
 这时候，`logs`交换机就会将它接收到的消息发送给我们的临时队列了。
 
 查看系统所有的绑定命令：
-``` bash
+```bash
 rabbitmqctl list_binding
 ```
 
@@ -86,7 +87,7 @@ rabbitmqctl list_binding
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/rb04.png)
 
-``` python emit_log.py
+```python emit_log.py
 #!/usr/bin/env python
 import pika
 import sys
@@ -108,7 +109,7 @@ connection.close()
 
 日志接受者实现：
 
-``` python receive_logs.py
+```python receive_logs.py
 import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.217.161', port=5673))
@@ -136,43 +137,43 @@ channel.start_consuming()
 ```
 
 一切搞定，先运行接受者程序，如果你想把消息写入文件中，可以这样执行：
-``` bash
+```bash
 python receive_logs.py > test.log
 ```
 
 如果只想打印到控制台：
-``` bash
+```bash
 python receive_logs.py
 ```
 
 然后开始启动日志发送者进程：
-``` bash
+```bash
 python emit_log.py
 ```
 
 演示结果：
 
 第一个窗口
-``` bash
+```bash
 rabbitmqctl list_bindings
 ```
 查看test.log内容
 
 第二个窗口：
-``` bash
+```bash
 $ python receive_logs.py
  [*] Waiting for logs. To exit press CTRL+C
  [x] b'info: Hello World!'
 ```
 
 发送者窗口：
-``` bash
+```bash
 $ python emit_log.py
  [x] Sent 'info: Hello World!'
 ```
 
 最后，运行如下命令来确认绑定的确建立了：
-``` bash
+```bash
 [root@controller161 ~]# rabbitmqctl list_bindings
 Listing bindings ...
 	exchange	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	queue	amq.gen-4CuguDMUeYD7j9rFJQvF9Q	[]

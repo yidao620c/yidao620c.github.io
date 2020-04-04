@@ -12,6 +12,7 @@ abbrlink: 17610
 迭代(iteration)指的是去获取元素的一种方式，一个接一个。当你显式或隐式的使用循环来遍历某个元素集的时候，那就是迭代。
 
 在Python里面，可迭代对象(iterable)和迭代器(iterator)有着特殊的含义。
+<!-- more -->
 
 * `iterable`是实现了`__iter__()`方法的对象，该方法会返回一个`iterator`对象
 * `iterator`是实现了`__iter__()`和`__next__()`方法的对象，`__iter__()`方法返回的是`iterator`对象本身
@@ -25,7 +26,7 @@ abbrlink: 17610
 在一个`iterable`对象上执行`iter`会返回一个`iterator`对象, 比如`iter(obj)` 
 
 下面一个例子可以非常清晰的解释清楚：
-``` python
+```python
 >>> s = 'cat'      # s is an ITERABLE
 
 >>> t = iter(s)    # t is an ITERATOR
@@ -46,7 +47,7 @@ StopIteration
 ```
 
 可以使用isinstance()判断一个对象是否是Iterable对象：
-``` python
+```python
 >>> from collections import Iterable
 >>> isinstance([], Iterable)
 True
@@ -61,7 +62,7 @@ False
 ```
 
 可以使用isinstance()判断一个对象是否是Iterator对象：
-``` python
+```python
 >>> from collections import Iterator
 >>> isinstance((x for x in range(10)), Iterator)
 True
@@ -76,7 +77,7 @@ False
 生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。
 
 把list、dict、str等Iterable变成Iterator可以使用iter()函数：
-``` python
+```python
 >>> isinstance(iter([]), Iterator)
 True
 >>> isinstance(iter('abc'), Iterator)
@@ -98,13 +99,13 @@ Iterator甚至可以表示一个无限大的数据流，例如全体自然数。
 集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()函数获得一个Iterator对象。
 
 Python的for循环本质上就是通过不断调用next()函数实现的，例如：
-``` python
+```python
 for x in [1, 2, 3, 4, 5]:
     pass
 ```
 
 实际上完全等价于：
-``` python
+```python
 # 首先获得Iterator对象:
 it = iter([1, 2, 3, 4, 5])
 # 循环:

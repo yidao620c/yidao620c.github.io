@@ -16,6 +16,7 @@ abbrlink: 56932
 实际上除了这几类内置类型外，for循环还能操作generator类型，也就是迭代器类型。
 
 generator类型包括生成器和带`yield的`生成器函数。
+<!-- more -->
 
 在Python里面，可迭代对象(iterable)和迭代器(iterator)有着特殊的含义。
 

@@ -19,6 +19,7 @@ mysql主从复制原理：
 3. slave重做中继日志中的事件,将改变反映它自己的数据(数据重演)
 
 其实就是根据主数据库的日志文件来进行同步。
+<!-- more -->
 
 ## 支持类型
 
@@ -42,7 +43,7 @@ mysql主从复制原理：
 1\. 两台机器的的selinux都是disable
 
 2\. 修改主DB server的配置文件(/etc/my.cnf)，开启日志功能,设置server_id值,保证唯一[node200为主DB server]
-``` bash
+```bash
 [root@node200 ~]# vi /etc/my.cnf
 # 修改配置文件里,下面两个参数：
 # 设置server_id,一般建议设置为IP,或者再加一些数字
@@ -52,7 +53,7 @@ log-bin=mysql3306-bin
 ```
 
 3\. 启动数据库服务器,并登陆数据库,授予相应的用户用于同步
-``` bash
+```bash
 mysql -uroot -p
 mysql> GRANT REPLICATION SLAVE,RELOAD,SUPER ON *.* TO 'slave1'@'192.168.212.201' IDENTIFIED BY 'winstore';
 # 刷新授权表信息
@@ -68,7 +69,7 @@ mysql> show master status;
 ```
 
 4\. 为保证主DB server和从DB server的数据一致,这里采用主备份,从还原来实现初始数据一致
-``` bash
+```bash
 # 主DB上面登录
 # 临时锁表
 mysql> flush tables with read lock;
@@ -82,14 +83,14 @@ mysql> unlock tables;
 ```
 
 5\. 从数据库配置文件只需修改一项,其余用命令行做
-``` bash
+```bash
 [root@node201 ~]# vi /etc/my.cnf
 # 设置server_id,一般建议设置为IP
 server_id = 201
 ```
 
 6\.启动从数据库,还原备份数据
-``` bash
+```bash
 # 启动数据库
 [root@node201 ~]# systemctl restart mysqld.service
 # 还原主DB server备份的数据
@@ -97,7 +98,7 @@ server_id = 201
 ```
 
 7\. 登陆从数据库,添加相关参数(主DBserver的ip/端口/同步用户/密码/position号/读取哪个日志文件)
-``` bash
+```bash
 [root@node201 ~]# mysql -uroot -p
 mysql> change master to
     -> master_host='192.168.212.200',
@@ -118,6 +119,6 @@ Slave_SQL_Running: Yes
 8\. 下面大家就可以在主DB server上新建一个表,看是否能同步到从DB server上,我这里就不测试了
 
 查看server_id：
-``` bash
+```bash
 mysql> show variables like '%server_id%';
 ```

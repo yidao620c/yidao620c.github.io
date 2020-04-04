@@ -13,23 +13,23 @@ abbrlink: 7044
 memcached下载地址：[memcached-1.4.15.tar.gz](http://memcached.googlecode.com/files/memcached-1.4.15.tar.gz)
 
 libevent下载地址：[libevent-2.0.21-stable.tar.gz](https://github.com/downloads/libevent/libevent/libevent-2.0.21-stable.tar.gz)
-
+<!-- more -->
 
 ### 具体安装步骤
 
 #### 安装libevent
 
 1. 由于memcached依赖于libevent，因此需要安装libevent。由于linux系统可能默认已经安装libevent，执行命令：
-``` bash
+```bash
 rpm -qa|grep libevent 
 ```
 1. 查看系统是否带有该安装软件，如果有执行命令:
-``` bash
+```bash
 # 由于系统自带的版本旧，忽略依赖删除
 rpm -e libevent-1.4.13-4.el6.x86_64 –nodeps
 ```
 1. 安装libevent命令：
-``` bash
+```bash
 tar zxvf libevent-2.0.21-stable.tar.gz
 cd libevent-2.0.21-stable
 ./configure --prefix=/usr/local/libevent
@@ -40,7 +40,7 @@ make install
 
 #### 安装memcached
 
-``` bash
+```bash
 tar zxvf memcached-1.4.2.tar.gz
 cd memcached-memcached-1.4.2
 ./configure --prefix=/usr/local/memcached --with-libevent=
@@ -57,12 +57,12 @@ make install
 #### 启动memcached
 
 打开一个终端，输入以下命令：
-``` bash
+```bash
 /usr/local/memcached/bin/memcached -d -m 256 -u root -p 11211 -c 1024 –P /tmp/memcached.pid
 ```
 
 启动参数说明：
-``` none
+```
 -d 选项是启动一个守护进程。
 -u root 表示启动memcached的用户为root。
 -m 是分配给Memcache使用的内存数量，单位是MB，默认64MB。
@@ -74,7 +74,7 @@ make install
 ```
 
 另外还有个更详细的参数说明：
-``` none
+```
 memcached 1.4.2
 -p <num监听的TCP端口(默认: 11211)
 -U <num监听的UDP端口(默认: 11211, 0表示不监听)
@@ -114,16 +114,16 @@ memcached 1.4.2
 也可以启动多个守护进程，但是端口不能重复
 
 #### 查看memcached启动命令：
-``` bash
+```bash
 ps aux|grep memcached
 ```
 #### 停止memcached
 
 打开一个终端，输入以下命令：
-``` bash
+```bash
 ps -ef | grep memcached或者上面的ps命令也行，第二个字段为PID，比如10068
 ```
 输入一下命令终止memcached服务：
-``` bash
+```bash
 kill -9 10068
 ```

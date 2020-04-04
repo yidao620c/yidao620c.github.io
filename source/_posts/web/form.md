@@ -11,6 +11,7 @@ abbrlink: 9619
 
 在平时开发中，如果网速比较慢的情况下，用户提交表单后，发现服务器半天都没有响应，
 那么用户可能会以为是自己没有提交表单，就会再点击提交按钮重复提交表单，我们在开发中必须防止表单重复提交。
+<!-- more -->
 
 ## 重复提交的几个场景
 
@@ -36,7 +37,7 @@ abbrlink: 9619
 可通过javascript来防止表单重复提交，表单提交之后，
 将提交按钮设置为不可用，让用户没有机会点击第二次提交按钮，代码如下：
 
-``` js
+```js
 function dosubmit(){
     //获取表单提交按钮
     var btnSubmit = document.getElementById("submit");
@@ -68,7 +69,7 @@ function dosubmit(){
 
 1.创建FormServlet，用于生成Token(令牌)和跳转到form.jsp页面
 
-``` java
+```java
 package xdp.gacl.session;
 
 import java.io.IOException;
@@ -98,7 +99,7 @@ public class FormServlet extends HttpServlet {
 
 生成Token的工具类TokenProccessor：
 
-``` java
+```java
 package xdp.gacl.session;
 
 import java.security.MessageDigest;
@@ -150,7 +151,7 @@ public class TokenProccessor {
 
 2.在form.jsp中使用隐藏域来存储Token(令牌)
 
-``` jsp
+```jsp
 <%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -170,7 +171,7 @@ public class TokenProccessor {
 
 3.DoFormServlet处理表单提交
 
-``` java
+```java
 package xdp.gacl.session;
 
 import java.io.IOException;

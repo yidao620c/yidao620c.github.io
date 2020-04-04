@@ -11,6 +11,7 @@ date: 2017-04-07 12:07:09
 可以通过复制Dockerfile、将镜像上传至公共Registry、搭建私有Registry三种方式。
 
 这里将后面两种方式，怎样使用公共Registry和搭建私有Registry。
+<!-- more -->
 
 ## 镜像命名
 其实就跟maven库管理一样，镜像名字由两部分组成：repository 和 tag：

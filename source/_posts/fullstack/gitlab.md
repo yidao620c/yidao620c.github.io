@@ -14,21 +14,22 @@ abbrlink: 54935
 全部命令都是在 root 用户下执行
 
 安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。
+<!-- more -->
 
 ## 安装和添加基础工具
-``` bash
+```bash
 yum install wget
 ```
 
 安装EPEL源
-``` bash
+```bash
 yum install epel-release
 wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://www.fedoraproject.org/static/0608B895.txt
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 ```
 
 添加RemiRPM仓库
-``` bash
+```bash
 wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-remi http://rpms.famillecollet.com/RPM-GPG-KEY-remi
 rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi
 ```
@@ -58,7 +59,7 @@ yum-config-manager --enable epel --enable PUIAS_6_computational
 yum clean all && yum makecache
 ```
 安装必要的工具
-``` bash
+```bash
 yum -y update
 yum -y groupinstall 'Development Tools'
 yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64 ntp nodejs python-docutils
@@ -66,7 +67,7 @@ yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-
 gitlab 8.0 之后的版本需要依赖 nodejs，不然安装 gitlab-shell 的时候会出现没有javascript runtime
 
 安装vim
-``` bash
+```bash
 yum -y install vim-enhanced
 update-alternatives --set editor /usr/bin/vim.basic
 ```
@@ -83,18 +84,18 @@ date                      # 查看当前时间
 ```
 
 配置默认编辑器
-``` bash
+```bash
 ln -s /usr/bin/vim /usr/bin/editor
 ```
 
 从源代码安装 Git
-``` bash
+```bash
 yum install -y zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
 yum -y remove git
 ```
 
 下载解压：
-``` bash
+```bash
 mkdir /tmp/git && cd /tmp/git
 curl --progress https://www.kernel.org/pub/software/scm/git/git-2.8.4.tar.gz | tar xz
 cd git-2.8.4/
@@ -114,7 +115,7 @@ Note: 编辑config/gitlab.yml (step 6), bin_path改成/usr/local/bin/git.
 
 ## 安装Ruby和Go
 GitLab 需要 2.1 以上版本的 Ruby，但是当前不兼容 2.2 和 2.3，先删除旧的
-``` bash
+```bash
 yum remove -y ruby
 ```
 如果没有安装ruby，上述删除的步骤可以跳过
@@ -131,7 +132,7 @@ make prefix=/usr/local install
 ```
 
 安装Bundler Gem:
-``` bash
+```bash
 gem sources --remove https://rubygems.org/
 gem sources -a https://ruby.taobao.org/
 gem sources -l
@@ -145,7 +146,7 @@ ruby -v
 ```
 
 *安装 go （gitlab 8.0 以后的版本需要go语言的支持）*
-``` bash
+```bash
 mkdir /tmp/go && cd /tmp/go
 URL='https://storage.googleapis.com/golang/' && wget -c `curl -s $URL|xmllint --format - |awk -PF'[><]' '{if ($3~/linux/ && $3!~/(beta|rc)[0-9]+|armv6l|386/)a=$3}END{print "'$URL'"a}'`
 # 上面下载的是个md5验证，可以自己先wget压缩包后手动解压缩安装
@@ -157,7 +158,7 @@ go version
 
 ## 系统用户
 为gitlab创建一个linux系统用户git
-``` bash
+```bash
 adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
 visudo
 # Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
@@ -167,13 +168,13 @@ visudo
 
 ## 数据库
 CentOS 7 版本将 MySQL 数据库软件从默认的程序列表中移除，用 Mariadb 代替了
-``` bash
+```bash
 yum install -y mariadb mariadb-server mariadb-devel
 systemctl enable mariadb  #设置开机启动
 systemctl start mariadb #启动MariaDB
 ```
 mariadb数据库的相关命令是：
-``` bash
+```bash
 systemctl start mariadb  #启动MariaDB
 systemctl stop mariadb  #停止MariaDB
 systemctl restart mariadb  #重启MariaDB
@@ -181,19 +182,19 @@ systemctl enable mariadb  #设置开机启动
 
 ```
 确保你的版本是5.5.14 或以上
-``` bash
+```bash
 mysql --version
 ```
 
 设置数据库 root 用户密码，并设置相关的安全配置
-``` bash
+```bash
 mysql_secure_installation
 ```
 因为是刚安装完数据库，因此没有 root 账户的密码，按回车后，会开始让设置密码。
 设置完密码后，会问是否删除匿名用户（不需要密码就能登录），选择 y
 
 如果失败了，就使用另外方法
-``` bash
+```bash
 stop the mysql daemon.
 mysqld_safe --skip-grant-tables
 mysql --user=root mysql
@@ -203,7 +204,7 @@ restart mysql
 ```
 
 然后`mysql -u root -p`登陆，使用刚刚的密码，为gitlab创建一个数据库用户git：
-``` bash
+```bash
 CREATE USER 'git'@'localhost' IDENTIFIED BY 'git';
 SET storage_engine=INNODB;
 # 创建生成环境数据库
@@ -226,11 +227,11 @@ max_allowed_packet=512M
 
 ## Redis
 开机就启动redis
-``` bash
+```bash
 chkconfig redis on
 ```
 配置socket
-``` bash
+```bash
 cp /etc/redis.conf /etc/redis.conf.orig
 # 禁止redis监听tcp请求，port设置成0
 sed 's/^port .*/port 0/' /etc/redis.conf.orig | sudo tee /etc/redis.conf
@@ -242,7 +243,7 @@ usermod -aG redis git
 
 ## 安装GitLab
 我们把gitlab安装到git用户的home目录
-``` bash
+```bash
 cd /home/git
 # 先切换到git账户
 su - git
@@ -277,7 +278,7 @@ sudo -u git mkdir /home/git/gitlab/public/uploads
 chmod -R u+rwX  /home/git/gitlab/public/uploads
 ```
 Unicorn 配置：
-``` bash
+```bash
 sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
 nproc  # 看看有几个核心
 # Enable cluster mode if you expect to have a high load instance
@@ -294,7 +295,7 @@ sudo -u git -H cp config/initializers/rack_attack.rb.example config/initializers
 ```
 
 然后配置git全局配置
-``` bash
+```bash
 sudo -u git -H git config --global user.name "GitLab"
 sudo -u git -H git config --global user.email "xiongneng@winhong.com"
 sudo -u git -H git config --global core.autocrlf input
@@ -475,7 +476,7 @@ service iptables restart
 
 ## 最后检查
 为了确保所有流程都正确完成，执行下面的检查：
-``` bash
+```bash
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 ```

@@ -21,6 +21,7 @@ ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过
 ngrok是开源的，官网地址：<https://github.com/inconshreveable/ngrok>
 
 下面，我们开始搭建ngrok服务。操作系统为CentOS 7.2 
+<!-- more -->
 
 ## 准备工作
 
@@ -36,14 +37,14 @@ ngrok是开源的，官网地址：<https://github.com/inconshreveable/ngrok>
 
 ngrok是基于go语言开发的，所以需要先安装go语言开发环境，CentOS可以使用yum安装：
 
-``` bash
+```bash
 yum install golang
 ```
 
 ### 安装git
 
 默认的git版本太低了，需要升级到git2.5，具体步骤如下：
-``` bash
+```bash
 sudo yum remove git
 sudo yum install epel-release
 sudo yum install https://centos7.iuscommunity.org/ius-release.rpm
@@ -55,7 +56,7 @@ sudo yum install git2u
 ### 下载ngrok源码
 
 新建一个目录，并clone一份源码：
-``` bash
+```bash
 mkdir ~/go/src/github.com/inconshreveable
 cd ~/go/src/github.com/inconshreveable
 git clone https://github.com/inconshreveable/ngrok.git
@@ -68,7 +69,7 @@ export GOPATH=~/go/src/github.com/inconshreveable/ngrok
 
 证书生成过程需要有自己的一个基础域名，比如我的就是`ngrok.xncoding.com`。
 
-``` bash
+```bash
 $ cd ngrok
 $ openssl genrsa -out rootCA.key 2048
 $ openssl req -x509 -new -nodes -key rootCA.key -subj "/CN=ngrok.xncoding.com" -days 5000 -out rootCA.pem
@@ -78,7 +79,7 @@ $ openssl x509 -req -in device.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateser
 ```
 
 执行完成以上命令后，在ngrok目录下，会新生成6个文件：
-``` none
+```
 -rw-r--r-- 1 root root   1001 Dec 29 11:53 device.crt
 -rw-r--r-- 1 root root    903 Dec 29 11:44 device.csr
 -rw-r--r-- 1 root root   1675 Dec 29 11:44 device.key
@@ -89,7 +90,7 @@ $ openssl x509 -req -in device.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateser
 
 我们在编译可执行文件之前，需要把生成的证书分别替换到 `assets/client/tls`和`assets/server/tls`中，
 这两个目录分别存放着ngrok和ngrokd的默认证书。
-``` bash
+```bash
 $ cp rootCA.pem assets/client/tls/ngrokroot.crt
 $ cp device.crt assets/server/tls/snakeoil.crt
 $ cp device.key assets/server/tls/snakeoil.key
@@ -101,14 +102,14 @@ $ cp device.key assets/server/tls/snakeoil.key
 
 客户端用证书 ：
 
-``` bash
+```bash
 cd ngrok
 cp /etc/letsencrypt/live/xncoding.com/chain.pem assets/client/tls/ngrokroot.crt
 ```
 
 服务器端用证书：
 
-``` bash
+```bash
 cp /etc/letsencrypt/live/xncoding.com/cert.pem assets/server/tls/snakeoil.crt
 cp /etc/letsencrypt/live/xncoding.com/privkey.pem assets/server/tls/snakeoil.key
 ```
@@ -118,7 +119,7 @@ cp /etc/letsencrypt/live/xncoding.com/privkey.pem assets/server/tls/snakeoil.key
 首先需要知道，ngrokd 为服务端的执行文件，ngrok为客户端的执行文件。
 
 接下来我们来编译ngrokd，在ngrok目录下，执行如下命令：
-``` bash
+```bash
 $ make release-server
 ```
 
@@ -127,7 +128,7 @@ $ make release-server
 由于客户端的平台版本较多，我们需要交叉编译来选择生成的平台。
 以windows、arm、linux版本编译，如下：
 
-``` none
+```
 $ GOOS=linux GOARCH=amd64 make release-client
 $ GOOS=windows GOARCH=amd64 make release-client
 $ GOOS=linux GOARCH=arm make release-client
@@ -142,7 +143,7 @@ $ GOOS=linux GOARCH=arm make release-client
 ### 启动ngrokd服务器
 
 请将 bin/ngrokd 放入PATH环境变量中，启动命令：
-``` bash
+```bash
 nohup ngrokd -domain=ngrok.xncoding.com -httpAddr=:5442 -httpsAddr=:5443 -tunnelAddr=":4443" &
 ```
 
@@ -150,7 +151,7 @@ nohup ngrokd -domain=ngrok.xncoding.com -httpAddr=:5442 -httpsAddr=:5443 -tunnel
 
 ngrokd还会开一个端口用来跟客户端通讯（可通过`-tunnelAddr=":xxx"` 指定），如果你配置了 iptables 规则，需要放行这个通讯端口(4443)上的 TCP 协议。
 
-``` bash
+```bash
 firewall-cmd --zone=public --add-port=4443/tcp --permanent
 firewall-cmd --reload
 ```
@@ -158,7 +159,7 @@ firewall-cmd --reload
 ### Nginx配置80端口转发
 
 我们在微信开发时候不允许使用端口访问，那么最好使用nginx反向代理转发，首先申请一个`demo.ngrok.xncoding.com`的免费证书，然后修改nginx配置如下：
-``` nginx
+```nginx
 server {
     listen       80;
     server_name  demo.ngrok.xncoding.com;
@@ -194,13 +195,13 @@ server {
 ### 启用客户端
 
 在刚刚复制过来的ngrok.exe客户端文件夹中，新建一个客户端配置`ngrok.cfg`：
-``` none
+```
 server_addr: "ngrok.xncoding.com:4443"
 trust_host_root_certs: false
 ```
 
 本地启动一个SpringBoot的WEB工程，端口8092，然后通过下面命令启动客户端：
-``` none
+```
 ngrok.exe -subdomain demo -config=ngrok.cfg -log=log.txt 8092
 ```
 
@@ -235,7 +236,7 @@ ngrok.exe -subdomain demo -config=ngrok.cfg -log=log.txt 8092
 
 这里使用的是[hteen/docker-ngrok](https://github.com/hteen/docker-ngrok)
 
-``` bash
+```bash
 git clone https://github.com/hteen/docker-ngrok.git
 cd docker-ngrok
 docker build -t hteen/ngrok .
@@ -260,7 +261,7 @@ docker build -t hteen/ngrok .
 
 申请好之后，增加配置`/etc/nginx/conf.d/ngrok.conf` 添加反向代理配置：
 
-``` none
+```
 map $scheme $proxy_port {
     "http"  "5442";
     "https" "5443";
@@ -293,14 +294,14 @@ server {
 
 上一步已经申请`ngrok.xncoding.com`这个域名的通配符lets encrypt证书，然后修改脚本`server.sh`
 
-``` none
+```
 -tlsKey=/etc/letsencrypt/live/ngrok.xncoding.com/privkey.pem -tlsCrt=/etc/letsencrypt/live/ngrok.xncoding.com/fullchain.pem
 ```
 也就是将之前的证书变量改成你实际的证书路径即可。
 
 然后运行：
 
-``` bash
+```bash
 docker run -idt --name ngrok-server \
 -p 5442:80 -p 5443:443 -p 4443:4443 \
 -v /data/ngrok:/myfiles \
@@ -309,7 +310,7 @@ docker run -idt --name ngrok-server \
 
 如果在腾讯云主机上面，还需要本级防火墙放行4443端口，以及在腾讯云安全组中也要放开4443端口。
 
-``` bash
+```bash
 1.查看已开放的端口(默认不开放任何端口)
 firewall-cmd --list-ports
 2.开启4443端口
@@ -336,19 +337,19 @@ systemctl restart firewalld
 在windows_amd64目录下，拷贝到自己的windows电脑上。
 
 新建配置文件ngrok.cfg，跟ngrok.exe同级目录，里面的内容跟之前讲的一样：
-``` none
+```
 server_addr: "ngrok.xncoding.com:4443"
 trust_host_root_certs: false
 ```
 
 然后打开windows的命令行，cd到`ngrok.exe`所在的目录中，到这个运行：
-``` none
+```
 ngrok -config=ngrok.cfg -subdomain=demo -log=log.txt 8092
 ```
 
 或者为了方便，在`ngrok.exe`所在的目录中新建一个`run.bat`文件，内容如下：
 
-``` none
+```
 @echo off
 ngrok.exe -config=ngrok.cfg -subdomain=demo -log=log.txt 8092
 ```

@@ -12,10 +12,11 @@ abbrlink: 16515
 Item是保存结构数据的地方，Scrapy可以将解析结果以字典形式返回，但是Python中字典缺少结构，在大型爬虫系统中很不方便。
 
 Item提供了类字典的API，并且可以很方便的声明字段，很多Scrapy组件可以利用Item的其他信息。
+<!-- more -->
 
 ## 定义Item
 定义Item非常简单，只需要继承`scrapy.Item`类，并将所有字段都定义为`scrapy.Field`类型即可
-``` python
+```python
 import scrapy
 
 class Product(scrapy.Item):
@@ -30,13 +31,13 @@ class Product(scrapy.Item):
 ## Item使用示例
 你会看到Item的使用跟Python中的字典API非常类似
 ### 创建Item
-``` python
+```python
 >>> product = Product(name='Desktop PC', price=1000)
 >>> print product
 Product(name='Desktop PC', price=1000)
 ```
 ### 获取值
-``` python
+```python
 >>> product['name']
 Desktop PC
 >>> product.get('name')
@@ -75,7 +76,7 @@ False
 ```
 
 ### 设置值
-``` python
+```python
 >>> product['last_updated'] = 'today'
 >>> product['last_updated']
 today
@@ -87,7 +88,7 @@ KeyError: 'Product does not support field: lala'
 ```
 
 ### 访问所有的值
-``` python
+```python
 >>> product.keys()
 ['price', 'name']
 
@@ -99,7 +100,7 @@ KeyError: 'Product does not support field: lala'
 Item Loader为我们提供了生成Item的相当便利的方法。Item为抓取的数据提供了容器，而Item Loader可以让我们非常方便的将输入填充到容器中。
 
 下面我们通过一个例子来展示一般使用方法：
-``` python
+```python
 from scrapy.loader import ItemLoader
 from myproject.items import Product
 
@@ -116,7 +117,7 @@ def parse(self, response):
 
 ## 输入/输出处理器
 每个Item Loader对每个`Field`都有一个输入处理器和一个输出处理器。输入处理器在数据被接受到时执行，当数据收集完后调用`ItemLoader.load_item() `时再执行输出处理器，返回最终结果。
-``` python
+```python
 l = ItemLoader(Product(), some_selector)
 l.add_xpath('name', xpath1) # (1)
 l.add_xpath('name', xpath2) # (2)
@@ -134,7 +135,7 @@ return l.load_item() # (5)
 
 ## 自定义Item Loader
 使用类定义语法，下面是一个例子
-``` python
+```python
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import TakeFirst, MapCompose, Join
 
@@ -153,7 +154,7 @@ class ProductLoader(ItemLoader):
 
 ## 在Field定义中声明输入/输出处理器
 还有个地方可以非常方便的添加输入/输出处理器，那就是直接在Field定义中
-``` python
+```python
 import scrapy
 from scrapy.loader.processors import Join, MapCompose, TakeFirst
 from w3lib.html import remove_tags
@@ -182,7 +183,7 @@ Tips：一般来讲，将输入处理器定义在Item Loader的定义中`field_i
 
 ## Item Loader上下文
 Item Loader上下文被所有输入/输出处理器共享，比如你有一个解析长度的函数
-``` python
+```python
 def parse_length(text, loader_context):
     unit = loader_context.get('unit', 'm')
     # ... length parsing code goes here ...
@@ -190,7 +191,7 @@ def parse_length(text, loader_context):
 ```
 
 初始化和修改上下文的值
-``` python
+```python
 loader = ItemLoader(product)
 loader.context['unit'] = 'cm'
 

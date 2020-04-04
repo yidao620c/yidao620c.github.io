@@ -15,12 +15,13 @@ abbrlink: 17827
 
 这一篇我们将利用RabbitMQ来构建一个RPC服务，服务器上面有一个可返回斐波拉契数的函数。
 客户端通过rpc调用来获取结果。 
+<!-- more -->
 
 ## 客户端接口
 为了演示的方便，我在客户端创建一个简单的类，里面有个`call`方法，它会发送一个rpc请求并等待执行的返回结果。
 
 使用它的方式如下：
-``` python
+```python
 fibonacci_rpc = FibonacciRpcClient()
 result = fibonacci_rpc.call(4)
 print("fib(4) is %r" % result)
@@ -31,7 +32,7 @@ print("fib(4) is %r" % result)
 使用RabbitMQ实现RPC原理很简单，客户端使用消息的方式发送方法名和参数，服务器将结果也作为消息回传回来，
 那么这时候就需要另外一个队列来接受返回的消息，这里可指定回调队列。
 
-``` python
+```python
 result = channel.queue_declare(exclusive=True)
 callback_queue = result.method.queue
 
@@ -67,7 +68,7 @@ channel.basic_publish(exchange='',
 
 RPC服务器：
 
-``` python rpc_server.py
+```python rpc_server.py
 import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.217.161', port=5673))
@@ -107,7 +108,7 @@ channel.start_consuming()
 ```
 
 客户端调用：
-``` python rpc_client.py
+```python rpc_client.py
 import pika
 import uuid
 
@@ -154,14 +155,14 @@ print(" [.] Got %r" % response)
 
 rpc_server.py
 
-``` none
+```
  [x] Awaiting RPC requests
  [.] fib(30)
 ```
 
 rpc_client.py
 
-``` none
+```
  [x] Requesting fib(30)
  [.] Got 832040
 ```

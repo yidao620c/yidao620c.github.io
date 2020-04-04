@@ -12,6 +12,7 @@ abbrlink: 52241
 
 SQLAlchemy中的映射关系有四种,分别是一对多、多对一、一对一、多对多。接下来我将详细说明怎样去定义这四种关系，
 然后再演示怎样通过这四种关系完成复杂的查询和更新。
+<!-- more -->
 
 ## 一对多
 
@@ -19,7 +20,7 @@ SQLAlchemy中的映射关系有四种,分别是一对多、多对一、一对一
 
 然后，在父表类中通过 relationship() 方法来引用子表的类：
 
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
@@ -37,7 +38,7 @@ class Child(Base):
 在一对多的关系中建立双向的关系，这样的话在对方看来这就是一个多对一的关系，
 在子表类中附加一个`relationship()`方法，并且在双方的`relationship()`方法中使用`relationship.back_populates`方法参数：
 
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
@@ -56,7 +57,7 @@ class Child(Base):
 
 或者，可以在单一的`relationship()`方法中使用`backref`参数来代替`back_populates`参数，
 推荐使用这种方式，可以少些几句话。
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
@@ -72,7 +73,7 @@ class Child(Base):
 一对一就是多对一和一对多的一个特例,只需在relationship加上一个参数uselist=False替换多的一端就是一对一
 
 从一对多转换到一对一:
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
@@ -85,7 +86,7 @@ class Child(Base):
 ```
 
 从多对一转换到一对一:
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
@@ -100,7 +101,7 @@ class Child(Base):
 ## 多对多
 多对多关系需要一个中间关联表,通过参数`secondary`来指定。`backref`会自动的为子表类加载同样的`secondary`参数,
 所以为了简洁起见仍然推荐这种写法：
-``` python
+```python
 from sqlalchemy import Table, Text
 post_keywords = Table('post_keywords',Base.metadata,
     Column('post_id',Integer,ForeignKey('posts.id')),
@@ -120,7 +121,7 @@ class Keyword(Base):
 ```
 
 如果使用`back_populates`，那么两个都要定义：
-``` python
+```python
 from sqlalchemy import Table, Text
 post_keywords = Table('post_keywords',Base.metadata,
     Column('post_id',Integer,ForeignKey('posts.id')),
@@ -148,7 +149,7 @@ class Keyword(Base):
 * backref 在一对多或多对一之间建立双向关系,比如
 * lazy:默认值是True, 懒加载
 * remote_side: 表中的外键引用的是自身时, 如Node类,如果想表示多对一的树形关系, 那么就可以使用remote_side
-``` python
+```python
   class Node(Base):
       __tablename__ = 'node'
       id = Column(Integer, primary_key=True)
@@ -158,7 +159,7 @@ class Keyword(Base):
 ```
 * secondary: 多对多指定中间表关键字
 * order_by: 在一对多的关系中,如下代码:
-``` python
+```python
 class User(Base):
   # ...
   addresses = relationship(lambda: Address,
@@ -166,7 +167,7 @@ class User(Base):
                    primaryjoin=lambda: Address.user_id==User.id)
 ```
 * cascade: 级联删除
-``` python
+```python
 class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer,primary_key = True)
@@ -196,22 +197,22 @@ def delete_parent():
 关联查询：<http://docs.sqlalchemy.org/en/rel_1_1/orm/query.html#sqlalchemy.orm.query.Query.join>
 
 非常简单的关联查询，外键就一个，系统知道如何去关联：
-``` python
+```python
 session.query(User).join(Address).filter(Address.email==”lzjun@qq.com”).all()
 ```
 指定ON字段：
-``` python
+```python
 q = session.query(User).join(Address, User.id==Address.user_id)
 ```
 
 多个join
-``` python
+```python
 q = session.query(User).join("orders", "items", "keywords")
 q = session.query(User).join(User.orders).join(Order.items).join(Item.keywords)
 ```
 
 子查询JOIN：
-``` python
+```python
 address_subq = session.query(Address).\
                 filter(Address.email_address == 'ed@foo.com').\
                 subquery()
@@ -220,21 +221,21 @@ q = session.query(User).join(address_subq, User.addresses)
 ```
 
 join from:
-``` python
+```python
 q = session.query(Address).select_from(User).\
                 join(User.addresses).\
                 filter(User.name == 'ed')
 ```
 
 和下面的SQL等价：
-``` sql
+```sql
 SELECT address.* FROM user
     JOIN address ON user.id=address.user_id
     WHERE user.name = :name_1
 ```
 
 左外连接，指定`isouter=True`，等价于` Query.outerjoin()`：
-``` python
+```python
 q = session.query(Node).\
         join("children", "children", aliased=True, isouter=True).\
         filter(Node.name == 'grandchild 1')

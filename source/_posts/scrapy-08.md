@@ -16,6 +16,7 @@ Scrapy为我们提供了可重用的[item pipelines](http://doc.scrapy.org/en/1.
 
 * 避免重复下载
 * 可以指定下载后保存的地方(文件系统目录中,Amazon S3中)
+<!-- more -->
 
 Images Pipeline为处理图片提供了额外的功能：
 
@@ -42,7 +43,7 @@ Images Pipeline为处理图片提供了额外的功能：
 
 ## 使用例子
 要使用媒体管道，请先在配置文件中打开它
-``` python
+```python
 # 同时使用图片和文件管道
 ITEM_PIPELINES = {
                   'scrapy.pipelines.images.ImagesPipeline': 1,
@@ -65,7 +66,7 @@ IMAGES_MIN_WIDTH = 110
 ```
 
 一个使用了缩略图的下载例子会生成如下图片：
-``` none
+```
 <IMAGES_STORE>/full/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
 <IMAGES_STORE>/thumbs/small/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
 <IMAGES_STORE>/thumbs/big/63bbfea82b8880ed33cdb762aa11fab722a90a24.jpg
@@ -73,7 +74,7 @@ IMAGES_MIN_WIDTH = 110
 
 然后，某个Item返回时，有`file_urls`或`image_urls`，并且存在相应的`files`或`images`字段
 
-``` python
+```python
 import scrapy
 
 class MyItem(scrapy.Item):
@@ -92,7 +93,7 @@ class MyItem(scrapy.Item):
 * `item_completed(self, results, item, info)`,当上门的Request下载完成后回调这个方法，然后填充`files`或`images`字段
 
 下面是一个扩展`ImagesPipeline`的例子，我只取path信息，并将它赋给`image_paths`字段，而不是默认的`images`
-``` python
+```python
 import scrapy
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exceptions import DropItem

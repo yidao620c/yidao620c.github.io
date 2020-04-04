@@ -15,6 +15,7 @@ abbrlink: 39462
 
 * github项目地址：<https://github.com/yidao620c/xnrpc>
 * pipi模块地址：<https://pypi.python.org/pypi/xnrpc>
+<!-- more -->
 
 ## 软件包归档格式
 

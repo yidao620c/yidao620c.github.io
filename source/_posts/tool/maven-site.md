@@ -12,7 +12,7 @@ abbrlink: 36871
 ## 本地生成预览
 
 修改父模块的pom.xml:
-``` xml
+```xml
 <site>
     <id>${project.artifactId}-site</id>
     <url>file://./</url>
@@ -20,11 +20,12 @@ abbrlink: 36871
 ```
 
 执行
-``` bash
+```bash
 mvn clean && mvn site:site && mvn site:stage
 ```
 
 目标站点在target/stage目录下面
+<!-- more -->
 
 ## 部署到服务器
 
@@ -34,7 +35,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 编辑maven的settings.xml文件，增加一个server配置
 
-``` xml
+```xml
 <server>
     <id>xx.xncoding.com</id>
     <username>name</username>
@@ -43,7 +44,7 @@ mvn clean && mvn site:site && mvn site:stage
 ```
 
 修改父模块的pom.xml:
-``` xml
+```xml
 <plugin>
     <artifactId>maven-site-plugin</artifactId>
     <version>3.7.1</version>
@@ -68,7 +69,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 1、在Tomcat的webapps目录下新建security文件夹，并在此文件夹下新建WEB-INF\web.xml文件。内容如下：
 
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://java.sun.com/xml/ns/javaee"
@@ -127,7 +128,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 根据上面权限名称，在Tomcat账号体系中增加账号密码，编辑/conf/tomcat-users.xml，内容如下：
 
-``` xml
+```xml
 <role rolename="tomcat"/>
 <role rolename="admin-gui"/>
 <role rolename="admin-script"/>
@@ -140,7 +141,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 2、然后跟上面一样，去本地配置maven的配置：
 
-``` xml
+```xml
 <server>
     <id>xx.xncoding.com</id>
     <username>tomcat</username>
@@ -150,7 +151,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 然后maven的pom.xml配置：
 
-``` xml
+```xml
 <plugin>
     <artifactId>maven-site-plugin</artifactId>
     <version>3.7.1</version>
@@ -173,7 +174,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 主要是两个配置，一个是pom依赖：
 
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -381,7 +382,7 @@ mvn clean && mvn site:site && mvn site:stage
 ```
 
 然后就是site.xml
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/DECORATION/1.8.0"
@@ -520,7 +521,7 @@ mvn clean && mvn site:site && mvn site:stage
 
 ## 源文档视图
 
-``` none
+```
 src
 └─site
     │  site.xml
@@ -620,7 +621,7 @@ src
 
 每个文件夹中index.md示例：
 
-``` none
+```
 ## Summary
 
 安全工具集合
@@ -638,7 +639,7 @@ src
 ## 执行命令
 
 执行
-``` bash
+```bash
 mvn clean && mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true site-deploy
 ```
 
@@ -646,7 +647,7 @@ mvn clean && mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.all
 
 在site.xml的body中添加如下片段，注意/security/是根据tomcat部署的子文件夹路径来的，如果部署在根路径下就是/favicon.ico即可:
 
-``` html
+```html
 <body>
         <head>
             <![CDATA[<link rel="shotcut icon" href="/security/favicon.ico"/>]]>
@@ -665,7 +666,7 @@ mvn clean && mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.all
 
 创建样式文件：src/site/resources/css/site.css，这个文件会被自动引入。内容如下：
 
-``` css
+```css
 body {
     font-size: 15px;
 }
@@ -729,7 +730,7 @@ pre.prettyprint {
 
 自定义表格：
 
-``` html
+```html
 <table class="table table-bordered table-condensed mytable" border="1">
     <tr>
         <th class="thname">参数名称</th>

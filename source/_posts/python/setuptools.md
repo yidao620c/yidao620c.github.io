@@ -13,6 +13,7 @@ abbrlink: 60723
 
 * github项目地址：<https://github.com/yidao620c/xnrpc>
 * pipi模块地址：<https://pypi.python.org/pypi/xnrpc>
+<!-- more -->
 
 ### 软件包归档格式
 
@@ -40,7 +41,7 @@ xnrpc项目的目录结果如下
 
 项目最顶层的目录为“xnrpc”，其中与打包最相关的文件是setup.py，
 这里面最核心的文件就是这个setup.py了，我们看看里面写什么：
-``` python
+```python
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 
@@ -122,7 +123,7 @@ setup(
 3. cmdclass       build或install的时候执行的额外操作
 
 还有一个文件`MANIFEST.in`定义了打源码包的时候需要包含的文件，一个示例如下：
-``` none
+```
 include LICENSE
 include README.rst
 include README.md
@@ -133,13 +134,13 @@ recursive-include etc *.conf
 ```
 
 ### 项目打包
-``` bash
+```bash
 cd xnrpc/
 python setup.py sdist bdist_wheel
 ```
 
 如果报错：invalid command 'bdist_wheel'，则先安装下wheel模块：
-``` python
+```python
 pip install wheel
 ```
 
@@ -150,7 +151,7 @@ pip install wheel
 如果没有账号需要先在PyPI网站上注册账号。
 在您的本机用户下创建~/.pypirc文件，此文件中配置PyPI访问地址和账号。下面是我的.pypirc文件内容请根据自己的账号来修改。
 
-``` none
+```
 [distutils]
 index-servers = pypi
 
@@ -162,7 +163,7 @@ password=********
 
 ### 注册项目
 
-``` bash
+```bash
 python setup.py register
 ```
 
@@ -172,12 +173,12 @@ Server response (403): Must access using HTTPS instead of HTTP
 解决方法：
 
 使用<https://github.com/pypa/twine>
-``` bash
+```bash
 pip install twine
 ```
 
 注册项目:
-``` bash
+```bash
 twine register dist/xnrpc-1.0.0.tar.gz
 twine register dist/xnrpc-1.0.0-py2-none-any.whl
 ```
@@ -185,7 +186,7 @@ twine register dist/xnrpc-1.0.0-py2-none-any.whl
 通过上面.pypirc文件中的配置，在PyPI上注册项目信息，成功注册之后，可以在PyPI上看到自己的项目名称：
 
 ### 上传项目
-``` bash
+```bash
 # python setup.py sdist bdist_wheel upload
 # 安装了twine使用
 twine upload dist/*
@@ -195,18 +196,18 @@ twine upload dist/*
 ![](https://xnstatic-1253397658.file.myqcloud.com/pysetup003.png)
 
 恭喜你成功将你的软件包上传至PyPI上面，全世界的人都可以通过pip来安装了：
-``` bash
+```bash
 pip install xnrpc
 ```
 
 ### 下载量分析
 安装:
-``` bash
+```bash
 pip install vanity
 ```
 
 使用:
-``` none
+```
 vanity xnrpc
 vanity xnrpc==1.0.0
 ```

@@ -17,6 +17,7 @@ pyenv是针对python版本的管理，通过修改环境变量的方式实现，
 通过在PATH最前面插入`shims`来决定应用使用的python版本，从而将你的命令传递给正确的python程序。
 
 我的系统环境是CentOS7.2
+<!-- more -->
 
 ## 理解Shims
 pyenv会在你的PATH最前面插入一个`shims`目录:
@@ -29,13 +30,13 @@ $(pyenv root)/shims:/usr/local/bin:/usr/bin:/bin
 
 ## 安装
 推荐自动安装（保证系统上面先安装git）:
-``` bash
+```bash
 curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 ```
 
 ## 环境变量
 编辑`~/.bash_profile`，最后面加入:
-``` bash
+```bash
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
@@ -44,7 +45,7 @@ export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 ```
 
 重启 shell:
-``` bash
+```bash
 exec $SHELL
 ```
 
@@ -94,7 +95,7 @@ eval "$(pyenv virtualenv-init -)"
 那么当`pyenv-virtualenv`进入/离开某个含有`.python-version`目录时会自动激活/退出虚拟环境。
 
 场景使用流程:
-``` bash
+```bash
 # 先创建一个虚拟环境
 pyenv versions
 pyenv virtualenv 2.7.13 virtual-env-2.7.13

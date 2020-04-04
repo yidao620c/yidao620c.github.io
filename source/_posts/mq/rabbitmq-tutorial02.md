@@ -13,16 +13,17 @@ abbrlink: 10613
 
 先演示最简单的一个入门级别的`hello world`例子，
 发送者发送一个字符串，接受者接收到消息后打印出来。然后再介绍怎样实现任务队列
+<!-- more -->
 
 ## hello world
 
 这里使用 python 的pika来演示，先安装pika:
-``` bash
+```bash
 pip install pika
 ```
 
 发送者程序需要先建立一个到RabbitMQ的连接(ip地址就是rabbitmq服务器地址)：
-``` python
+```python
 #!/usr/bin/env python
 import pika
 
@@ -31,14 +32,14 @@ channel = connection.channel()
 ```
 
 然后创建一个消息队列：
-``` python
+```python
 channel.queue_declare(queue='hello')
 ```
 
 这里的`queue_declare`可以调用任意多次，因为最终只会有一个名字叫"hello"的队列被创建。
 
 然后通过默认的路由器来转发消息：
-``` python
+```python
 channel.basic_publish(exchange='',
                       routing_key='hello',
                       body='Hello World!')
@@ -46,12 +47,12 @@ print(" [x] Sent 'Hello World!'")
 ```
 
 最后别忘了关闭连接来刷新缓存，确保所有的消息都写到了队列中：
-``` python
+```python
 connection.close()
 ```
 
 最后的接受者程序是这样的：
-``` python send.py
+```python send.py
 #!/usr/bin/env python
 import pika
 
@@ -68,7 +69,7 @@ connection.close()
 ```
 
 接受者程序差不多，不需要路由器，但是需要传递一个回调函数，每次接收到消息就被调用：
-``` python receive.py
+```python receive.py
 #!/usr/bin/env python
 import pika
 
@@ -90,7 +91,7 @@ channel.start_consuming()
 
 出现的问题：
 
-``` none
+```
 pika.exceptions.ProbableAuthenticationError
 ```
 
@@ -98,14 +99,14 @@ pika.exceptions.ProbableAuthenticationError
 
 发现里面的错误是这样的
 
-``` none
+```
 =ERROR REPORT==== 23-May-2017::10:57:22 ===
 Error on AMQP connection <0.460.0> (10.10.111.230:58575 -> 192.168.217.161:5673, state: starting):
 PLAIN login refused: user 'guest' - invalid credentials
 ```
 
 解决办法是，修改guest的密码：
-``` bash
+```bash
 [root@controller161 ~]# rabbitmqctl list_users
 Listing users ...
 guest	[administrator]
@@ -127,7 +128,7 @@ Changing password for user "guest" ...
 
 这里模拟一个长时间任务，用发送的消息中含有的点数`.`来表示耗时几秒，一个点表示一秒钟。
 
-``` python new_task.py
+```python new_task.py
 import pika
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(host='192.168.217.161', port=5673))
@@ -154,7 +155,7 @@ connection.close()
 ```
 
 工作进程如下：
-``` python worker.py
+```python worker.py
 import pika
 import time
 
@@ -215,7 +216,7 @@ RabbitMQ利用`Message acknowledgment`来确保消息已经被正常并且处理
 
 默认情况下是开启的，前面的例子，我关闭了它，使用`no_ack=True`，现在我来打开它，
 当处理完成后，发送一个正确的消息确认：
-``` python
+```python
 def callback(ch, method, properties, body):
     print " [x] Received %r" % (body,)
     time.sleep( body.count('.') )
@@ -234,12 +235,12 @@ channel.basic_consume(callback,
 那消息都没了。服务器上面的消息通过持久化来保证安全性。我们需要同时什么队列和消息是持久化的。
 
 第一步申明队列是持久化的：
-``` python
+```python
 channel.queue_declare(queue='task_queue', durable=True)
 ```
 
 第二步申明消息也是持久化的：
-``` python
+```python
 channel.basic_publish(exchange='',
       routing_key='task_queue',
       body=m,
@@ -254,6 +255,6 @@ channel.basic_publish(exchange='',
 ### 消息分发策略
 默认策略是只要消息来了我就分给某个worker，而不会去管那个worker是否已经完成了任务。
 可通过`basic_qos`方法，并指定只有收到了消息处理应答后才将消息发送给worker。
-``` python
+```python
 channel.basic_qos(prefetch_count=1)
 ```

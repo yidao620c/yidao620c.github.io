@@ -23,6 +23,7 @@ abbrlink: 64400
 特点：算法公开、（相比非对称加密）计算量小、加密速度快、效率高。
 
 弱点：双方都使用同样的密钥，安全性得不到保证。
+<!-- more -->
 
 常用对称加密算法
 
@@ -32,7 +33,7 @@ abbrlink: 64400
 
 这里只列出最常用的AES算法实现，也是安全等级最高，推荐使用的对称加密算法，其他实现请参考我的GitHub上的源码。
 
-``` java
+```java
 /**
  * 对称加密/解密算法（推荐算法）：AES
  *
@@ -127,7 +128,7 @@ public class AESUtil {
 
 RSA算法示例：
 
-``` java
+```java
 public class RSAUtil {
     // 非对称密钥算法
     private static final String KEY_ALGORITHM = "RSA";

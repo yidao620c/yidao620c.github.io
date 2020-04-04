@@ -14,14 +14,15 @@ abbrlink: 42706
 
 使用Maven命令。经过测试，好用。下载了所有POM里的依赖包的source，这点不是想要的，原来只想下载想看的依赖的source。
 参考：[IDEA-165800 Can’t download dependency's source code](https://youtrack.jetbrains.com/issue/IDEA-165800)
+<!-- more -->
 
 使用如下命令行下载：
-``` bash
+```bash
 mvn dependency:resolve -Dclassifier=sources
 ```
 
 如果只想下载指定的包，使用（多个使用逗号分隔）：
-``` bash
+```bash
 mvn dependency:sources -DincludeArtifactIds=commons-io,:mybatis
 ```
 

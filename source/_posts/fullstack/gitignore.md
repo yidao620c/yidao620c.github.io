@@ -10,6 +10,7 @@ abbrlink: 25153
 ---
 
 个人比较常用的.gitignore文件如下：
+<!-- more -->
 
 ```
 #idea

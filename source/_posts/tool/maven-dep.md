@@ -9,11 +9,13 @@ tags:
 abbrlink: 64830
 ---
 
-今天一个传递依赖问题搞了我半天，终于搞明白原因了。一个jar包A依赖了httpclient，然后另一个jar包B引入A，在IDEA里面只能看到依赖A，不管咋样都看不到依赖httpclient。
+今天一个传递依赖问题搞了我半天，终于搞明白原因了。一个jar包A依赖了httpclient，然后另一个jar包B引入A，
+在IDEA里面只能看到依赖A，不管咋样都看不到依赖httpclient。
 
 我在IDEA的项目B里面，打包后在控制台发现一个告警：
+<!-- more -->
 
-``` none
+```
 the POM for A is invalid, transitive dependencies (if any) will not be available, enable debug logging for more details
 ```
 
@@ -23,25 +25,25 @@ the POM for A is invalid, transitive dependencies (if any) will not be available
 
 在应用B的根目录打印依赖树：
 
-``` bash
+```bash
 mvn dependency:tree>tree.txt
 ```
 
 应用依赖树中出现如下警告。警告显示：应用引入的依赖包无效，依赖包中传递依赖项不可用，可以通过开启debug获取更多信息。
 
-``` none
+```
 [WARNING] the POM for A is invalid, transitive dependencies (if any) will not be available, enable debug logging for more details... 
 ```
 
 然后我开启debug功能，重新打印依赖树：
 
-``` bash
+```bash
 mvn -X dependency:tree>tree.txt
 ```
 
 开启maven debug功能后，警告后紧跟了一条错误信息，如下。
 
-``` none
+```
 [WARNING] The POM for com.huawei.dc.security:security-sdk-https:jar:1.0-SNAPSHOT is invalid, transitive dependencies (if any) will not be available: 2 problems were encountered while building the effective model for com.huawei.dc.security:security-sdk-https:1.0-SNAPSHOT
 [ERROR] 'dependencies.dependency.version' for org.springframework.boot:spring-boot-configuration-processor:jar is missing. @ 
 [ERROR] 'dependencies.dependency.version' for org.springframework.boot:spring-boot-autoconfigure:jar is missing. @ 

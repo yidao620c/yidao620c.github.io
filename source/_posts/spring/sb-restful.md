@@ -14,6 +14,7 @@ REST，即Representational State Transfer的缩写，对这个词组的翻译是
 RESTful是一种软件设计风格，就是目前最流行的一种互联网软件架构。它结构清晰、符合标准、易于理解、扩展方便，所以正得到越来越多网站的采用。
 
 SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。
+<!-- more -->
 
 ## 几个注解
 
@@ -47,7 +48,7 @@ RESTful架构有一些典型的设计误区，就是URI包含动词。因为"资
 
 ## 实体定义
 
-``` java
+```java
 public class User {
     private Long id;
     private String name;
@@ -60,7 +61,7 @@ public class User {
 
 接下来就可以编写RestController了，这里为了演示，会将数据保存到内存Map中，实际使用肯定是保存到数据库中。
 
-``` java
+```java
 /**
  * 接口类
  */
@@ -122,7 +123,7 @@ public class UserController {
 
 先写一个json和对象之间相互转化的工具类，使用Jackson库：
 
-``` java
+```java
 public class JacksonUtil {
     private static ObjectMapper mapper = new ObjectMapper();
 
@@ -148,7 +149,7 @@ public class JacksonUtil {
 
 然后再编写单元测试：
 
-``` java
+```java
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

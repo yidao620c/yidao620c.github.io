@@ -14,6 +14,7 @@ abbrlink: 33952
 如果想更加通用一点，最好使用Servlet Filter实现这个需求。
 
 本文将通过几个实际的例子展示下Servlet中的Filter的使用。
+<!-- more -->
 
 ### 我们为什么需要使用Filter？
 
@@ -38,19 +39,19 @@ abbrlink: 33952
 ### Filter接口
 
 Filter接口包含了三个跟生命周期有关的方法，并且由Servlet容器来管理。它们分别是：
-``` java
+```java
 void init(FilterConfig paramFilterConfig)
 ```
 
 当容器初始化这个Filter的时候被调用，并且只会被调用一次。因此在这个方法里面我们可以初始化一些资源。
 FilterConfig会被容器用来给Filter提供初始化参数以及Servlet Context对象。
 我们可以在这个方法中抛出ServletException异常。
-``` java
+```java
 doFilter(ServletRequest paramServletRequest, ServletResponse paramServletResponse, FilterChain paramFilterChain)
 ```
 
 这个方法在每次执行过滤的时候被调用，request和response被作为参数传递进来，FilterChain表示过滤器链，这是典型的责任链模式的实现例子。
-``` java
+```java
 void destroy()
 ```
 
@@ -65,7 +66,7 @@ void destroy()
 
 像下面这样声明一个filter：
 
-``` xml
+```xml
 <filter>
   <filter-name>RequestLoggingFilter</filter-name> <!-- mandatory -->
   <filter-class>com.journaldev.servlet.filters.RequestLoggingFilter</filter-class> <!-- mandatory -->
@@ -78,7 +79,7 @@ void destroy()
 
 然后定义一个mapping：
 
-``` xml
+```xml
 <filter-mapping>
   <filter-name>RequestLoggingFilter</filter-name> <!-- 必填 -->
   <url-pattern>/*</url-pattern> <!-- url-pattern 或 servlet-name必须指定至少一个 -->
@@ -91,7 +92,7 @@ void destroy()
 
 下面是login.html页面：
 
-``` html
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -111,7 +112,7 @@ Password: <input type="password" name="pwd">
 ```
 
 LoginServlet负责验证客户端是否已经登录：
-``` java LoginServlet.java
+```java LoginServlet.java
 package com.journaldev.servlet.session;
   
 import java.io.IOException;
@@ -162,7 +163,7 @@ public class LoginServlet extends HttpServlet {
 ```
 
 验证通过后跳转到LoginSuccess.jsp：
-``` jsp LoginSuccess.jsp
+```jsp LoginSuccess.jsp
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -198,7 +199,7 @@ User=<%=user %>
 ```
 
 退出时我们并不需要进行验证，退出页面为：
-``` jsp CheckoutPage.jsp
+```jsp CheckoutPage.jsp
 <%@ page language="java" contentType="text/html; charset=US-ASCII"
     pageEncoding="US-ASCII"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -228,7 +229,7 @@ for(Cookie cookie : cookies){
 ```
 
 LogoutServlet在用户点击退出按钮时执行：
-``` java LogoutServlet.java
+```java LogoutServlet.java
 package com.journaldev.servlet.session;
   
 import java.io.IOException;
@@ -272,7 +273,7 @@ public class LogoutServlet extends HttpServlet {
 ```
 
 现在我们来创建日志和登录认证的两个filter：
-``` java RequestLoggingFilter.java
+```java RequestLoggingFilter.java
 package com.journaldev.servlet.filters;
 
 import java.io.IOException;
@@ -328,7 +329,7 @@ public class RequestLoggingFilter implements Filter {
 }
 ```
 然后是另一个Filter：
-``` java AuthenticationFilter.java
+```java AuthenticationFilter.java
 package com.journaldev.servlet.filters;
   
 import java.io.IOException;
@@ -381,7 +382,7 @@ public class AuthenticationFilter implements Filter {
 ```
 
 注意我们并不会对任何静态html页面或LoginServlet进行验证，下面我们在web.xml文件中配置：
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
   <display-name>ServletFilterExample</display-name>

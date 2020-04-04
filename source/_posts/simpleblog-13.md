@@ -13,6 +13,7 @@ Redis 是一个高性能的key-value数据库。redis的出现，
 它提供了Python，Ruby，Erlang，PHP客户端，使用很方便。
 
 目前Redis已经发布了3.0版本，正式支持分布式，这个特性太强大，以至于你再不用就对不住自己了。
+<!-- more -->
 
 ### 性能测试
 服务器配置：Linux 2.6, Xeon X3320 2.5Ghz
@@ -30,7 +31,7 @@ stackoverflow网站使用Redis做为缓存服务器。
 
 #### requirements.txt
 添加如下内容，方便以后安装软件依赖，由于在pythonanywhere上面并不能安装redis服务，所以本章只能在本地测试。
-``` none
+```
 redis==2.10.5
 django-redis==4.4.2
 APScheduler==3.1.0
@@ -38,7 +39,7 @@ APScheduler==3.1.0
 
 #### settings.py配置
 新增内容
-``` python
+```python
 from urllib.parse import urlparse
 import dj_database_url
 
@@ -70,7 +71,7 @@ except ImportError:
 
 #### local_settings.py配置
 这个是本地开发时候使用到的配置文件
-``` python
+```python
 DEBUG = True
 
 CACHES = {
@@ -92,7 +93,7 @@ CACHES = {
 
 #### cache_manager.py缓存管理器
 我们新建一个缓存管理器cache_manager.py，内容如下
-``` python
+```python
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """
@@ -143,7 +144,7 @@ def sync_click():
 
 #### views.py修改
 然后我们修改view.py，在相应的action里使用这个cache_manager：
-``` python
+```python
 from .commons import cache_manager
 
 def post_list(request):

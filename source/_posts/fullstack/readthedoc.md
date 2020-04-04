@@ -15,6 +15,7 @@ abbrlink: 715
 
 一般来讲，这个非常适合写软件文档以及编写一些教程、电子书之类。对于一些一两篇文章就能写清楚的可以记笔记或写博客，
 但是如果要写成一个系列的，不如写成一本书的形式，更美观，也更系统。
+<!-- more -->
 
 现有的写电子书的方式，有以下几个解决方案，优劣势也很明显：
 
@@ -30,13 +31,13 @@ Sphinx是一个基于Python的文档生成项目，最早只是用来生成 Pyth
 不过也可以通过模块支持其他格式，待会我会介绍怎样支持MarkDown格式。
 
 ### 安装Sphinx:
-``` bash
+```bash
 pip install sphinx sphinx-autobuild sphinx_rtd_theme
 ```
 这一步时间会安装很多python依赖，耐心等等..
 
 ### 初始化:
-``` bash
+```bash
 # 创建文档根目录
 mkdir -p /root/work/scrapy-cookbook
 cd scrapy-cookbook/
@@ -45,7 +46,7 @@ sphinx-quickstart
 ```
 下面是我填写的，其他基本上默认即可：
 
-``` none
+```
 > Separate source and build directories (y/n) [n]:y
 > Project name: scrapy-cookbook
 > Author name(s): Xiong Neng
@@ -55,13 +56,13 @@ sphinx-quickstart
 ```
 
 安装软件tree查看目录树结构：
-``` bash
+```bash
 yum install tree
 ```
 
 然后运行 `tree -C .` 查看生成的sphinx结构:
 
-``` none
+```
 .
 ├── build
 ├── make.bat
@@ -74,13 +75,13 @@ yum install tree
 ```
 
 添加一篇文章，在source目录下新建hello.rst，内容如下:
-``` none
+```
 hello,world
 =============
 ```
 
 `index.rst` 修改如下:
-``` none
+```
 Contents:
 .. toctree::
    :maxdepth: 2
@@ -90,7 +91,7 @@ Contents:
 
 ### 更改主题 sphinx_rtd_theme
 更改source/conf.py:
-``` python
+```python
 import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -101,7 +102,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 ![](https://xnstatic-1253397658.file.myqcloud.com/rtd01.png)
 
 toctree 支持多级目录,比如要想将python.rst,java.rst笔记在不同的目录,toctree这样设置:
-``` none
+```
 Contents:
 
 .. toctree::
@@ -114,12 +115,12 @@ Contents:
 
 ## 支持markdown编写
 通过[recommonmark](https://recommonmark.readthedocs.io/en/latest/) 来支持markdown
-``` bash
+```bash
 pip install recommonmark
 ```
 
 然后更改conf.py:
-``` python
+```python
 from recommonmark.parser import CommonMarkParser
 source_parsers = {
     '.md': CommonMarkParser,
@@ -129,7 +130,7 @@ source_suffix = ['.rst', '.md']
 
 ### AutoStructify
 如果想使用高级功能，可以添加AutoStructify配置，在`conf.py`中添加:
-``` python
+```python
 # At top on conf.py (with other import statements)
 import recommonmark
 from recommonmark.transform import AutoStructify
@@ -146,7 +147,7 @@ def setup(app):
 网上有个详细配置: <https://github.com/rtfd/recommonmark/blob/master/docs/conf.py>
 
 然后修改刚刚的`hello.rst`，改用熟悉的`hello.md`编写:
-``` md
+```md
 
 ## hello world
 
@@ -186,12 +187,12 @@ def setup(app):
 下载安装包[install-tl-unx.tar.gz](http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz)
 
 如果先安装依赖包：
-``` bash
+```bash
 yum install perl-Digest-MD5
 ```
 
 然后解压缩安装：
-``` bash
+```bash
 tar zxf install-tl-unx.tar.gz
 cd install-tl-*
 ./install-tl  # install-tl-windows on Windows
@@ -203,13 +204,13 @@ Enter command: i
 安装时间会比较长，我这里安装大概要50分钟左右，请耐心等待...
 
 安装完后配置PATH，在`/etc/profile`后面添加:
-``` bash
+```bash
 export PATH=/usr/local/texlive/2016/bin/x86_64-linux:$PATH
 ```
 注意上面的路径改成你自己正确的路径，然后执行`source /etc/profile`即可
 
 如果要生成中文PDF，还需要确认安装了东亚语言包和字体包
-``` bash
+```bash
 yum -y install fontconfig ttmkfdir
 # /usr/share目录就可以看到fonts和fontconfig目录
 # 首先在/usr/share/fonts目录下新建一个目录chinese：
@@ -230,13 +231,13 @@ fc-list :zh
 ```
 
 要用XeLaTeX 取代 pdflatex，我們需要修改`conf.py`:
-``` python
+```python
 # 注：在生成html的时候这句话要注释
 latex_engine = 'xelatex'
 ```
 
 然后执行：
-``` bash
+```bash
 make clean
 make latexpdf
 ```
@@ -252,7 +253,7 @@ make latexpdf
 
 先安装opencc
 
-``` basn
+```bash
 wget https://github.com/BYVoid/OpenCC/archive/master.zip
 unzip master.zip
 yum install -y cmake gcc gcc-c++ doxygen
@@ -263,7 +264,7 @@ ln -s /usr/lib/libopencc.so.2 /usr/lib64/libopencc.so.2
 
 写一个shell脚本来转换源码：
 
-``` bash
+```bash
 #!/bin/bash
 # 将某个文件夹所有文件简体转换成繁体字
 
@@ -278,7 +279,7 @@ done
 
 简体转繁体
 
-``` bash
+```bash
 ./stot.sh scrapy-cookbook/source/
 ```
 
@@ -289,7 +290,7 @@ done
 **build的时候出现错误：! Package inputenc Error: Unicode char 我 (U+6211)**
 
 解决办法，在`conf.py`中添加:
-``` python
+```python
 latex_elements={# The paper size ('letterpaper' or 'a4paper').
 'papersize':'a4paper',# The font size ('10pt', '11pt' or '12pt').
 'pointsize':'12pt','classoptions':',oneside','babel':'',#必須
@@ -321,7 +322,7 @@ latex_elements={# The paper size ('letterpaper' or 'a4paper').
 
 解决办法，更改conf.py
 
-``` python
+```python
 import sphinx.environment
 from docutils.utils import get_source_line
 
@@ -340,7 +341,7 @@ sphinx.environment.BuildEnvironment.warn_node = _warn_node
 将图片下载到source/images目录，然后改链接为相对路径。
 
 如要居中显示图片，使用:
-``` none
+```
 <center>![scrapy架构图](/images/scrapy.png)</center>
 ```
 
@@ -349,7 +350,7 @@ sphinx.environment.BuildEnvironment.warn_node = _warn_node
 **自动生成标题问题**
 
 修改`conf.py`将manual改成howto
-``` none
+```
 latex_documents = [
     (master_doc, 'scrapy-cookbook.tex', u'scrapy-cookbook Documentation',
      u'Xiong Neng', 'howto'),
@@ -361,7 +362,7 @@ latex_documents = [
 **图片覆盖文字的问题**
 
 养成一个好习惯就是新增图片一定要空一行
-``` md
+```md
 one line
 
 ![scrapy架构图](/images/scrapy.png)
@@ -378,7 +379,7 @@ two line
 
 为了解决这个问题，需要手工编辑sphinx生成的python3-cookbook.tex
 
-``` bash
+```bash
 cd build/latex/
 vi scrapy-cookbook.tex
 ```
@@ -389,7 +390,7 @@ vi scrapy-cookbook.tex
 请注意别乱动里面的东西，删除一个空行也不行。
 
 然后执行命令：
-``` bash
+```bash
 xelatex scrapy-cookbook.tex
 ```
 
@@ -405,7 +406,7 @@ xelatex scrapy-cookbook.tex
 
 编辑tex文件，在导言区的内容如下：
 
-``` none
+```
 前面省略...
 \title{《Python Cookbook》第三版}
 \date{Dec 09, 2017}
@@ -465,11 +466,11 @@ xelatex scrapy-cookbook.tex
 在 `\section{附录A}` 前插入 `\specialtocdepth`
 
 另外执行下面命令，删除每个章节多余的Contents和下面的一行空格：
-``` bash
+```bash
 sed -i '/Contents:/,+1 d' python3-cookbook.tex
 ```
 
 再次运行生成命令即可(最好执行2次)：
-``` none
+```
 xelatex python3-cookbook.tex
 ```

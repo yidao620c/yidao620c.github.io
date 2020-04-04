@@ -14,6 +14,7 @@ RabbitMQ任务调度默认是阻塞的，使用pika中的`channel.start_consumin
 虽然说可同时接受多条消息，但是并不能同时处理这多条消息，那么需要自己在代码里面实现任务的并发调度。
 
 在Python里面实现并发方式多种多样，有多线程、多进程、多协程方式，我演示下如何实现。
+<!-- more -->
 
 ## 默认方式
 
@@ -22,7 +23,7 @@ RabbitMQ任务调度默认是阻塞的，使用pika中的`channel.start_consumin
 
 生产者代码（后面的都不变），直接复制的前面教程的代码：
 
-``` python
+```python
 import pika
 import sys
 
@@ -62,7 +63,7 @@ connection.close()
 ```
 
 消费者代码：
-``` python
+```python
 import pika
 import time
 import datetime
@@ -103,7 +104,7 @@ channel.start_consuming()
 
 运行结果：
 
-``` none
+```
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:04:46.977268 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:04:51.987554 [x] Finished b'[disk.error] Hello World! 111111'
@@ -119,7 +120,7 @@ channel.start_consuming()
 
 下面用多线程方式实现并发，消费者代码如下：
 
-``` python
+```python
 import pika
 import time
 import datetime
@@ -160,7 +161,7 @@ channel.start_consuming()
 ```
 
 运行结果：
-``` none
+```
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:07:58.486085 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:07:58.487085 [x] Received b'[disk.error] Hello World! 222222'
@@ -174,7 +175,7 @@ channel.start_consuming()
 ## 多进程方式
 
 下面用多进程方式实现并发（注意多进程只能在Linux中使用），消费者代码如下，我只写差异部分，其他跟上面多线程一样：
-``` python
+```python
 from multiprocessing import Process
 
 def callback(ch, method, properties, body):
@@ -188,7 +189,7 @@ def callback(ch, method, properties, body):
 
 利用gevent协程模式，比多线程更加高效，这个是我推荐的方式：
 
-``` python
+```python
 import gevent
 from gevent import monkey; monkey.patch_all()
 
@@ -198,7 +199,7 @@ def callback(ch, method, properties, body):
 ```
 
 运行结果：
-``` none
+```
  [*] Waiting for logs. To exit press CTRL+C
 2017-05-26 11:13:53.637398 [x] Received b'[disk.error] Hello World! 111111'
 2017-05-26 11:13:53.637398 [x] Received b'[disk.error] Hello World! 222222'

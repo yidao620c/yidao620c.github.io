@@ -11,6 +11,7 @@ abbrlink: 13296
 
 MongoDB是一个高性能、开源、无模式的文档型数据库，是当前NoSql数据库中比较热门的一种。
 适合对大量或者无固定格式的数据进行存储，比如：日志、缓存等。对事物支持较弱，不适用复杂的多文档（多表）的级联查询。
+<!-- more -->
 
 MongoDB的适用场景：
 
@@ -30,7 +31,7 @@ MongoDB的适用场景：
 
 只需要添加：
 
-``` xml
+```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -61,7 +62,7 @@ db.createUser(
 
 修改`application.yml`配置，增加mongodb的配置项：
 
-``` yml
+```yaml
 spring:
   data:
     mongodb:
@@ -72,7 +73,7 @@ spring:
 
 这里只是为了测试，我就定义一个简单的客户类：
 
-``` java
+```java
 @Document(collection = "customer")
 public class Customer {
     @Id
@@ -107,7 +108,7 @@ public class Customer {
 
 这里可继承`MongoRepository`，这样一些通用操作的方法，比如增删改查你就不用写了，只需要添加你自己自定义的其他方法：
 
-``` java
+```java
 public interface CustomerRepository extends MongoRepository<Customer, String> {
 
     Customer findByFirstName(String firstName);
@@ -124,7 +125,7 @@ public interface CustomerRepository extends MongoRepository<Customer, String> {
 
 接下来编写核心的业务服务类 `CustomerService`
 
-``` java
+```java
 @Service
 public class CustomerService {
     @Resource
@@ -177,7 +178,7 @@ public class CustomerService {
 
 OK，一切准备妥当之后，我们来编写测试用例：
 
-``` java
+```java
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ApplicationTests {

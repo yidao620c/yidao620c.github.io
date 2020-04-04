@@ -12,10 +12,11 @@ abbrlink: 40306
 项目中经常会出现需要同时连接两个数据源的情况，这里还是演示基于MyBatis来配置两个数据源，并演示如何切换不同的数据源。
 
 网上的一些例子都写的有点冗余，这里我通过自定义注解+AOP的方式，来简化这种数据源的切换操作。
+<!-- more -->
 
 ## maven依赖
 
-``` xml
+```xml
 <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -72,7 +73,7 @@ abbrlink: 40306
 
 这里我们需要创建两个数据库，初始化脚本如下：
 
-``` sql
+```sql
 # -------------------------------------以下是pos业务库开始-------------------------------------------
 CREATE DATABASE IF NOT EXISTS pos default charset utf8 COLLATE utf8_general_ci;
 SET FOREIGN_KEY_CHECKS=0;
@@ -131,7 +132,7 @@ INSERT INTO `t_user` VALUES (2,'aix1','张三','123456','eee', '17859569358', ''
 
 接下来修改application.yml配置文件，如下：
 
-``` yml
+```yaml
 ###################  自定义配置  ###################
 xncoding:
   muti-datasource-open: true #是否开启多数据源(true/false)
@@ -177,7 +178,7 @@ biz:
 
 多数据源的常量类：
 
-``` java
+```java
 public interface DSEnum {
     String DATA_SOURCE_CORE = "dataSourceCore";         //核心数据源
     String DATA_SOURCE_BIZ = "dataSourceBiz";            //其他业务的数据源
@@ -186,7 +187,7 @@ public interface DSEnum {
 
 datasource的上下文，用来存储当前线程的数据源类型：
 
-``` java
+```java
 public class DataSourceContextHolder {
 
     private static final ThreadLocal<String> contextHolder = new ThreadLocal<String>();
@@ -217,7 +218,7 @@ public class DataSourceContextHolder {
 
 定义动态数据源，继承`AbstractRoutingDataSource` ：
 
-``` java
+```java
 public class DynamicDataSource extends AbstractRoutingDataSource {
 
     @Override
@@ -229,7 +230,7 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 
 接下来自定义一个注解，用来在Service方法上面注解使用哪个数据源：
 
-``` java
+```java
 /**
  * 多数据源标识
  *
@@ -245,7 +246,7 @@ public @interface DataSource {
 
 最后，最核心的AOP类定义：
 
-``` java
+```java
 /**
  * 多数据源切换的aop
  *
@@ -317,7 +318,7 @@ public class MultiSourceExAop implements Ordered {
 
 然后定义配置类：
 
-``` java
+```java
 @Configuration
 @EnableTransactionManagement(order = 2)
 @MapperScan(basePackages = {"com.xncoding.pos.common.dao.repository"})
@@ -391,7 +392,7 @@ public class MybatisPlusConfig {
 
 ## 实体类
 
-``` java
+```java
 @TableName(value = "t_user")
 public class User extends Model<User> {
 
@@ -444,7 +445,7 @@ private static final long serialVersionUID = 1L;
 
 ## 定义DAO
 
-``` java
+```java
 public interface UserMapper extends BaseMapper<User> {
 
 }
@@ -452,7 +453,7 @@ public interface UserMapper extends BaseMapper<User> {
 
 ## 定义Service
 
-``` java
+```java
 @Service
 public class UserService {
 
@@ -513,7 +514,7 @@ public class UserService {
 
 最后编写一个简单的测试，我只测试`findById()`方法和`findById1()`方法，看它们是否访问的是不同的数据源。
 
-``` java
+```java
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ApplicationTests {

@@ -14,10 +14,11 @@ abbrlink: 20610
 
 单元测试一个最大的好处，就是确保一个程序模块的行为符合我们设计的测试用例。
 在将来修改的时候，可以极大程度地保证该模块行为仍然是正确的。
+<!-- more -->
 
 ## 基本用法
 我们通过一个例子来说明怎样写单元测试，先编写一个Dict类，它的行为和dic一致，但是可以通过属性来访问。
-``` python
+```python
 class Dict(dict):
 
     def __init__(self, **kw):
@@ -34,7 +35,7 @@ class Dict(dict):
 ```
 
 python自带unittest模块来方便我们编写单元测试，先引入：
-``` python
+```python
 import unittest
 
 class TestDict(unittest.TestCase):
@@ -72,33 +73,33 @@ class TestDict(unittest.TestCase):
 
 对每一类测试都需要编写一个test_xxx()方法。由于unittest.TestCase提供了很多内置的条件判断，
 我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是assertEqual()：
-``` python
+```python
 # 断言函数返回的结果与1相等
 self.assertEqual(abs(-1), 1)
 ```
 另一种重要的断言就是期待抛出指定类型的Error，比如通过d['empty']访问不存在的key时，断言会抛出KeyError：
-``` python
+```python
 with self.assertRaises(KeyError):
     value = d['empty']
 ```
 
 ## 运行单个测试
 一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在mydict_test.py的最后加上两行代码：
-``` python
+```python
 if __name__ == '__main__':
     unittest.main()
 ```
 这种方式可将其当做普通的python脚本来运行。
 
 另一种方法是在命令行通过参数-m unittest直接运行单元测试，无需写main方法（推荐这种方式）：
-``` python
+```python
 python -m unittest mydict_test
 ```
 
 ## 运行测试套件
 最常见的情况是软件很多，需要为每个模块写一个单元测试模块，
 最后想将它们作为一个测试套件一起运行，那么就要使用TestLoader了：
-``` python
+```python
 import unittest
 
 if __name__ == '__main__':
@@ -118,7 +119,7 @@ setUp()和tearDown()方法有什么用呢？设想你的测试需要启动一个
 在tearDown()方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码。
 
 另外，如果你想在整个测试类所有方法开始执行前和所有方法执行完后执行，就使用类方法`setUpClass()`和`tearDownClass()`:
-``` python
+```python
 class TestDict(unittest.TestCase):
 
     def setUp(self):
@@ -138,7 +139,7 @@ class TestDict(unittest.TestCase):
 ```
 
 如果是模块级别的，就使用函数setUpModule()和tearDownModule()：
-``` python
+```python
 def setUpModule():
     createConnection()
 
@@ -148,7 +149,7 @@ def tearDownModule():
 
 ## 忽略测试
 你还可以根据某些条件来忽略某些测试，这里使用@unittest.skip注解实现：
-``` python
+```python
 class MyTestCase(unittest.TestCase):
 
     @unittest.skip("demonstrating skipping")
@@ -167,7 +168,7 @@ class MyTestCase(unittest.TestCase):
         pass
 ```
 还可以忽略整个测试类：
-``` python
+```python
 @unittest.skip("showing class skipping")
 class MySkippedTestCase(unittest.TestCase):
     def test_not_run(self):
@@ -175,7 +176,7 @@ class MySkippedTestCase(unittest.TestCase):
 ```
 
 标注某个测试一定会失败:
-``` python
+```python
 @unittest.expectedFailure
     def test_fail(self):
         self.assertEqual(1, 0, "broken")
@@ -252,7 +253,7 @@ overriding the 'setUp' and 'tearDown' methods respectively.
 ![](https://xnstatic-1253397658.file.myqcloud.com/pyunittest02.png)
 
 下面通过简单的例子再来实践一下，就拿unittest文档上的例子吧：
-``` python
+```python
 import random
 import unittest
 
@@ -287,7 +288,7 @@ if __name__ == '__main__':
 这个TestSequenceFunctions类到底是个什么呢？它是一个测试用例，还是三个测试用例？
 其实，我们只要看一些TestLoader是如何加载测试用例的，就一清二楚了，
 在`loader.TestLoader`类中有一个`loadTestsFromTestCase()`方法：
-``` python
+```python
 def loadTestsFromTestCase(self, testCaseClass):
     """Return a suite of all tests cases contained in testCaseClass"""
     if issubclass(testCaseClass, suite.TestSuite):
@@ -324,7 +325,7 @@ unittest本身并不具备这个功能，需要使用[HTMLTestRunner](https://py
 ### 报告中显示用例的注释
 给报告中的每个测试用例添加注释，来说明该测试用例是用来干什么的，非常有必要。
 这里在每个测试函数的下方添加上注释：
-``` python
+```python
 def test_equal(self):
     '''这里是测试两个值是否相等'''
     self.assertEqual(1, 1)

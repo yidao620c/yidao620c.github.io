@@ -10,6 +10,7 @@ date: 2017-11-30 12:16:53
 我之前写了一篇如何在readthedoc上面发布文档的文章，现在又多了一个选择，就是使用GitBook来编写文档。
 主要是觉得对于一个托管到GitHub上面的项目来讲，可以顺带的编写使用教程和文档，可以托管到`github.io`上面，
 非常的方便有用。因为很多软件别人觉得好不好用，文档太重要了。
+<!-- more -->
 
 ## 安装
 
@@ -19,7 +20,7 @@ date: 2017-11-30 12:16:53
 
 [Node.js](https://nodejs.org/en)
 
-``` bash
+```bash
 yum install curl sudo
 sudo yum install epel-release
 curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -
@@ -30,14 +31,14 @@ node -v
 
 **换淘宝源**
 
-``` none
+```
 npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 之后使用cnpm命令代替npm命令
 
 **安装gitbook-cli**
 
-``` bash
+```bash
 $ cnpm install gitbook-cli -g
 $ gitbook -V
 CLI version: 2.3.2
@@ -56,7 +57,7 @@ gitbook 的基本用法非常简单，基本上就只有几个命令：
 
 首先，创建如下目录结构：
 
-``` none
+```
 $ tree book/
 book/
 ├── README.md
@@ -67,7 +68,7 @@ book/
 
 EADME.md 和 SUMMARY.md 是两个必须文件，README.md 是对书籍的简单介绍：
 
-``` none
+```
 $ cat book/README.md 
 # README
 
@@ -75,7 +76,7 @@ This is a book powered by [GitBook](https://github.com/GitbookIO/gitbook).
 ```
 
 SUMMARY.md 是书籍的目录结构。内容如下：
-``` none
+```
 $ cat book/SUMMARY.md 
 # SUMMARY
 
@@ -87,7 +88,7 @@ $ cat book/SUMMARY.md
 
 创建了这两个文件后，使用 `gitbook init`，它会为我们创建 `SUMMARY.md` 中的目录结构
 
-``` none
+```
 $ cd book
 $ gitbook init
 $ tree
@@ -105,7 +106,7 @@ $ tree
 ```
 
 书籍目录结构创建完成以后，就可以使用 gitbook serve 来编译和预览书籍了：
-``` none
+```
 [root@VM_170_150_centos book]# gitbook serve
 Live reload server started on port: 35729
 Press CTRL+C to quit ...
@@ -136,7 +137,7 @@ Serving book on http://localhost:4000
 
 gitbook在编译书籍的时候会读取书籍源码顶层目录中的`book.json`，参考gitbook文档，一个典型的配置：
 
-``` json
+```json
 {
     "author": "熊能 <yidao620@gmail.com>",
     "description": "scrapy简明指南",
@@ -192,7 +193,7 @@ gitbook还支持许多插件，用户可以从 [NPM](https://www.npmjs.com/) 上
 
 接下来我推荐几个比较好用的插件
 
-``` bash
+```bash
 cnpm i -g gitbook-plugin-disqus
 cnpm i -g gitbook-plugin-multipart
 cnpm i -g gitbook-plugin-toggle-chapters
@@ -225,7 +226,7 @@ Disqus 是一个非常流行的为网站集成评论系统的工具，同样，g
 首先，需要在 disqus 上注册一个账号，然后添加一个 website，这会获得一个关键字，然后在集成时配置这个关键字即可。
 
 配置如下：
-``` json
+```json
 {
     "plugins": ["disqus"],
     "pluginsConfig": {
@@ -256,7 +257,7 @@ Disqus 是一个非常流行的为网站集成评论系统的工具，同样，g
 由于 gitbook 书籍可以通过 gitbook 本地构建出 site 格式，所以可以直接将构建好的书籍直接放到 GitHub Pages 中托管，
 之后，可以通过如下地址访问书籍：
 
-``` none
+```
 http://<username>.github.io/<project>
 ```
 
@@ -281,7 +282,7 @@ http://<username>.github.io/<project>
 
 为了每次自动发布gitbook书籍到github.io上去，我自己写了个脚本：
 
-``` bash
+```bash
 #!/bin/bash
 
 cd doc
@@ -365,7 +366,7 @@ fonts目录放入的字体：
 * fontawesome-webfont.woff2
 
 css目录放入的样式文件：
-``` none
+```
 font-awesome.css
 font-awesome.css.map
 font-awesome.min.css
@@ -373,7 +374,7 @@ font-awesome.min.css
 
 2\. 同时在配置文件里面，在url路径前面加入项目名前缀，比如上面的配置中：
 
-``` json
+```json
 {
     "pluginsConfig": {
         "theme-gestalt": {

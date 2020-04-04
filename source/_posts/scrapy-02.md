@@ -19,11 +19,12 @@ abbrlink: 23055
 * 编写一个Item Pipline来存储提取出来的Item对象
 
 Scrapy使用Python语言编写，如果你对这门语言还不熟，请先去学习下基本知识。
+<!-- more -->
 
 ## 创建Scrapy工程
 
 在任何你喜欢的目录执行如下命令
-``` bash
+```bash
 scrapy startproject coolscrapy
 ```
 将会创建coolscrapy文件夹，其目录结构如下：
@@ -49,7 +50,7 @@ coolscrapy/
 我们通过创建一个scrapy.Item类，并定义它的类型为scrapy.Field的属性，
 我们准备将虎嗅网新闻列表的名称、链接地址和摘要爬取下来。
 
-``` python
+```python
 import scrapy
 
 class HuxiuItem(scrapy.Item):
@@ -73,7 +74,7 @@ class HuxiuItem(scrapy.Item):
 它负责解析返回页面数据并提取出相应的Item（返回Item对象），还有其他合法的链接URL（返回Request对象）。
 
 我们在coolscrapy/spiders文件夹下面新建`huxiu_spider.py`，内容如下：
-``` python huxiu_spider.py
+```python huxiu_spider.py
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """
@@ -102,7 +103,7 @@ class HuxiuSpider(scrapy.Spider):
 
 ## 运行爬虫
 在根目录执行下面的命令，其中huxiu是你定义的spider名字：
-``` bash
+```bash
 scrapy crawl huxiu
 ```
 如果一切正常，应该可以打印出每一个新闻
@@ -111,7 +112,7 @@ scrapy crawl huxiu
 如果想继续跟踪每个新闻链接进去，看看它的详细内容的话，那么可以在parse()方法中返回一个Request对象，
 然后注册一个回调函数来解析新闻详情。
 
-``` python
+```python
 from coolscrapy.items import HuxiuItem
 import scrapy
 
@@ -147,7 +148,7 @@ class HuxiuSpider(scrapy.Spider):
 
 ## 导出抓取数据
 最简单的保存抓取数据的方式是使用json格式的文件保存在本地，像下面这样运行：
-``` bash
+```bash
 scrapy crawl huxiu -o items.json
 ```
 在演示的小系统里面这种方式足够了。不过如果你要构建复杂的爬虫系统，
@@ -156,7 +157,7 @@ scrapy crawl huxiu -o items.json
 ## 保存数据到数据库
 上面我们介绍了可以将抓取的Item导出为json格式的文件，不过最常见的做法还是编写Pipeline将其存储到数据库中。
 我们在`coolscrapy/pipelines.py`定义
-``` python
+```python
 # -*- coding: utf-8 -*-
 import datetime
 import redis
@@ -200,7 +201,7 @@ class ArticleDataBasePipeline(object):
 我写了篇关于它的[入门教程](https://www.xncoding.com/2016/03/07/python/sqlalchemy.html)，可以参考下。
 
 然后在`setting.py`中配置这个Pipeline，还有数据库链接等信息：
-``` python
+```python
 ITEM_PIPELINES = {
     'coolscrapy.pipelines.ArticleDataBasePipeline': 5,
 }
@@ -215,7 +216,7 @@ DATABASE = {'drivername': 'mysql',
             'query': {'charset': 'utf8'@@
 ```
 再次运行爬虫
-``` bash
+```bash
 scrapy crawl huxiu
 ```
 那么所有新闻的文章都存储到数据库中去了。

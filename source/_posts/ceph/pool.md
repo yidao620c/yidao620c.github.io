@@ -20,36 +20,37 @@ pool是ceph存储数据时的逻辑分区，它起到namespace的作用。
 pool也支持snapshot功能。可以运行ceph osd pool mksnap命令创建pool的快照，并且在必要的时候恢复它。
 还可以设置pool的拥有者属性，从而进行访问控制。
 
-下面记录一下和pool相关的命令
+下面记录一下和pool相关的命令。
+<!-- more -->
 
 ## 查询pool列表
-``` bash
+```bash
 ceph osd lspools
 ```
 
 ## 创建pool
 
 创建pool之前可更改两个pg默认配置：
-``` bash
+```bash
 osd pool default pg num = 100
 osd pool default pgp num = 100
 ```
 
 pg_num是指定创建的pg的个数，会有一组编号，然后pgp_num就是控制pg到osd的映射分布。一般最好将pgp_num设置成一样。
 
-``` bash
+```bash
 ceph osd pool create {pool-name} {pg-num} [{pgp-num}] [replicated] [crush-ruleset-name] [expected-num-objects]
 ceph osd pool create testpool 128 128 replicated
 ```
 
 ## 删除存储池
 
-``` bash
+```bash
 ceph osd pool delete {pool-name} [{pool-name} --yes-i-really-really-mean-it]
 ```
 
 如果你单独为这个pool创建了crush_ruleset，那么最好也将这个也删了。
-``` bash
+```bash
 # 查看pool的ruleset id
 crush_ruleset=$(ceph osd pool get {pool-name} crush_ruleset)
 # 比如找到了crush_ruleset名字为123
@@ -64,12 +65,12 @@ z=/tmp/z && ceph osd getcrushmap -o $z && crushtool -d $z -o $z && cat $z && rm 
 ```
 
 ## 重命名存储池
-``` bash
+```bash
 ceph osd pool rename {current-pool-name} {new-pool-name}
 ```
 
 ## 快照
-``` bash
+```bash
 # 创建快照
 ceph osd pool mksnap {pool-name} {snap-name}
 # 删除快照
@@ -86,7 +87,7 @@ rbd -p <pool name> snap unprotect {snap-name}  Allow a snapshot to be deleted.
 ```
 
 ## 获取/设置存储池属性
-``` bash
+```bash
 ceph osd pool get {pool-name} {key}
 ceph osd pool set {pool-name} {key} {value}
 ```
@@ -100,7 +101,7 @@ ceph osd pool set {pool-name} {key} {value}
 
 ## 获取pool的空间使用情况
 
-``` bash
+```bash
 [root@node001 ~]# ceph df
 GLOBAL:
     SIZE     AVAIL     RAW USED     %RAW USED

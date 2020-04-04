@@ -12,9 +12,13 @@ abbrlink: 16870
 你是否经常要在Windows 7或MAC OS X上面开发Python或Web应用程序，但是它们最后需要在linux上面来运行呢？
 我们经常会碰到开发时没有问题但是到了正式的Linux环境下面却出现问题。那么怎样保证开发环境跟运行环境的一致呢？
 
-通常有两种方法解决。一种是使用PyCharm内置支持的`Vagrant`，这个教程可以参考[Vagrant开发环境配置](https://github.com/astaxie/Go-in-Action/blob/master/ebook/zh/01.0.md)。
+通常有两种方法解决。一种是使用PyCharm内置支持的`Vagrant`，
+这个教程可以参考[Vagrant开发环境配置](https://github.com/astaxie/Go-in-Action/blob/master/ebook/zh/01.0.md)。
+<!-- more -->
+
 不过很遗憾的是我自己在试验过程中启动VirtualBox虚拟机时候老是报错，暂时还没解决，读者可以自己试着测试看行不行。
-第二种方式就是通过PyCharm的远程解释器加上文件同步功能，实现本地编辑代码->同步到服务器->通过远程debug来调试测试程序。目前我选择的是第二种，虽然比第一种更笨拙点。
+第二种方式就是通过PyCharm的远程解释器加上文件同步功能，实现本地编辑代码->同步到服务器->通过远程debug来调试测试程序。
+目前我选择的是第二种，虽然比第一种更笨拙点。
 
 远程调试的功能在Eclipse、IntelliJ IDEA等大型IDE中均有支持，实现原理都基本相同，这里采用PyCharm进行说明。
 

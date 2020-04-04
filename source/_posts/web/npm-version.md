@@ -18,6 +18,7 @@ abbrlink: 48779
 major.minor.patch
 
 主版本号.次版本号.修补版本号
+<!-- more -->
 
 ### 版本匹配规则
 
@@ -108,7 +109,7 @@ x的位置表示任意版本
 
 The difference between npm install and npm update handling of package versions specified in package.json:
 
-``` json
+```json
 {
   "name":          "my-project",
   "version":       "1.0",                             // install   update

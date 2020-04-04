@@ -13,6 +13,7 @@ Jetty 可以用来作为一个传统的 Web 服务器，也可以作为一个动
 
 jetty是轻量级的web服务器和servlet引擎。它的最大特点是：可以很方便的作为嵌入式服务器。
 就是只要引入jetty的jar包，可以通过直接调用其API的方式来启动web服务。
+<!-- more -->
 
 Jetty的广泛应用得益于其诸多优秀的特性：
 
@@ -46,7 +47,7 @@ Jetty在设计之初就是作为一个可以嵌入到其他的Java代码中的se
 
 ## 启动
 jetty的启动跟Tomcat不同，cd到JETTY_HOME目录，执行：
-``` sh
+```bash
 java -jar start.jar
 ```
 
@@ -87,7 +88,7 @@ java -jar start.jar jetty.port=8002
 
 ## 与IDEA的集成
 最好的方式就是使用maven的插件`jetty-maven-plugin`来集成：
-``` xml
+```xml
 <plugin>
     <groupId>org.eclipse.jetty</groupId>
     <artifactId>jetty-maven-plugin</artifactId>
@@ -114,7 +115,7 @@ Jetty还能通过嵌入式的方式使用，有API方式和maven插件方式。
 
 ### API方式
 添加maven依赖
-``` xml
+```xml
 <dependency>
   <groupId>org.eclipse.jetty</groupId>
   <artifactId>jetty-webapp</artifactId>
@@ -142,7 +143,7 @@ Jetty还能通过嵌入式的方式使用，有API方式和maven插件方式。
 ```
 
 官方的启动代码
-``` java
+```java
 public class SplitFileServer
 {
     public static void main( String[] args ) throws Exception

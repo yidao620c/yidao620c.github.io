@@ -12,6 +12,7 @@ abbrlink: 9657
 vim 是 Linux 系统上的最著名的文本/代码编辑器，也是早年的 Vi 编辑器的加强版，
 而 gvim 则是其 Windows 版。它的最大特色是完全使用键盘命令进行编辑，脱离了鼠标操作虽然使得入门变得困难，
 但上手之后键盘流的各种巧妙组合操作却能带来极为大幅的效率提升。
+<!-- more -->
 
 因此 vim 和现代的编辑器（如 Sublime Text）有着非常巨大的差异，而且入门学习曲线陡峭，
 需要记住很多按键组合和命令，如今被看作是高手、Geek们专用的编辑器。尽管 vim 已经是古董级的软件，
@@ -20,18 +21,18 @@ vim 是 Linux 系统上的最著名的文本/代码编辑器，也是早年的 V
 
 ## 安装
 将来要支持python开发，先安装
-``` bash
+```bash
 yum install python-devel
 ```
 这一步比较简单，在centos上面一条命令:
-``` bash
+```bash
 yum install vim
 vim --version
 VIM - Vi IMproved 7.4
 ```
 
 下载源码并进行编译安装(8.0有些问题，暂时不建议安装):
-``` bash
+```bash
 wget https://github.com/vim/vim/archive/master.zip
 unzip master.zip
 cd vim-master
@@ -53,14 +54,14 @@ Vim有多个扩展管理器，但是我们强烈推荐[Vundle](https://github.co
 你可以把它想象成Vim的pip，有了Vundle，安装和更新包这种事情不费吹灰之力。
 
 我们现在来安装Vundle：
-``` bash
+```bash
 git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
 该命令将下载Vundle插件管理器，并将它放置在你的Vim编辑器bundles文件夹中。
 现在，你可以通过.vimrc配置文件来管理所有扩展了。
 
 我这里有一个比较优化的配置了，将vim打造成一个IDE， 编辑`~/.vimrc`，输入如下内容
-``` vim
+```vim
 "vundle
 set nocompatible
 filetype off
@@ -222,7 +223,7 @@ vnoremap ,s y:%s/<C-R>=escape(@", '\\/.*$^~[]')<CR>/
 出现过问题"ouCompleteMe unavailable: No module named ycmd"
 
 解决办法:
-``` bash
+```bash
 cd ~/.vim/bundle/YouCompleteMe
 git pull
 git submodule update --init --recursive
@@ -236,7 +237,7 @@ git submodule update --init --recursive
 The ycmd server SHUT DOWN (restart with ':YcmRestartServer')
 
 YCM需要手动编译才行，到`.vim/bundle/YouCompleteMe`下跑
-``` bash
+```bash
  ./install.sh --clang-completer
 ```
 耐心等待大概1个小时可以下载并安装完...
@@ -449,14 +450,14 @@ Vim提供了方便访问近期缓冲区的方式，只需要输入`:b <buffer na
 NERDTree的作用就是列出当前路径的目录树，一般IDE都是有的。
 可以方便的浏览项目的总体的目录结构和创建删除重命名文件或文件名。
 至于它的配置我做了如下修改:
-``` vim
+```vim
 " NERDTree config
 map <F2> :NERDTreeToggle<CR>
 ```
 使用F2键快速调出和隐藏它；
 
 如果想打开vim时自动打开NERDTree，可以如下设定:
-``` vim
+```vim
 autocmd vimenter * NERDTree
 ```
 下面总结一些命令,非常的多，只要记住一些你常用的就行了，后名添加！！！的是我常用的

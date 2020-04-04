@@ -12,10 +12,11 @@ abbrlink: 12880
 说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，
 但是一些特有或相对老旧的系统依然使用了传统的soap web service，例如银行、航空公司的机票查询接口等。
 本篇主要讲解spring boot整合cxf发布webservice服务和spring boot整合cxf客户端调用webservice服务。
+<!-- more -->
 
 ## maven依赖
 
-``` xml
+```xml
 <dependencies>
     <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -58,7 +59,7 @@ abbrlink: 12880
 
 先定义一个简单的用户类User：
 
-``` java
+```java
 package com.xncoding.webservice.model;
 
 public class User {
@@ -83,7 +84,7 @@ public class User {
 
 创建一个简单的服务接口，定义了两个方法，一个返回字符串，一个返回一个实体类User：
 
-``` java
+```java
 package com.xncoding.webservice.service;
 
 import com.xncoding.webservice.model.User;
@@ -108,7 +109,7 @@ public interface ICommonService {
 
 接下来实现这个接口，编写相应的业务逻辑：
 
-``` java
+```java
 package com.xncoding.webservice.service.impl;
 
 import com.xncoding.webservice.model.User;
@@ -140,7 +141,7 @@ public class CommonServiceImpl implements ICommonService {
 
 接下来编写cxf的配置类：
 
-``` java
+```java
 @Configuration
 public class CxfConfig {
     @Autowired
@@ -165,7 +166,7 @@ public class CxfConfig {
 
 如果你想自定义wsdl的访问url，那么可以在application.yml中自定义：
 
-``` yml
+```yaml
 cxf:
   path: /services  # 替换默认的/services路径
 ```
@@ -178,7 +179,7 @@ cxf:
 
 这种方式需要拿到对方的接口
 
-``` java
+```java
 @Test
 public void cl1() {
     try {
@@ -204,7 +205,7 @@ public void cl1() {
 
 ### 动态调用方式
 
-``` java
+```java
 @Test
 public void cl2() {
     // 创建动态客户端
@@ -279,7 +280,7 @@ wsimport -encoding utf-8 -p com.xncoding.webservice.client -keep http://xxx?wsdl
 
 客户端使用例子：
 
-``` java
+```java
 CommonService_Service c = new CommonService_Service();
 com.xncoding.webservice.client.User user = c.getCommonServiceImplPort().getUser("Tom");
 assertThat(user.getName(), is("Tom"));

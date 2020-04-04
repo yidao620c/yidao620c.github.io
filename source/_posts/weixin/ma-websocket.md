@@ -10,6 +10,7 @@ date: 2017-12-15 12:47:12
 小程序已经添加了对WebSocket的支持，如果需要长连接和推送的场景来讲可以使用。
 关于websocket的使用，[小程序WebSocket API](https://mp.weixin.qq.com/debug/wxadoc/dev/api/network-socket.html) 里边已经给了。
 相比较传统的HTTP接口形式，websocket长连接可实现双向通信，但是用好它可并不简单。
+<!-- more -->
 
 刚开始的时候做这个推送，我选用了Socket.IO协议来实现，服务器端用netty-socketio实现，
 而小程序用了一个第三方库[wxapp-socket-io](https://github.com/wxsocketio/wxapp-socket-io)，但是遇到各种问题，连接自动断掉，一直连不上服务器。
@@ -159,7 +160,7 @@ onUnload     | Function   | 生命周期函数--监听页面卸载
 
 下面是app.js代码：
 
-``` js
+```js
 let socketMsgQueue = []
 let isLoading = false
 
@@ -267,7 +268,7 @@ App({
 
 下面是某个页面的onshow()函数：
 
-``` js
+```js
 /**
 * 生命周期函数--监听页面显示
 */

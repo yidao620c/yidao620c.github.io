@@ -15,24 +15,25 @@ abbrlink: 6633
 
 这篇先介绍生成器这个东东，学会你就知道它有多强大了，不过对于生成器的讲解稍微有点长，
 可能看完不止5分钟，所以我分了上下两篇。建议读者耐心看完，这是进阶的必经之路。
+<!-- more -->
 
 ## 列表推导
 
 在讲生成器之前，先讲讲python里面常用的几个常见的推导式：
 
 *列表推导式（list comprehension）*
-``` python
+```python
 my_list = [f(x) for x in sequence if cond(x)]
 ```
 返回一个新的列表，列表中每个元素是原来列表中满足`cond(x)`条件的元素经过函数`f(x)`转换后的值。
 
 *字典推导式（dictionary comprehension）*
-``` python
+```python
 my_dict = {k(x): v(x) for x in sequence if cond(x)}
 ```
 
 *集合推导式（set comprehension）*
-``` python
+```python
 my_set = {f(x) for x in sequence if cond(x)}
 ```
 

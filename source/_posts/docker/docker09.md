@@ -12,13 +12,14 @@ date: 2017-04-12 19:15:36
 
 对于这样一个 multi-host 环境，我们将如何高效地进行管理呢？我们面临的第一个问题是：为所有的 host 安装和配置 docker。
 如果一个个去安装肯定很麻烦又容易出错，手工方式效率低且不容易保证一致性，针对这个问题，docker 给出的解决方案是 Docker Machine。
+<!-- more -->
 
 ## 安装 Docker Machine
 
 用 Docker Machine 可以批量安装和配置 docker host，这个 host 可以是本地的虚拟机、物理机，也可以是公有云中的云主机。
 
 安装命令：
-``` bash
+```bash
 curl -L https://github.com/docker/machine/releases/download/v0.16.1/docker-machine-Linux-x86_64 >/tmp/docker-machine &&
 chmod +x /tmp/docker-machine &&
 sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
@@ -26,7 +27,7 @@ sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
 
 下载的执行文件被放到 `/usr/local/bin` 中，执行`ocker-mahine version` 验证命令是否可用：
 
-``` bash
+```bash
 [root@ecs-hw01 ~]# docker-machine version
 docker-machine version 0.16.1, build cce350d7
 ```
@@ -38,14 +39,14 @@ docker-machine version 0.16.1, build cce350d7
 先安装bash-completion：`yum install bash-completion -y`
 
 然后执行下面脚本下载三个bash文件，复制到`/etc/bash_completion.d/`中：
-``` bash
+```bash
 scripts=( docker-machine-prompt.bash docker-machine-wrapper.bash docker-machine.bash ); 
 for i in "${scripts[@]}"; do sudo wget https://raw.githubusercontent.com/docker/machine/v0.16.1/contrib/completion/bash/${i} -P /etc/bash_completion.d; done
 ```
 
 启用该功能。 在~/.bashrc中末尾添加：
 
-``` bash
+```bash
 source /etc/bash_completion.d/docker-machine-prompt.bash
 source /etc/bash_completion.d/docker-machine-wrapper.bash
 source /etc/bash_completion.d/docker-machine.bash
@@ -59,7 +60,7 @@ PS1='[\u@\h \W$(__docker_machine_ps1)]\$ '
 对于 Docker Machine 来说，术语 Machine 就是运行 docker daemon 的主机。“创建 Machine” 指的就是在 host 上安装和部署 docker。
 先执行 `docker-machine ls` 查看一下当前的 machine：
 
-``` bash
+```bash
 [root@ecs-hw01 ~]# docker-machine ls
 NAME   ACTIVE   DRIVER   STATE   URL   SWARM   DOCKER   ERRORS
 ```
@@ -68,13 +69,13 @@ NAME   ACTIVE   DRIVER   STATE   URL   SWARM   DOCKER   ERRORS
 
 创建 machine 要求能够无密码登录远程主机，所以需要先通过如下命令将 ssh key 拷贝到 192.168.1.21：
 
-``` bash
+```bash
 ssh-copy-id 192.168.1.21
 ```
 
 一切准备就绪，执行 `docker-machine create` 命令创建 host1：
 
-``` bash
+```bash
 docker-machine create --driver generic --generic-ip-address=192.168.2.21 host1
 ```
 
@@ -100,7 +101,7 @@ docker-machine create --driver generic --generic-ip-address=192.168.2.21 host1
 Docker Machine 也提供了一些子命令方便对 machine 进行管理。其中最常用的就是无需登录到 machine 就能执行 docker 相关操作。
 
 我们前面学过，要执行远程 docker 命令我们需要通过 -H 指定目标主机的连接字符串，比如：
-``` bash
+```bash
 docker -H tcp://192.168.12.100:2376 ps
 ```
 
@@ -112,7 +113,7 @@ Docker Machine 则让这个过程更简单。`docker-machine env host1`显示访
 
 `docker-machine upgrade` 更新 machine 的 docker 到最新版本，可以批量执行：
 
-``` bash
+```bash
 docker-machine upgrade host1 host2
 ```
 
@@ -120,7 +121,7 @@ docker-machine upgrade host1 host2
 
 `docker-machine scp` 可以在不同 machine 之间拷贝文件，比如：
 
-``` bash
+```bash
 docker-machine scp host1:/tmp/a host2:/tmp/b
 ```
 

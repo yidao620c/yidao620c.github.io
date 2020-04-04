@@ -13,6 +13,7 @@ abbrlink: 61361
 而你想全世界的人都能用到你写的东西，就需要发布到Maven中央仓库了。
 
 本篇文章详细讲解如何发布Maven构件到中央仓库。
+<!-- more -->
 
 ## 注册Sonatype的账户
 
@@ -52,7 +53,7 @@ windows用户到 <http://www.gpg4win.org/download.html> 去下载Gpg4win-Vanilla
 
 下载之后执行：
 
-``` bash
+```bash
 gpg --gen-key
 ```
 
@@ -64,7 +65,7 @@ gpg --gen-key
 找你所使用的maven的配置文件<mvn_home>/conf/settings.xml，在配置文件中找到<servers>节点，
 这个节点默认是注释了的，我们就在这个猪似的外边增加一个<servers>的配置如下：
 
-``` xml
+```xml
 <servers>
     <server>
         <id>oss</id>
@@ -88,7 +89,7 @@ gpg --gen-key
 
 下面是我的一个示例：
 
-``` xml
+```xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -208,14 +209,14 @@ gpg --gen-key
 
 待构件编写完成，就可以进行上传、发布了。在命令行进入项目pom.xml所在路径，执行：
 
-``` bash
+```bash
 mvn clean deploy -P release
 ```
 
 在稍后些时候会要你输入gpg密钥库的密码，输入即可完成上传。
 当然有时候不会弹出输入密码的输入框，只是提示需要输入密码，根据gpg插件的官网解释，需要加上密码作为参数执行命令，即：
 
-``` bash
+```bash
 mvn clean deploy -P release -Dgpg.passphrase=密码
 ```
 
@@ -228,13 +229,13 @@ mvn clean deploy -P release -Dgpg.passphrase=密码
 
 我再close过程中出现过验证签名失败的问题：
 
-``` none
+```
  No public key: Key with id: (xxxx) was not able to be located on http://keyserver.ubuntu.com:11371
 ```
 
 只需要在本地执行：
 
-``` bash
+```bash
 gpg --keyserver hkp://keyserver.ubuntu.com --send-keys xxxx
 ```
 

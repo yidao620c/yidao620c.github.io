@@ -15,6 +15,7 @@ abbrlink: 7172
 
 默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求，
 一般来说，没有必要再加入Quartz2了，不过你要是有更高级需求也可以整合Quartz2进来。
+<!-- more -->
 
 ## 定时任务架构
 
@@ -29,7 +30,7 @@ abbrlink: 7172
 
 实际上只要添加最基础的start依赖即可支持定时任务：
 
-``` xml
+```xml
 <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -41,7 +42,7 @@ abbrlink: 7172
 
 如果有多个耗时任务，最好使用线程池来执行，添加一个配置类专门用来配置定时任务执行的线程池：
 
-``` java
+```java
 @Configuration
 @EnableScheduling
 public class ScheduleConfig implements SchedulingConfigurer {
@@ -59,7 +60,7 @@ public class ScheduleConfig implements SchedulingConfigurer {
 
 ## 添加执行任务类
 
-``` java
+```java
 @Component
 public class MyJob {
     private Logger logger = LoggerFactory.getLogger(MyJob.class);

@@ -17,27 +17,27 @@ ECharts是一款由百度前端技术部开发的，基于Javascript的数据可
 力导向布局图以及和弦图，同时支持任意维度的堆积和多图表混合展现。
 
 官方网站：<http://echarts.baidu.com/index.html>
-
+<!-- more -->
 
 ## 二维折线图
 
 二维折线图是最常见的用法，这里我画的是最基础的二维折线图。
 
 首先引入最新js依赖`echarts.min.js`
-``` html
+```html
 <script type="text/javascript" src="../../js/jquery-1.12.4.min.js"></script>
 <script src="./echarts.min.js"></script>
 ```
 
 第二步，页面定义图表div，里面放的隐藏input是首页加载时候从后台传入的_隔开数据:
-``` html
+```html
 <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
 <div id="main1" style="width: 800px;height:400px;"></div>
 <hr/>
 ```
 
 注意看js怎么写:
-``` js
+```js
 $(function () {
     // 开始初始化echart数据
     x_data = ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"];

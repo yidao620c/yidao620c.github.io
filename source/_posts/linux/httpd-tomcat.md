@@ -16,11 +16,11 @@ abbrlink: 985
 主机IP：两台机器，192.168.203.103、192.168.203.104
 
 安装软件：jdk-8u51-linux-x64, apache-tomcat-8.0.24, tomcat-connectors-1.2.41, httpd-2.2.15, httpd-devel-2.2.15
-
+<!-- more -->
 
 ### 一、两台机器都安装JAVA8
 
-``` bash
+```bash
 sudo rpm -qa | grep jdk
 jdk-1.7.0_45-fcs.x86_64
 sudo rpm -e jdk-1.7.0_45
@@ -28,13 +28,13 @@ sudo rpm -e jdk-1.7.0_45
 
 下载JDK8的包
 
-``` bash
+```bash
 wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u60-b27/jdk-8u60-linux-x64.tar.gz"
 ```
 
 如果上述链接失效，请去官网下载最新的源码包。
 
-``` bash
+```bash
 cd /opt/
 tar xzf jdk-8u51-linux-x64.tar.gz
 cd /opt/jdk1.8.0_51/
@@ -45,7 +45,7 @@ sudo alternatives --config java
 
 得到以下输出，选择刚刚安装的jdk8即可：
 
-``` none
+```
 There are 3 programs which provide 'java'.
 
   Selection    Command
@@ -59,7 +59,7 @@ Enter to keep the current selection[+], or type selection number: 3
 
 然后再配置下javac和jar
 
-``` bash
+```bash
 sudo alternatives --install /usr/bin/jar jar /opt/jdk1.8.0_51/bin/jar 2
 sudo alternatives --install /usr/bin/javac javac /opt/jdk1.8.0_51/bin/javac 2
 sudo alternatives --set jar /opt/jdk1.8.0_51/bin/jar
@@ -67,30 +67,30 @@ sudo alternatives --set javac /opt/jdk1.8.0_51/bin/javac
 ```
 
 查看下JDK版本
-``` bash
+```bash
 java -version
 ```
 
 修改环境变量
-``` bash
+```bash
 sudo vim /etc/profile
 ```
 
 输入以下内容
-``` bash
+```bash
 export JAVA_HOME=/opt/jdk1.8.0_51
 export JRE_HOME=/opt/jdk1.8.0_51/jre
 export PATH=$PATH:$JAVA_HOME/bin
 ```
 执行
-``` bash
+```bash
 source /etc/profile
 ```
 
 ### 二、两台机器安装tomcat
 
 1.下载安装tomcat
-``` bash
+```bash
 wget http://mirrors.cnnic.cn/apache/tomcat/tomcat-8/v8.0.24/bin/apache-tomcat-8.0.24.tar.gz
 tar xf apache-tomcat-8.0.24.tar.gz -C /usr/local/
 cd /usr/local/
@@ -98,22 +98,22 @@ ln -sv apache-tomcat-8.0.24 tomcat
 ```
 
 2.配置环境变量
-``` bash
+```bash
 vim /etc/profile.d/tomcat.sh
 ```
 
-``` bash
+```bash
 CATALINA_BASE=/usr/local/tomcat
 PATH=$CATALINA_BASE/bin:$PATH
 export PATH CATALINA_BASE
 ```
 执行：
-``` bash
+```bash
 . /etc/profile.d/tomcat.sh
 ```
 
 3.查看状态：
-``` bash
+```bash
 catalina.sh version
 ```
 
@@ -121,7 +121,7 @@ catalina.sh version
 
 sudo vim /etc/init.d/tomcat
 
-``` bash
+```bash
 
 #!/bin/sh
 # Tomcat init script for linux
@@ -159,7 +159,7 @@ esac
 
 执行：
 
-``` bash
+```bash
 
 sudo chmod +x /etc/init.d/tomcat
 sudo chkconfig --add tomcat
@@ -170,7 +170,7 @@ sudo chkconfig --add tomcat
 
 在第一台机子上面：
 
-``` bash
+```bash
 sudo vim /usr/local/tomcat/conf/server.xml
 ```
 
@@ -182,7 +182,7 @@ sudo vim /usr/local/tomcat/conf/server.xml
 
 在第二台机子上面：
 
-``` bash
+```bash
 sudo vim /usr/local/tomcat/conf/server.xml
 ```
 
@@ -194,13 +194,13 @@ sudo vim /usr/local/tomcat/conf/server.xml
 6.提供测试页面
 
 第一台机器上：
-``` bash
+```bash
 sudo mkdir -pv /usr/local/tomcat/webapps/test/WEB-INF/{classes,lib}
 sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 写一个简单的JSP页面：
 
-``` html
+```html
 <%@ page language="java" %>
 <%@ page import="java.util.*" %>
 <html>
@@ -216,19 +216,19 @@ sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 
 然后启动tomcat
-``` bash
+```bash
 sudo service tomcat start
 ```
 这时候可以通过访问 `http://192.168.203.103:8080/test` 访问到这个页面
 
 第二台机器上：
-``` bash
+```bash
 sudo mkdir -pv /usr/local/tomcat/webapps/test/WEB-INF/{classes,lib}
 sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 写一个简单的JSP页面：
 
-``` html
+```html
 <%@ page language="java" %>
 <%@ page import="java.util.*" %>
 <html>
@@ -244,7 +244,7 @@ sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 
 然后启动tomcat
-``` bash
+```bash
 sudo service tomcat start
 ```
 这时候可以通过访问`http://192.168.203.104:8080/test`访问到这个页面
@@ -263,7 +263,7 @@ yum -y install httpd httpd-devel
 
 2.安装mod_jk.so模块：
 
-``` bash
+```bash
 wget http://mirrors.cnnic.cn/apache/tomcat/tomcat-connectors/jk/tomcat-connectors-1.2.41-src.tar.gz
 tar xf tomcat-connectors-1.2.41-src.tar.gz
 cd tomcat-connectors-1.2.41-src/native/
@@ -273,7 +273,7 @@ sudo make && sudo make install
 
 3.提供额外的httpd模块配置文件：
 
-``` bash
+```bash
 vim /etc/httpd/conf.d/httpd-jk.conf
 ```
 
@@ -289,7 +289,7 @@ JkMount  /status/  stat1
 
 4.配置mod_jk模块的配置文件workers.properties：
 
-``` bash
+```bash
 vim /etc/httpd/conf.d/workers.properties
 ```
 
@@ -322,7 +322,7 @@ ServerName localhost:80
 ```
 
 最后我们启动httpd服务：
-``` bash
+```bash
 sudo service httpd start
 ```
 
@@ -330,7 +330,7 @@ sudo service httpd start
 
 6.修改httpd默认端口号方法
 
-``` bash
+```bash
 sudo vim /etc/httpd/conf/httpd.conf
 ```
 

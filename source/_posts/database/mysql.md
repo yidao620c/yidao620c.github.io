@@ -15,29 +15,30 @@ abbrlink: 58473
 
 ## 安装和配置
 在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。
+<!-- more -->
 
 从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 `wget` 下载：
-``` bash
+```bash
 wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm
 ```
 
 安装 yum Repository
-``` bash
+```bash
 yum -y install mysql57-community-release-el7-8.noarch.rpm
 ```
 
 搜索 mysql server
-``` bash
+```bash
 yum search mysql-com
 ```
 
 安装
-``` bash
+```bash
 yum -y install mysql-community-server.x86_64
 ```
 
 启动、停止、查看状态、开机启动等
-``` bash
+```bash
 systemctl start mysqld.service
 systemctl stop mysqld.service
 systemctl status mysqld.service
@@ -48,24 +49,24 @@ systemctl enable mysqld.service
 
 MySQL5.7.6 之后会在启动 mysql 进程的时候生成一个用户密码，首次登陆需要这个密码才行。
 密码保存在 mysql 进程的日志里，即`/var/log/mysqld.log`
-``` bash
+```bash
 cat /var/log/mysqld.log | grep 'password'
 # 登录
 mysql -uroot -p
 ```
 
 修改root密码，先登录进去后：
-``` none
+```
 mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
 ```
 
 最后，安装完了可以删除 MySQL 的 Repository ，这样可以减少 yum 检查更新的时间，使用下面的命令：
-``` bash
+```bash
 yum -y remove mysql57-community-release-el7-8.noarch
 ```
 
 修改权限，让其他的机器也能访问：
-``` none
+```
 mysql> GRANT ALL ON *.* TO 'root'@'%' IDENTIFIED BY 'mysql';
 mysql> flush privileges;
 ```
@@ -74,31 +75,31 @@ mysql> flush privileges;
 ## 常见数据库操作
 
 创建新的数据库并制定UTF-8编码
-``` none
+```
 drop database fastloan3;
 create database fastloan3 DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 ```
 
 通过sql脚本文件执行sql：
-``` bash
+```bash
 mysql -uroot -p... fastloan3 < t_invoice.sql
 ```
 
 导出数据库
-``` bash
+```bash
 mysqldump -u... -p... mydb > mydb_tables.sql
 mysqldump -u... -p... mydb t1 t2 t3 > mydb_tables.sqlhe
 ```
 
 查看表空间占用大小
-``` none
+```
 mysql> use information_schema;
 mysql> SELECT TABLE_NAME,DATA_LENGTH+INDEX_LENGTH,TABLE_ROWS
 FROM TABLES WHERE TABLE_SCHEMA='数据库名' //AND TABLE_NAME='表名'
 ```
 
 查看详细表结构，包括注释
-``` none
+```
 show full columns from <table_name>
 SELECT COLUMN_NAME, COLUMN_TYPE, EXTRA, COLUMN_COMMENT
 FROM information_schema.columns
@@ -138,7 +139,7 @@ id  |name
 `INNER JOIN`跟`JOIN`是一样的，一般`INNER`关键字可以省略。
 `INNER JOIN`将只会返回相匹配的元素项，即不会返回结果为NULL的数据项。
 
-``` sql
+```sql
 SELECT
     *
 FROM
@@ -160,7 +161,7 @@ id  |name    |id1  |name1
 请注意这里的`OUTER`是可选的，`LEFT JOIN` 和 `LEFT OUTER JOIN`是一样的。
 左连接（`LEFT OUTER JOIN`）会输出左表中的所有结果，如果右表中有相应项，则会输出，否则为NULL。
 
-``` sql
+```sql
 SELECT
     *
 FROM
@@ -182,7 +183,7 @@ id  |name    |id1  |name1
 
 右连接（`RIGHT OUTER JOIN`）会输出右表中的所有结果，如果左表中有相应项，则会输出，否则为NULL。
 
-``` sql
+```sql
 SELECT
     *
 FROM
@@ -206,7 +207,7 @@ NULL |NULL    |5    |ZaZa
 `UNION`操作符用于合并两个或多个 `SELECT` 语句的结果集。请注意，`UNION` 内部的 `SELECT` 语句必须拥有相同数量的列。
 列也必须拥有相似的数据类型。同时，每条`SELECT`语句中的列的顺序必须相同。`UNION`只选取不同的记录，而`UNION ALL`会列出所有记录。
 
-``` sql
+```sql
 SELECT name FROM TableA
 UNION
 SELECT name FROM TableB
@@ -214,7 +215,7 @@ SELECT name FROM TableB
 
 结果集（注意下面没有重复项）
 
-``` none
+```
 HaHa
 HeiHei
 WaWa
@@ -225,7 +226,7 @@ ZaZa
 
 使用`UNION ALL`
 
-``` sql
+```sql
 SELECT name FROM TableA
 UNION ALL
 SELECT name FROM TableB
@@ -233,7 +234,7 @@ SELECT name FROM TableB
 
 结果集
 
-``` none
+```
 HaHa
 HeiHei
 WaWa
@@ -252,7 +253,7 @@ ZaZa
 
 在 SQL 中增加 HAVING 子句原因是，WHERE 关键字无法与合计函数一起使用。
 
-``` sql
+```sql
 SELECT column_name, aggregate_function(column_name)
 FROM table_name
 WHERE column_name operator value
@@ -272,7 +273,7 @@ O_Id    |OrderDate       |OrderPrice      |Customer
 6       |2008/07/21      |100             |Carter
 
 现在，我们希望查找订单总金额少于 2000 的客户:
-``` sql
+```sql
 SELECT Customer,SUM(OrderPrice) FROM Orders
 GROUP BY Customer
 HAVING SUM(OrderPrice)<2000
@@ -280,7 +281,7 @@ HAVING SUM(OrderPrice)<2000
 
 现在我们希望查找客户 "Bush" 或 "Adams" 拥有超过 1500 的订单总金额。
 我们在 SQL 语句中增加了一个普通的 WHERE 子句：
-``` sql
+```sql
 SELECT Customer,SUM(OrderPrice) FROM Orders
 WHERE Customer='Bush' OR Customer='Adams'
 GROUP BY Customer
@@ -296,7 +297,7 @@ Adams     |2000
 
 
 现在我要求"Bush" 或 "Adams" 拥有超过 1500 的订单平均金额：
-``` sql
+```sql
 SELECT Customer,SUM(OrderPrice) FROM Orders
 WHERE Customer='Bush' OR Customer='Adams'
 GROUP BY Customer
@@ -314,6 +315,6 @@ Bush被淘汰了，因为他的平均订单金额（(1000+700+300)/3）<1500
 ## 其他有用函数
 `MID(str,pos,len)`提取子串，pos从1开始。
 
-``` sql
+```sql
 SELECT MID(Customer,1,3) FROM Orders;
 ```

@@ -12,6 +12,7 @@ abbrlink: 18848
 
 如果正常使用pip安装会将软件包安装到python系统包目录下面，也就是site-packages目录。
 通常我们需要对环境进行隔离以防止别的包影响到。这时候需要安装虚拟环境virtualenv了。
+<!-- more -->
 
 ## 安装virtualenv
 

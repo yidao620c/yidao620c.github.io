@@ -12,6 +12,7 @@ Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在P
 这里稍微说一下，werkzeug不是一个web服务器，也不是一个web框架，而是一个工具包，
 官方的介绍说是一个WSGI工具包，它可以作为一个Web框架的底层库，
 因为它封装好了很多Web框架的东西，例如 Request，Response 等等。
+<!-- more -->
 
 例如我最常用的Flask框架就是以Werkzeug为基础开发的，这也是我要专门探究Werkzeug底层的原因，
 因为我想知道Flask的实现逻辑以及底层控制。这篇文章没有涉及到Flask的相关内容，
@@ -27,14 +28,14 @@ Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在P
 读者如果不懂的可以去看看，写的比较详细了。
 
 一个最简单的WSGI应用:
-``` python
+```python
 def application(environ, start_response):
     start_response('200 OK', [('Content-Type', 'text/plain')])
     return ['Hello World!']
 ```
 
 我们使用Werkzeug来包装请求和相应之后，变成这样:
-``` python
+```python
 from werkzeug.wrappers import Request, Response
 
 def application(environ, start_response):
@@ -51,7 +52,7 @@ def application(environ, start_response):
 下面我一步步来写这个tinyurl应用，名字叫shortly行不，模板使用jinjia2，后台存储使用redis。
 
 先按照相应的依赖
-``` bash
+```bash
 pip install Jinja2 redis
 ```
 
@@ -60,7 +61,7 @@ pip install Jinja2 redis
 
 ### 第1步：创建文件夹
 首先创建下面这样结构的文件夹：
-``` none
+```
 /shortly
     /static
     /templates
@@ -71,7 +72,7 @@ pip install Jinja2 redis
 ### 第2步：基本结构
 我们在`shortly`文件夹下面创建`shortly.py`，这里面会引入很多包，
 我一开始就把它们全部引入进来，省的后面再重复写，所有的引入如下:
-``` python
+```python
 import os
 import redis
 from urllib import parse as urlparse
@@ -85,7 +86,7 @@ from jinja2 import Environment, FileSystemLoader
 
 现在来创建一个基本结构类，并通过一个函数来创建这个类的实例，
 同时通过一个可选设置创建一个中间件，将`static`文件夹暴露给用户：
-``` python
+```python
 class Shortly(object):
 
     def __init__(self, config):
@@ -116,7 +117,7 @@ def create_app(redis_host='localhost', redis_port=6379, with_static=True):
 ```
 
 最后我们启动一个开发环境服务器，带有自动代码热加载和调试功能：
-``` python
+```python
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
     app = create_app()
@@ -146,7 +147,7 @@ $ python shortly.py
 我们有了一个基本的框架类，可以在构造器中添加更多有用的东西，
 后面我们要用到redis和jinja2模板，可以在这里初始化配置。
 
-``` python
+```python
 def __init__(self, config):
     self.redis = redis.Redis(config['redis_host'], config['redis_port'])
     template_path = os.path.join(os.path.dirname(__file__), 'templates')
@@ -166,7 +167,7 @@ def render_template(self, template_name, **context):
 我们还可以利用它来逆向解析URL，不过这里我暂时不打算讲这个。
 
 只需要在构造器中添加下面的Map:
-``` python
+```python
 self.url_map = Map([
     Rule('/', endpoint='new_url'),
     Rule('/<short_id>', endpoint='follow_short_link'),
@@ -176,7 +177,7 @@ self.url_map = Map([
 这里我们定义了三个URL规则，每个URL会分发给不同的处理函数，
 那么怎样由`endpoint`得到正确的处理函数呢，这个取决于你自己定义规则，
 比如这里我准备使用函数名为`on_`+`endpoint`的方式：
-``` python
+```python
 def dispatch_request(self, request):
     adapter = self.url_map.bind_to_environ(request.environ)
     try:
@@ -187,7 +188,7 @@ def dispatch_request(self, request):
 ```
 
 比如我们的URL为`http://localhost:5000/foo`，返回的值为:
-``` python
+```python
 endpoint = 'follow_short_link'
 values = {'short_id': u'foo'}
 ```
@@ -200,7 +201,7 @@ values = {'short_id': u'foo'}
 
 ### 第5步：第一个View
 我们先来定义第一个view：
-``` python
+```python
 def on_new_url(self, request):
     error = None
     url = ''
@@ -218,14 +219,14 @@ def on_new_url(self, request):
 并插入数据库，并且重定向到详情页面。否则就返回`new_url.html`页面。
 
 坚持URL是否合法的函数：
-``` python
+```python
 def is_valid_url(url):
     parts = urlparse.urlparse(url)
     return parts.scheme in ('http', 'https')
 ```
 
 将url插入到redis数据库中：
-``` python
+```python
 def insert_url(self, url):
     short_id = self.redis.get('reverse-url:' + url)
     if short_id is not None:
@@ -238,7 +239,7 @@ def insert_url(self, url):
 ```
 
 数字的36位编码函数：
-``` python
+```python
 def base36_encode(number):
     assert number >= 0, 'positive integer required'
     if number == 0:
@@ -253,7 +254,7 @@ def base36_encode(number):
 ### 第6步：重定向view
 这一步比较简单，就是从redis中找到长地址然后重定向到上面。
 同时我还使用一个计数器来追踪到底这个链接被点击过多少次：
-``` python
+```python
 def on_follow_short_link(self, request, short_id):
     link_target = self.redis.get('url-target:' + short_id)
     if link_target is None:
@@ -265,7 +266,7 @@ def on_follow_short_link(self, request, short_id):
 ### 第7步：详情页面
 这个页面非常简单，只需要通过一个模板来显示即可。
 除了展示原始链接外，还会将点击次数也显示出来，默认点击数为0：
-``` python
+```python
 def on_short_link_details(self, request, short_id):
     link_target = self.redis.get('url-target:' + short_id)
     if link_target is None:
@@ -285,7 +286,7 @@ def on_short_link_details(self, request, short_id):
 这可以防止XSS攻击和网页渲染错误：
 
 `layout.html`
-``` html
+```html
 <!doctype html>
 <title>@% block title %@@% endblock %@ | shortly</title>
 <link rel=stylesheet href=/static/style.css type=text/css>
@@ -297,7 +298,7 @@ def on_short_link_details(self, request, short_id):
 ```
 
 `new_url.html`
-``` html
+```html
 @% extends "layout.html" %@
 @% block title %@Create New Short URL@% endblock %@
 @% block body %@
@@ -314,7 +315,7 @@ def on_short_link_details(self, request, short_id):
 ```
 
 `short_link_details.html`
-``` html
+```html
 @% extends "layout.html" %@
 @% block title %@Details about /@@ short_id @@@% endblock %@
 @% block body %@
@@ -330,7 +331,7 @@ def on_short_link_details(self, request, short_id):
 
 ### 第9步：样式
 另外我还简单添加了一些样式，让页面显示更加美观点，写到`static/style.css`文件中：
-``` css
+```css
 body        { background: #E8EFF0; margin: 0; padding: 0; }
 body, input { font-family: 'Helvetica Neue', Arial,
               sans-serif; font-weight: 300; font-size: 18px; }

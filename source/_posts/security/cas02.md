@@ -21,12 +21,13 @@ abbrlink: 47979
 * 操作系统：华为云主机上CentOS 7
 
 Cas支持Gradle和Maven两种编译方式，使用SpringBoot构建，我这里使用Maven的方式。
+<!-- more -->
 
 ## Maven镜像配置
 
 华为和Sonatype 联合发布中国官方 Maven 仓库，特意试了试，感觉速度挺快的，比阿里的快。这里贴一下配置：
 
-``` xml
+```xml
   <servers>
 	<server>
       <id>huaweicloud</id>
@@ -59,7 +60,7 @@ Gradle地址：https://github.com/apereo/cas-gradle-overlay-template
 
 我下载的是5.3分支：
 
-``` bash
+```bash
 git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
 ```
 
@@ -67,7 +68,7 @@ git clone https://github.com/apereo/cas-overlay-template.git -b 5.3
 
 将下载Overlay解压，默认配置就可以直接构筑能用的 war 包：
 
-``` bash
+```bash
 cd cas-overlay-template/
 ./build.sh package
 ```
@@ -87,7 +88,7 @@ cd cas-overlay-template/
 
 **使用java自带keytool创建本地密钥库**
 
-``` bash
+```bash
 [root@ecs-hw01 cas]# keytool -genkey -alias cas.server.com -keyalg RSA -keystore casServer.keystore
 Enter keystore password:  
 Re-enter new password: 
@@ -115,7 +116,7 @@ The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS
 
 **把密钥库导出成证书文件**
 
-``` bash
+```bash
 [root@ecs-hw01 cas]# keytool -export -alias cas.server.com -keystore casServer.keystore -file casServer.crt -storepass changeit
 Certificate stored in file <casServer.crt>
 
@@ -125,7 +126,7 @@ The JKS keystore uses a proprietary format. It is recommended to migrate to PKCS
 
 **查看证书**
 
-``` bash
+```bash
 [root@ecs-hw01 cas]# keytool -printcert -file casServer.crt
 Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
 Issuer: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
@@ -152,7 +153,7 @@ KeyIdentifier [
 
 **将创建过的证书导入到java证书库**
 
-``` bash
+```bash
 [root@ecs-hw01 cas]# keytool -import -keystore "/usr/local/jdk/jre/lib/security/cacerts" -file "/root/cas/casServer.crt" -alias cas.server.com
 Enter keystore password:  
 Owner: CN=cas.server.com, OU=wusong, O=yanfazu, L=beijing, ST=dongcheng, C=zh
@@ -183,7 +184,7 @@ Certificate was added to keystore
 
 **查看JDK证书内容**
 
-``` bash
+```bash
 [root@ecs-hw01 cas]# keytool -list -v -keystore /usr/local/jdk/jre/lib/security/cacerts -alias cas.server.com
 Enter keystore password:  
 Alias name: cas.server.com
@@ -216,7 +217,7 @@ KeyIdentifier [
 **根据 alias 别名删除 JDK 证书**
 
 做完实验后如果你想删除JDK证书，可使用如下命令：
-``` bash
+```bash
 keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/cacerts
 ```
 
@@ -226,7 +227,7 @@ keytool -delete -alias cas.server.com -keystore /usr/local/jdk/jre/lib/security/
 
 第二步，然后修改`cas.properties`文件
 
-``` properties
+```properties
 cas.server.name: https://cas.server.com:8443
 cas.server.prefix: https://cas.server.com:8443/cas
 
@@ -250,13 +251,13 @@ server.ssl.key-alias=cas.server.com
 
 第四步，将项目的/etc/cas复制到操作系统的/etc/命令中
 
-``` bash
+```bash
 [root@ecs-hw01 cas-overlay-template]# cp -r etc/cas/ /etc/
 ```
 
 ## 运行测试
 
-``` bash
+```bash
 [root@ecs-hw01 cas-overlay-template]# ./build.sh run
 ```
 
@@ -264,7 +265,7 @@ server.ssl.key-alias=cas.server.com
 
 本地修改host文件
 
-``` none
+```
 xx.xx.xx.xx cas.server.com
 ```
 
@@ -294,7 +295,7 @@ tomcat的下载和安装我就不讲了，直接下载tomcat包解压即可。
 
 修改tomcat的配置文件server.xml，找到下面的代码：
 
-``` xml
+```xml
 <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
            maxThreads="150" SSLEnabled="true">
     <SSLHostConfig>

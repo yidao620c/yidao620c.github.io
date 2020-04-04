@@ -17,8 +17,10 @@ abbrlink: 1643
 
 下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口，
 我们可以写一个简单的串行求解程序，该程序将在谜题空间Puzzle Space中查找，
-直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M代表一步
-``` java
+直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M代表一步。
+<!-- more -->
+
+```java
 /** 表示 搬箱子 之类谜题的抽象类*/
 public interface Puzzle<P, M> {
     P initialPosition();
@@ -33,7 +35,8 @@ public interface Puzzle<P, M> {
 
 下面的PuzzleNode代表通过一系列的移动到达的一个位置，其中保存了到达该位置的移动以及前一个Node。
 只要沿着PuzzleNode链接逐步回溯，就可以重新构建出达到当前位置的移动序列。
-``` java
+
+```java
 /** 用于谜题解决框架的链接节点 */
 @Immutable
 public class PuzzleNode<P, M> {
@@ -57,7 +60,7 @@ public class PuzzleNode<P, M> {
 ```
 下面的SequentialPuzzleSolver给出了谜题框架的串行解决方案，它在谜题空间中执行深度优先搜索，
 当找到解答方案，不一定是最短的解决方案，结束搜索。
-``` java
+```java
 /** 串行的谜题解答器*/
 public class SequentialPuzzleSolver<P, M> {
     private final Puzzle<P, M> puzzle;
@@ -95,7 +98,7 @@ public class SequentialPuzzleSolver<P, M> {
 接下来我们给出并行解决方案，ConcurrentPuzzleSolver中使用了一个内部类SolverTask，
 这个类扩展了PuzzleNode并实现了Runnable。大多数工作都是在run中完成的：首先计算下一步肯能到达的所有位置，
 并去掉已经到达的位置，然后判断（这个任务或者其他某个任务）是否已经成功完成，最后将尚未搜索过的位置提交给Executor。
-``` java
+```java
 public class ConcurrentPuzzleSolver<P, M> {
     private final Puzzle<P, M> puzzle;
     private final ExecutorService exec;
@@ -187,7 +190,7 @@ public class ValueLatch<T> {
 如果不存在解答，那么ConcurrentPuzzleSolver就会永远的等待下去，getSolution一直阻塞下去。
 通过记录活动任务数量，当该值为零时将解答设置为null，如下：
 
-``` java
+```java
 public class PuzzleSolver<P, M> extends ConcurrentPuzzleSolver<P, M> {
     PuzzleSolver(Puzzle<P, M> puzzle) {
         super(puzzle);

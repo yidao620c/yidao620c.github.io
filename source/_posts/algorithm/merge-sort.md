@@ -24,11 +24,12 @@ abbrlink: 4772
 k如果大于lgn,则比归并排序复杂度大了。
 左边可以写成nk+nlgn-nlgk，k等于lgn时，就是2nlgn-nlglgn.忽略恒定系数，则与归并排序是一样的。
 最后结论： k < lg(n)的时候，使用插入排序。
+<!-- more -->
 
 ## 实现
 
 首先是插入排序的实现，这个比较简单：
-``` python
+```python
 def insertSort(seq):
     for j in range(1, len(seq)):
         key = seq[j]
@@ -40,7 +41,7 @@ def insertSort(seq):
         seq[i + 1] = key
 ```
 然后是利用了插入排序的归并排序算法：
-``` python
+```python
 from math import log
 
 __author__ = 'Xiong Neng'

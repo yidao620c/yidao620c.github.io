@@ -20,6 +20,7 @@ date: 2017-04-05 15:17:09
 ## COPY
 
 将文件从 build context 复制到镜像。
+<!-- more -->
 
 COPY 支持两种形式：
 

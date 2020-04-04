@@ -19,6 +19,7 @@ abbrlink: 16546
 
 1. 递归的代码要比循环简洁很多，也优雅很多。
 2. 递归的代码可以用数学方式建模，可以从数学角度验证其正确性。
+<!-- more -->
 
 很多函数式语言甚至没有循环的概念和关键字，强迫你使用递归来实现循环。如，ErLang 。
 递归也有一些缺点，递归使用栈来保存函数地址和参数、返回值，而栈是有一定大小的，
@@ -48,7 +49,7 @@ abbrlink: 16546
 
 #### 代码实现
 
-``` java
+```java
 /**
  * @param array
  * @param start
@@ -115,7 +116,7 @@ public static int binarySearch(int[] array, int start, int end, int value) {
 
 #### 代码实现
 
-``` java
+```java
 /**
  * 快速排序，有副作用 从小到大
  *

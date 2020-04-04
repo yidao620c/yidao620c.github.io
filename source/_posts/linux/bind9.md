@@ -19,11 +19,12 @@ DNS服务由BIND软件提供，启动后服务名为`named`，管理工具为`rn
 当局域网内主机要访问外网域名时，DNS服务器会先查本地缓存，查不到则将该解析请求转发给ISP的DNS服务器
 （假设IP为`211.155.23.88`和`211.155.27.88`），而不是转发给.（root）服务器。
 并且，只会对内网主机的解析请求进行转发（假设内网网段范围为`192.168.0.0/16`），而不会对外网主机的解析请求进行转发。
+<!-- more -->
 
 ## 安装
 这里选择将bind运行在chroot环境下面，更加安全。只需要安装`bind-chroot`即可，其他软件比如`bind`本身也会自动安装，
 也即执行：
-``` bash
+```bash
 yum install -y bind-chroot
 systemctl start named-chroot
 systemctl enable named-chroot
@@ -31,7 +32,7 @@ systemctl status named-chroot
 ``
 
 ## 配置
-``` bash
+```bash
 cp -a /etc/named.conf /etc/named.conf.raw
 vi /etc/named.conf
 ```
@@ -120,7 +121,7 @@ ftp IN CNAME www.xn.local.
 
 
 最后启动`named`服务：
-``` bash
+```bash
 systemctl start named
 systemctl enable named
 systemctl status named
@@ -138,7 +139,7 @@ systemctl status named
 
 ## 指定DNS服务器
 CentOS7指定DNS服务器方法：
-``` bash
+```bash
 systemctl restart NetworkManager.service
 nmcli connection show
 nmcli con mod eth0 ipv4.dns "192.168.217.161"

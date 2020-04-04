@@ -17,6 +17,7 @@ abbrlink: 7125
 有能力的同学不妨尝试自行架设，这也就是本文的目的啦。
 
 喝水不忘挖井人，在此向服务器软件的作者Lanyu表示衷心的感谢。
+<!-- more -->
 
 点击→ [Lanyu的博客](http://blog.lanyus.com/)
 
@@ -28,17 +29,17 @@ abbrlink: 7125
 接下来，介绍如何部署到Linux服务器上，首先将xxxServer_linux_amd64上传到任意目录，
 我这里是 `/root/work/` 目录，先将名字改了，太长了
 
-``` bash
+```bash
 mv xxxServer_linux_amd64 xnServer
 ```
 
 接下来 需要把它运行起来，先加一个可执行权限
-``` bash
+```bash
 chmod +x xnServer
 ```
 
 运行
-``` bash
+```bash
 /root/work/xnServer -p 1027 -u yidao -prolongationPeriod 999999999 -l 127.0.0.1
 ```
 

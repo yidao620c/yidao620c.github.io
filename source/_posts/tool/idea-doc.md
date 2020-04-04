@@ -10,12 +10,12 @@ abbrlink: 22010
 ---
 
 IDEA里面按Alt+Insert可弹出生成getter/setter方法模板的提示，默认的模板并不会带JavaDoc。可自定义模板
-
 ![](https://xnstatic-1253397658.file.myqcloud.com/idea-getter.jpg)
+<!-- more -->
 
 ### getter模板
 
-``` none
+```
 /**
  * Gets the value of $field.name
  * @return the value of $field.name
@@ -38,7 +38,7 @@ ${name}() {
 
 ### setter模板
 
-``` none
+```
 /**
  * Sets the $field.name
  * <p>You can use get$StringUtil.capitalizeWithJavaBeanConvention($StringUtil.sanitizeJavaIdentifier($helper.getPropertyName($field, $project)))() to get the value of $field.name</p>

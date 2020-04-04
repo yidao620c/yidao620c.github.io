@@ -17,6 +17,7 @@ abbrlink: 30888
 pip支持从PyPI(<https://pypi.org/>)、版本控制以及直接从分发文件进行安装。
 pip是一个命令行程序。安装pip后，会向系统添加一个pip命令，该命令可以从命令提示符运行。
 目前，pip 是The Python Packaging Authority (PyPA) 推荐的 Python 包管理工具！
+<!-- more -->
 
 ## 安装pip
 

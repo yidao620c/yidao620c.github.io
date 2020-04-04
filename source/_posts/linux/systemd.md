@@ -14,11 +14,12 @@ CentOS 7继承了RHEL 7的新的特性，例如强大的systemd，
 
 CentOS 7的服务systemctl脚本存放在：/usr/lib/systemd/，有系统 system 和用户 user 之分，
 即：`/usr/lib/systemd/system` 和 `/usr/lib/systemd/user` 
+<!-- more -->
 
 ## 配置文件
 
 这里我们先要说明一下unit的文件位置，一般主要有三个目录：
-``` none
+```
 /lib/systemd/system
 /run/systemd/system
 /etc/systemd/system
@@ -34,7 +35,7 @@ CentOS 7的服务systemctl脚本存放在：/usr/lib/systemd/，有系统 system
 
 ## 服务配置
 每一个服务以`.service`结尾，一般会分为3部分：[Unit]、[Service]和[Install]，就以nginx为例吧，具体内容如下：
-``` none
+```
 [Unit]
 Description=nginx - high performance web server
 Documentation=http://nginx.org/en/docs/
@@ -84,7 +85,7 @@ WantedBy=multi-user.target
 * WantedBy：服务安装的用户模式，从字面上看，就是想要使用这个服务的有是谁？上文中使用的是：`multi-user.target` ，就是指想要使用这个服务的目录是多用户。
 
 每一个.target实际上是链接到我们单位文件的集合,当我们执行
-``` bash
+```bash
 systemctl enable nginx.service
 ```
 就会在 `/etc/systemd/system/multi-user.target.wants/` 目录下新建一个 `/usr/lib/systemd/system/nginx.service` 文件的链接。
@@ -92,7 +93,7 @@ systemctl enable nginx.service
 ## 操作示例
 
 下面是几个最常用的service操作:
-``` bash
+```bash
 # 自启动
 systemctl enable nginx.service
 # 禁止自启动

@@ -11,22 +11,23 @@ abbrlink: 32465
 在讲生成器之前，先讲讲python里面常用的几个常见的推导式：
 
 *列表推导式（list comprehension）*
-``` python
+```python
 my_list = [f(x) for x in sequence if cond(x)]
 ```
+<!-- more -->
 
 *字典推导式（dictionary comprehension）*
-``` python
+```python
 my_dict = {k(x): v(x) for x in sequence if cond(x)}
 ```
 
 *集合推导式（set comprehension）*
-``` python
+```python
 my_set = {f(x) for x in sequence if cond(x)}
 ```
 
 *生成器表达式（generator expression）*
-``` python
+```python
 my_generator = (f(x) for x in sequence if cond(x))
 ```
 
@@ -56,7 +57,7 @@ my_generator = (f(x) for x in sequence if cond(x))
 假设你老板叫你写一个函数，接受一个整数列表为参数，然后输出一个只包含素数的Iterable（一次返回一个成员的对象）。
 
 这个很简单嘛
-``` python
+```python
 def get_primes(input_list):
     result_list = list()
     for element in input_list:
@@ -96,7 +97,7 @@ def is_prime(number):
 要是有特殊函数不是这样的呢，设想下如果`get_primes()`函数一次只返回下一个值，我们就根本不需要构建列表了。没有列表也就占用不了内存，而老板只是想在结果上面进行迭代操作，她并不在意你以什么形式返回来。
 
 不幸的是，这个看上去好像不可能实现，就算我们有个魔法函数允许我们从n循环到无穷大
-``` python
+```python
 def get_primes(start):
     for element in magical_infinite_range(start):
         if is_prime(element):
@@ -104,7 +105,7 @@ def get_primes(start):
 ```
 
 然后我们像下面这样调用这个函数：
-``` python
+```python
 def solve_number_10():
     total = 2
     for next_prime in get_primes(3):
@@ -129,7 +130,7 @@ def solve_number_10():
 因此，当你使用`next()`调用一个生成器的时候，生成器负责传会下一个值，它会把`yield`后面的值传过来。所以记住这句话：`yield`相对于生成器函数的`return`
 
 下面是一个简单的生成器函数：
-``` python
+```python
 >>> def simple_generator_function():
 >>>    yield 1
 >>>    yield 2
@@ -137,7 +138,7 @@ def solve_number_10():
 ```
 
 两种使用方法：
-``` python
+```python
 >> for value in simple_generator_function():
 >>>     print(value)
 1
@@ -157,7 +158,7 @@ def solve_number_10():
 一旦再遇到`next()`调用，生成器函数就被激活，而如果`next()`永远不再调用，那么最后记录的状态也就被丢弃了。
 
 我们使用生成器函数重新改写下`get_primes()`函数，这次我们不再需要`magical_infinite_range()`函数了。直接使用`while`循环来创建我们的无限序列：
-``` python
+```python
 def get_primes(number):
     while True:
         if is_prime(number):
@@ -171,7 +172,7 @@ def get_primes(number):
 ### 程序控制流
 
 我们重新来看看代码`solve_number_10`，它在调用`get_primes()`时究竟发生了什么：
-``` python
+```python
 def solve_number_10():
     total = 2
     for next_prime in get_primes(3):
@@ -196,7 +197,7 @@ def solve_number_10():
 1. for循环再次从`get_primes`请求数据
 
 这时候，控制不会直接从`get_prime()`函数第1行语句进入，而是从第5行恢复运行，那也是我们离开的地方。
-``` python
+```python
 def get_primes(number):
     while True:
         if is_prime(number):
@@ -218,7 +219,7 @@ def get_primes(number):
 为了说明怎样向生成器发送数据，还是刚刚那个素数例子，这次我们并不是简单的返回比`number`大的素数，而是找出大于这个数的连续指数最小的素数。
 比如对于10，我们要找出比10大的最小素数，然后是比100大的最小素数，然后是比1000大的最小素数，以此类推。
 
-``` python
+```python
 def get_primes(number):
     while True:
         if is_prime(number):
@@ -229,7 +230,7 @@ def get_primes(number):
 这样我们就能每次进入`get_prime()`下次执行时，将number设置成我们想要的值，而不是离开时它自己保存的值。
 
 然后我们再来改写调用它的函数：
-``` python
+```python
 def print_successive_primes(iterations, base=10):
     prime_generator = get_primes(base)
     prime_generator.send(None)
@@ -244,7 +245,7 @@ def print_successive_primes(iterations, base=10):
 这个是有必要的，因为生成器函数定义的第一条语句并不是yield，因此要是我们发送一个真实的数据过去，没东西可以接受啊。一旦这个生成器启动了，我们就能给它发送数据了。
 
 在来看一个send例子
-``` python
+```python
 if __name__ == '__main__':
     def myfunc():
         print 'start myfunc...',
@@ -275,7 +276,7 @@ if __name__ == '__main__':
 ### Python中的协程
 现在我们已经对生成器和`yield`原理有了理解。让我们再看看`yield`还有什么是可以做的。
 尽管send确实可以像上面那样用，但是生产简单的序列的时候我们基本不会那样用。下面再举一个例子看看send使用的常见场景：
-``` python
+```python
 import random
 
 def get_data():

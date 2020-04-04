@@ -16,6 +16,7 @@ abbrlink: 12206
 官网地址：<http://www.treejs.cn/v3/main.php>
 
 另外还有好多实际效果的演示，可以去看看。
+<!-- more -->
 
 ## 下载
 直接去github下载源码：<https://github.com/zTree/zTree_v3>
@@ -26,7 +27,7 @@ abbrlink: 12206
 
 提取最核心的东东
 
-``` html
+```html
 <!DOCTYPE html>
 <HTML>
 <HEAD>
@@ -104,7 +105,7 @@ abbrlink: 12206
 ```
 
 记住引入`metroStyle.css`，还有metro的图片文件夹也引入，另外自己还自定义了一些样式：
-``` css
+```css
 .ztree li.title {list-style: none;}
 .ztree ul.ztree {margin-top: 10px;border: 1px solid #617775;background: #f0f6e4;width:220px;height:360px;overflow-y:scroll;overflow-x:auto;}
 .ztree ul.log {border: 1px solid #617775;background: #f0f6e4;width:300px;height:170px;overflow: hidden;}
@@ -126,7 +127,7 @@ zTree的API介绍也很详细，<http://www.treejs.cn/v3/api.php>
 
 这里我弄两个最典型的来讲，一个是获取所有的选择节点，另一个是将所有选择的叶子节点id拿出来。
 
-``` js
+```js
 // 通过id号来获取这个树
 var treeObj2 = $.fn.zTree.getZTreeObj("treeDemo");
 // 获取所有已经选择了的节点，获得一个node列表

@@ -14,6 +14,7 @@ abbrlink: 44320
 
 但是还是有它的局限性——它并不能根据多个条件来实现路由，只能通过完全匹配`routing key`，
 灵活性不够。
+<!-- more -->
 
 比如我想实现仅仅对于那些`error`级别日志并且由`kern`生成的日志才记录到文件中。
 
@@ -44,7 +45,7 @@ abbrlink: 44320
 我们假设所有的消息的`routing key`形式为`"<facility>.<severity>`。
 
 日志生产者：
-``` python emit_log_topic.py
+```python emit_log_topic.py
 import pika
 import sys
 
@@ -81,7 +82,7 @@ connection.close()
 ```
 
 日志消费者：
-``` python receive_logs_topic.py
+```python receive_logs_topic.py
 import pika
 import sys
 
@@ -122,7 +123,7 @@ channel.start_consuming()
 
 emit_log_topic.py
 
-``` none
+```
  [x] Sent 'disk.error':'[disk.info] Hello World!'
  [x] Sent 'disk.warning':'[disk.warning] Hello World!'
  [x] Sent 'test.error':'[test.error] Hello World!'
@@ -130,7 +131,7 @@ emit_log_topic.py
 
 receive_logs_topic.py
 
-``` none
+```
  [*] Waiting for logs. To exit press CTRL+C
  [x] 'disk.error':b'[disk.info] Hello World!'
  [x] 'disk.warning':b'[disk.warning] Hello World!'

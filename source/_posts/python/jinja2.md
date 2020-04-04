@@ -11,6 +11,7 @@ abbrlink: 16052
 
 jinja2是python中的一个优秀的模板语言，类似于django的模板。它的速度快，安全，目前被各种框架被广泛使用。
 官网地址：<http://jinja.pocoo.org/>
+<!-- more -->
 
 它的一些特性：
 
@@ -30,7 +31,7 @@ pip install jinja2
 
 ### 基本使用
 通过创建一个Template类，不过这种方法不是推荐方式：
-``` python
+```python
 >>> from jinja2 import Template
 >>> template = Template('Hello @@ name @@!')
 >>> template.render(name='John Doe')
@@ -49,7 +50,7 @@ Jinja2使用一个中心对象叫模板环境Environment，用它来存储陪着
 大多数框架会在程序启动时创建一个Environment对象，用它来加载模板。
 
 最简单的陪着Jinja2和加载模板的方式类似下面：
-``` python
+```python
 from jinja2 import Environment, PackageLoader
 env = Environment(loader=PackageLoader('yourapp', 'templates'))
 ```
@@ -57,7 +58,7 @@ env = Environment(loader=PackageLoader('yourapp', 'templates'))
 你还可以使用其他的加载器，或者自定义加载器，来从数据库或其他地方加载模板。
 
 要想加载到一个模板，只需使用get_template()方法
-``` python
+```python
 template = env.get_template('mytemplate.html')
 print template.render(the='variables', go='here')
 ```
@@ -66,13 +67,13 @@ print template.render(the='variables', go='here')
 Jinja2内部使用Unicode，所以传给render方法的参数必须是unicode对象，另外换行符是unix的'\n'，
 最好在每个python模块第一行添加
 
-``` python
+```python
 # -*- coding: utf-8 -*-
 ```
 
 Jinja2的模板默认编码是utf-8，一些库会严格检查str类型比如`datetime.strftime`，它不接受unicode参数。
 所以Jinja2对于ascii字符串返回str，其他的返回unicode，比如：
-``` python
+```python
 >>> m = Template(u"@% set a, b = 'foo', 'föö' %@").module
 >>> m.a
 'foo'
@@ -83,7 +84,7 @@ u'f\xf6\xf6'
 #### 自动转换
 推荐的做法是开启 Autoescape Extension扩展，下面是一个推荐的启动配置方案，对于.html,.htm和.xml的模板开启自动转换，
 对于其他的禁止自动转换：
-``` python
+```python
 def guess_autoescape(template_name):
     if template_name is None or '.' not in template_name:
         return False
@@ -101,7 +102,7 @@ env = Environment(autoescape=guess_autoescape,
 
 所有加载器都继承自BaseLoader，如果你想定义自己的加载器，就写个子类，重写它的`get_source`方法即可。
 一个基本的从文件加载模板的加载器像下面这样：
-``` python
+```python
 from jinja2 import BaseLoader, TemplateNotFound
 from os.path import join, exists, getmtime
 
@@ -131,12 +132,12 @@ class MyLoader(BaseLoader):
 
 #### 自定义过滤器
 @% raw %@`@@ 42|myfilter(23) @@`@% endraw %@会被`myfilter(42, 23)`调用，一个例子
-``` python
+```python
 def datetimeformat(value, format='%H:%M / %d-%m-%Y'):
     return value.strftime(format)
 ```
 然后注册到环境中
-``` python
+```python
 environment.filters['datetimeformat'] = datetimeformat
 ```
 模板中使用：
@@ -148,7 +149,7 @@ publication date: @@ article.pub_date|datetimeformat('%d-%m-%Y') @@
 所以就有了environmentfilter(), contextfilter() 和evalcontextfilter()三个装饰器。
 
 下面是一个简单例子，将所有文本换行符转换为html换行符，文本段落转换我html段落。如果启动自动转换，返回安全的html字符串：
-``` python
+```python
 import re
 from jinja2 import evalcontextfilter, Markup, escape
 
@@ -168,7 +169,7 @@ def nl2br(eval_ctx, value):
 
 #### 基础
 下面是一个典型的模板：
-``` html
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -214,7 +215,7 @@ def nl2br(eval_ctx, value):
 #### 行语句
 
 下面等价
-``` html
+```html
 <ul>
 # for item in seq
     <li>@@ item @@</li>
@@ -230,7 +231,7 @@ def nl2br(eval_ctx, value):
 
 #### 模板继承
 一个基础模板
-``` html
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,7 +251,7 @@ def nl2br(eval_ctx, value):
 </html>
 ```
 一个子模板继承上面的基础模板
-``` html
+```html
 @% extends "base.html" %@
 @% block title %@Index@% endblock %@
 @% block head %@
@@ -268,7 +269,7 @@ def nl2br(eval_ctx, value):
 ```
 
 还能指定模板名字，更加具有可读性
-``` html
+```html
 @% block sidebar %@
     @% block inner_sidebar %@
         ...
@@ -288,7 +289,7 @@ def nl2br(eval_ctx, value):
 
 #### 流程控制语句
 列表循环
-``` html
+```html
 <h1>Members</h1>
 <ul>
 @% for user in users %@
@@ -303,7 +304,7 @@ def nl2br(eval_ctx, value):
 ```
 
 key-value形式的循环：
-``` html
+```html
 <dl>
 @% for key, value in my_dict.iteritems() %@
     <dt>@@ key|e @@</dt>
@@ -313,7 +314,7 @@ key-value形式的循环：
 ```
 
 if判断
-``` html
+```html
 @% if kenny.sick %@
     Kenny is sick.
 @% elif kenny.dead %@
@@ -367,7 +368,7 @@ if判断
 
 ### jinja2扩展
 添加扩展
-``` python
+```python
 jinja_env = Environment(extensions=['jinja2.ext.i18n'])
 ```
 

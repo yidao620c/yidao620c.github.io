@@ -11,6 +11,7 @@ abbrlink: 24109
 
 今天Python3.8版本刚刚发布，添加了很多新功能。这里介绍几个我觉得最酷的特性，感受一下小Python的美。
 更全面的特性请直接去官网看：<https://docs.python.org/3.8/whatsnew/3.8.html>
+<!-- more -->
 
 ## 赋值表达式
 
@@ -19,7 +20,7 @@ abbrlink: 24109
 可以看到这个操作符看上去像一只横躺着的海象。
 
 比如下面这个例子中，使用赋值表达式可以防止你调用两次`len()`方法
-``` python
+```python
 if (n := len(a)) > 10:
     print(f"List is too long ({n} elements, expected <= 10)")
 ```
@@ -28,7 +29,7 @@ if (n := len(a)) > 10:
 
 在函数的参数中增加一个`/`可以强制前面的参数必须使用位置参数调用，不能使用关键字参数。
 比如下面的函数中，a跟b必须使用位置参数调用，c和d随便，e和f必须使用关键字参数
-``` python
+```python
 def f(a, b, /, c, d, *, e, f):
     print(a, b, c, d, e, f)
 ```
@@ -39,7 +40,7 @@ def f(a, b, /, c, d, *, e, f):
 
 [PEP 578](https://www.python.org/dev/peps/pep-0578) 添加了一个审计钩子和一个确认开放钩子。
 
-``` python
+```python
 import sys
 import urlib.request
 
@@ -59,7 +60,7 @@ sys.addaudithook(audit_hook
 ## 全新第三方包读取模块
 
 新模块`importlib.metadata`提供了读取第三方包原信息的能力。比如它能从第三方包中读取版本号、实体列表
-``` python
+```python
 >>> # Note following example requires that the popular "requests"
 >>> # package has been installed.
 >>>
@@ -79,7 +80,7 @@ sys.addaudithook(audit_hook
 ## functools改进
 
 现在functools.lru_cache()注解可以不用加括号了，下面的两种写法都支持
-``` python
+```python
 @lru_cache
 def f(x):
     pass
@@ -96,7 +97,7 @@ def f(x):
 
 同时还支持对于协程的模拟测试，只需要测试用例继承自`unittest.IsolatedAsyncioTestCase`
 
-``` python
+```python
 import unittest
 
 
@@ -128,7 +129,7 @@ math模块中中添加了一个函数`math.dist()`用来计算两点之间的欧
 `math.hypot()`现在可以处理多维数据，之前仅支持2-D场景。
 
 新增一个`math.prod()`函数，跟累积求和类似，是一个累积乘积函数。
-``` python
+```python
 >>> prior = 0.8
 >>> likelihoods = [0.625, 0.84, 0.30]
 >>> math.prod(likelihoods, start=prior)

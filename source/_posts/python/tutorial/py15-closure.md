@@ -21,6 +21,7 @@ def test():
     num = 10 # 局部变量
 print(num)  # NameError: name 'num' is not defined
 ```
+<!-- more -->
 
 定义在模块最外层的变量是全局变量，它是全局范围内可见的，当然在函数里面也可以读取到全局变量的。例如：
 ```python

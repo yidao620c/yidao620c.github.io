@@ -17,10 +17,11 @@ Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，
 ### 安装docker
 
 这里省略
+<!-- more -->
 
 ### 在docker库获取镜像：redis，ruby
 
-``` bash
+```bash
 docker pull redis
 ```
 
@@ -28,7 +29,7 @@ docker pull redis
 
 配置文件`redis_master.conf`
 
-``` none
+```
 daemonize no
 pidfile "/var/run/redis.pid"
 port 6379
@@ -49,14 +50,14 @@ appendfsync always
 ```
 
 启动主redis服务
-``` bash
+```bash
  docker run --name redis_master -v $(pwd)/redis_master.conf:/data/redis_master.conf --restart=always -d redis redis-server /data/redis_master.conf
 ```
 
 ### 从redis服务
 
 配置文件`redis_slave.conf`
-``` none
+```
 daemonize no
 pidfile "/var/run/redis.pid"
 port 6379
@@ -78,14 +79,14 @@ slaveof 172.17.0.4 6379
 ```
 
 注意上面的IP地址172.17.0.4就是主redis服务容器地址，然后启动从redis服务：
-``` bash
+```bash
 docker run --name redis_slave -v $(pwd)/redis_slave.conf:/data/redis_slave.conf --restart=always -d redis:latest redis-server /data/redis_slave.conf
 ```
 
 ### 哨兵服务
 
 配置文件sentinel.conf
-``` none
+```
 daemonize no
 port 26379
 dir "/tmp"
@@ -101,13 +102,13 @@ sentinel current-epoch 0
 ```
 
 启动哨兵服务：
-``` bash
+```bash
 docker run --name sentinel -v $(pwd)/sentinel.conf:/data/sentinel.conf --restart=always -d redis redis-sentinel /data/sentinel.conf
 ```
 
 ### 最后验证
 
-``` bash
+```bash
 docker inspect redis_master | grep IPA
 docker run -it redis redis-cli -h 172.17.0.4
 172.17.0.4:6379> info
@@ -134,14 +135,14 @@ redis_git_dirty:0
 
 ### 在docker库获取镜像：redis，ruby
 
-``` bash
+```bash
 docker pull redis
 docker pull ruby
 ```
 
 ### 下载最新redis源码包
 
-``` bash
+```bash
 wget https://github.com/antirez/redis/archive/unstable.zip
 ```
 
@@ -151,7 +152,7 @@ wget https://github.com/antirez/redis/archive/unstable.zip
 
 找到一份原始的redis.conf文件，将其重命名为：redis-cluster.tmpl，并配置如下几个参数，此文件的目的是生成每一个redis实例的redis.conf:
 
-``` none
+```
 # bind 127.0.0.1
 port ${PORT}
 daemonize no
@@ -164,7 +165,7 @@ cluster-node-timeout 15000
 
 ## 构建一个redis集群管理镜像
 
-``` dockerfile
+```dockerfile
 FROM ruby
 MAINTAINER xn<xiongneng@gmail.com>
 RUN gem install redis
@@ -183,14 +184,14 @@ RUN redis-cli --version
 
 创建docker network
 
-``` bash
+```bash
 # 创建docker内部网络
 docker network create redis-cluster-net
 ```
 
 接下来编写自动脚本：
 
-``` bash
+```bash
 #!/bin/bash
 
 # 创建 master 和 slave 文件夹
@@ -236,12 +237,12 @@ docker run -it --rm --net redis-cluster-net redis-cluster redis-cli --cluster cr
 ## 验证
 
 进入容器：
-``` bash
+```bash
 docker exec -it redis-master-7000 /bin/bash
 ```
 
 连接redis：
-``` bash
+```bash
 172.19.0.2:7000> set a aaa
 -> Redirected to slot [15495] located at 172.19.0.4:7002
 OK

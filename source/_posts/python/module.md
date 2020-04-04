@@ -13,6 +13,7 @@ abbrlink: 42645
 
 引入包是为了解决命名冲突问题，你可以把包当成是命名空间，比如你写的`abc.py`模块和其他人写的`abc.py`模块只要在不同的包中就不会冲突。
 只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突。
+<!-- more -->
 
 比如我现在有这样一个目录结构：
 
@@ -35,7 +36,7 @@ abbrlink: 42645
 
 ## 导入模块
 要使用模块就需要先导入
-``` python
+```python
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
@@ -56,7 +57,7 @@ if __name__ == '__main__':
 接下来是主体部分，这个是一个模块的标准写法。
 
 注意到：
-``` python
+```python
 if __name__ == '__main__':
     demo()
 ```
@@ -66,14 +67,14 @@ if __name__ == '__main__':
 ## 模块搜索路径
 当我们试图加载一个模块时，Python会在指定的路径下搜索对应的.py文件，如果找不到就会报错。
 默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在sys模块的path变量中：
-``` python
+```python
 import sys
 print('\n'.join(sys.path))
 ```
 如果我们要添加自己的搜索目录，有两种方法：
 
 第一种方法是直接修改sys.path，添加要搜索的目录，这种方法是在运行时修改，运行结束后失效。：
-``` python
+```python
 >>> import sys
 >>> sys.path.append('/Users/michael/my_py_scripts')
 ```
@@ -113,7 +114,7 @@ print('\n'.join(sys.path))
             class User(object): pass
 
 然后我来对这些对象做一个测试，注意我注释掉的是不支持属性并给出报错信息：
-``` python
+```python
 # 打印python解释器路径和PYTHONPATH
 import sys
 print(sys.executable)
@@ -204,31 +205,31 @@ python里面最常用的是使用pip在线安装第三方模块。
 安装pip有三种方式，我都介绍一遍。
 
 第一种通过get-pip.py脚本安装：
-``` bash
+```bash
 curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 python get-pip.py
 ```
 
 第二种先下载安装setuptoos，使用它里面的easy_install命令安装：
-``` bash
+```bash
 tar -zxvf /root/install_venv/setuptools-28.8.0.tar.gz -C /root/setuptools --strip-components=1
 cd /root/setuptools && python setup.py install
 sudo easy_install pip
 ```
 
 第三种之间下载源码安装：
-``` bash
+```bash
 tar -zxvf /root/install_venv/pip-9.0.1.tar.gz -C /root/pip --strip-components=1
 cd /root/pip && python setup.py install
 ```
 
 安装完pip后就可以通过简单的命令安装其他python模块了，比如要安装网络爬虫scrapy：
-``` bash
+```bash
 pip install scrapy
 ```
 
 一些更高级的命令示例：
-``` bash
+```bash
 # 安装指定版本
 sudo pip install scrapy==1.0.2
 # 更新
@@ -252,12 +253,12 @@ pip install --no-index --find-links=d:\python27\packages -r requirements.txt
 通常我们需要对环境进行隔离以防止别的包影响到。这时候需要安装虚拟环境virtualenv了。
 
 **安装**：
-``` bash
+```bash
 sudo pip install -U virtualenv
 ```
 
 **创建**：
-``` bash
+```bash
 # 默认继承系统的site-packages中的模块
 virtualenv myenv
 # 不继承系统的site-packages中的模块
@@ -265,12 +266,12 @@ virtualenv --no-site-packages myenv
 ```
 
 **激活**：
-``` bash
+```bash
 source myenv/bin/activate
 ```
 
 **退出**：
-``` bash
+```bash
 deactivate
 ```
 
@@ -285,12 +286,12 @@ deactivate
 ```
 
 **整个虚拟环境导出**：
-``` bash
+```bash
 pip freeze -E django-mimo > requirements.txt
 ```
 
 **整个虚拟环境导入**：
-``` bash
+```bash
 pip install -E django-mimo -r requirements.txt
 ```
 

@@ -13,10 +13,11 @@ abbrlink: 11718
 
 这一节我们更进一步，实现订阅部分消息的功能。比如我只讲那些ERROR级别的消息写入日志文件，
 同时将所有日志打印到控制台上面。
+<!-- more -->
 
 ## 绑定
 在前面的例子我们已经创建了一个绑定：
-``` python
+```python
 channel.queue_bind(exchange=exchange_name,
                    queue=queue_name)
 ```
@@ -25,7 +26,7 @@ channel.queue_bind(exchange=exchange_name,
 
 绑定需要指定一个关键字参数叫`routing_key`，为了不跟`basic_publish`搞混，
 我现在将其称为`binding key`，下面我们创建一个带key的绑定：
-``` python
+```python
 channel.queue_bind(exchange=exchange_name,
                    queue=queue_name,
                    routing_key='black')
@@ -58,7 +59,7 @@ channel.queue_bind(exchange=exchange_name,
 
 日志消息生产者代码：
 
-``` python emit_log_direct.py
+```python emit_log_direct.py
 import pika
 import sys
 
@@ -97,7 +98,7 @@ connection.close()
 
 日志消费者：
 
-``` python receive_logs_direct.py
+```python receive_logs_direct.py
 import pika
 import sys
 
@@ -136,14 +137,14 @@ channel.start_consuming()
 运行效果：
 
 日志生产者：
-``` none
+```
  [x] Sent 'info':'[INFO] Hello World!'
  [x] Sent 'error':'[ERROR] Hello World!'
  [x] Sent 'warning':'[WARNING] Hello World!'
 ```
 
 日志消费者：
-``` none
+```
  [*] Waiting for logs. To exit press CTRL+C
  [x] 'error':b'[ERROR] Hello World!'
  [x] 'warning':b'[WARNING] Hello World!'

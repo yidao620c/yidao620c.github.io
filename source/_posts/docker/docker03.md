@@ -13,6 +13,7 @@ date: 2017-04-03 08:26:12
 
 hello-world 是 Docker 官方提供的一个镜像，通常用来验证 Docker 是否安装成功。
 我先从这个最小镜像开始说下，之前已经把它下载下来了。
+<!-- more -->
 
 hello-world 的 Dockerfile 内容如下：
 ```
@@ -202,7 +203,7 @@ Usage：bash clean.sh your-image-name
 
 需要安装jq，jq是终端解析json输出的利器
 
-``` bash
+```bash
 #!/usr/bin/env bash
 
 ACCEPT_HEADER="Accept: application/vnd.docker.distribution.manifest.v2+json"

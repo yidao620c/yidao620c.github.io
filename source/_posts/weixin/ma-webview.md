@@ -10,6 +10,7 @@ date: 2017-12-12 10:16:53
 最近要做一个项目需要在小程序中打开外链，小程序最近开放了web-view组件，
 可在里面内嵌自己写的H5页面，也就实现了打开外链的功能，但是有几个注意点。
 这里记录一下，希望将来小程序能放开更多限制。
+<!-- more -->
 
 ## 申请业务域名
 
@@ -32,7 +33,7 @@ date: 2017-12-12 10:16:53
 
 ## 示例代码
 
-``` html
+```html
 <!– wxml –>
 <!– 指向微信公众平台首页的web-view –>
 <web-view src=”https://mp.weixin.qq.com/”></web-view>
@@ -51,7 +52,7 @@ wx.miniProgram.reLaunch     | 参数与小程序接口一致  | 即将开放
 wx.miniProgram.redirectTo   | 参数与小程序接口一致  | 即将开放
 
 示例代码：
-``` html
+```html
 <!-- html -->
 <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.3.0.js"></script>
 

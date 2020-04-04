@@ -13,6 +13,7 @@ Docker 为容器提供了两种存放数据的资源：
 2. Data Volume
 
 接下来分别介绍下这两种存储方式。
+<!-- more -->
 
 ## storage driver
 

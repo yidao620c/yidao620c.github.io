@@ -12,6 +12,7 @@ abbrlink: 57631
 
 虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。
 本篇讲解一下如何在Spring4里面集成Axis2开发WebService，包括服务器端和客户端。
+<!-- more -->
 
 ## 服务端
 
@@ -19,7 +20,7 @@ abbrlink: 57631
 
 ### 添加依赖
 
-``` xml
+```xml
 
 <properties>
     <spring.version>4.3.13.RELEASE</spring.version>
@@ -106,14 +107,14 @@ abbrlink: 57631
 
 创建接口：
 
-``` java
+```java
 public interface AxisHelloWorld {
     public String getMessage(String message);
 }
 ```
 
 实现类：
-``` java
+```java
 @Service(value = "axisHelloWorldService")
 public class AxisHelloWorldImpl implements AxisHelloWorld {
     @Override
@@ -127,7 +128,7 @@ public class AxisHelloWorldImpl implements AxisHelloWorld {
 
 服务端的spring配置文件applicationContext.xml：
 
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -151,7 +152,7 @@ public class AxisHelloWorldImpl implements AxisHelloWorld {
 
 在/WEB-INF/目录下建立目录/services/axis/META-INF，然后再在这个目录下创建文件services.xml，内容如下：
 
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <service name="axisHelloWorld">
     <parameter name="ServiceObjectSupplier" locked="false">
@@ -170,7 +171,7 @@ public class AxisHelloWorldImpl implements AxisHelloWorld {
 
 再配置web.xml：
 
-``` xml
+```xml
 <web-app version="2.4"
          xmlns="http://java.sun.com/xml/ns/j2ee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -210,7 +211,7 @@ public class AxisHelloWorldImpl implements AxisHelloWorld {
 
 正确的返回WSDL文件，并且里面会有我定义的一个服务：
 
-``` xml
+```xml
 <wsdl:service name="axisHelloWorld">
 ```
 
@@ -227,7 +228,7 @@ wsdl2java.bat命令可以在<Axis2安装目录>/bin目录中找到。
 
 然后再任意一个目录执行：
 
-``` none
+```
 >wsdl2java -uri http://localhost:8080/services/axisHelloWorld?wsdl  -p com.xncoding.axis2.client -s -o stub
 ```
 
@@ -238,7 +239,7 @@ wsdl2java.bat命令可以在<Axis2安装目录>/bin目录中找到。
 
 ### 编写测试方法
 
-``` java
+```java
 @Test
 public void test() throws Exception {
     //创建生成的stub类

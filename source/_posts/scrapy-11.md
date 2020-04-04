@@ -16,14 +16,15 @@ abbrlink: 21665
 ![](https://xnstatic-1253397658.file.myqcloud.com/scrapy02.png)
 去查看html源码会发现表单里面有个隐藏的`authenticity_token`值，这个是需要先获取然后跟用户名和密码一起提交的。
 ![](https://xnstatic-1253397658.file.myqcloud.com/scrapy03.png)
+<!-- more -->
 
 ### 重写start_requests方法
 要使用cookie，第一步得打开它呀，默认scrapy使用`CookiesMiddleware`中间件，并且打开了。如果你之前禁止过，请设置如下
-``` python
+```python
 COOKIES_ENABLES = True
 ```
 我们先要打开登录页面，获取`authenticity_token`值，这里我重写了start_requests方法
-``` python
+```python
 # 重写了爬虫类的方法, 实现了自定义请求, 运行成功后会调用callback回调函数
 def start_requests(self):
     return [Request("https://github.com/login",
@@ -42,7 +43,7 @@ def post_login(self, response):
 
 ### 使用FormRequest
 Scrapy为我们准备了`FormRequest`类专门用来进行Form表单提交的
-``` python
+```python
 # 为了模拟浏览器，我们定义httpheader
 post_headers = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -82,7 +83,7 @@ def after_login(self, response):
 
 `FormRequest.from_response()`方法让你指定提交的url，请求头还有form表单值，注意我们还通过`meta`传递了cookie标识。
 它同样有个回调函数，登录成功后调用。下面我们来实现它
-``` python
+```python
 def after_login(self, response):
     # 登录之后，开始进入我要爬取的私信页面
     for url in self.start_urls:
@@ -97,7 +98,7 @@ def after_login(self, response):
 
 有个问题刚开始困扰我很久就是这里我定义的spider继承自CrawlSpider，它内部自动去下载匹配的链接，
 而每次去访问链接的时候并没有自动带上cookie，后来我重写了它的`_requests_to_follow()`方法解决了这个问题
-``` python
+```python
 def _requests_to_follow(self, response):
     """重写加入cookiejar的更新"""
     if not isinstance(response, HtmlResponse):
@@ -117,7 +118,7 @@ def _requests_to_follow(self, response):
 
 ### 页面处理方法
 在规则Rule里面我定义了每个链接的回调函数`parse_page`，就是最终我们处理每个issue页面提取信息的逻辑
-``` python
+```python
 def parse_page(self, response):
     """这个是使用LinkExtractor自动处理链接以及`下一页`"""
     logging.info(u'--------------消息分割线-----------------')
@@ -128,7 +129,7 @@ def parse_page(self, response):
 ```
 
 ### 完整源码
-``` python
+```python
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
 """

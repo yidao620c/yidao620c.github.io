@@ -15,7 +15,7 @@ PyInstaller是一个能将Python程序转换成单个可执行文件的程序，
 环境为windows7操作系统，python2.7.8 virtual environment
 
 官网：<https://github.com/pyinstaller/pyinstaller>
-
+<!-- more -->
 
 ### 详细步骤：
 1\. win7下面先安装这个依赖：pywin32，下载下来后切换到venv2.7，然后使用easy_install xxx.exe安装
@@ -72,7 +72,7 @@ pyinstaller -F -w -p D:\tmp\core-python\libs -i d:\tmp\main.ico main.py
 
 第二步，修改程序中引用这些资源文件比如图片的代码：
 
-``` python
+```python
 def resource_path(relative_path):
     """定义一个读取相对路径的函数"""
     if hasattr(sys, "_MEIPASS"):
@@ -82,13 +82,13 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 ```
 然后每次在获取图片的时候，这么引用它的目录：
-``` python
+```python
 img = wx.Image(resource_path('resources/me.jpg'), wx.BITMAP_TYPE_JPEG)
 ```
 第三步，先运行第6步生成一个main.spec文件
 
 第四步，修改main.spec文件：
-``` python
+```python
 # -*- mode: python -*-
 a = Analysis(['main.py'],
              pathex=['d:\\tmp\\core-wxpython'],
@@ -111,7 +111,7 @@ exe = EXE(pyz,
 注意：我在a.datas下面添加了那行配置，具体的路径自己去修改下。
 
 上面是添加单个文件，如果有多个文件，可以一个个的添加。不过如果文件多了话，那么就使用下面的方法：
-``` python
+```python
 # -*- mode: python -*-
 a = Analysis(['main.py'],
              pathex=['d:\\tmp\\core-wxpython'],
@@ -166,7 +166,7 @@ ImportError: No module named pkg_resources
 ```
 
 解决办法是在安装pycrypto之前，先安装distribute库
-``` bash
+```bash
 curl https://svn.apache.org/repos/asf/oodt/tools/oodtsite.publisher/trunk/distribute_setup.py | python
 ```
 然后再安装windows下面对应的pycrypto库
@@ -180,7 +180,7 @@ easy_install http://www.voidspace.org.uk/downloads/pycrypto26/pycrypto-2.6.win-a
 不要在程序中使用任何print语句，或者是你将stdout重定向到一个日志、文件或任何其他非控制台地方。
 
 最好的方法是利用日志功能，将输出定向到日志文件中去，在main函数开头添加如下代码：
-``` python
+```python
 import logging
 import tempfile
 logging.basicConfig(level=logging.INFO,
@@ -188,7 +188,7 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(message)s')
 ```
 用到logging的时候，需要配置日志到文件中，而不是console：
-``` python
+```python
 import logging
 _LOGGING = logging.getLogger(__file__)
 ```
@@ -204,7 +204,7 @@ _LOGGING = logging.getLogger(__file__)
 最后用pyinstaller設one folder & no console打包都不跳出小窗口了
 
 解决办法就是自定义一个subprocess_call函数来代替subprocess的call调用，不适用Popen了：
-``` python
+```python
 def subprocess_call(*args, **kwargs):
     # also works for Popen. It creates a new *hidden* window,
     # so it will work in frozen apps (.exe).
@@ -218,14 +218,14 @@ def subprocess_call(*args, **kwargs):
     return retcode
 ```
 调用方法：
-``` python
+```python
 exresult = subprocess_call(exe_command, shell=True)
 ```
 这个方法会等命令执行完成，返回值为0表示正常结束！
 
 4\. 打包后不能放到中文路径下执行
 解决办法是下载安装PyInstaller的中文支持库，安装后再重新执行pyinstaller打包命令：
-``` bash
+```bash
 git clone https://github.com/dkw72n/pyinstaller.git
 python setup.py install
 pyinstaller -F -w -i d:\tmp\main.ico main.py

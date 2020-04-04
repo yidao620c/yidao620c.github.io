@@ -16,19 +16,19 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 
 在maven工程的pom.xml中加入SiteMesh依赖：
 
-``` xml
+```xml
 <dependency>
     <groupId>opensymphony</groupId>
     <artifactId>sitemesh</artifactId>
     <version>2.4.2</version>
 </dependency>
 ```
-
+<!-- more -->
 
 ### 过滤器定义：
 在web.xml中：
 
-``` xml
+```xml
 <filter>
     <filter-name>sitemeshFilter</filter-name>
     <filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
@@ -41,7 +41,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 
 ### WEB-INF下新建decorators.xml文件
 
-``` xml
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <decorators defaultdir="/WEB-INF/layouts/">
     <!-- 此处用来定义不需要过滤的页面 -->
@@ -58,7 +58,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 不用过滤/static/目录下的文件，然后指定了装饰器：/WEB-INF/layouts/default.jsp。
 
 ### default.jsp模板
-``` jsp
+```jsp
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="sitemesh" uri="http://www.opensymphony.com/sitemesh/decorator" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -102,7 +102,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 
 使用的过程中，几乎感受不到SiteMesh的存在，例如下面的页面：
 
-``` jsp
+```jsp
 <%@ page language="java" contentType="text/html; charset=utf-8"
     pageEncoding="utf-8"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -132,7 +132,7 @@ SiteMesh的介绍就不多说了，主要是用来统一页面风格，减少重
 
 我们来看一下，被SiteMesh装饰过的页面源代码：
 
-``` html
+```html
 <!DOCTYPE html>
 <html>
 <head>

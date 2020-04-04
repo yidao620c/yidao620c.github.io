@@ -12,6 +12,7 @@ abbrlink: 15782
 这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。
 第一个例子演示一个标准的`SpringMVC`这个Java Web工程怎样自动抓取最新源码、测试、打包和部署，
 第二个例子演示目前我做的`Winstore`这个Python项目怎样实现自定义构建指令、在线升级、自动打包和自动部署。
+<!-- more -->
 
 ## SpringMVC
 
@@ -26,7 +27,7 @@ abbrlink: 15782
 在Jenkins机器上面安装JDK8，并设置好环境变量`JAVA_HOME`。
 
 安装sqlite3：
-``` bash
+```bash
 yum install -y sqlite sqlite-devel
 ```
 
@@ -116,7 +117,7 @@ node("master") {
 然后，修改首页页面内容，再次提交后push上去，再看看是否更新过来。
 
 另外，如果单元测试不通过，构建就会失败，修改一下单元测试，
-``` java
+```java
 @Test
 public void testIndex() {
     assertEquals("www", "www1");
@@ -209,7 +210,7 @@ ssh-copy-id root@192.168.217.233
 并且将它们纳入版本管理中。
 
 下面是打包脚本：
-``` sh
+```bash
 #!/bin/bash
 # winstore package
 
@@ -224,7 +225,7 @@ exit 0
 ```
 
 下面是安装winstore集群脚本：
-``` sh
+```bash
 #!/bin/bash
 # winstore package
 
@@ -448,7 +449,7 @@ pipeline {
 
 ## FAQ
 构建历史太多了咋办，写个脚本清空下：
-``` groovy
+```groovy
 def jobName = "winstore-pipeline"
 def job = Jenkins.instance.getItem(jobName)
 job.getBuilds().each { it.delete() }

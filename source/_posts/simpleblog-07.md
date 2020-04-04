@@ -12,10 +12,11 @@ abbrlink: 45644
 包括url配置、视图、模型和模板。接下来开始继续完善我们的博客系统了。
 
 首先我们需要一个显示每篇文章的详细页面，对不？
+<!-- more -->
 
 ## 文章详情
 对于首页每一篇文章，我们希望点击标题后可以进入该文章的阅读页面。修改post_list.html中的标题href如下：
-``` html
+```html
 <h1><a href="@% url 'blog.views.post_detail' pk=post.pk %@">@@ post.title @@</a></h1>
 ```
 我来详细解释下这个@% raw %@@% url ‘blog.views.post_detail’ pk=post.pk %@，@% %@@% endraw %@
@@ -26,7 +27,7 @@ blog.views.post_detail是视图的全路径。
 我们希望文章详细页面的链接类似这样：http://127.0.0.1:8000/post/1/
 
 修改blog/urls.py为下面的这样：
-``` python
+```python
 from django.conf.urls import patterns, include, url
 from . import views
 
@@ -50,7 +51,7 @@ urlpatterns = patterns('',
 现在去访问还会报错，因为我们还没有post_detail这个视图。现在我们开始定义它。
 
 修改文件blog/views.py如下：
-``` python
+```python
 from django.shortcuts import render, get_object_or_404
 
 def post_detail(request, pk):
@@ -60,7 +61,7 @@ def post_detail(request, pk):
 
 ### post_detail模板
 然后再增加模板blog/templates/blog/post_detail.html：
-``` html
+```html
 @% extends 'blog/base.html' %@
 
 @% block content %@
@@ -95,7 +96,7 @@ forms一个很好的特性就是它既能从头定义一个表单，也能创建
        └── forms.py
 
 在里面写入如下内容：
-``` python
+```python
 from django import forms
 from .models import Post
 
@@ -115,12 +116,12 @@ PostForm需要继承自forms.ModelForm，这样django就能实现某些神奇的
 
 ### 增加链接
 打开blog/templates/blog/base.html，在名字为page-header的div中添加一个新增文章的链接：
-``` html
+```html
 <a href="@% url 'blog.views.post_new' %@" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
 ```
 
 这时候你的base.html应该是这样的：
-``` html
+```html
 @% load staticfiles %@
 <html>
 <head>
@@ -150,12 +151,12 @@ PostForm需要继承自forms.ModelForm，这样django就能实现某些神奇的
 
 ### URL
 打开blog/urls.py文件，添加一条配置：
-``` python
+```python
 url(r'^post/new/$', views.post_new, name='post_new'),
 ```
 
 现在它的内容应该是这样的：
-``` python
+```python
 from django.conf.urls import patterns, include, url
 from . import views
 
@@ -168,12 +169,12 @@ urlpatterns = patterns('',
 
 ### post_new视图
 打开文件blog/views.py，先引入PostForm
-``` python
+```python
 from .forms import PostForm
 ```
 
 然后增加视图：
-``` python
+```python
 def post_new(request):
     form = PostForm()
     return render(request, 'blog/post_edit.html', {'form': form})
@@ -181,7 +182,7 @@ def post_new(request):
 
 ### post_edit.html模板
 在blog/templates/blog目录新建一个post_edit.html页面，然后写入下列内容：
-``` html
+```html
 @% extends 'blog/base.html' %@
 
 @% block content %@
@@ -203,13 +204,13 @@ def post_new(request):
 那么我们需要修改下post_new视图逻辑了：
 
 在头部先引入下面的依赖：
-``` python
+```python
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 ```
 
 然后修改post_new视图如下：
-``` python
+```python
 def post_new(request):
     if request.method == "POST":
         form = PostForm(request.POST)
@@ -239,13 +240,13 @@ django已经自动帮我们做了验证，是不是很酷呢？
 我们刚刚已经实现了新建文章的功能，那么如果是编辑修改文章呢。接下来我会快速的讲解这个流程，现在你应该是可以看得懂的了。
 
 首先打开blog/templates/blog/post_detail.html，添加一行：
-``` html
+```html
 <a class="btn btn-default" href="@% url 'post_edit' pk=post.pk %@">
 <span class="glyphicon glyphicon-pencil"></span></a>
 ```
 
 现在它的内容是这样的：
-``` html
+```html
 @% extends 'blog/base.html' %@
 
 @% block content %@
@@ -260,13 +261,13 @@ django已经自动帮我们做了验证，是不是很酷呢？
 @% endblock %@
 ```
 然后修改blog/urls.py文件，添加一条：
-``` python
+```python
 url(r'^post/(?P<pk>[0-9]+)/edit/$', views.post_edit, name='post_edit'),
 ```
 
 我们会重用模板blog/templates/blog/post_edit.html，
 因此只需要修改下view就可以了，打开文件blog/views.py，将下面的内容添加到最后：
-``` python
+```python
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":

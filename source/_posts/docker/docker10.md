@@ -16,10 +16,10 @@ date: 2017-04-15 09:56:12
 * 第三方方案：常用的包括 flannel、weave 和 calico。
 
 docker 网络是一个非常活跃的技术领域，不断有新的方案开发出来，那么要问个非常重要的问题了：
-
 如此众多的方案是如何与 docker 集成在一起的？
 
 答案是：libnetwork 以及 CNM（草泥马？）。
+<!-- more -->
 
 ## libnetwork & CNM
 

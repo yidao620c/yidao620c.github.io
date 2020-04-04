@@ -10,6 +10,7 @@ abbrlink: 17738
 
 到现在为止我们已经完成的差不多了，并且基本的东西都已经学到了，是时候用起来了。
 我们的博客还有很多功能需要完善，下面抛砖引玉新增几个功能，还有其他功能等你自己去发现和实现。
+<!-- more -->
 
 ## 草稿箱
 之前我们新建文章的时候只是是保存到数据库，也就是仅仅保存了草稿，还没有对外发布，
@@ -19,30 +20,30 @@ abbrlink: 17738
 
 打开mysite/templates/mysite/base.html文件，在
 
-``` html
+```html
 <h1><a href="/">Django Girls Blog</a></h1>
 ```
 
 的上面一行添加如下链接：
-``` html
+```html
 <a href="@% url 'post_draft_list' %@" class="top-menu">
 <span class="glyphicon glyphicon-edit"></span></a>
 ```
 
 第二步就是配置urls，在blog/urls.py中添加：
-``` python
+```python
 url(r'^drafts/$', views.post_draft_list, name='post_draft_list'),
 ```
 
 第三步在blog/views.py中添加一个view：
-``` python
+```python
 def post_draft_list(request):
     posts = Post.objects.filter(published_date__isnull=True).order_by('-created_date')
     return render(request, 'blog/post_draft_list.html', {'posts': posts})
 ```
 
 第四步添加一个template，新建blog/templates/blog/post_draft_list.html，内容如下：
-``` html
+```html
 @% extends 'blog/base.html' %@
 @% block content %@
     @% for post in posts %@
@@ -69,7 +70,7 @@ def post_draft_list(request):
 
 打开blog/template/blog/post_detail.html，将下面这段
 
-``` none
+```
 @% if post.published_date %@
     @@ post.published_date @@
 @% endif %@
@@ -77,7 +78,7 @@ def post_draft_list(request):
 
 换成下面这段：
 
-``` html
+```html
 @% if post.published_date %@
     @@ post.published_date @@
 @% else %@
@@ -87,11 +88,11 @@ def post_draft_list(request):
 这里增加了一个else语句，意思是如果没有发布日期的话就增加一个发布按钮。
 
 第二步添加urls配置，打开blog/urls.py：
-``` python
+```python
 url(r'^post/(?P<pk>[0-9]+)/publish/$', views.post_publish, name='post_publish'),
 ```
 第三步视图，打开blog/views.py：
-``` python
+```python
 def post_publish(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.publish()
@@ -113,18 +114,18 @@ def post_publish(request, pk):
 最后当然需要一个删除功能了，还是四部曲！
 
 第一步是在页面上添加链接，打开blog/templates/blog/post_detail.html，在编辑按钮下面一行添加如下：
-``` html
+```html
 <a class="btn btn-default" href="@% url 'post_remove' pk=post.pk %@">
 <span class="glyphicon glyphicon-remove"></span></a>
 ```
 
 第二步配置urls映射，打开blog/urls.py，添加如下一行：
-``` python
+```python
 url(r'^post/(?P<pk>[0-9]+)/remove/$', views.post_remove, name='post_remove'),
 ```
 
 第三步添加视图view，打开blog/views.py，添加一个视图函数：
-``` python
+```python
 def post_remove(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.delete()
@@ -147,7 +148,7 @@ OK，刷新页面看效果：
 
 ### 在view里面使用Paginator
 
-``` python
+```python
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def post_list(request):
@@ -172,7 +173,7 @@ def post_list(request):
 这里我传到页面去的posts是一个Page对象，另外我还传了一个"page"标志，因为其他方法也会使用到这个页面，但是不需要分页的。
 
 修改post_list.html页面，增加分页div
-``` html
+```html
 @% for post in posts %@
 ...这个中间是对于文章post的循环，这个不变...
 @% endfor %@

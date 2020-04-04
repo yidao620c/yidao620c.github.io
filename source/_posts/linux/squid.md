@@ -14,9 +14,10 @@ abbrlink: 58371
 
 不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。
 本篇演示搭建了一个简单的squid的正向代理，同时支持认证，随便记记笔记。
+<!-- more -->
 
 ## 安装
-``` bash
+```bash
 yum install squid -y
 yum install httpd-tools -y
 ```
@@ -134,7 +135,7 @@ total 496
 ```
 
 ## 启动服务
-``` bash
+```bash
 # 开启启动
 systemctl enable squid.service
 # 启动
@@ -151,7 +152,7 @@ systemctl restart squid.service
 ### 全局代理
 `vim /etc/profile`，在最后加入
 
-``` bash
+```bash
 export http_proxy="http://username:password@proxy_ip:port"
 export https_proxy="http://username:password@proxy_ip:port"
 ```
@@ -174,7 +175,7 @@ ftp_proxy=http://username:password@proxy_ip:port/
 
 ### curl的代理设置
 在`~/.bashrc`里面增加一个别名:
-``` bash
+```bash
 alias curl="curl -x http://username:password@proxy_ip:port"
 ```
 

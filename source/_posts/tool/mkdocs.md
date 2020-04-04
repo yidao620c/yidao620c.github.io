@@ -20,6 +20,7 @@ MkDocs有一堆很好看的主题。 官方内置了两个主题：
 和[readthedocs](https://mkdocs.zimoapps.com/user-guide/styling-your-docs/#readthedocs)，
 也可以从[MkDocs wiki](https://github.com/mkdocs/mkdocs/wiki/MkDocs-Themes)中选择第三方主题，
 或者[自定义主题](https://mkdocs.zimoapps.com/user-guide/custom-themes/)。
+<!-- more -->
 
 ## 安装 Mkdocs
 
@@ -38,7 +39,7 @@ mkdocs new my-project
 这样就会在本地建立一个my-project文件夹　其中包括了一个mkdocs.yml和一个docs文件夹
 
 * mkdocs.yml: 这个文件是一个配置文件主要配置你的站点名字，板块等具体配置点我
-* docs: 是存放你要写的 Markdown 文档的地方初始化一个index.md文档配置点我
+* docs: 是存放你要写的 Markdown 文档的地方初始化一个index.md文档配置点我。
 
 在本地查看搭建的文档效果
 ```

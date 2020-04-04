@@ -14,6 +14,7 @@ abbrlink: 41865
 
 JRebel的使用方式最常见还是通过插件方式使用，这里我介绍下在IntelliJ IDEA中怎样集成JRebel，
 另外还顺便介绍一下IDEA如何进行远程调试。
+<!-- more -->
 
 ## 安装
 
@@ -46,7 +47,7 @@ IDEA里面安装插件比较简单，File --> setttings --> Plugins,找到`Browe
 
 在2018/07/05这天IDEA突然提示JRebel的激活码不能用了，然后打开`https://zeroturnaround.com/software/jrebel/myjrebel-discontinued/`一看，
 
-``` none
+```
 We’ve made a difficult decision. As of July 5, myJRebel is no longer available.
 But don’t worry! All myJRebel users active within the last 12 months are eligible to continue using all JRebel’s wonderful 
 features by moving to JRebel commercial license at a massively discounted price: $99 (over 80% off the regular price).
@@ -54,13 +55,13 @@ features by moving to JRebel commercial license at a massively discounted price:
 
 通过开源社区找到一个很好用的LicenseServer，通过这个可以，gitee地址：
 
-``` none
+```
 https://gitee.com/gsls200808/JrebelLicenseServerforJava
 ```
 
 Packing a runnable jar:
 
-``` bash
+```bash
 mvn package
 java -jar JrebelBrainsLicenseServerforJava-1.0-SNAPSHOT-jar-with-dependencies.jar -p 8082
 ```
@@ -69,7 +70,7 @@ default port is 8081.
 
 然后在IDEA里面的JRebel激活中输入通过licensing service：
 
-``` none
+```
 http://ip:8082/fdf12095-3e08-49a0-92ee-5b459d5431dd
 ```
 
@@ -102,7 +103,7 @@ email也随便填一个，激活即可。
 在Run/Configuration里面，新增一个Remote Server配置。
 
 复制 Remote Server 自动生成的 JVM 参数，等下有用，如下图，比如我的是：
-``` none
+```
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
 ```
 
@@ -114,7 +115,7 @@ email也随便填一个，激活即可。
 ### 远程Tomcat配置
 
 编辑文件`catalina.sh`，在最上面添加：
-``` bash
+```bash
 export JAVA_OPTS='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
 ```
 
@@ -123,7 +124,7 @@ export JAVA_OPTS='-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=
 ### 远程Jetty
 
 jetty 不像Tomcat那样需要安装，只要有jetty的jar包就可以启动我们想要启动的应用，启动命令如下：
-``` bash
+```bash
 nohup java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005 -jar ${jarfile} >/dev/null 2>&1 &
 ```
 

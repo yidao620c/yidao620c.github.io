@@ -15,12 +15,13 @@ abbrlink: 47600
 
 目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。
 这里我只讲Ajax的两种方式，因为更好的WebSocket方式我已经单独写了一篇文章来介绍。
+<!-- more -->
 
 通过一个实际例子来演示下。
 
 ## 服务器实现
 这里通过一个SpringMVC项目，实现服务器长时间任务部分：
-``` java
+```java
 @RequestMapping("/longtime")
     public void ajax(HttpServletRequest request, HttpServletResponse response, long timed) throws Exception {
         PrintWriter writer = response.getWriter();
@@ -75,7 +76,7 @@ abbrlink: 47600
 也就是说这之间的间隔只有50毫秒，而非周期100毫秒
 
 那如果我想保证每次执行的间隔应该怎么办？用setTimeout，比如下面的代码：
-``` js
+```js
 var i = 1
 var timer = setTimeout(function() {
     alert(i++)
@@ -87,7 +88,7 @@ var timer = setTimeout(function() {
 接下来无论你什么时候点击“确定”， 下一次执行一定离这次确定相差2秒钟的
 
 两者的清除：
-``` js
+```js
 t1=setTimeout(xx(),1000);
 clearTimeout(t1);
 
@@ -105,7 +106,7 @@ clearInteval(t2);
 请求多，难于维护、浪费服务器和网络资源。
 
 看看实际的轮训例子：
-``` js
+```js
 var count1 = 0;
 function ask1() {
     var repeat = window.setInterval(function () {
@@ -133,7 +134,7 @@ function ask1() {
 
 这种是Ajax最常见的请求方式，我们通常使用ajax异步提交请求时候就是用的这种方式：
 
-``` js
+```js
 // Ajax long polling 方式
 var count2 = 0;
 function ask2() {

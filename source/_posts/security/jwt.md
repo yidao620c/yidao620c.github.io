@@ -12,12 +12,13 @@ abbrlink: 21652
 
 Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，
 特别适用于分布式站点的单点登录（SSO）场景。JWT的声明一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，
-以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。<!--more>
+以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该token也可直接被用于认证，也可被加密。
 
 JWT官网：<https://jwt.io/>
+<!-- more -->
 
 JWT是由三段信息构成的，将这三段信息文本用.链接一起就构成了Jwt字符串。就像这样:
-``` none
+```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 ```
 
@@ -39,7 +40,7 @@ jwt的头部承载两部分信息：
 * HMAC (Hash Message Authentication Code，散列消息鉴别码，基于密钥的Hash算法的认证协议。用公开函数和密钥产生一个固定长度的值作为认证标识，用这个标识鉴别消息的完整性。常用于接口签名验证
 
 完整的头部就像下面这样的JSON：
-``` json
+```json
 {
   'typ': 'JWT',
   'alg': 'HS256'
@@ -47,7 +48,7 @@ jwt的头部承载两部分信息：
 ```
 
 然后将头部进行base64加密（该加密是可以对称解密的),构成了第一部分
-``` none
+```
 eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
 ```
 
@@ -78,7 +79,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
 私有声明是提供者和消费者所共同定义的声明，一般不建议存放敏感信息，因为base64是对称解密的，意味着该部分信息可以归类为明文信息。
 
 定义一个payload:
-``` json
+```json
 {
   "sub": "1234567890",
   "name": "John Doe",
@@ -87,7 +88,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9
 ```
 
 然后将其进行base64加密，得到Jwt的第二部分：
-``` none
+```
 eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
 ```
 
@@ -95,7 +96,7 @@ eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
 
 jwt的第三部分是一个签证信息，这个签证信息由三部分组成：
 
-``` none
+```
 header (base64后的)
 payload (base64后的)
 secret
@@ -104,14 +105,14 @@ secret
 这个部分需要base64加密后的header和base64加密后的payload使用.连接组成的字符串，
 然后通过header中声明的加密方式进行加盐secret组合加密，然后就构成了jwt的第三部分。
 
-``` js
+```js
 // javascript
 var encodedString = base64UrlEncode(header) + '.' + base64UrlEncode(payload);
 var signature = HMACSHA256(encodedString, 'secret'); // TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 ```
 
 将这三部分用.连接成一个完整的字符串,构成了最终的jwt:
-``` none
+```
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ
 ```
 
@@ -121,7 +122,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 ## 如何应用
 
 一般是在请求头里加入Authorization，并加上Bearer标注：
-``` js
+```js
 fetch('api/user/1', {
   headers: {
     'Authorization': 'Bearer ' + token

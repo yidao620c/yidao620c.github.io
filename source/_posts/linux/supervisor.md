@@ -12,6 +12,7 @@ abbrlink: 39907
 Supervisor (http://supervisord.org) 是一个用 Python 写的进程管理工具，
 可以很方便的用来启动、重启、关闭进程（不仅仅是Python进程）。除了对单个进程的控制，还可以同时启动、关闭多个进程，
 有时候服务器出问题导致所有应用程序都被杀死，此时可以用supervisor同时启动所有应用程序。
+<!-- more -->
 
 ## 组成部分
 supervisor 主要由两部分组成：
@@ -21,13 +22,13 @@ supervisor 主要由两部分组成：
 
 ## 安装
 可以直接使用 pip 安装：
-``` bash
+```bash
 sudo pip install supervisor
 ```
 如果是 Ubuntu 系统，也可以使用 apt-get 来安装
 
 安装完成之后，可以运行 echo_supervisord_conf 生成默认的配置文件：
-``` bash
+```bash
 echo_supervisord_conf > /etc/supervisord.conf
 ```
 
@@ -54,7 +55,7 @@ WantedBy=multi-user.target
 ```
 
 无需修改/etc/supervisord.conf配置文件，该启动脚本都能够添加到systemctl自启动服务:
-``` bash
+```bash
 systemctl enable supervisord.service
 systemctl start/restart/stop supervisord.service
 ```
@@ -105,16 +106,16 @@ files = relative/directory/*.ini    ; 可以是 *.conf 或 *.ini
 ```
 
 然后可以通过 supervisord 命令启动 supervisord:
-``` bash
+```bash
 supervisord -c /etc/supervisord.conf
 ```
 查看 supervisord 是否在运行：
-``` bash
+```bash
 ps aux | grep supervisord
 ```
 
 我们可以看到 supervisord 已经被启动了， 然后进入 supervisorctl 的 shell 界面:
-``` bash
+```bash
 $ supervisorctl
 supervisor> status
 supervisor>
@@ -142,7 +143,7 @@ startsecs=10                                         ; 启动 10 秒后没有异
 ## 使用 supervisorctl
 
 然后运行以下命令更新配置并启动进程：
-``` bash
+```bash
 $ supervisorctl reread (只更新配置文件)
 celeryd: available
 
@@ -154,7 +155,7 @@ celeryd                          RUNNING    pid 1919, uptime 0:00:18
 ```
 
 我们看到 celery worker 已经被成功启动了。你可以使用不同的命令来控制进程的启动和关闭:
-``` bash
+```bash
 $ supervisorctl stop celeryd
 celeryd: stopped
 $ supervisorctl start celeryd
@@ -166,7 +167,7 @@ celeryd: started
 
 把所有的配置文件都放在 supervisord.conf 并不是个好主意，一旦管理的进程过多，就很麻烦。
 所以一般都会 新建一个目录来专门放置进程的配置文件，然后通过 include 的方式来获取这些配置信息:
-``` bash
+```bash
 [include]
 files = /etc/supervisor/conf.d/*.conf
 ```
