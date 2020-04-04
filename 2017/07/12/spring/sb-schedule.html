@@ -1,262 +1,259 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="springboot,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。
-为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。
-接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。
-默认，springb...">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。 为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。 接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。 默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求， 一般来说，没有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot系列 - 定时任务">
+<meta property="og:url" content="https://www.xncoding.com/2017/07/12/spring/sb-schedule.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。 为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。 接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。 默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求， 一般来说，没有">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-07-12T02:59:25.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:40:03.541Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="springboot">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.xncoding.com/2017/07/12/spring/sb-schedule.html">
 
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
 
-
-<title>SpringBoot系列 - 定时任务 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
-
-
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+  <title>SpringBoot系列 - 定时任务 | 飞污熊博客</title>
+  
 
 
 
 
-    
 
 
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
 
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
 
-
-    
-
-    <link rel="stylesheet" href="/js/prism/prism.css">
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="SpringBoot系列 - 定时任务">
-            
-                SpringBoot系列 - 定时任务
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/spring">
-            spring
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/springboot" title='springboot'>
-                        springboot
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2017/07/12</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2017/07/12/spring/sb-schedule.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot系列 - 定时任务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-07-12 10:59:25" itemprop="dateCreated datePublished" datetime="2017-07-12T10:59:25+08:00">2017-07-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。
 为了实现这个需求，通常我们会通过多线程来实现这个功能，但是这样我们需要自己做一些比较麻烦的工作。
 接下来，让我们看看如何使用Spring scheduling task简化定时任务功能的实现。</p>
 <p>默认，springboot已经支持了定时任务Schedule模块，所以一般情况已经完全能够满足我们的实际需求，
 一般来说，没有必要再加入Quartz2了，不过你要是有更高级需求也可以整合Quartz2进来。</p>
+<a id="more"></a>
+
 <h2 id="定时任务架构"><a href="#定时任务架构" class="headerlink" title="定时任务架构"></a>定时任务架构</h2><p>一般来说，实际项目中，为了提高服务的响应能力，我们一般会通过负载均衡的方式，或者反向代理多个节点的方式来进行。
 如果我们将定时任务写在我们的项目中，那么在同一个时间点，定时任务会一起执行，也就是会执行多次，这样很可能会导致我们的业务出现错误。</p>
 <p>建议使用逻辑分离的方式来解决这个问题。就是我们将真正要定时任务处理的逻辑，写成rest或者rpc服务，
 然后我们可以新建一个单独的定时任务项目，这个项目应该是没有任何的业务代码的，他纯粹只有定时任务功能，
 几点启动，或者每隔多少时间启动。启动后，通过rest或者rpc的方式，调用真正处理逻辑的服务。</p>
 <h2 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h2><p>实际上只要添加最基础的start依赖即可支持定时任务：</p>
-<pre><code class="line-numbers language-xml">&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;2.0.4.RELEASE&lt;/version&gt;
-&lt;/parent&gt;
-</code></pre>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">parent</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.4.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">parent</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
 <h2 id="添加注解配置类"><a href="#添加注解配置类" class="headerlink" title="添加注解配置类"></a>添加注解配置类</h2><p>如果有多个耗时任务，最好使用线程池来执行，添加一个配置类专门用来配置定时任务执行的线程池：</p>
-<pre><code class="line-numbers language-java">@Configuration
-@EnableScheduling
-public class ScheduleConfig implements SchedulingConfigurer {
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.setScheduler(taskExecutor());
-    }
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableScheduling</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ScheduleConfig</span> <span class="keyword">implements</span> <span class="title">SchedulingConfigurer</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configureTasks</span><span class="params">(ScheduledTaskRegistrar taskRegistrar)</span> </span>&#123;</span><br><span class="line">        taskRegistrar.setScheduler(taskExecutor());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span>(destroyMethod=<span class="string">"shutdown"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ExecutorService <span class="title">taskExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Executors.newScheduledThreadPool(<span class="number">20</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Bean(destroyMethod=&quot;shutdown&quot;)
-    public ExecutorService taskExecutor() {
-        return Executors.newScheduledThreadPool(20);
-    }
-}
-</code></pre>
-<h2 id="添加执行任务类"><a href="#添加执行任务类" class="headerlink" title="添加执行任务类"></a>添加执行任务类</h2><pre><code class="line-numbers language-java">@Component
-public class MyJob {
-    private Logger logger = LoggerFactory.getLogger(MyJob.class);
-    public final static long ONE_Minute =  10 * 1000;
+<h2 id="添加执行任务类"><a href="#添加执行任务类" class="headerlink" title="添加执行任务类"></a>添加执行任务类</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyJob</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Logger logger = LoggerFactory.getLogger(MyJob<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">long</span> ONE_Minute =  <span class="number">10</span> * <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled</span>(fixedDelay=ONE_Minute)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fixedDelayJob</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        logger.info(DateTimeKit.formatDateTime(<span class="keyword">new</span> Date())+<span class="string">" &gt;&gt;fixedDelay执行.... start"</span>);</span><br><span class="line">        Thread.sleep(<span class="number">5000L</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Scheduled</span>(fixedRate=ONE_Minute)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">fixedRateJob</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        logger.info(DateTimeKit.formatDateTime(<span class="keyword">new</span> Date())+<span class="string">" &gt;&gt;fixedRate执行...."</span>);</span><br><span class="line">        Thread.sleep(<span class="number">8000L</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 第一位，表示秒，取值0-59</span></span><br><span class="line"><span class="comment">     * 第二位，表示分，取值0-59</span></span><br><span class="line"><span class="comment">     * 第三位，表示小时，取值0-23</span></span><br><span class="line"><span class="comment">     * 第四位，日期天/日，取值1-31</span></span><br><span class="line"><span class="comment">     * 第五位，日期月份，取值1-12</span></span><br><span class="line"><span class="comment">     * 第六位，星期，取值1-7，1表示星期天，2表示星期一</span></span><br><span class="line"><span class="comment">     * 第七位，年份，可以留空，取值1970-2099</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Scheduled</span>(cron=<span class="string">"0 40 19 * * ?"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cronJob</span><span class="params">()</span></span>&#123;</span><br><span class="line">        logger.info(DateTimeKit.formatDateTime(<span class="keyword">new</span> Date())+<span class="string">" &gt;&gt;cron执行...."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Scheduled(fixedDelay=ONE_Minute)
-    public void fixedDelayJob() throws InterruptedException {
-        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;fixedDelay执行.... start&quot;);
-        Thread.sleep(5000L);
-    }
-
-    @Scheduled(fixedRate=ONE_Minute)
-    public void fixedRateJob() throws InterruptedException {
-        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;fixedRate执行....&quot;);
-        Thread.sleep(8000L);
-    }
-
-    /**
-     * 第一位，表示秒，取值0-59
-     * 第二位，表示分，取值0-59
-     * 第三位，表示小时，取值0-23
-     * 第四位，日期天/日，取值1-31
-     * 第五位，日期月份，取值1-12
-     * 第六位，星期，取值1-7，1表示星期天，2表示星期一
-     * 第七位，年份，可以留空，取值1970-2099
-     */
-    @Scheduled(cron=&quot;0 40 19 * * ?&quot;)
-    public void cronJob(){
-        logger.info(DateTimeKit.formatDateTime(new Date())+&quot; &gt;&gt;cron执行....&quot;);
-    }
-}
-</code></pre>
 <h2 id="三种定时任务类型"><a href="#三种定时任务类型" class="headerlink" title="三种定时任务类型"></a>三种定时任务类型</h2><p>上面的例子中有三种典型的定时任务，先将前面最简单的两种，单位都是毫秒，比如1分钟=60秒×1000：</p>
 <ol>
 <li>fixedDelay：当任务执行完毕后x毫秒后再执行下一个任务</li>
@@ -265,215 +262,232 @@ public class MyJob {
 <p>而还有一类定时任务，比如是每天的3点15分执行，那么我们就需要用另外一种方式：cron表达式</p>
 <h2 id="cron表达式"><a href="#cron表达式" class="headerlink" title="cron表达式"></a>cron表达式</h2><p>cron表达式，有专门的语法，而且感觉有点绕人，不过简单来说，大家记住一些常用的用法即可，特殊的语法可以单独去查。</p>
 <p>cron一共有7位，但是最后一位是年，可以留空，所以我们可以写6位：</p>
-<pre><code>* 第一位，秒，取值0-59
-* 第二位，分，取值0-59
-* 第三位，时，取值0-23
-* 第四位，日，取值1-31
-* 第五位，月，取值1-12
-* 第六位，星期，取值1-7，1表示星期天，2表示星期一
-* 第七位，年份，可以留空，取值1970-2099
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">* 第一位，秒，取值<span class="number">0</span><span class="number">-59</span></span><br><span class="line">* 第二位，分，取值<span class="number">0</span><span class="number">-59</span></span><br><span class="line">* 第三位，时，取值<span class="number">0</span><span class="number">-23</span></span><br><span class="line">* 第四位，日，取值<span class="number">1</span><span class="number">-31</span></span><br><span class="line">* 第五位，月，取值<span class="number">1</span><span class="number">-12</span></span><br><span class="line">* 第六位，星期，取值<span class="number">1</span><span class="number">-7</span>，<span class="number">1</span>表示星期天，<span class="number">2</span>表示星期一</span><br><span class="line">* 第七位，年份，可以留空，取值<span class="number">1970</span><span class="number">-2099</span></span><br></pre></td></tr></table></figure>
 
-</code></pre><p>cron中，还有一些特殊的符号，含义如下：</p>
-<pre><code>(*)星号：可以理解为每的意思，每秒，每分，每时，每日，每月，每星期，每年...
-(?)问号：问号只能出现在日和星期这两个位置，表示这个位置的值不确定，每天3点执行，所以第六位星期的位置，
-我们是不需要关注的，就是不确定的值。同时：日和星期是两个相互排斥的元素，通过问号来表明不指定值。
-比如，1月10日，比如是星期1，如果在星期的位置是另指定星期二，就前后冲突矛盾了。
-(-)减号：表达一个范围，如在小时字段中使用“10-12”，则表示从10到12点，即10,11,12
-(,)逗号：表达一个列表值，如在星期字段中使用“1,2,4”，则表示星期一，星期二，星期四
-(/)斜杠：如：x/y，x是开始值，y是步长，比如在第一位（秒） 0/15就是，从0秒开始，每15秒，最后就是0，15，30，45，60 另：*/y，等同于0/y
-(L)字符：用在日表示一个月中的最后一天，用在周表示该月最后一个星期X
-(W)字符：指定离给定日期最近的工作日(周一到周五)
-(#)字符：表示该月第几个周X。6#3表示该月第3个周五
-</code></pre><p>下面列举几个例子供大家来验证：</p>
-<pre><code>0 0 3 * * ?     每天3点执行
-0 5 3 * * ?     每天3点5分执行
-0 5 3 ? * *     每天3点5分执行，与上面作用相同
-0 5/10 3 * * ?  每天3点的 5分，15分，25分，35分，45分，55分这几个时间点执行
-0 10 3 ? * 1    每周星期天，3点10分 执行，注：1表示星期天    
-0 10 3 ? * 1#3  每个月的第三个星期，星期天执行，#号只能出现在星期的位置
-</code></pre><h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-schedule" target="_blank" rel="noopener">springboot-schedule</a></p>
+<p>cron中，还有一些特殊的符号，含义如下：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(*)星号：可以理解为每的意思，每秒，每分，每时，每日，每月，每星期，每年...</span><br><span class="line">(?)问号：问号只能出现在日和星期这两个位置，表示这个位置的值不确定，每天<span class="number">3</span>点执行，所以第六位星期的位置，</span><br><span class="line">我们是不需要关注的，就是不确定的值。同时：日和星期是两个相互排斥的元素，通过问号来表明不指定值。</span><br><span class="line">比如，<span class="number">1</span>月<span class="number">10</span>日，比如是星期<span class="number">1</span>，如果在星期的位置是另指定星期二，就前后冲突矛盾了。</span><br><span class="line">(-)减号：表达一个范围，如在小时字段中使用“<span class="number">10</span><span class="number">-12</span>”，则表示从<span class="number">10</span>到<span class="number">12</span>点，即<span class="number">10</span>,<span class="number">11</span>,<span class="number">12</span></span><br><span class="line">(,)逗号：表达一个列表值，如在星期字段中使用“<span class="number">1</span>,<span class="number">2</span>,<span class="number">4</span>”，则表示星期一，星期二，星期四</span><br><span class="line">(/)斜杠：如：x/y，x是开始值，y是步长，比如在第一位（秒） <span class="number">0</span>/<span class="number">15</span>就是，从<span class="number">0</span>秒开始，每<span class="number">15</span>秒，最后就是<span class="number">0</span>，<span class="number">15</span>，<span class="number">30</span>，<span class="number">45</span>，<span class="number">60</span> 另：*/y，等同于<span class="number">0</span>/y</span><br><span class="line">(L)字符：用在日表示一个月中的最后一天，用在周表示该月最后一个星期X</span><br><span class="line">(W)字符：指定离给定日期最近的工作日(周一到周五)</span><br><span class="line">(#)字符：表示该月第几个周X。<span class="number">6</span>#<span class="number">3</span>表示该月第<span class="number">3</span>个周五</span><br></pre></td></tr></table></figure>
+
+<p>下面列举几个例子供大家来验证：</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">0 </span><span class="number">0</span> <span class="number">3</span> * * ?     每天<span class="number">3</span>点执行</span><br><span class="line"><span class="symbol">0 </span><span class="number">5</span> <span class="number">3</span> * * ?     每天<span class="number">3</span>点<span class="number">5</span>分执行</span><br><span class="line"><span class="symbol">0 </span><span class="number">5</span> <span class="number">3</span> ? * *     每天<span class="number">3</span>点<span class="number">5</span>分执行，与上面作用相同</span><br><span class="line"><span class="symbol">0 </span><span class="number">5</span>/<span class="number">10</span> <span class="number">3</span> * * ?  每天<span class="number">3</span>点的 <span class="number">5</span>分，<span class="number">15</span>分，<span class="number">25</span>分，<span class="number">35</span>分，<span class="number">45</span>分，<span class="number">55</span>分这几个时间点执行</span><br><span class="line"><span class="symbol">0 </span><span class="number">10</span> <span class="number">3</span> ? * <span class="number">1</span>    每周星期天，<span class="number">3</span>点<span class="number">10</span>分 执行，注：<span class="number">1</span>表示星期天    </span><br><span class="line"><span class="symbol">0 </span><span class="number">10</span> <span class="number">3</span> ? * <span class="number">1#</span><span class="number">3</span>  每个月的第三个星期，星期天执行，#号只能出现在星期的位置</span><br></pre></td></tr></table></figure>
+
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-schedule" target="_blank" rel="noopener">springboot-schedule</a></p>
 
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2017/07/12/spring/sb-schedule.html">SpringBoot系列 - 定时任务</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2017/07/13/spring/sb-cxf.html" class="pre-post btn btn-default" title='SpringBoot系列 - cxf实现WebService'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - cxf实现WebService</span>
-        </a>
     
     
-        <a href="/2017/07/10/spring/sb-multisource.html" class="next-post btn btn-default" title='SpringBoot系列 - 多数据源配置'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - 多数据源配置</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/springboot/" rel="tag"># springboot</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/10/spring/sb-multisource.html" rel="prev" title="SpringBoot系列 - 多数据源配置">
+      <i class="fa fa-chevron-left"></i> SpringBoot系列 - 多数据源配置
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/07/13/spring/sb-cxf.html" rel="next" title="SpringBoot系列 - cxf实现WebService">
+      SpringBoot系列 - cxf实现WebService <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#定时任务架构"><span class="toc-text">定时任务架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加依赖"><span class="toc-text">添加依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加注解配置类"><span class="toc-text">添加注解配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加执行任务类"><span class="toc-text">添加执行任务类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三种定时任务类型"><span class="toc-text">三种定时任务类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cron表达式"><span class="toc-text">cron表达式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#定时任务架构"><span class="nav-number">1.</span> <span class="nav-text">定时任务架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加依赖"><span class="nav-number">2.</span> <span class="nav-text">添加依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加注解配置类"><span class="nav-number">3.</span> <span class="nav-text">添加注解配置类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加执行任务类"><span class="nav-number">4.</span> <span class="nav-text">添加执行任务类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三种定时任务类型"><span class="nav-number">5.</span> <span class="nav-text">三种定时任务类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cron表达式"><span class="nav-number">6.</span> <span class="nav-text">cron表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub源码"><span class="nav-number">7.</span> <span class="nav-text">GitHub源码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>

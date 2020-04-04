@@ -1,200 +1,247 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="springboot,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。
-WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3C定为标准。
-在WebSocket API 中，浏览器和服务器只需要要做一个握手的动作，然后，...">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。 WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3C定为标准。 在WebSocket API 中，浏览器和服务器只需要要做一个握手的动作，然后，浏览器和服务器之间就形成了一条快速通道。 两者之间就直接可以数据互相传送。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot系列 - 集成WebSocket实时通信">
+<meta property="og:url" content="https://www.xncoding.com/2017/07/15/spring/sb-websocket.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。 WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3C定为标准。 在WebSocket API 中，浏览器和服务器只需要要做一个握手的动作，然后，浏览器和服务器之间就形成了一条快速通道。 两者之间就直接可以数据互相传送。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/sb-websocket20.png">
+<meta property="article:published_time" content="2017-07-15T04:28:16.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:40:37.246Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="springboot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/sb-websocket20.png">
+
+<link rel="canonical" href="https://www.xncoding.com/2017/07/15/spring/sb-websocket.html">
 
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
 
-
-<title>SpringBoot系列 - 集成WebSocket实时通信 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
-
-
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
-
-
-
-
-    
+  <title>SpringBoot系列 - 集成WebSocket实时通信 | 飞污熊博客</title>
+  
 
 
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
 
 
 
-    
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
-    <link rel="stylesheet" href="/js/prism/prism.css">
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="SpringBoot系列 - 集成WebSocket实时通信">
-            
-                SpringBoot系列 - 集成WebSocket实时通信
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/spring">
-            spring
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/springboot" title='springboot'>
-                        springboot
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2017/07/15</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2017/07/15/spring/sb-websocket.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot系列 - 集成WebSocket实时通信
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-07-15 12:28:16" itemprop="dateCreated datePublished" datetime="2017-07-15T12:28:16+08:00">2017-07-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。
 WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3C定为标准。
-在WebSocket API 中，浏览器和服务器只需要要做一个握手的动作，然后，浏览器和服务器之间就形成了一条快速通道。两者之间就直接可以数据互相传送。</p>
+在WebSocket API 中，浏览器和服务器只需要要做一个握手的动作，然后，浏览器和服务器之间就形成了一条快速通道。
+两者之间就直接可以数据互相传送。</p>
+<a id="more"></a>
+
 <p>注意特点：</p>
 <ul>
 <li>为浏览器和服务端提供了双工异步通信的功能，即服务器可以主动向客户端推送信息，客户端也可以主动向服务器发送信息，是真正的双向平等对话，属于服务器推送技术的一种。</li>
@@ -210,94 +257,24 @@ WebSocket 通信协议于2011年被IETF定为标准RFC 6455，WebSocketAPI 被W3
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>STOMP：即<code>Simple Text Orientated Messaging Protocol</code>，它是一个简单的文本消息传输协议，属于 WebSocket 的子协议，
 提供了一个可互操作的连接格式，允许STOMP客户端与任意STOMP消息代理（Broker）进行交互。STOMP协议由于设计简单，
 易于开发客户端，因此在多种语言和多种平台上得到广泛地应用。</p>
-<h2 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h2><pre><code class="line-numbers language-xml">&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-websocket&lt;/artifactId&gt;
-    &lt;exclusions&gt;
-        &lt;exclusion&gt;
-            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-            &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-        &lt;/exclusion&gt;
-    &lt;/exclusions&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-jetty&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre>
+<h2 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-websocket<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-tomcat<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-jetty<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
 <p>个人喜好用jetty取代tomcat，所以才这样写。你可以只需要引入<code>spring-boot-starter-websocket</code>即可。</p>
-<h2 id="配置类"><a href="#配置类" class="headerlink" title="配置类"></a>配置类</h2><pre><code class="line-numbers language-java">@Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+<h2 id="配置类"><a href="#配置类" class="headerlink" title="配置类"></a>配置类</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableWebSocketMessageBroker</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebSocketConfig</span> <span class="keyword">extends</span> <span class="title">AbstractWebSocketMessageBrokerConfigurer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerStompEndpoints</span><span class="params">(StompEndpointRegistry stompEndpointRegistry)</span> </span>&#123;</span><br><span class="line">        stompEndpointRegistry.addEndpoint(<span class="string">"/simple"</span>)</span><br><span class="line">                .setAllowedOrigins(<span class="string">"*"</span>) <span class="comment">//解决跨域问题</span></span><br><span class="line">                .withSockJS();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configureMessageBroker</span><span class="params">(MessageBrokerRegistry registry)</span> </span>&#123;</span><br><span class="line">        registry.enableSimpleBroker(<span class="string">"/topic"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
-        stompEndpointRegistry.addEndpoint(&quot;/simple&quot;)
-                .setAllowedOrigins(&quot;*&quot;) //解决跨域问题
-                .withSockJS();
-    }
-
-    @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker(&quot;/topic&quot;);
-    }
-}
-</code></pre>
 <p>关于这个类说明如下：</p>
 <ol>
 <li>@EnableWebSocketMessageBroker注解表示开启使用STOMP协议来传输基于代理的消息，Broker就是代理的意思。</li>
 <li>registerStompEndpoints方法表示注册STOMP协议的节点，并指定映射的URL</li>
-<li>addEndpoint(“/simple”).withSockJS(); 用来注册STOMP协议节点，同时指定使用SockJS</li>
+<li>addEndpoint(&quot;/simple&quot;).withSockJS(); 用来注册STOMP协议节点，同时指定使用SockJS</li>
 <li>configureMessageBroker方法用来配置消息代理，由于我们是实现推送功能，这里的消息代理是/topic</li>
 </ol>
-<h2 id="请求消息类"><a href="#请求消息类" class="headerlink" title="请求消息类"></a>请求消息类</h2><pre><code class="line-numbers language-java">public class RequestMessage {
-    private String name;
+<h2 id="请求消息类"><a href="#请求消息类" class="headerlink" title="请求消息类"></a>请求消息类</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RequestMessage</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public String getName() {
-        return name;
-    }
-}
-</code></pre>
-<h2 id="响应消息类"><a href="#响应消息类" class="headerlink" title="响应消息类"></a>响应消息类</h2><pre><code class="line-numbers language-java">public class ResponseMessage {
-    private String responseMessage;
+<h2 id="响应消息类"><a href="#响应消息类" class="headerlink" title="响应消息类"></a>响应消息类</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ResponseMessage</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String responseMessage;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ResponseMessage</span><span class="params">(String responseMessage)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.responseMessage = responseMessage;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getResponseMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> responseMessage;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public ResponseMessage(String responseMessage) {
-        this.responseMessage = responseMessage;
-    }
+<h2 id="SpringMVC控制器"><a href="#SpringMVC控制器" class="headerlink" title="SpringMVC控制器"></a>SpringMVC控制器</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WsController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> SimpMessagingTemplate messagingTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">WsController</span><span class="params">(SimpMessagingTemplate messagingTemplate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.messagingTemplate = messagingTemplate;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@MessageMapping</span>(<span class="string">"/welcome"</span>)</span><br><span class="line">    <span class="meta">@SendTo</span>(<span class="string">"/topic/say"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResponseMessage <span class="title">say</span><span class="params">(RequestMessage message)</span> </span>&#123;</span><br><span class="line">        System.out.println(message.getName());</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ResponseMessage(<span class="string">"welcome,"</span> + message.getName() + <span class="string">" !"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 定时推送消息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Scheduled</span>(fixedRate = <span class="number">1000</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">callback</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 发现消息</span></span><br><span class="line">        DateFormat df = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">        messagingTemplate.convertAndSend(<span class="string">"/topic/callback"</span>, <span class="string">"定时推送消息时间: "</span> + df.format(<span class="keyword">new</span> Date()));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public String getResponseMessage() {
-        return responseMessage;
-    }
-}
-</code></pre>
-<h2 id="SpringMVC控制器"><a href="#SpringMVC控制器" class="headerlink" title="SpringMVC控制器"></a>SpringMVC控制器</h2><pre><code class="line-numbers language-java">@Controller
-public class WsController {
-
-    private final SimpMessagingTemplate messagingTemplate;
-
-    @Autowired
-    public WsController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
-
-    @MessageMapping(&quot;/welcome&quot;)
-    @SendTo(&quot;/topic/say&quot;)
-    public ResponseMessage say(RequestMessage message) {
-        System.out.println(message.getName());
-        return new ResponseMessage(&quot;welcome,&quot; + message.getName() + &quot; !&quot;);
-    }
-
-    /**
-     * 定时推送消息
-     */
-    @Scheduled(fixedRate = 1000)
-    public void callback() {
-        // 发现消息
-        DateFormat df = new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm:ss&quot;);
-        messagingTemplate.convertAndSend(&quot;/topic/callback&quot;, &quot;定时推送消息时间: &quot; + df.format(new Date()));
-    }
-}
-</code></pre>
 <p>say方法上添加的@MessageMapping注解和我们之前使用的@RequestMapping类似。@SendTo注解表示当服务器有消息需要推送的时候，
 会对订阅了@SendTo中路径的浏览器发送消息。</p>
 <p>除此之外，我还定义了一个定时推送消息方法，这个方法每隔1秒会主动给订阅了主题<code>/topic/callback</code>的客户端推送消息。</p>
@@ -310,270 +287,233 @@ public class WsController {
 </ol>
 <p>可在我的github项目源码里面找到这三个js文件。</p>
 <p>下面是演示的页面：</p>
-<pre><code class="line-numbers language-html">&lt;html&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;/&gt;
-    &lt;title&gt;广播式WebSocket&lt;/title&gt;
-    &lt;script src=&quot;js/sockjs.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;js/stomp.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;js/jquery-3.1.1.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body onload=&quot;disconnect()&quot;&gt;
-&lt;noscript&gt;&lt;h2 style=&quot;color: #e80b0a;&quot;&gt;Sorry，浏览器不支持WebSocket&lt;/h2&gt;&lt;/noscript&gt;
-&lt;div&gt;
-    &lt;div&gt;
-        &lt;button id=&quot;connect&quot; onclick=&quot;connect();&quot;&gt;连接&lt;/button&gt;
-        &lt;button id=&quot;disconnect&quot; disabled=&quot;disabled&quot; onclick=&quot;disconnect();&quot;&gt;断开连接&lt;/button&gt;
-    &lt;/div&gt;
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>广播式WebSocket<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/sockjs.min.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/stomp.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery-3.1.1.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> <span class="attr">onload</span>=<span class="string">"disconnect()"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">noscript</span>&gt;</span><span class="tag">&lt;<span class="name">h2</span> <span class="attr">style</span>=<span class="string">"color: #e80b0a;"</span>&gt;</span>Sorry，浏览器不支持WebSocket<span class="tag">&lt;/<span class="name">h2</span>&gt;</span><span class="tag">&lt;/<span class="name">noscript</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"connect"</span> <span class="attr">onclick</span>=<span class="string">"connect();"</span>&gt;</span>连接<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"disconnect"</span> <span class="attr">disabled</span>=<span class="string">"disabled"</span> <span class="attr">onclick</span>=<span class="string">"disconnect();"</span>&gt;</span>断开连接<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"conversationDiv"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">label</span>&gt;</span>输入你的名字<span class="tag">&lt;/<span class="name">label</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">id</span>=<span class="string">"name"</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"sendName"</span> <span class="attr">onclick</span>=<span class="string">"sendName();"</span>&gt;</span>发送<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"response"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"callback"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript">    <span class="keyword">var</span> stompClient = <span class="literal">null</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">setConnected</span><span class="params">(connected)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">"connect"</span>).disabled = connected;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">"disconnect"</span>).disabled = !connected;</span></span><br><span class="line"><span class="javascript">        <span class="built_in">document</span>.getElementById(<span class="string">"conversationDiv"</span>).style.visibility = connected ? <span class="string">'visible'</span> : <span class="string">'hidden'</span>;</span></span><br><span class="line"><span class="javascript">        $(<span class="string">"#response"</span>).html();</span></span><br><span class="line"><span class="javascript">        $(<span class="string">"#callback"</span>).html();</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">connect</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">        <span class="keyword">var</span> socket = <span class="keyword">new</span> SockJS(<span class="string">'http://localhost:8092/simple'</span>);</span></span><br><span class="line">        stompClient = Stomp.over(socket);</span><br><span class="line"><span class="actionscript">        stompClient.connect(&#123;&#125;, <span class="function"><span class="keyword">function</span> <span class="params">(frame)</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">            setConnected(<span class="literal">true</span>);</span></span><br><span class="line"><span class="javascript">            <span class="built_in">console</span>.log(<span class="string">'Connected:'</span> + frame);</span></span><br><span class="line"><span class="actionscript">            stompClient.subscribe(<span class="string">'/topic/say'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(response)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">                showResponse(<span class="built_in">JSON</span>.parse(response.body).responseMessage);</span></span><br><span class="line">            &#125;);</span><br><span class="line"><span class="actionscript">            <span class="comment">// 另外再注册一下定时任务接受</span></span></span><br><span class="line"><span class="actionscript">            stompClient.subscribe(<span class="string">'/topic/callback'</span>, <span class="function"><span class="keyword">function</span> <span class="params">(response)</span> </span>&#123;</span></span><br><span class="line">                showCallback(response.body);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">disconnect</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">        <span class="keyword">if</span> (stompClient != <span class="literal">null</span>) &#123;</span></span><br><span class="line">            stompClient.disconnect();</span><br><span class="line">        &#125;</span><br><span class="line"><span class="actionscript">        setConnected(<span class="literal">false</span>);</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(<span class="string">'Disconnected'</span>);</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">sendName</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> name = $(<span class="string">'#name'</span>).val();</span></span><br><span class="line"><span class="javascript">        <span class="built_in">console</span>.log(<span class="string">'name:'</span> + name);</span></span><br><span class="line"><span class="javascript">        stompClient.send(<span class="string">"/welcome"</span>, &#123;&#125;, <span class="built_in">JSON</span>.stringify(&#123;<span class="string">'name'</span>: name&#125;));</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">showResponse</span><span class="params">(message)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        $(<span class="string">"#response"</span>).html(message);</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="actionscript">    <span class="function"><span class="keyword">function</span> <span class="title">showCallback</span><span class="params">(message)</span> </span>&#123;</span></span><br><span class="line"><span class="javascript">        $(<span class="string">"#callback"</span>).html(message);</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-    &lt;div id=&quot;conversationDiv&quot;&gt;
-        &lt;label&gt;输入你的名字&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;name&quot;/&gt;
-        &lt;button id=&quot;sendName&quot; onclick=&quot;sendName();&quot;&gt;发送&lt;/button&gt;
-        &lt;p id=&quot;response&quot;&gt;&lt;/p&gt;
-        &lt;p id=&quot;callback&quot;&gt;&lt;/p&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;script type=&quot;text/javascript&quot;&gt;
-    var stompClient = null;
-
-    function setConnected(connected) {
-        document.getElementById(&quot;connect&quot;).disabled = connected;
-        document.getElementById(&quot;disconnect&quot;).disabled = !connected;
-        document.getElementById(&quot;conversationDiv&quot;).style.visibility = connected ? &#39;visible&#39; : &#39;hidden&#39;;
-        $(&quot;#response&quot;).html();
-        $(&quot;#callback&quot;).html();
-    }
-
-    function connect() {
-        var socket = new SockJS(&#39;http://localhost:8092/simple&#39;);
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            setConnected(true);
-            console.log(&#39;Connected:&#39; + frame);
-            stompClient.subscribe(&#39;/topic/say&#39;, function (response) {
-                showResponse(JSON.parse(response.body).responseMessage);
-            });
-            // 另外再注册一下定时任务接受
-            stompClient.subscribe(&#39;/topic/callback&#39;, function (response) {
-                showCallback(response.body);
-            });
-        });
-    }
-
-    function disconnect() {
-        if (stompClient != null) {
-            stompClient.disconnect();
-        }
-        setConnected(false);
-        console.log(&#39;Disconnected&#39;);
-    }
-
-    function sendName() {
-        var name = $(&#39;#name&#39;).val();
-        console.log(&#39;name:&#39; + name);
-        stompClient.send(&quot;/welcome&quot;, {}, JSON.stringify({&#39;name&#39;: name}));
-    }
-
-    function showResponse(message) {
-        $(&quot;#response&quot;).html(message);
-    }
-    function showCallback(message) {
-        $(&quot;#callback&quot;).html(message);
-    }
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-<p>页面上面点击”连接”按钮后，开始连接到<code>/simple</code>节点。输入名字后点击发送，将向<code>/welcome</code>的url发送消息。</p>
+<p>页面上面点击&quot;连接&quot;按钮后，开始连接到<code>/simple</code>节点。输入名字后点击发送，将向<code>/welcome</code>的url发送消息。</p>
 <p>同时订阅了两个主题：<code>/topic/say</code> 和 <code>/topic/callback</code>，会接收到服务器的say方法的返回，以及定时推送消息。</p>
 <p>演示效果：</p>
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/sb-websocket20.png" alt></p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/sb-websocket20.png" alt=""></p>
 <p>每隔一秒页面都会刷新显示当前时间。同时控制台也会打印定时推送过来的消息。</p>
 <h2 id="Android客户端"><a href="#Android客户端" class="headerlink" title="Android客户端"></a>Android客户端</h2><p>对于想要使用Android客户端进行WebSocket通信的，
 可参考 <a href="https://github.com/NaikSoftware/StompProtocolAndroid" target="_blank" rel="noopener">StompProtocolAndroid</a></p>
 <h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-websocket" target="_blank" rel="noopener">springboot-websocket</a></p>
 
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2017/07/15/spring/sb-websocket.html">SpringBoot系列 - 集成WebSocket实时通信</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2017/07/16/spring/sb-socketio.html" class="pre-post btn btn-default" title='SpringBoot系列 - 集成SocketIO实时通信'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - 集成SocketIO实时通信</span>
-        </a>
     
     
-        <a href="/2017/07/13/spring/sb-cxf.html" class="next-post btn btn-default" title='SpringBoot系列 - cxf实现WebService'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - cxf实现WebService</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/springboot/" rel="tag"># springboot</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/13/spring/sb-cxf.html" rel="prev" title="SpringBoot系列 - cxf实现WebService">
+      <i class="fa fa-chevron-left"></i> SpringBoot系列 - cxf实现WebService
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/07/16/spring/sb-socketio.html" rel="next" title="SpringBoot系列 - 集成SocketIO实时通信">
+      SpringBoot系列 - 集成SocketIO实时通信 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概述"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引入依赖"><span class="toc-text">引入依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置类"><span class="toc-text">配置类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#请求消息类"><span class="toc-text">请求消息类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#响应消息类"><span class="toc-text">响应消息类</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringMVC控制器"><span class="toc-text">SpringMVC控制器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#客户端"><span class="toc-text">客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Android客户端"><span class="toc-text">Android客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引入依赖"><span class="nav-number">2.</span> <span class="nav-text">引入依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置类"><span class="nav-number">3.</span> <span class="nav-text">配置类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求消息类"><span class="nav-number">4.</span> <span class="nav-text">请求消息类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应消息类"><span class="nav-number">5.</span> <span class="nav-text">响应消息类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringMVC控制器"><span class="nav-number">6.</span> <span class="nav-text">SpringMVC控制器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端"><span class="nav-number">7.</span> <span class="nav-text">客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android客户端"><span class="nav-number">8.</span> <span class="nav-text">Android客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub源码"><span class="nav-number">9.</span> <span class="nav-text">GitHub源码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>

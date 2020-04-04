@@ -1,199 +1,241 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="负载均衡,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。
-1、什么是LVS？
-请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
-LVS项目介绍：http://www.linuxvirtualser...">
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
+  <meta name="description" content="我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。 1、什么是LVS？ 请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。  LVS项目介绍：http:&#x2F;&#x2F;www.linuxvirtualserver.org&#x2F;zh&#x2F;lvs1.html LVS集群的体系结构：http:&#x2F;&#x2F;www.linuxvirtu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群">
+<meta property="og:url" content="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。 1、什么是LVS？ 请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。  LVS项目介绍：http:&#x2F;&#x2F;www.linuxvirtualserver.org&#x2F;zh&#x2F;lvs1.html LVS集群的体系结构：http:&#x2F;&#x2F;www.linuxvirtu">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/0002.png">
+<meta property="article:published_time" content="2015-09-16T08:40:04.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:12:12.225Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="负载均衡">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/0002.png">
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
-
-
-<title>CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<link rel="canonical" href="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
 
 
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群 | 飞污熊博客</title>
+  
 
 
 
 
-    
 
 
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
 
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
 
-
-    
-
-    <link rel="stylesheet" href="/js/prism/prism.css">
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群">
-            
-                CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/linux">
-            linux
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/负载均衡" title='负载均衡'>
-                        负载均衡
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2015/09/16</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-09-16 16:40:04" itemprop="dateCreated datePublished" datetime="2015-09-16T16:40:04+08:00">2015-09-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。</p>
 <p><strong>1、什么是LVS？</strong></p>
 <p>请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。</p>
@@ -201,7 +243,9 @@ LVS项目介绍：http://www.linuxvirtualser...">
 <li>LVS项目介绍：<a href="http://www.linuxvirtualserver.org/zh/lvs1.html" target="_blank" rel="noopener">http://www.linuxvirtualserver.org/zh/lvs1.html</a></li>
 <li>LVS集群的体系结构：<a href="http://www.linuxvirtualserver.org/zh/lvs2.html" target="_blank" rel="noopener">http://www.linuxvirtualserver.org/zh/lvs2.html</a></li>
 <li>LVS集群中的IP负载均衡技术：<a href="http://www.linuxvirtualserver.org/zh/lvs3.html" target="_blank" rel="noopener">http://www.linuxvirtualserver.org/zh/lvs3.html</a></li>
-<li>LVS集群的负载调度：<a href="http://www.linuxvirtualserver.org/zh/lvs4.html" target="_blank" rel="noopener">http://www.linuxvirtualserver.org/zh/lvs4.html</a></li>
+<li>LVS集群的负载调度：<a href="http://www.linuxvirtualserver.org/zh/lvs4.html" target="_blank" rel="noopener">http://www.linuxvirtualserver.org/zh/lvs4.html</a><a id="more"></a>
+
+</li>
 </ul>
 <p><strong>2、什么是KeepAlived?</strong></p>
 <p>Keepalived原理与实战精讲： <a href="http://zhumeng8337797.blog.163.com/blog/static/100768914201191762253640/" target="_blank" rel="noopener">http://zhumeng8337797.blog.163.com/blog/static/100768914201191762253640/</a></p>
@@ -210,151 +254,63 @@ LVS项目介绍：http://www.linuxvirtualser...">
 <p><strong>4、小结</strong></p>
 <p>相信读了以上的理论知识后，已经对集群的实现原理有了大概的了解，那接下来我们就开始动手吧。</p>
 <p>系统架构图：</p>
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/0002.png" alt></p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/0002.png" alt=""></p>
 <h2 id="服务器的安装"><a href="#服务器的安装" class="headerlink" title="服务器的安装"></a>服务器的安装</h2><p>我们会用到4个服务器，横向分2层：</p>
 <p>第1层是LVS服务器（1个主，1个从；从可以多个）用来转发请求，需要安装ipvsadm和keepAlived；
 第2层是提供具体服务的服务器（表中用了2个；当然也可以是多个，现实的应用会上百台。），
 安装的是具体的服务，这里我们安装的是TOMCAT。</p>
 <p>主机环境如下：</p>
-<pre><code>192.168.203.107　 LVS_VIP（VIP：Virtual IP）
-192.168.203.103　 LVS_Master　　
-192.168.203.104　 LVS_Backup
-192.168.203.93　  WEB1_RealServer
-192.168.203.94　  WEB2_RealServer
-</code></pre><p>克隆：我们先安装配置好一层的一个服务器，其他服务器使用克隆方式。</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">192.168.203.107</span>　 LVS_VIP（VIP：Virtual IP）</span><br><span class="line"><span class="number">192.168.203.103</span>　 LVS_Master　　</span><br><span class="line"><span class="number">192.168.203.104</span>　 LVS_Backup</span><br><span class="line"><span class="number">192.168.203.93</span>　  WEB1_RealServer</span><br><span class="line"><span class="number">192.168.203.94</span>　  WEB2_RealServer</span><br></pre></td></tr></table></figure>
+
+<p>克隆：我们先安装配置好一层的一个服务器，其他服务器使用克隆方式。</p>
 <h3 id="1-安装虚拟机VirtualBox4-2-12"><a href="#1-安装虚拟机VirtualBox4-2-12" class="headerlink" title="1. 安装虚拟机VirtualBox4.2.12"></a>1. 安装虚拟机VirtualBox4.2.12</h3><h3 id="2-安装CentOS-6-5"><a href="#2-安装CentOS-6-5" class="headerlink" title="2. 安装CentOS 6.5"></a>2. 安装CentOS 6.5</h3><p>这一步先安装一台虚拟机，然后其他的通过克隆方式安装，不过注意的是，
 克隆之后需要修改相应的IP地址已经eth0等配置。具体方法是：</p>
 <h4 id="1-修改-etc-udev-rules-d-70-persistent-net-rules"><a href="#1-修改-etc-udev-rules-d-70-persistent-net-rules" class="headerlink" title="1) 修改/etc/udev/rules.d/70-persistent-net.rules"></a>1) 修改/etc/udev/rules.d/70-persistent-net.rules</h4><p>拷贝eth1的硬件地址到eth0，删除eth1信息</p>
-<h4 id="2-配置-etc-sysconfig-network-scripts-ifcfg-eth0"><a href="#2-配置-etc-sysconfig-network-scripts-ifcfg-eth0" class="headerlink" title="2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0"></a>2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0</h4><pre><code>DEVICE=&quot;eth0&quot;
-BOOTPROTO=&quot;static&quot;
-HWADDR=&quot;00:0C:29:91:42:2C&quot;
-MTU=&quot;1500&quot;
-NM_CONTROLLED=&quot;yes&quot;
-ONBOOT=&quot;yes&quot;
-IPADDR=192.168.203.94
-NETMASK=255.255.255.0
-GATEWAY=192.168.203.254
-</code></pre><h4 id="3-reboot"><a href="#3-reboot" class="headerlink" title="3) reboot"></a>3) reboot</h4><p>这样可以保证所有的机器网卡都是eth0接口</p>
+<h4 id="2-配置-etc-sysconfig-network-scripts-ifcfg-eth0"><a href="#2-配置-etc-sysconfig-network-scripts-ifcfg-eth0" class="headerlink" title="2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0"></a>2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0</h4><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">DEVICE</span>=<span class="string">"eth0"</span></span><br><span class="line"><span class="attr">BOOTPROTO</span>=<span class="string">"static"</span></span><br><span class="line"><span class="attr">HWADDR</span>=<span class="string">"00:0C:29:91:42:2C"</span></span><br><span class="line"><span class="attr">MTU</span>=<span class="string">"1500"</span></span><br><span class="line"><span class="attr">NM_CONTROLLED</span>=<span class="string">"yes"</span></span><br><span class="line"><span class="attr">ONBOOT</span>=<span class="string">"yes"</span></span><br><span class="line"><span class="attr">IPADDR</span>=<span class="number">192.168</span>.<span class="number">203.94</span></span><br><span class="line"><span class="attr">NETMASK</span>=<span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line"><span class="attr">GATEWAY</span>=<span class="number">192.168</span>.<span class="number">203.254</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-reboot"><a href="#3-reboot" class="headerlink" title="3) reboot"></a>3) reboot</h4><p>这样可以保证所有的机器网卡都是eth0接口</p>
 <h3 id="3-LVS层安装LVS和KeepAlived"><a href="#3-LVS层安装LVS和KeepAlived" class="headerlink" title="3. LVS层安装LVS和KeepAlived"></a>3. LVS层安装LVS和KeepAlived</h3><p>首先是LVS_MASTER机器的安装配置，打开LVS_Master服务器；</p>
 <p>先安装lvs_master的服务，lvs_backup使用克隆虚拟机的方式，然后在配置文件修改三个参数即可，下面会讲到。</p>
 <h4 id="1-安装IPVSADM"><a href="#1-安装IPVSADM" class="headerlink" title="1) 安装IPVSADM"></a>1) 安装IPVSADM</h4><p>知识点：IPVSADM理解为IPVS管理工具；LVS（Linux Virtual Server）的核心为IPVS（IP Virtual Server），
 从Linux内核版本2.6起，IPVS模块已经编译进了Linux内核。</p>
 <p>使用yum命令进行安装，系统会选择最适合内核版本的ipvsadm</p>
-<pre><code>yum -y install ipvsadm
-</code></pre><h4 id="2-防火墙"><a href="#2-防火墙" class="headerlink" title="2) 防火墙"></a>2) 防火墙</h4><p>为了测试方便，我们直接关闭防火墙，在实际使用中开启需要的端口即可。</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y <span class="keyword">install</span> ipvsadm</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-防火墙"><a href="#2-防火墙" class="headerlink" title="2) 防火墙"></a>2) 防火墙</h4><p>为了测试方便，我们直接关闭防火墙，在实际使用中开启需要的端口即可。</p>
 <p>具体配置可参考：<a href="http://www.cnblogs.com/rockee/archive/2012/05/17/2506671.html" target="_blank" rel="noopener">http://www.cnblogs.com/rockee/archive/2012/05/17/2506671.html</a></p>
-<pre><code>service iptables stop
-</code></pre><h4 id="3-KeepAlived-的安装"><a href="#3-KeepAlived-的安装" class="headerlink" title="3) KeepAlived 的安装"></a>3) KeepAlived 的安装</h4><p>知识点：KeepAlived是一个路由软件，它主要的目的是让我们通过简单的配置，实现高可用负载均衡，
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables <span class="built_in">stop</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-KeepAlived-的安装"><a href="#3-KeepAlived-的安装" class="headerlink" title="3) KeepAlived 的安装"></a>3) KeepAlived 的安装</h4><p>知识点：KeepAlived是一个路由软件，它主要的目的是让我们通过简单的配置，实现高可用负载均衡，
 当然负载均衡依赖于Linux虚拟服务器（IPVS）的内核模块，其高可用性使用VRRP协议来实现，
 KeepAlived不仅会检测负载均衡服务器池中每台机器的健康状况并通知IPVS将非健康的机器从池中移除掉；
 同时它还能对负载均衡调度器本身实现健康状态检查，当主负载均衡调度器出现问题时，备用负载均衡调度器顶替主进行工作。
 逐条执行如下命令，执行的原因暂不解释，实际就是需要这些组件，安装即可。</p>
-<pre><code class="line-numbers language-bash">cd /usr/src
-yum -y install openssl-devel
-wget http://www.keepalived.org/software/keepalived-1.2.7.tar.gz
-wget http://mirror.centos.org/centos/6/os/x86_64/Packages/popt-static-1.13-7.el6.x86_64.rpm
-yum -y install popt-static-1.13-7.el6.x86_64.rpm
-yum -y install kernel-devel make gcc openssl-devel libnl* popt*
-ln -s /usr/src/kernels/2.6.32-220.13.1.el6.x86_64/ /usr/src/linux
-tar zxvf keepalived-1.2.7.tar.gz
-cd keepalived-1.2.7
-./configure --with-kernel-dir=/usr/src/kernels/2.6.32-358.2.1.el6.x86_64/
-make &amp;&amp; make install
-cp /usr/local/etc/rc.d/init.d/keepalived /etc/rc.d/init.d/
-cp /usr/local/etc/sysconfig/keepalived /etc/sysconfig/
-mkdir /etc/keepalived
-cp /usr/local/etc/keepalived/keepalived.conf /etc/keepalived/
-cp /usr/local/sbin/keepalived /usr/sbin/
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/src</span><br><span class="line">yum -y install openssl-devel</span><br><span class="line">wget http://www.keepalived.org/software/keepalived-1.2.7.tar.gz</span><br><span class="line">wget http://mirror.centos.org/centos/6/os/x86_64/Packages/popt-static-1.13-7.el6.x86_64.rpm</span><br><span class="line">yum -y install popt-static-1.13-7.el6.x86_64.rpm</span><br><span class="line">yum -y install kernel-devel make gcc openssl-devel libnl* popt*</span><br><span class="line">ln -s /usr/src/kernels/2.6.32-220.13.1.el6.x86_64/ /usr/src/linux</span><br><span class="line">tar zxvf keepalived-1.2.7.tar.gz</span><br><span class="line"><span class="built_in">cd</span> keepalived-1.2.7</span><br><span class="line">./configure --with-kernel-dir=/usr/src/kernels/2.6.32-358.2.1.el6.x86_64/</span><br><span class="line">make &amp;&amp; make install</span><br><span class="line">cp /usr/<span class="built_in">local</span>/etc/rc.d/init.d/keepalived /etc/rc.d/init.d/</span><br><span class="line">cp /usr/<span class="built_in">local</span>/etc/sysconfig/keepalived /etc/sysconfig/</span><br><span class="line">mkdir /etc/keepalived</span><br><span class="line">cp /usr/<span class="built_in">local</span>/etc/keepalived/keepalived.conf /etc/keepalived/</span><br><span class="line">cp /usr/<span class="built_in">local</span>/sbin/keepalived /usr/sbin/</span><br></pre></td></tr></table></figure>
+
 <p>注：上面的kernel路径自己去用tab键弄出来
 OK，KeepAlived安装完毕，然后进行配置。</p>
 <h4 id="4-KeepAlivde的配置"><a href="#4-KeepAlivde的配置" class="headerlink" title="4) KeepAlivde的配置"></a>4) KeepAlivde的配置</h4><p><strong>第一步：打开IP Forward 功能</strong></p>
 <p>（LVS现有三种负载均衡规则都需要打开此功能，如果不打开此功能，下面的配置配得再好都无济于事）</p>
-<pre><code class="line-numbers language-bash">vim /etc/sysctl.conf
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
 <p>打开后修改里面“net.ipv4.ip_forward = 1”，修改好后保存退出，执行如下命令使设置立即生效</p>
-<pre><code class="line-numbers language-bash">sysctl -p
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -p</span><br></pre></td></tr></table></figure>
+
 <p><strong>第二步：KeepAlivde的配置</strong></p>
 <p>配置文件在这个位置： /etc/keepalived/keepalived.conf</p>
 <p>启动KeepAlived时，它默认会去/etc/keepalived下面找它的配置文件，
 所以上面命令中我们已经将这个配置文件复制过来了。现在进行修改：</p>
-<pre><code>! Configuration File for keepalived
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">! Configuration File <span class="keyword">for</span> keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     <span class="symbol">test@</span>sina.com</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from <span class="symbol">admin@</span>test.com</span><br><span class="line">   smtp_server <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">   smtp_connect_timeout <span class="number">30</span></span><br><span class="line">   router_id LVS_MASTER</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    <span class="keyword">interface</span> <span class="symbol">eth0</span></span><br><span class="line">    <span class="symbol">virtual_router_id</span> <span class="symbol">60</span></span><br><span class="line">    <span class="symbol">priority</span> <span class="symbol">100</span></span><br><span class="line">    <span class="symbol">advert_int</span> <span class="symbol">1</span></span><br><span class="line">    <span class="symbol">authentication</span> &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass <span class="number">1111</span></span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span> <span class="number">8080</span> &#123;</span><br><span class="line">    delay_loop <span class="number">6</span></span><br><span class="line">    lb_algo rr</span><br><span class="line">    lb_kind DR</span><br><span class="line">    nat_mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">    persistence_timeout <span class="number">50</span></span><br><span class="line">    protocol TCP</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.93</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.94</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-global_defs {
-   notification_email {
-     test@sina.com
-   }
-   notification_email_from admin@test.com
-   smtp_server 127.0.0.1
-   smtp_connect_timeout 30
-   router_id LVS_MASTER
-}
-
-vrrp_instance VI_1 {
-    state MASTER
-    interface eth0
-    virtual_router_id 60
-    priority 100
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass 1111
-    }
-    virtual_ipaddress {
-        192.168.203.107
-    }
-}
-
-virtual_server 192.168.203.107 8080 {
-    delay_loop 6
-    lb_algo rr
-    lb_kind DR
-    nat_mask 255.255.255.0
-    persistence_timeout 50
-    protocol TCP
-
-    real_server 192.168.203.93 8080 {
-        weight 1
-        TCP_CHECK {
-            connect_timeout 3
-            nb_get_retry 3
-            delay_before_retry 3
-        }
-    }
-
-    real_server 192.168.203.94 8080 {
-        weight 1
-        TCP_CHECK {
-            connect_timeout 3
-            nb_get_retry 3
-            delay_before_retry 3
-
-    }
-}
-</code></pre><p>以上就完成了keepAlived的配置，下面进行启动</p>
-<pre><code class="line-numbers language-bash">chkconfig keepalived on
-service keepalived start
-</code></pre>
+<p>以上就完成了keepAlived的配置，下面进行启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chkconfig keepalived on</span><br><span class="line">service keepalived start</span><br></pre></td></tr></table></figure>
 <p>查看进程</p>
-<pre><code class="line-numbers language-bash">ps aux | grep keepalived
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps aux | grep keepalived</span><br></pre></td></tr></table></figure>
 <p>Keepalived正常运行时，共启动3个进程，其中一个进程是父进程，负责监控其子进程；
 一个是vrrp子进程；另外一个是checkers子进程。</p>
 <p>查看下虚拟IP是否已经加上（重要）</p>
-<pre><code>[root@centos03 keepalived-1.2.7]# ip a
-1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-    inet6 ::1/128 scope host
-       valid_lft forever preferred_lft forever
-2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP qlen 1000
-    link/ether 08:00:27:81:29:7d brd ff:ff:ff:ff:ff:ff
-    inet 192.168.203.103/24 brd 192.168.203.255 scope global eth0
-    inet 192.168.203.107/32 scope global eth0
-    inet6 fe80::a00:27ff:fe81:297d/64 scope link
-       valid_lft forever preferred_lft forever
-</code></pre><p>说明虚拟IP已经自动配置上了。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>centos03 keepalived<span class="number">-1.2</span><span class="number">.7</span>]# ip a</span><br><span class="line"><span class="number">1</span>: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span class="number">16436</span> qdisc noqueue state UNKNOWN</span><br><span class="line">    link/loopback <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span> brd <span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span>:<span class="number">00</span></span><br><span class="line">    inet <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>/<span class="number">8</span> scope host lo</span><br><span class="line">    inet6 ::<span class="number">1</span>/<span class="number">128</span> scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="number">2</span>: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="number">1500</span> qdisc pfifo_fast state UP qlen <span class="number">1000</span></span><br><span class="line">    link/ether <span class="number">08</span>:<span class="number">00</span>:<span class="number">27</span>:<span class="number">81</span>:<span class="number">29</span>:<span class="number">7</span>d brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet <span class="number">192.168</span><span class="number">.203</span><span class="number">.103</span>/<span class="number">24</span> brd <span class="number">192.168</span><span class="number">.203</span><span class="number">.255</span> scope global eth0</span><br><span class="line">    inet <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span>/<span class="number">32</span> scope global eth0</span><br><span class="line">    inet6 fe80::a00:<span class="number">27f</span>f:fe81:<span class="number">297</span>d/<span class="number">64</span> scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>说明虚拟IP已经自动配置上了。</p>
 <p>还有3个命令在先列示下，并不用执行</p>
 <ul>
 <li>显示集群中服务器ip信息：<code>ipvsadm -ln</code></li>
@@ -364,95 +320,37 @@ service keepalived start
 <p>至此，LVS_MASTER服务器已经配置好并启动了，接下来我们配置web服务器。</p>
 <h4 id="5-WEB服务器WEB1-RealServer的配置"><a href="#5-WEB服务器WEB1-RealServer的配置" class="headerlink" title="5) WEB服务器WEB1_RealServer的配置"></a>5) WEB服务器WEB1_RealServer的配置</h4><p>1. 克隆虚拟机WEB1_RealServer(192.168.203.93)；
 2. 配置虚拟IP启动脚本</p>
-<pre><code class="line-numbers language-bash">vim /etc/init.d/realserver.sh
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/realserver.sh</span><br></pre></td></tr></table></figure>
 <p>在文件中输入如下脚本：</p>
-<pre><code class="line-numbers language-bash">#!/bin/bash
-SNS_VIP=192.168.203.107
-. /etc/rc.d/init.d/functions
-case &quot;$1&quot; in
-start)
- ifconfig lo:0 $SNS_VIP netmask 255.255.255.255 broadcast $SNS_VIP
- /sbin/route add -host $SNS_VIP dev lo:0
- echo &quot;1&quot; &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore
- echo &quot;2&quot; &gt;/proc/sys/net/ipv4/conf/lo/arp_announce
- echo &quot;1&quot; &gt;/proc/sys/net/ipv4/conf/all/arp_ignore
- echo &quot;2&quot; &gt;/proc/sys/net/ipv4/conf/all/arp_announce
- sysctl -p &gt;/dev/null 2&gt;&amp;1
- echo &quot;RealServer Start OK&quot;
- ;;
-stop)
- ifconfig lo:0 down
- route del $SNS_VIP &gt;/dev/null 2&gt;&amp;1
- echo &quot;0&quot; &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore
- echo &quot;0&quot; &gt;/proc/sys/net/ipv4/conf/lo/arp_announce
- echo &quot;0&quot; &gt;/proc/sys/net/ipv4/conf/all/arp_ignore
- echo &quot;0&quot; &gt;/proc/sys/net/ipv4/conf/all/arp_announce
- echo &quot;RealServer Stoped&quot;
- ;;
- *)
- echo &quot;Usage: $0 {start|stop}&quot;
- exit 1
-esac
-exit 0
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">SNS_VIP=192.168.203.107</span><br><span class="line">. /etc/rc.d/init.d/<span class="built_in">functions</span></span><br><span class="line"><span class="keyword">case</span> <span class="string">"<span class="variable">$1</span>"</span> <span class="keyword">in</span></span><br><span class="line">start)</span><br><span class="line"> ifconfig lo:0 <span class="variable">$SNS_VIP</span> netmask 255.255.255.255 broadcast <span class="variable">$SNS_VIP</span></span><br><span class="line"> /sbin/route add -host <span class="variable">$SNS_VIP</span> dev lo:0</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"1"</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"2"</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"1"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"2"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line"> sysctl -p &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"RealServer Start OK"</span></span><br><span class="line"> ;;</span><br><span class="line">stop)</span><br><span class="line"> ifconfig lo:0 down</span><br><span class="line"> route del <span class="variable">$SNS_VIP</span> &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"0"</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"0"</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"0"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"0"</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"RealServer Stoped"</span></span><br><span class="line"> ;;</span><br><span class="line"> *)</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">"Usage: <span class="variable">$0</span> &#123;start|stop&#125;"</span></span><br><span class="line"> <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">esac</span></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
 <p>3. 安装配置TOMCAT</p>
 <p>我测试用的是TOMCAT6</p>
-<pre><code class="line-numbers language-bash">yum -y install tomcat6 tomcat6-webapps tomcat6-admin-webapps
-service tomcat6 start
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum -y install tomcat6 tomcat6-webapps tomcat6-admin-webapps</span><br><span class="line">service tomcat6 start</span><br></pre></td></tr></table></figure>
+
 <p>关闭防火墙</p>
-<pre><code class="line-numbers language-bash">service iptables stop
-</code></pre>
-<p>打开浏览器：<a href="http://192.168.203.93:8080" target="_blank" rel="noopener">http://192.168.203.93:8080</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables stop</span><br></pre></td></tr></table></figure>
+
+<p>打开浏览器：http://192.168.203.93:8080</p>
 <p>会看到TOMCAT的熟悉页面了。</p>
 <p>为了测试负载均衡，我们将这个页面改下，以更好的标识这个网页是本服务器的</p>
 <p>Tomcat6安装目录位于/usr/share/tomcat6，所以我们要编辑tomcat下的webapps/ROOT/index.html这个文件。</p>
-<pre><code class="line-numbers language-bash">cd /usr/share/tomcat6/webapps/ROOT/
-cat /dev/null &gt; index.html
-vim index.html
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/share/tomcat6/webapps/ROOT/</span><br><span class="line">cat /dev/null &gt; index.html</span><br><span class="line">vim index.html</span><br></pre></td></tr></table></figure>
 <p>将如下文本写入index.html，然后打开浏览器：<a href="http://192.168.203.93:8080" target="_blank" rel="noopener">http://192.168.203.93:8080</a>，已经改变：</p>
-<pre><code>web1 192.168.203.93
-</code></pre><ul>
-<li>启动虚拟IP的脚本<pre><code class="line-numbers language-bash">sh /etc/init.d/realserver.sh start
-ifconfig
-</code></pre>
-运行后会看到网络有一个虚拟IP：
-<code>`</code>
-[root@centos01 ROOT]# ifconfig
-eth0      Link encap:Ethernet  HWaddr 08:00:27:59:AB:1D<pre><code>    inet addr:192.168.203.93  Bcast:192.168.203.255  Mask:255.255.255.0
-    inet6 addr: fe80::a00:27ff:fe59:ab1d/64 Scope:Link
-    UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-    RX packets:81006 errors:0 dropped:0 overruns:0 frame:0
-    TX packets:12305 errors:0 dropped:0 overruns:0 carrier:0
-    collisions:0 txqueuelen:1000
-    RX bytes:83023415 (79.1 MiB)  TX bytes:1645604 (1.5 MiB)
-</code></pre></li>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">web1 <span class="number">192.168</span><span class="number">.203</span><span class="number">.93</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>启动虚拟IP的脚本<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh /etc/init.d/realserver.sh start</span><br><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+运行后会看到网络有一个虚拟IP：<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>centos01 ROOT]# ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr <span class="number">08</span>:<span class="number">00</span>:<span class="number">27</span>:<span class="number">59</span>:AB:<span class="number">1</span>D</span><br><span class="line">          inet addr:<span class="number">192.168</span><span class="number">.203</span><span class="number">.93</span>  Bcast:<span class="number">192.168</span><span class="number">.203</span><span class="number">.255</span>  Mask:<span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">          inet6 addr: fe80::a00:<span class="number">27f</span>f:fe59:ab1d/<span class="number">64</span> Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packets:<span class="number">81006</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packets:<span class="number">12305</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> carrier:<span class="number">0</span></span><br><span class="line">          collisions:<span class="number">0</span> txqueuelen:<span class="number">1000</span></span><br><span class="line">          RX bytes:<span class="number">83023415</span> (<span class="number">79.1</span> MiB)  TX bytes:<span class="number">1645604</span> (<span class="number">1.5</span> MiB)</span><br><span class="line"></span><br><span class="line">lo        Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>  Mask:<span class="number">255.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">          inet6 addr: ::<span class="number">1</span>/<span class="number">128</span> Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packets:<span class="number">46</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packets:<span class="number">46</span> errors:<span class="number">0</span> dropped:<span class="number">0</span> overruns:<span class="number">0</span> carrier:<span class="number">0</span></span><br><span class="line">          collisions:<span class="number">0</span> txqueuelen:<span class="number">0</span></span><br><span class="line">          RX bytes:<span class="number">3559</span> (<span class="number">3.4</span> KiB)  TX bytes:<span class="number">3559</span> (<span class="number">3.4</span> KiB)</span><br><span class="line"></span><br><span class="line">lo:<span class="number">0</span>      Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span>  Mask:<span class="number">255.255</span><span class="number">.255</span><span class="number">.255</span></span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+</li>
 </ul>
-<p>lo        Link encap:Local Loopback
-          inet addr:127.0.0.1  Mask:255.0.0.0
-          inet6 addr: ::1/128 Scope:Host
-          UP LOOPBACK RUNNING  MTU:16436  Metric:1
-          RX packets:46 errors:0 dropped:0 overruns:0 frame:0
-          TX packets:46 errors:0 dropped:0 overruns:0 carrier:0
-          collisions:0 txqueuelen:0
-          RX bytes:3559 (3.4 KiB)  TX bytes:3559 (3.4 KiB)</p>
-<p>lo:0      Link encap:Local Loopback
-          inet addr:192.168.203.107  Mask:255.255.255.255
-          UP LOOPBACK RUNNING  MTU:16436  Metric:1</p>
-<pre><code>
-4\. 去LVS_MASTER服务器的终端查看下ipvsadm，查看已经连接上了WEB1服务器，运行命令
-``` bash
-ipvsadm -ln
-</code></pre><p>结果如下：</p>
-<pre><code>[root@centos03 keepalived-1.2.7]# ipvsadm -ln
-IP Virtual Server version 1.2.1 (size=4096)
-Prot LocalAddress:Port Scheduler Flags
-  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn
-TCP  192.168.203.107:8080 rr persistent 50
-  -&gt; 192.168.203.93:8080          Route   1      0          0
-</code></pre><p>已经可以看到有服务器加入进来了。
+<p>4. 去LVS_MASTER服务器的终端查看下ipvsadm，查看已经连接上了WEB1服务器，运行命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -ln</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos03 keepalived-1.2.7]# ipvsadm -ln</span><br><span class="line">IP Virtual<span class="built_in"> Server </span>version 1.2.1 (<span class="attribute">size</span>=4096)</span><br><span class="line">Prot LocalAddress:Port<span class="built_in"> Scheduler </span>Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  192.168.203.107:8080 rr persistent 50</span><br><span class="line">  -&gt; 192.168.203.93:8080         <span class="built_in"> Route </span>  1      0          0</span><br></pre></td></tr></table></figure>
+
+
+<p>已经可以看到有服务器加入进来了。
 此时我们访问网页<a href="http://192.168.203.107:8080" target="_blank" rel="noopener">http://192.168.203.107:8080</a>，出现界面显示web1 192.168.203.93；
 OK，至此已经能实现负载均衡了，接下来我们通过克隆实现多个主机的试验。</p>
 <p>5. 服务器克隆</p>
@@ -461,70 +359,17 @@ MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instanc
 （注意keepAlived的配置文件中有一个网卡设备，虚拟机的网卡设备可能是不一样的，
 有的是eth0，有的是eth1，所以也是要改动的，否则从服务器的服务器很有可能服务不正常）</p>
 <p>配置好的如下文：</p>
-<pre><code>! Configuration File for keepalived
-
-global_defs {
-   notification_email {
-     test@sina.com
-   }
-   notification_email_from admin@test.com
-   smtp_server 127.0.0.1
-   smtp_connect_timeout 30
-   router_id LVS_BACKUP
-}
-
-vrrp_instance VI_1 {
-    state BACKUP
-    interface eth0
-    virtual_router_id 60
-    priority 90
-    advert_int 1
-    authentication {
-        auth_type PASS
-        auth_pass 1111
-    }
-    virtual_ipaddress {
-        192.168.203.107
-    }
-}
-
-virtual_server 192.168.203.107 8080 {
-    delay_loop 6
-    lb_algo rr
-    lb_kind DR
-    nat_mask 255.255.255.0
-    persistence_timeout 50
-    protocol TCP
-
-    real_server 192.168.203.93 8080 {
-        weight 1
-        TCP_CHECK {
-            connect_timeout 3
-            nb_get_retry 3
-            delay_before_retry 3
-        }
-    }
-
-    real_server 192.168.203.94 8080 {
-        weight 1
-        TCP_CHECK {
-            connect_timeout 3
-            nb_get_retry 3
-            delay_before_retry 3
-        }
-    }
-}
-</code></pre><p>2) 从WEB1_RealServer克隆一个WEB2_RealServer，将tomcat的index.html文件改为web2 192.168.203.94。
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">! Configuration File <span class="keyword">for</span> keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     <span class="symbol">test@</span>sina.com</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from <span class="symbol">admin@</span>test.com</span><br><span class="line">   smtp_server <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">   smtp_connect_timeout <span class="number">30</span></span><br><span class="line">   router_id LVS_BACKUP</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    <span class="keyword">interface</span> <span class="symbol">eth0</span></span><br><span class="line">    <span class="symbol">virtual_router_id</span> <span class="symbol">60</span></span><br><span class="line">    <span class="symbol">priority</span> <span class="symbol">90</span></span><br><span class="line">    <span class="symbol">advert_int</span> <span class="symbol">1</span></span><br><span class="line">    <span class="symbol">authentication</span> &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass <span class="number">1111</span></span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span> <span class="number">8080</span> &#123;</span><br><span class="line">    delay_loop <span class="number">6</span></span><br><span class="line">    lb_algo rr</span><br><span class="line">    lb_kind DR</span><br><span class="line">    nat_mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">    persistence_timeout <span class="number">50</span></span><br><span class="line">    protocol TCP</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.93</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.94</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>2) 从WEB1_RealServer克隆一个WEB2_RealServer，将tomcat的index.html文件改为web2 192.168.203.94。
 （这里的IP是我测试的，您的可以自定义）启动realserver.sh脚本。</p>
 <p>3) OK，至此我们已经虚拟出2个LVS服务器，一对主从；2个WEB服务器，web1和web2。
 接下来我们进行测试，看能否满足我们的初始需求。</p>
 <h2 id="负载和可用性测试"><a href="#负载和可用性测试" class="headerlink" title="负载和可用性测试"></a>负载和可用性测试</h2><p>开启每个服务器的相关服务，关闭防火墙，我们开始进行测试。</p>
 <p>测试LVS层</p>
 <p>1）首先执行ip a命令，主服务器会存在一个虚拟IP，从服务器不会存在这个虚拟IP。现在浏览网页显示正常。虚拟IP如图所示：</p>
-<pre><code>显示集群中服务器ip信息：ipvsadm -ln
-查看日志：tail -f /var/log/messages
-查看请求转发情况：ipvsadm -lcn | grep 虚拟IP
-</code></pre><p>2）现在停掉LVS_MASTER的keepAlived服务，看LVS_BACKUP是否可以自动加上虚拟IP地址，并且开始转发请求。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">显示集群中服务器ip信息：ipvsadm -<span class="keyword">ln</span></span><br><span class="line">查看日志：tail -<span class="keyword">f</span> /var/<span class="built_in">log</span>/<span class="keyword">messages</span></span><br><span class="line">查看请求转发情况：ipvsadm -lcn | <span class="keyword">grep</span> 虚拟IP</span><br></pre></td></tr></table></figure>
+
+<p>2）现在停掉LVS_MASTER的keepAlived服务，看LVS_BACKUP是否可以自动加上虚拟IP地址，并且开始转发请求。</p>
 <p>（注意keepAlived的配置文件中有一个网卡设备，虚拟机的网卡设备可能是不一样的，有的是eth0，
 有的是eth1，所以也是要改动的，否则从服务器的服务器很有可能服务不正常）
 之后你通过命令：ip a去分别查看LVS_MASTER和LVS_BACKUP机器，结果正如预料一样，BACKUP立即接管了MASTER的工作。
@@ -544,186 +389,221 @@ virtual_server 192.168.203.107 8080 {
 <p>—————————————————全文完——————————————–</p>
 
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2015/09/16/linux/lvs-keepalived.html">CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2015/09/22/algorithm/merge-sort.html" class="pre-post btn btn-default" title='归并排序中对小数组采用插入排序'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">归并排序中对小数组采用插入排序</span>
-        </a>
     
     
-        <a href="/2015/09/07/python/pyinstaller.html" class="next-post btn btn-default" title='使用PyInstaller打包Python程序'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">使用PyInstaller打包Python程序</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1/" rel="tag"># 负载均衡</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/09/07/python/pyinstaller.html" rel="prev" title="使用PyInstaller打包Python程序">
+      <i class="fa fa-chevron-left"></i> 使用PyInstaller打包Python程序
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/09/22/algorithm/merge-sort.html" rel="next" title="归并排序中对小数组采用插入排序">
+      归并排序中对小数组采用插入排序 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器的安装"><span class="toc-text">服务器的安装</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-安装虚拟机VirtualBox4-2-12"><span class="toc-text">1. 安装虚拟机VirtualBox4.2.12</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-安装CentOS-6-5"><span class="toc-text">2. 安装CentOS 6.5</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-修改-etc-udev-rules-d-70-persistent-net-rules"><span class="toc-text">1) 修改/etc/udev/rules.d/70-persistent-net.rules</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-配置-etc-sysconfig-network-scripts-ifcfg-eth0"><span class="toc-text">2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-reboot"><span class="toc-text">3) reboot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-LVS层安装LVS和KeepAlived"><span class="toc-text">3. LVS层安装LVS和KeepAlived</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-安装IPVSADM"><span class="toc-text">1) 安装IPVSADM</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-防火墙"><span class="toc-text">2) 防火墙</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-KeepAlived-的安装"><span class="toc-text">3) KeepAlived 的安装</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-KeepAlivde的配置"><span class="toc-text">4) KeepAlivde的配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-WEB服务器WEB1-RealServer的配置"><span class="toc-text">5) WEB服务器WEB1_RealServer的配置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#负载和可用性测试"><span class="toc-text">负载和可用性测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器的安装"><span class="nav-number">1.</span> <span class="nav-text">服务器的安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装虚拟机VirtualBox4-2-12"><span class="nav-number">1.1.</span> <span class="nav-text">1. 安装虚拟机VirtualBox4.2.12</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装CentOS-6-5"><span class="nav-number">1.2.</span> <span class="nav-text">2. 安装CentOS 6.5</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-修改-etc-udev-rules-d-70-persistent-net-rules"><span class="nav-number">1.2.1.</span> <span class="nav-text">1) 修改&#x2F;etc&#x2F;udev&#x2F;rules.d&#x2F;70-persistent-net.rules</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-配置-etc-sysconfig-network-scripts-ifcfg-eth0"><span class="nav-number">1.2.2.</span> <span class="nav-text">2) 配置&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eth0</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-reboot"><span class="nav-number">1.2.3.</span> <span class="nav-text">3) reboot</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-LVS层安装LVS和KeepAlived"><span class="nav-number">1.3.</span> <span class="nav-text">3. LVS层安装LVS和KeepAlived</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-安装IPVSADM"><span class="nav-number">1.3.1.</span> <span class="nav-text">1) 安装IPVSADM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-防火墙"><span class="nav-number">1.3.2.</span> <span class="nav-text">2) 防火墙</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-KeepAlived-的安装"><span class="nav-number">1.3.3.</span> <span class="nav-text">3) KeepAlived 的安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-KeepAlivde的配置"><span class="nav-number">1.3.4.</span> <span class="nav-text">4) KeepAlivde的配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-WEB服务器WEB1-RealServer的配置"><span class="nav-number">1.3.5.</span> <span class="nav-text">5) WEB服务器WEB1_RealServer的配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载和可用性测试"><span class="nav-number">2.</span> <span class="nav-text">负载和可用性测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>

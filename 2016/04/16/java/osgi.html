@@ -1,204 +1,249 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="osgi,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="开篇我先解释一下两个容易搞混的术语：
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
 
-OSGi: The Open Services Gateway Initiative(开放服务网关协议)，是用来模块化开发和部署Java应用程序和库（library）的一种架构，已经成为Java模块化事实上的标准了。详细解释请参考OSGi简介
-WSGI:...">
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
 
+  <meta name="description" content="开篇我先解释一下两个容易搞混的术语：  OSGi: The Open Services Gateway Initiative(开放服务网关协议)，是用来模块化开发和部署Java应用程序和库（library）的一种架构，已经成为Java模块化事实上的标准了。详细解释请参考OSGi简介 WSGI: Web Server Gateway Interface(Web服务器网关接口)，具体的来说，WSGI是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSGi简易教程">
+<meta property="og:url" content="https://www.xncoding.com/2016/04/16/java/osgi.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="开篇我先解释一下两个容易搞混的术语：  OSGi: The Open Services Gateway Initiative(开放服务网关协议)，是用来模块化开发和部署Java应用程序和库（library）的一种架构，已经成为Java模块化事实上的标准了。详细解释请参考OSGi简介 WSGI: Web Server Gateway Interface(Web服务器网关接口)，具体的来说，WSGI是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/20160512170036.png">
+<meta property="article:published_time" content="2016-04-15T17:02:42.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:11:21.371Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="osgi">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/20160512170036.png">
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
-
-
-<title>OSGi简易教程 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
+<link rel="canonical" href="https://www.xncoding.com/2016/04/16/java/osgi.html">
 
 
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
 
+  <title>OSGi简易教程 | 飞污熊博客</title>
+  
 
 
 
-    
 
 
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
 
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
 
-    
-
-    <link rel="stylesheet" href="/js/prism/prism.css">
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="OSGi简易教程">
-            
-                OSGi简易教程
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/java">
-            java
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/osgi" title='osgi'>
-                        osgi
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2016/04/16</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2016/04/16/java/osgi.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OSGi简易教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-16 01:02:42" itemprop="dateCreated datePublished" datetime="2016-04-16T01:02:42+08:00">2016-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>开篇我先解释一下两个容易搞混的术语：</p>
 <ul>
 <li>OSGi: The Open Services Gateway Initiative(开放服务网关协议)，是用来模块化开发和部署Java应用程序和库（library）的一种架构，已经成为Java模块化事实上的标准了。详细解释请参考<a href="http://www.osgi.com.cn/article/7289226" target="_blank" rel="noopener">OSGi简介</a></li>
 <li>WSGI: Web Server Gateway Interface(Web服务器网关接口)，具体的来说，WSGI是一个Python专用规范，定义了Web服务器如何与Python应用程序进行交互，使得使用Python写的Web应用程序可以和Web服务器对接起来。最新版本在Python的PEP-3333定义的。详细解释请参考<a href="https://segmentfault.com/a/1190000003069785" target="_blank" rel="noopener">WSGI简介</a></li>
 </ul>
 <p>所以，弄清楚之后才发现只有一个字母的差别，但是这两个东东一毛钱的关系都没有，^_^ </p>
+<a id="more"></a>
+
 <h3 id="为什么使用OSGi"><a href="#为什么使用OSGi" class="headerlink" title="为什么使用OSGi"></a>为什么使用OSGi</h3><p>跟Java的Servlet协议和EJB协议类似，OSGi协议定义了两件事：一组OSGi容器必须实现的服务，以及容器和你的应用程序之间的接口标准。
 也许你会搞不懂为什么我们已经有了Servelt容器来构建Web应用程序，有了EJB容器来构建企业级事务应用程序，那我们还要这个OSGi容器干嘛？
 简单来讲就是OSGi容器是特地用来开发非常复杂的大型Java应用程序的，你需要将系统分解成很多个模块。</p>
@@ -207,107 +252,62 @@ WSGI:...">
 <p>在OSGi里面，各个模块都是以bundle的形式存在。每个bundle包含各自的java类和其他资源，并可以为其他的bundle提供服务。</p>
 <h4 id="创建bundle"><a href="#创建bundle" class="headerlink" title="创建bundle"></a>创建bundle</h4><p>打开eclipse，通过下面的步骤来创建一个Hello World的bundle</p>
 <ol>
-<li>菜单选择File –&gt; New –&gt; Project，打开创建工程对话框。</li>
+<li>菜单选择File --&gt; New --&gt; Project，打开创建工程对话框。</li>
 <li>选择<code>Plug-in Project</code>点下一步</li>
 <li>输入如下的内容<ul>
 <li>Project Name: com.javaworld.sample.HelloWorld</li>
-<li>Target Platform: OSGi framework –&gt; Standard</li>
+<li>Target Platform: OSGi framework --&gt; Standard</li>
 </ul>
 </li>
 <li>其他默认点下一步进入Plug-in Context对话框，还是默认点下一步</li>
 <li>这一步Template对话框里面选择Hello OSGi Bundle，然后完成</li>
 </ol>
 <h4 id="Activator-java"><a href="#Activator-java" class="headerlink" title="Activator.java"></a>Activator.java</h4><p>打开Activator.java这个类，应该类似下面这样：</p>
-<pre><code class="line-numbers language-java">package com.javaworld.sample.helloworld;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-public class Activator implements BundleActivator {
-    public void start(BundleContext context) throws Exception {
-        System.out.println(&quot;Hello world&quot;);
-    }
-    public void stop(BundleContext context) throws Exception {
-        System.out.println(&quot;Goodbye World&quot;);
-    }
-}
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.javaworld.sample.helloworld;</span><br><span class="line"><span class="keyword">import</span> org.osgi.framework.BundleActivator;</span><br><span class="line"><span class="keyword">import</span> org.osgi.framework.BundleContext;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Activator</span> <span class="keyword">implements</span> <span class="title">BundleActivator</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Hello world"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Goodbye World"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h4 id="MANIFEST-MF"><a href="#MANIFEST-MF" class="headerlink" title="MANIFEST.MF"></a>MANIFEST.MF</h4><p>这个文件比较核心，它定义了你怎样去部署这个bundle。应该会类似下面这样。<em>注：#开头的是我自己加的注释</em></p>
-<pre><code class="line-numbers language-none"># 这个是MF版本
-Manifest-Version: 1.0
-# 定义了Bundle遵循的OSGi规范版本。默认值为1，表示R3的Bundle，2表示R4及其后发布的版本。
-Bundle-ManifestVersion: 2
-# 该属性头为本Bundle定义了一个简短的、可以阅读的名称
-Bundle-Name: HelloWorld Plug-in
-# 提供了Bundle的一个全局的惟一的标志符，名称应该是基于反域名解析的。这个标记是必须的。
-Bundle-SymbolicName: com.javaworld.sample.HelloWorld
-# 该属性头给出了本Bundle的版本号
-Bundle-Version: 1.0.0
-# 该属性头给出了本Bundle中使用的监听器类名字，这个属性值是可选的。监听器将对Activator中的start()和stop()方法监听
-Bundle-Activator: com.javaworld.sample.helloworld.Activator
-# 该属性头是对本Bundle发行商的表述
-Bundle-Vendor: JAVAWORLD
-# Bundle运行所依赖的环境
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-# 定义bundle的导入包
-Import-Package: org.osgi.framework;version=&quot;1.3.0&quot;
-</code></pre>
-<p>现在一切准备就绪了，你可以直接运行这个bundle。点击”Run Configuration”，新加一个OSGi Framework，把需要的bundle勾上，Run</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这个是MF版本</span></span><br><span class="line"><span class="attr">Manifest-Version:</span> <span class="number">1.0</span></span><br><span class="line"><span class="comment"># 定义了Bundle遵循的OSGi规范版本。默认值为1，表示R3的Bundle，2表示R4及其后发布的版本。</span></span><br><span class="line"><span class="attr">Bundle-ManifestVersion:</span> <span class="number">2</span></span><br><span class="line"><span class="comment"># 该属性头为本Bundle定义了一个简短的、可以阅读的名称</span></span><br><span class="line"><span class="attr">Bundle-Name:</span> <span class="string">HelloWorld</span> <span class="string">Plug-in</span></span><br><span class="line"><span class="comment"># 提供了Bundle的一个全局的惟一的标志符，名称应该是基于反域名解析的。这个标记是必须的。</span></span><br><span class="line"><span class="attr">Bundle-SymbolicName:</span> <span class="string">com.javaworld.sample.HelloWorld</span></span><br><span class="line"><span class="comment"># 该属性头给出了本Bundle的版本号</span></span><br><span class="line"><span class="attr">Bundle-Version:</span> <span class="number">1.0</span><span class="number">.0</span></span><br><span class="line"><span class="comment"># 该属性头给出了本Bundle中使用的监听器类名字，这个属性值是可选的。监听器将对Activator中的start()和stop()方法监听</span></span><br><span class="line"><span class="attr">Bundle-Activator:</span> <span class="string">com.javaworld.sample.helloworld.Activator</span></span><br><span class="line"><span class="comment"># 该属性头是对本Bundle发行商的表述</span></span><br><span class="line"><span class="attr">Bundle-Vendor:</span> <span class="string">JAVAWORLD</span></span><br><span class="line"><span class="comment"># Bundle运行所依赖的环境</span></span><br><span class="line"><span class="attr">Bundle-RequiredExecutionEnvironment:</span> <span class="string">JavaSE-1.8</span></span><br><span class="line"><span class="comment"># 定义bundle的导入包</span></span><br><span class="line"><span class="attr">Import-Package:</span> <span class="string">org.osgi.framework;version="1.3.0"</span></span><br></pre></td></tr></table></figure>
+
+<p>现在一切准备就绪了，你可以直接运行这个bundle。点击&quot;Run Configuration&quot;，新加一个OSGi Framework，把需要的bundle勾上，Run</p>
 <p>注意，请在Target Platform里面把下面这些依赖添加进去
-<img src="https://xnstatic-1253397658.file.myqcloud.com/20160512170036.png" alt></p>
+<img src="https://xnstatic-1253397658.file.myqcloud.com/20160512170036.png" alt=""></p>
 <p>运行之后会在控制台打印hello world，那么说明执行成功了。</p>
 <h3 id="OSGi控制台"><a href="#OSGi控制台" class="headerlink" title="OSGi控制台"></a>OSGi控制台</h3><p>OSGi控制台是OSGi容器的命令行接口，它可以让你启动、停止、安装、更新和卸载bundle。
-在Eclipse下面的Open Console标签点击”Host OSGi Console”</p>
+在Eclipse下面的Open Console标签点击&quot;Host OSGi Console&quot;</p>
 <p>下面是常见的几个命令：</p>
 <ul>
 <li>ss 显示所有已经安装了的bundle列表，包括bundle ID、简短名、状态</li>
-<li>start <bundleid> 启动一个bundle</bundleid></li>
-<li>stop <bundleid> 停止一个bundle</bundleid></li>
-<li>update <bundleid> 使用一个新的jar来更新bundle</bundleid></li>
-<li>install <bundleurl> 在OSGi容器中安装一个新的bundle</bundleurl></li>
-<li>uninstall <bundleid> 从OSGi容器中卸载一个bundle</bundleid></li>
+<li>start <bundleid> 启动一个bundle</li>
+<li>stop <bundleid> 停止一个bundle</li>
+<li>update <bundleid> 使用一个新的jar来更新bundle</li>
+<li>install <bundleURL> 在OSGi容器中安装一个新的bundle</li>
+<li>uninstall <bundleid> 从OSGi容器中卸载一个bundle</li>
 <li>exit 退出osgi环境</li>
-<li>refresh <bundleid>  刷新对应id的Bundle</bundleid></li>
+<li>refresh <bundleid>  刷新对应id的Bundle</li>
 <li>ls 显示所有services  如果没有发布service会显示找不到该命令</li>
-<li>ls –c <bundleid> 显示该bundle中所有发布service的详细信息，对与unsatisfied的component查错很有用</bundleid></li>
+<li>ls –c <bundleid> 显示该bundle中所有发布service的详细信息，对与unsatisfied的component查错很有用</li>
 </ul>
 <p>这些都是标准的OSGi命令，所以你可以适用于任何OSGi容器</p>
 <h3 id="依赖管理"><a href="#依赖管理" class="headerlink" title="依赖管理"></a>依赖管理</h3><p>OSGi协议允许你将应用切分为多个子模块，然后各自管理自己的依赖，默认情况下bundle里的东西对外是不可见的。要想让别的bundle可以调用到内部服务需要导出相应的包，同时其他想要使用的bundle还要导入此包。</p>
 <h4 id="导出一个包"><a href="#导出一个包" class="headerlink" title="导出一个包"></a>导出一个包</h4><p>我们再创建一个<code>com.javaworld.sample.HelloService</code>的bundle，然后将其导出。这个bundle构建过程跟前面步骤一样，这里不再重复。</p>
 <p>然后创建好后我们在HelloService这个bundle里面新建一个<code>com.javaworld.sample.service.HelloService.java</code>接口</p>
-<pre><code class="line-numbers language-java">public interface HelloService {
-    public String sayHello();
-}
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">HelloService</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>再创建一个实现了这个接口的类<code>com.javaworld.sample.service.impl.HelloServiceImpl.java</code></p>
-<pre><code class="line-numbers language-java">public class HelloServiceImpl implements HelloService{
-    public String sayHello() {
-        System.out.println(&quot;Inside HelloServiceImple.sayHello()&quot;);
-        return &quot;Say Hello&quot;;
-    }
-}
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceImpl</span> <span class="keyword">implements</span> <span class="title">HelloService</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Inside HelloServiceImple.sayHello()"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Say Hello"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>打开HelloService中的<code>MANIFEST.MF</code>文件，添加Export-Package选项</p>
-<pre><code class="line-numbers language-none">Export-Package: com.javaworld.sample.service
-</code></pre>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Export-Package</span>: <span class="selector-tag">com</span><span class="selector-class">.javaworld</span><span class="selector-class">.sample</span><span class="selector-class">.service</span></span><br></pre></td></tr></table></figure>
+
 <h4 id="导入一个包"><a href="#导入一个包" class="headerlink" title="导入一个包"></a>导入一个包</h4><p>在HelloWorld bundle里面，打开它的<code>MANIFEST.MF</code>文件，添加Import-Package</p>
-<pre><code class="line-numbers language-none">Import-Package: com.javaworld.sample.service,
- org.osgi.framework;version=&quot;1.3.0&quot;
-</code></pre>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Import</span>-<span class="keyword">Package</span>: com.javaworld.sample.service,</span><br><span class="line"> org.osgi.framework;version=<span class="string">"1.3.0"</span></span><br></pre></td></tr></table></figure>
 <p>打开<code>com.javaworld.sample.helloworld.Activator.java</code>源文件，现在你是可以访问HelloServiceImpl类了，
 可编译通过但是直接调用会出错。原因是OSGi特有的类加载机制</p>
 <h4 id="OSGi服务"><a href="#OSGi服务" class="headerlink" title="OSGi服务"></a>OSGi服务</h4><p>OSGi很适合用来开发面向服务的应用程序，因为它会把接口和实现分开，调用者不需要知道任何服务实现细节，
 而服务提供者可以任意修改服务实现而不用告知被调用者，只要保证接口不变即可。</p>
 <h4 id="导出服务"><a href="#导出服务" class="headerlink" title="导出服务"></a>导出服务</h4><p>在服务bundle里面新建一个<code>com.javaworld.sample.service.impl.HelloServiceActivator.java</code></p>
-<pre><code class="line-numbers language-java">public class HelloServiceActivator implements BundleActivator  {
-    ServiceRegistration helloServiceRegistration;
-    public void start(BundleContext context) throws Exception {
-        HelloService helloService = new HelloServiceImpl();
-        helloServiceRegistration =context.registerService(HelloService.class.getName(), helloService, null);
-    }
-    public void stop(BundleContext context) throws Exception {
-        helloServiceRegistration.unregister();
-    }
-}
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceActivator</span> <span class="keyword">implements</span> <span class="title">BundleActivator</span>  </span>&#123;</span><br><span class="line">    ServiceRegistration helloServiceRegistration;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        HelloService helloService = <span class="keyword">new</span> HelloServiceImpl();</span><br><span class="line">        helloServiceRegistration =context.registerService(HelloService<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(), <span class="title">helloService</span>, <span class="title">null</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        helloServiceRegistration.unregister();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>通过使用<code>BundleContext.registerService()</code>来导出服务，三个参数含义</p>
 <ul>
 <li>第一个是服务的名字</li>
@@ -315,280 +315,249 @@ Import-Package: org.osgi.framework;version=&quot;1.3.0&quot;
 <li>第三个是服务的属性，是一个<code>Dictionary</code>对象</li>
 </ul>
 <p>然后你要更改服务bundle的<code>MANIFEST.MF</code>文件，指定<code>HelloServiceActivator</code>为它的activator类</p>
-<pre><code class="line-numbers language-none">Bundle-Activator: com.javaworld.sample.service.impl.HelloServiceActivator
-</code></pre>
-<h4 id="导入服务"><a href="#导入服务" class="headerlink" title="导入服务"></a>导入服务</h4><p>这一步我们修改HelloWorld的程序，开始导入我们刚刚创建的服务并实际使用它。修改<code>Activator</code>类</p>
-<pre><code class="line-numbers language-java">public class Activator implements BundleActivator {
-    ServiceReference helloServiceReference;
-    public void start(BundleContext context) throws Exception {
-        System.out.println(&quot;Hello World!!&quot;);
-        helloServiceReference= context.getServiceReference(HelloService.class.getName());
-        HelloService helloService =(HelloService)context.getService(helloServiceReference);
-        System.out.println(helloService.sayHello());
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">Bundle-Activator</span>: <span class="selector-tag">com</span><span class="selector-class">.javaworld</span><span class="selector-class">.sample</span><span class="selector-class">.service</span><span class="selector-class">.impl</span><span class="selector-class">.HelloServiceActivator</span></span><br></pre></td></tr></table></figure>
 
-    }
-    public void stop(BundleContext context) throws Exception {
-        System.out.println(&quot;Goodbye World!!&quot;);
-        context.ungetService(helloServiceReference);
-    }
-}
-</code></pre>
+<h4 id="导入服务"><a href="#导入服务" class="headerlink" title="导入服务"></a>导入服务</h4><p>这一步我们修改HelloWorld的程序，开始导入我们刚刚创建的服务并实际使用它。修改<code>Activator</code>类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Activator</span> <span class="keyword">implements</span> <span class="title">BundleActivator</span> </span>&#123;</span><br><span class="line">    ServiceReference helloServiceReference;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Hello World!!"</span>);</span><br><span class="line">        helloServiceReference= context.getServiceReference(HelloService<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">        HelloService helloService =(HelloService)context.getService(helloServiceReference);</span><br><span class="line">        System.out.println(helloService.sayHello());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Goodbye World!!"</span>);</span><br><span class="line">        context.ungetService(helloServiceReference);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p><code>BundleContext.getServiceReference()</code>方法返回一个<code>ServiceReference</code>对象，
 然后你可以调用<code>BundleContext.getService()</code>传入这个对象后获取真正的服务对象了。
 再次运行这个HelloWorld看看，打印出<code>Inside HelloServiceImple.sayHello()</code>，说明已经成功调用了。</p>
 <h3 id="创建一个服务工厂"><a href="#创建一个服务工厂" class="headerlink" title="创建一个服务工厂"></a>创建一个服务工厂</h3><p>上一节我们在服务bundle里面创建了一个<code>HelloServiceImpl</code>对象，任何其他bundle导入的时候都会返回这个同样的对象。要是我们想对每个bundle返回不同对象要在呢么做呢？
 解决方法是创建一个实现了<code>ServiceFactory</code>接口的类，然后注册这个工厂类的对象，而不是实际的服务对象。</p>
-<pre><code class="line-numbers language-java">public class HelloServiceFactory implements ServiceFactory{
-    private int usageCounter = 0;
-    public Object getService(Bundle bundle, ServiceRegistration registration) {
-        System.out.println(&quot;Create object of HelloService for &quot; + bundle.getSymbolicName());
-        usageCounter++;
-        System.out.println(&quot;Number of bundles using service &quot; + usageCounter);
-        HelloService helloService = new HelloServiceImpl();
-        return helloService;
-    }
-    public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-        System.out.println(&quot;Release object of HelloService for &quot; + bundle.getSymbolicName());
-        usageCounter--;
-        System.out.println(&quot;Number of bundles using service &quot; + usageCounter);
-    }
-}
-</code></pre>
-<p>修改<code>HelloServiceActivator.java</code>中的<code>start()</code>方法</p>
-<pre><code class="line-numbers language-java">public class HelloServiceActivator implements BundleActivator  {
-    ServiceRegistration helloServiceRegistration;
-    public void start(BundleContext context) throws Exception {
-        HelloServiceFactory helloServiceFactory = new HelloServiceFactory();
-        helloServiceRegistration =context.registerService(HelloService.class.getName(), helloServiceFactory, null);
-    }
-    public void stop(BundleContext context) throws Exception {
-        helloServiceRegistration.unregister();
-    }
-}
-</code></pre>
-<p>再次运行也是同样的结果，不过这次效果是每个bundle请求会获取yield新的service对象了。</p>
-<h3 id="跟踪服务"><a href="#跟踪服务" class="headerlink" title="跟踪服务"></a>跟踪服务</h3><p>有时候你需要跟踪某个服务什么时候被注册，被卸载之类的。这时候你可以使用<code>ServiceTracker</code>类，我们在HelloWorld里面新建一个类
-<code>`</code> java HelloServiceTracker.java
-public class HelloServiceTracker extends ServiceTracker {
-    public HelloServiceTracker(BundleContext context) {
-        super(context, HelloService.class.getName(),null);
-    }
-    public Object addingService(ServiceReference reference) {
-        System.out.println(“Inside HelloServiceTracker.addingService “ + reference.getBundle());
-        return super.addingService(reference);
-    }
-    public void removedService(ServiceReference reference, Object service) {
-        System.out.println(“Inside HelloServiceTracker.removedService “ + reference.getBundle());
-        super.removedService(reference, service);
-    }
-}</p>
-<pre><code>
-同时我们要修改` MANIFEST.MF`文件，导入包`org.osgi.util.tracker`
-``` none
-Import-Package: com.javaworld.sample.service,
- org.osgi.framework;version=&quot;1.3.0&quot;,
- org.osgi.util.tracker
-</code></pre><p>然后修改<code>Activator.java</code>，让它使用这个<code>HelloServiceTracker</code>来获取真正的Service类</p>
-<pre><code class="line-numbers language-java">public class Activator implements BundleActivator {
-    HelloServiceTracker helloServiceTracker;
-    public void start(BundleContext context) throws Exception {
-        System.out.println(&quot;Hello World!!&quot;);
-        helloServiceTracker= new HelloServiceTracker(context);
-        helloServiceTracker.open();
-        HelloService helloService = (HelloService)helloServiceTracker.getService();
-        System.out.println(helloService.sayHello());
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceFactory</span> <span class="keyword">implements</span> <span class="title">ServiceFactory</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> usageCounter = <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getService</span><span class="params">(Bundle bundle, ServiceRegistration registration)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Create object of HelloService for "</span> + bundle.getSymbolicName());</span><br><span class="line">        usageCounter++;</span><br><span class="line">        System.out.println(<span class="string">"Number of bundles using service "</span> + usageCounter);</span><br><span class="line">        HelloService helloService = <span class="keyword">new</span> HelloServiceImpl();</span><br><span class="line">        <span class="keyword">return</span> helloService;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">ungetService</span><span class="params">(Bundle bundle, ServiceRegistration registration, Object service)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Release object of HelloService for "</span> + bundle.getSymbolicName());</span><br><span class="line">        usageCounter--;</span><br><span class="line">        System.out.println(<span class="string">"Number of bundles using service "</span> + usageCounter);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    }
-    public void stop(BundleContext context) throws Exception {
-        System.out.println(&quot;Goodbye World!!&quot;);
-        helloServiceTracker.close();
-    }
-}
-</code></pre>
+<p>修改<code>HelloServiceActivator.java</code>中的<code>start()</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceActivator</span> <span class="keyword">implements</span> <span class="title">BundleActivator</span>  </span>&#123;</span><br><span class="line">    ServiceRegistration helloServiceRegistration;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        HelloServiceFactory helloServiceFactory = <span class="keyword">new</span> HelloServiceFactory();</span><br><span class="line">        helloServiceRegistration =context.registerService(HelloService<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(), <span class="title">helloServiceFactory</span>, <span class="title">null</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        helloServiceRegistration.unregister();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>再次运行也是同样的结果，不过这次效果是每个bundle请求会获取yield新的service对象了。</p>
+<h3 id="跟踪服务"><a href="#跟踪服务" class="headerlink" title="跟踪服务"></a>跟踪服务</h3><p>有时候你需要跟踪某个服务什么时候被注册，被卸载之类的。这时候你可以使用<code>ServiceTracker</code>类，我们在HelloWorld里面新建一个类</p>
+<figure class="highlight java"><figcaption><span>HelloServiceTracker.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloServiceTracker</span> <span class="keyword">extends</span> <span class="title">ServiceTracker</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">HelloServiceTracker</span><span class="params">(BundleContext context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, HelloService<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>(),<span class="title">null</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">addingService</span><span class="params">(ServiceReference reference)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Inside HelloServiceTracker.addingService "</span> + reference.getBundle());</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">super</span>.addingService(reference);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removedService</span><span class="params">(ServiceReference reference, Object service)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Inside HelloServiceTracker.removedService "</span> + reference.getBundle());</span><br><span class="line">        <span class="keyword">super</span>.removedService(reference, service);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同时我们要修改<code>MANIFEST.MF</code>文件，导入包<code>org.osgi.util.tracker</code></p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Import</span>-<span class="keyword">Package</span>: com.javaworld.sample.service,</span><br><span class="line"> org.osgi.framework;version=<span class="string">"1.3.0"</span>,</span><br><span class="line"> org.osgi.util.tracker</span><br></pre></td></tr></table></figure>
+
+<p>然后修改<code>Activator.java</code>，让它使用这个<code>HelloServiceTracker</code>来获取真正的Service类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Activator</span> <span class="keyword">implements</span> <span class="title">BundleActivator</span> </span>&#123;</span><br><span class="line">    HelloServiceTracker helloServiceTracker;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Hello World!!"</span>);</span><br><span class="line">        helloServiceTracker= <span class="keyword">new</span> HelloServiceTracker(context);</span><br><span class="line">        helloServiceTracker.open();</span><br><span class="line">        HelloService helloService = (HelloService)helloServiceTracker.getService();</span><br><span class="line">        System.out.println(helloService.sayHello());</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">stop</span><span class="params">(BundleContext context)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"Goodbye World!!"</span>);</span><br><span class="line">        helloServiceTracker.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>再次执行时，你会发现当你启动、停止这个HelloService bundle的时候，相应的跟踪器里面的方法也会执行。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>我们通过一个小的例子演示了一个使用OSGi框架开发模块化程序的最基础的东西，你已经知道怎样导入/导出包和服务了。如果想更深入学习，可以去<a href="http://www.osgi.com.cn/" target="_blank" rel="noopener">OSGi中文社区</a>，那里有很多好的资源。</p>
 
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2016/04/16/java/osgi.html">OSGi简易教程</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2016/04/22/python/wsgi.html" class="pre-post btn btn-default" title='WGSI简易教程'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">WGSI简易教程</span>
-        </a>
     
     
-        <a href="/2016/04/15/scrapy-12.html" class="next-post btn btn-default" title='Scrapy笔记12- 抓取动态网站'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">Scrapy笔记12- 抓取动态网站</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/osgi/" rel="tag"># osgi</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/15/scrapy-12.html" rel="prev" title="Scrapy笔记12- 抓取动态网站">
+      <i class="fa fa-chevron-left"></i> Scrapy笔记12- 抓取动态网站
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/22/python/wsgi.html" rel="next" title="WGSI简易教程">
+      WGSI简易教程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#为什么使用OSGi"><span class="toc-text">为什么使用OSGi</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用Equinox构建一个小应用"><span class="toc-text">使用Equinox构建一个小应用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#创建bundle"><span class="toc-text">创建bundle</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Activator-java"><span class="toc-text">Activator.java</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MANIFEST-MF"><span class="toc-text">MANIFEST.MF</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OSGi控制台"><span class="toc-text">OSGi控制台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#依赖管理"><span class="toc-text">依赖管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#导出一个包"><span class="toc-text">导出一个包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#导入一个包"><span class="toc-text">导入一个包</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#OSGi服务"><span class="toc-text">OSGi服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#导出服务"><span class="toc-text">导出服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#导入服务"><span class="toc-text">导入服务</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#创建一个服务工厂"><span class="toc-text">创建一个服务工厂</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#跟踪服务"><span class="toc-text">跟踪服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总结"><span class="toc-text">总结</span></a></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么使用OSGi"><span class="nav-number">1.</span> <span class="nav-text">为什么使用OSGi</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Equinox构建一个小应用"><span class="nav-number">2.</span> <span class="nav-text">使用Equinox构建一个小应用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建bundle"><span class="nav-number">2.1.</span> <span class="nav-text">创建bundle</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Activator-java"><span class="nav-number">2.2.</span> <span class="nav-text">Activator.java</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MANIFEST-MF"><span class="nav-number">2.3.</span> <span class="nav-text">MANIFEST.MF</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSGi控制台"><span class="nav-number">3.</span> <span class="nav-text">OSGi控制台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#依赖管理"><span class="nav-number">4.</span> <span class="nav-text">依赖管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#导出一个包"><span class="nav-number">4.1.</span> <span class="nav-text">导出一个包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#导入一个包"><span class="nav-number">4.2.</span> <span class="nav-text">导入一个包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#OSGi服务"><span class="nav-number">4.3.</span> <span class="nav-text">OSGi服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#导出服务"><span class="nav-number">4.4.</span> <span class="nav-text">导出服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#导入服务"><span class="nav-number">4.5.</span> <span class="nav-text">导入服务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建一个服务工厂"><span class="nav-number">5.</span> <span class="nav-text">创建一个服务工厂</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#跟踪服务"><span class="nav-number">6.</span> <span class="nav-text">跟踪服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>

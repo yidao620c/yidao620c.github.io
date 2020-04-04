@@ -1,503 +1,497 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="squid,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网，
-那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。
-不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。
-本篇演示搭建了一个简单的squid的正向代理...">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网， 那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。 不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。 本篇演示搭建了一个简单的squid的正向代理，同时支持认证，随便记记笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS7.2搭建代理服务器">
+<meta property="og:url" content="https://www.xncoding.com/2016/07/07/linux/squid.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网， 那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。 不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。 本篇演示搭建了一个简单的squid的正向代理，同时支持认证，随便记记笔记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-07-07T13:15:16.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:13:03.876Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="squid">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.xncoding.com/2016/07/07/linux/squid.html">
 
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
 
-
-<title>CentOS7.2搭建代理服务器 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
-
-
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+  <title>CentOS7.2搭建代理服务器 | 飞污熊博客</title>
+  
 
 
 
 
-    
 
 
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
 
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
 
-
-    
-
-    <link rel="stylesheet" href="/js/prism/prism.css">
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="CentOS7.2搭建代理服务器">
-            
-                CentOS7.2搭建代理服务器
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/linux">
-            linux
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/squid" title='squid'>
-                        squid
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2016/07/07</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2016/07/07/linux/squid.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS7.2搭建代理服务器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-07-07 21:15:16" itemprop="dateCreated datePublished" datetime="2016-07-07T21:15:16+08:00">2016-07-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网，
 那么可以在这个可以上外网的机器上面搭建代理服务器，其他机器配置好代理就能上网了。</p>
 <p>不管是测试用途还是自己使用，squid都是一个很不错的代理工具。支持正向代理、反向代理、还有透明代理。
 本篇演示搭建了一个简单的squid的正向代理，同时支持认证，随便记记笔记。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><pre><code class="line-numbers language-bash">yum install squid -y
-yum install httpd-tools -y
-</code></pre>
-<h2 id="生成密码文件"><a href="#生成密码文件" class="headerlink" title="生成密码文件"></a>生成密码文件</h2><pre><code>mkdir /etc/squid3/
-# xiongneng 是用户名
-htpasswd -cd /etc/squid3/passwords xiongneng
-# 提示输入密码，在这里我设的密码为 123456
-# 注意密码不要超过8位
-</code></pre><h2 id="测试密码文件"><a href="#测试密码文件" class="headerlink" title="测试密码文件"></a>测试密码文件</h2><pre><code>/usr/lib64/squid/basic_ncsa_auth /etc/squid3/passwords
-# 输入 用户名 密码
-xiongneng 123456
-# 提示OK说明成功，ERR是有问题，请检查一下之前步骤
-OK
+<a id="more"></a>
 
-# 测试完成，crtl + c 打断
-</code></pre><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><pre><code>vim /etc/squid/squid.conf
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install squid -y</span><br><span class="line">yum install httpd-tools -y</span><br></pre></td></tr></table></figure>
 
-# 在最后添加
+<h2 id="生成密码文件"><a href="#生成密码文件" class="headerlink" title="生成密码文件"></a>生成密码文件</h2><figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/squid3/</span><br><span class="line"><span class="meta"># xiongneng 是用户名</span></span><br><span class="line">htpasswd -cd /etc/squid3/passwords xiongneng</span><br><span class="line"><span class="meta"># 提示输入密码，在这里我设的密码为 123456</span></span><br><span class="line"><span class="meta"># 注意密码不要超过8位</span></span><br></pre></td></tr></table></figure>
 
-auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid3/passwords
-auth_param basic realm proxy
-acl authenticated proxy_auth REQUIRED
-http_access allow authenticated
+<h2 id="测试密码文件"><a href="#测试密码文件" class="headerlink" title="测试密码文件"></a>测试密码文件</h2><figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta-keyword">/usr/</span>lib64<span class="meta-keyword">/squid/</span>basic_ncsa_auth <span class="meta-keyword">/etc/</span>squid3/passwords</span><br><span class="line"><span class="meta"># 输入 用户名 密码</span></span><br><span class="line">xiongneng <span class="number">123456</span></span><br><span class="line"><span class="meta"># 提示OK说明成功，ERR是有问题，请检查一下之前步骤</span></span><br><span class="line">OK</span><br><span class="line"></span><br><span class="line"><span class="meta"># 测试完成，crtl + c 打断</span></span><br></pre></td></tr></table></figure>
 
-# 这里是端口号，可以按需修改
-# http_port 3128 这样写会同时监听ipv6和ipv4的端口，推荐适应下面的配置方法。
-http_port 0.0.0.0:3128
-</code></pre><h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>squid的权限控制很灵活，具体配置方法可以参考 <a href="http://www.squid-cache.org/Doc/config/acl/" target="_blank" rel="noopener">官方文档</a>，
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/squid/squid.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在最后添加</span></span><br><span class="line"></span><br><span class="line">auth_param basic program /usr/lib64/squid/basic_ncsa_auth /etc/squid3/passwords</span><br><span class="line">auth_param basic realm proxy</span><br><span class="line">acl authenticated proxy_auth REQUIRED</span><br><span class="line">http_access allow authenticated</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里是端口号，可以按需修改</span></span><br><span class="line"><span class="comment"># http_port 3128 这样写会同时监听ipv6和ipv4的端口，推荐适应下面的配置方法。</span></span><br><span class="line">http_port 0.0.0.0:3128</span><br></pre></td></tr></table></figure>
+
+<h2 id="权限控制"><a href="#权限控制" class="headerlink" title="权限控制"></a>权限控制</h2><p>squid的权限控制很灵活，具体配置方法可以参考 <a href="http://www.squid-cache.org/Doc/config/acl/" target="_blank" rel="noopener">官方文档</a>，
 或者 <a href="http://home.arcor.de/pangj/squid/chap06.html" target="_blank" rel="noopener">Squid中文权威指南</a>，
 具体工作原理有点像iptables，用规则去卡控流量。默认的配置只能允许内网用户访问，如果有更多需求，你还可以指定很多规则！</p>
 <p>下面是我的配置实例：</p>
-<pre><code># Example rule allowing access from your local networks.
-# Adapt to list your (internal) IP networks from where browsing
-# should be allowed
-acl localnet src 10.0.0.0/8    # RFC1918 possible internal network
-acl localnet src 172.16.0.0/12    # RFC1918 possible internal network
-acl localnet src 192.168.0.0/16    # RFC1918 possible internal network
-acl localnet src fc00::/7       # RFC 4193 local private network range
-acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Example rule allowing access from your local networks.</span></span><br><span class="line"><span class="comment"># Adapt to list your (internal) IP networks from where browsing</span></span><br><span class="line"><span class="comment"># should be allowed</span></span><br><span class="line">acl localnet src 10.0.0.0/8	# RFC1918 possible internal network</span><br><span class="line">acl localnet src 172.16.0.0/12	# RFC1918 possible internal network</span><br><span class="line">acl localnet src 192.168.0.0/16	# RFC1918 possible internal network</span><br><span class="line">acl localnet src fc00::/7       # RFC 4193 local private<span class="built_in"> network </span>range</span><br><span class="line">acl localnet src fe80::/10      # RFC 4291 link-local (directly plugged) machines</span><br><span class="line"></span><br><span class="line">acl SSL_ports<span class="built_in"> port </span>443</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>80		# http</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>21		# ftp</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>443		# https</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>70		# gopher</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>210		# wais</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>1025-65535	# unregistered ports</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>280		# http-mgmt</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>488		# gss-http</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>591		# filemaker</span><br><span class="line">acl Safe_ports<span class="built_in"> port </span>777		# multiling http</span><br><span class="line">acl CONNECT method CONNECT</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Recommended minimum Access Permission configuration:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Deny requests to certain unsafe ports</span></span><br><span class="line">http_access deny !Safe_ports</span><br><span class="line"></span><br><span class="line"><span class="comment"># Deny CONNECT to other than secure SSL ports</span></span><br><span class="line">http_access deny CONNECT !SSL_ports</span><br><span class="line"></span><br><span class="line"><span class="comment"># Only allow cachemgr access from localhost</span></span><br><span class="line">http_access allow localhost manager</span><br><span class="line">http_access deny manager</span><br><span class="line"></span><br><span class="line"><span class="comment"># We strongly recommend the following be uncommented to protect innocent</span></span><br><span class="line"><span class="comment"># web applications running on the proxy server who think the only</span></span><br><span class="line"><span class="comment"># one who can access services on "localhost" is a local user</span></span><br><span class="line"><span class="comment">#http_access deny to_localhost</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Example rule allowing access from your local networks.</span></span><br><span class="line"><span class="comment"># Adapt localnet in the ACL section to list your (internal) IP networks</span></span><br><span class="line"><span class="comment"># from where browsing should be allowed</span></span><br><span class="line">http_access allow localnet</span><br><span class="line">http_access allow localhost</span><br><span class="line"></span><br><span class="line"><span class="comment"># And finally deny all other access to this proxy</span></span><br><span class="line">http_access deny all</span><br></pre></td></tr></table></figure>
 
-acl SSL_ports port 443
-acl Safe_ports port 80        # http
-acl Safe_ports port 21        # ftp
-acl Safe_ports port 443        # https
-acl Safe_ports port 70        # gopher
-acl Safe_ports port 210        # wais
-acl Safe_ports port 1025-65535    # unregistered ports
-acl Safe_ports port 280        # http-mgmt
-acl Safe_ports port 488        # gss-http
-acl Safe_ports port 591        # filemaker
-acl Safe_ports port 777        # multiling http
-acl CONNECT method CONNECT
+<h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>squid的日志默认是打开的，位于目录<code>/var/log/squid/</code>，当然这个地址还有日志的格式都是可以完全自定义的</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[<span class="symbol">root@</span>controller161 ~]# ll /var/log/squid/</span><br><span class="line">total <span class="number">496</span></span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid <span class="number">355208</span> May  <span class="number">6</span> <span class="number">12</span>:<span class="number">17</span> access.log</span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid   <span class="number">1846</span> Jul <span class="number">10</span>  <span class="number">2016</span> access.log<span class="number">-20160710.</span>gz</span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid   <span class="number">3710</span> Jul <span class="number">15</span>  <span class="number">2016</span> access.log<span class="number">-20160718.</span>gz</span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid <span class="number">125341</span> May  <span class="number">4</span> <span class="number">15</span>:<span class="number">19</span> cache.log</span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid   <span class="number">1325</span> Jul  <span class="number">9</span>  <span class="number">2016</span> cache.log<span class="number">-20160710.</span>gz</span><br><span class="line">-rw-r----- <span class="number">1</span> squid squid   <span class="number">1110</span> Jul <span class="number">14</span>  <span class="number">2016</span> cache.log<span class="number">-20160718.</span>gz</span><br></pre></td></tr></table></figure>
 
-#
-# Recommended minimum Access Permission configuration:
-#
-# Deny requests to certain unsafe ports
-http_access deny !Safe_ports
+<h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启启动</span></span><br><span class="line">systemctl <span class="built_in">enable</span> squid.service</span><br><span class="line"><span class="comment"># 启动</span></span><br><span class="line">systemctl start squid.service</span><br><span class="line"><span class="comment"># 停止</span></span><br><span class="line">systemctl stop squid.service</span><br><span class="line"><span class="comment"># 重启</span></span><br><span class="line">systemctl restart squid.service</span><br></pre></td></tr></table></figure>
 
-# Deny CONNECT to other than secure SSL ports
-http_access deny CONNECT !SSL_ports
-
-# Only allow cachemgr access from localhost
-http_access allow localhost manager
-http_access deny manager
-
-# We strongly recommend the following be uncommented to protect innocent
-# web applications running on the proxy server who think the only
-# one who can access services on &quot;localhost&quot; is a local user
-#http_access deny to_localhost
-
-#
-# INSERT YOUR OWN RULE(S) HERE TO ALLOW ACCESS FROM YOUR CLIENTS
-#
-
-# Example rule allowing access from your local networks.
-# Adapt localnet in the ACL section to list your (internal) IP networks
-# from where browsing should be allowed
-http_access allow localnet
-http_access allow localhost
-
-# And finally deny all other access to this proxy
-http_access deny all
-</code></pre><h2 id="日志"><a href="#日志" class="headerlink" title="日志"></a>日志</h2><p>squid的日志默认是打开的，位于目录<code>/var/log/squid/</code>，当然这个地址还有日志的格式都是可以完全自定义的</p>
-<pre><code>[root@controller161 ~]# ll /var/log/squid/
-total 496
--rw-r----- 1 squid squid 355208 May  6 12:17 access.log
--rw-r----- 1 squid squid   1846 Jul 10  2016 access.log-20160710.gz
--rw-r----- 1 squid squid   3710 Jul 15  2016 access.log-20160718.gz
--rw-r----- 1 squid squid 125341 May  4 15:19 cache.log
--rw-r----- 1 squid squid   1325 Jul  9  2016 cache.log-20160710.gz
--rw-r----- 1 squid squid   1110 Jul 14  2016 cache.log-20160718.gz
-</code></pre><h2 id="启动服务"><a href="#启动服务" class="headerlink" title="启动服务"></a>启动服务</h2><pre><code class="line-numbers language-bash"># 开启启动
-systemctl enable squid.service
-# 启动
-systemctl start squid.service
-# 停止
-systemctl stop squid.service
-# 重启
-systemctl restart squid.service
-</code></pre>
 <h2 id="代理服务器设置"><a href="#代理服务器设置" class="headerlink" title="代理服务器设置"></a>代理服务器设置</h2><p>在其他CentOS机器上面配置各种代理方法</p>
 <h3 id="全局代理"><a href="#全局代理" class="headerlink" title="全局代理"></a>全局代理</h3><p><code>vim /etc/profile</code>，在最后加入</p>
-<pre><code class="line-numbers language-bash">export http_proxy=&quot;http://username:password@proxy_ip:port&quot;
-export https_proxy=&quot;http://username:password@proxy_ip:port&quot;
-</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> http_proxy=<span class="string">"http://username:password@proxy_ip:port"</span></span><br><span class="line"><span class="built_in">export</span> https_proxy=<span class="string">"http://username:password@proxy_ip:port"</span></span><br></pre></td></tr></table></figure>
+
 <h3 id="yum代理设置"><a href="#yum代理设置" class="headerlink" title="yum代理设置"></a>yum代理设置</h3><p>编辑<code>/etc/yum.conf</code>，在最后加入</p>
-<pre><code># Proxy
-proxy=http://username:password@proxy_ip:port/
-</code></pre><h3 id="wget的代理设置"><a href="#wget的代理设置" class="headerlink" title="wget的代理设置"></a>wget的代理设置</h3><p>编辑<code>/etc/wgetrc</code>，在最后加入</p>
-<pre><code># Proxy
-http_proxy=http://username:password@proxy_ip:port/
-https_proxy=http://username:password@proxy_ip:port/
-ftp_proxy=http://username:password@proxy_ip:port/
-</code></pre><h3 id="curl的代理设置"><a href="#curl的代理设置" class="headerlink" title="curl的代理设置"></a>curl的代理设置</h3><p>在<code>~/.bashrc</code>里面增加一个别名:</p>
-<pre><code class="line-numbers language-bash">alias curl=&quot;curl -x http://username:password@proxy_ip:port&quot;
-</code></pre>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Proxy</span></span><br><span class="line"><span class="attr">proxy</span>=http://username:password@proxy_ip:port/</span><br></pre></td></tr></table></figure>
+
+<h3 id="wget的代理设置"><a href="#wget的代理设置" class="headerlink" title="wget的代理设置"></a>wget的代理设置</h3><p>编辑<code>/etc/wgetrc</code>，在最后加入</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Proxy</span></span><br><span class="line"><span class="attr">http_proxy</span>=http://username:password@proxy_ip:port/</span><br><span class="line"><span class="attr">https_proxy</span>=http://username:password@proxy_ip:port/</span><br><span class="line"><span class="attr">ftp_proxy</span>=http://username:password@proxy_ip:port/</span><br></pre></td></tr></table></figure>
+
+<h3 id="curl的代理设置"><a href="#curl的代理设置" class="headerlink" title="curl的代理设置"></a>curl的代理设置</h3><p>在<code>~/.bashrc</code>里面增加一个别名:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">alias</span> curl=<span class="string">"curl -x http://username:password@proxy_ip:port"</span></span><br></pre></td></tr></table></figure>
+
 <p>另外一种方法是编辑<code>~/.curlrc</code>文件 (没有就创建一个):</p>
-<pre><code>proxy = http://username:password@proxy_ip:port
-</code></pre>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxy = <span class="string">http:</span><span class="comment">//username:password@proxy_ip:port</span></span><br></pre></td></tr></table></figure>
+
+
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2016/07/07/linux/squid.html">CentOS7.2搭建代理服务器</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2016/07/20/web/http-cache.html" class="pre-post btn btn-default" title='HTTP缓存介绍'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">HTTP缓存介绍</span>
-        </a>
     
     
-        <a href="/2016/07/01/linux/bind9.html" class="next-post btn btn-default" title='CentOS7.2搭建DNS服务器'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">CentOS7.2搭建DNS服务器</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/squid/" rel="tag"># squid</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/07/01/linux/bind9.html" rel="prev" title="CentOS7.2搭建DNS服务器">
+      <i class="fa fa-chevron-left"></i> CentOS7.2搭建DNS服务器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/07/20/web/http-cache.html" rel="next" title="HTTP缓存介绍">
+      HTTP缓存介绍 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成密码文件"><span class="toc-text">生成密码文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试密码文件"><span class="toc-text">测试密码文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置"><span class="toc-text">配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限控制"><span class="toc-text">权限控制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#日志"><span class="toc-text">日志</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#启动服务"><span class="toc-text">启动服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代理服务器设置"><span class="toc-text">代理服务器设置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#全局代理"><span class="toc-text">全局代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#yum代理设置"><span class="toc-text">yum代理设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#wget的代理设置"><span class="toc-text">wget的代理设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#curl的代理设置"><span class="toc-text">curl的代理设置</span></a></li></ol></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成密码文件"><span class="nav-number">2.</span> <span class="nav-text">生成密码文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试密码文件"><span class="nav-number">3.</span> <span class="nav-text">测试密码文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">4.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#权限控制"><span class="nav-number">5.</span> <span class="nav-text">权限控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志"><span class="nav-number">6.</span> <span class="nav-text">日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动服务"><span class="nav-number">7.</span> <span class="nav-text">启动服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代理服务器设置"><span class="nav-number">8.</span> <span class="nav-text">代理服务器设置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#全局代理"><span class="nav-number">8.1.</span> <span class="nav-text">全局代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#yum代理设置"><span class="nav-number">8.2.</span> <span class="nav-text">yum代理设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wget的代理设置"><span class="nav-number">8.3.</span> <span class="nav-text">wget的代理设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#curl的代理设置"><span class="nav-number">8.4.</span> <span class="nav-text">curl的代理设置</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>

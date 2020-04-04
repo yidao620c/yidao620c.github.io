@@ -1,372 +1,260 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="zh-CN">
-<head><meta name="generator" content="Hexo 3.9.0">
-    <!--Setting-->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
-    <meta http-equiv="Cache-Control" content="no-siteapp">
-    <meta http-equiv="Cache-Control" content="no-transform">
-    <meta name="renderer" content="webkit|ie-comp|ie-stand">
-    <meta name="apple-mobile-web-app-capable" content="飞污熊博客">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="format-detection" content="telephone=no,email=no,adress=no">
-    <meta name="browsermode" content="application">
-    <meta name="screen-orientation" content="portrait">
-    <link rel="dns-prefetch" href="https://www.xncoding.com">
-    <!--SEO-->
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
 
-    <meta name="keywords" content="springboot,">
+<link rel="stylesheet" href="/css/main.css">
 
 
-    <meta name="description" content="上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。
-Socket.IO 主要使用WebSocket协议。但是如果需要的话，Socket.io可以回退到几种其它方法，
-例如Adobe Flash Sockets、JSONP拉取、或是传统的AJA...">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。 Socket.IO 主要使用WebSocket协议。但是如果需要的话，Socket.io可以回退到几种其它方法， 例如Adobe Flash Sockets、JSONP拉取、或是传统的AJAX拉取，并且提供完全相同的接口。 尽管它可以被用作WebSocket的包装库，它还是提供了许多其它功能，比">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot系列 - 集成SocketIO实时通信">
+<meta property="og:url" content="https://www.xncoding.com/2017/07/16/spring/sb-socketio.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。 Socket.IO 主要使用WebSocket协议。但是如果需要的话，Socket.io可以回退到几种其它方法， 例如Adobe Flash Sockets、JSONP拉取、或是传统的AJAX拉取，并且提供完全相同的接口。 尽管它可以被用作WebSocket的包装库，它还是提供了许多其它功能，比">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-07-16T11:09:58.000Z">
+<meta property="article:modified_time" content="2020-04-04T04:40:03.550Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="springboot">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://www.xncoding.com/2017/07/16/spring/sb-socketio.html">
 
 
-<meta name="robots" content="all">
-<meta name="google" content="all">
-<meta name="googlebot" content="all">
-<meta name="verify" content="all">
-    <!--Title-->
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
 
-
-<title>SpringBoot系列 - 集成SocketIO实时通信 | 飞污熊博客</title>
-
-
-    <link rel="alternate" href="/atom.xml" title="飞污熊博客" type="application/atom+xml">
-
-
-    <link rel="icon" href="/images/favicon.ico">
-
-    
-
-
-    <link rel="stylesheet" href="//imsun.github.io/gitment/style/default.css">
-
-
-<link rel="stylesheet" href="/css/bootstrap.min.css?rev=3.3.7">
-<link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="/css/style.css?rev=@@hash">
+  <title>SpringBoot系列 - 集成SocketIO实时通信 | 飞污熊博客</title>
+  
 
 
 
 
-    
 
 
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
 
-    <script>
-        var _hmt = _hmt || [];
-        (function() {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?13766878cde148282622871dd245a973";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
 
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
 
-
-    
-
-    <link rel="stylesheet" href="/js/prism/prism.css">
 </head>
 
-</html>
-<!--[if lte IE 8]>
-<style>
-    html{ font-size: 1em }
-</style>
-<![endif]-->
-<!--[if lte IE 9]>
-<div style="ie">你使用的浏览器版本过低，为了你更好的阅读体验，请更新浏览器的版本或者使用其他现代浏览器，比如Chrome、Firefox、Safari等。</div>
-<![endif]-->
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
 
-<body>
-    
-    <nav class="main-navigation">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="navbar-header"><span class="nav-toggle-button collapsed pull-right" data-toggle="collapse" data-target="#main-menu" id="mnav">
-                    <span class="sr-only"></span>
-                        <i class="fa fa-bars"></i>
-                    </span>
-                    <a class="navbar-brand" href="https://www.xncoding.com">飞污熊博客</a>
-                </div>
-                <div class="collapse navbar-collapse" id="main-menu" style="text-align: left;">
-                    <ul class="menu">
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/"><i class="fa fa-home"></i>飞污熊博客</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/categories"><i class="fa fa-list"></i>分类</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/archives"><i class="fa fa-archive"></i>时间轴</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/tags"><i class="fa fa-tags"></i>标签</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/welfare"><i class="fa fa-gift"></i>资源分享</a>
-                            </li>
-                        
-                            <li role="presentation" class="text-center">
-                                <a href="/about"><i class="fa fa-user"></i>关于我</a>
-                            </li>
-                        
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
     </div>
-</nav>
+  </div>
 
-<a href="https://github.com/yidao620c">
-    <img style="position: absolute; top: 0; left: 0; border: 0;"
-        src="/img/fork-me.png" alt="Fork me on GitHub">
-</a>
+  <div class="site-meta">
 
-    <section class="content-wrap">
-        <div class="container">
-            <div class="row">
-                <main class="col-md-9 main-content m-post">
-                    <p id="process"></p>
-<article class="post">
-    <div class="post-head">
-        <h1 id="SpringBoot系列 - 集成SocketIO实时通信">
-            
-                SpringBoot系列 - 集成SocketIO实时通信
-            
-        </h1>
-        <div class="post-meta">
-    
-    
-    <span class="categories-meta fa-wrap">
-        <i class="fa fa-folder-open-o"></i>
-        <a href="/categories/spring">
-            spring
-        </a>
-    </span>
-    
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
 
-    
-    <span class="fa-wrap">
-        <i class="fa fa-tags"></i>
-        <span class="tags-meta">
-            
-                
-                    <a href="/tags/springboot" title='springboot'>
-                        springboot
-                    </a>
-                
-            
-        </span>
-    </span>
-    
-
-    
-        
-        <span class="fa-wrap">
-            <i class="fa fa-clock-o"></i>
-            <span class="date-meta">2017/07/16</span>
-        </span>
-        
-            <span class="fa-wrap">
-                <i class="fa fa-eye"></i>
-                <span id="busuanzi_value_page_pv"></span>
-            </span>
-        
-    
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
 </div>
 
-        
-        
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
     </div>
+  </div>
+
+</div>
+    </header>
+
     
-    <div class="post-body post-content">
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2017/07/16/spring/sb-socketio.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot系列 - 集成SocketIO实时通信
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-07-16 19:09:58" itemprop="dateCreated datePublished" datetime="2017-07-16T19:09:58+08:00">2017-07-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/spring/" itemprop="url" rel="index"><span itemprop="name">spring</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
         <p>上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。</p>
 <p>Socket.IO 主要使用WebSocket协议。但是如果需要的话，Socket.io可以回退到几种其它方法，
 例如Adobe Flash Sockets、JSONP拉取、或是传统的AJAX拉取，并且提供完全相同的接口。
 尽管它可以被用作WebSocket的包装库，它还是提供了许多其它功能，比如广播至多个套接字，存储与不同客户有关的数据，和异步IO操作。</p>
 <p>更多请参考 Socket.IO 官网：<a href="https://socket.io/" target="_blank" rel="noopener">https://socket.io/</a></p>
+<a id="more"></a>
+
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>基于 socket.io 来说，采用 node 实现更加合适，本文使用两个后端的Java开源框架实现。</p>
 <ul>
 <li>服务端使用 <a href="https://github.com/mrniko/netty-socketio" target="_blank" rel="noopener">netty-socketio</a></li>
 <li>客户端使用 <a href="https://github.com/socketio/socket.io-client-java" target="_blank" rel="noopener">socket.io-client-java</a></li>
 </ul>
 <p>业务需求是将之前通过轮询方式调动RESTFul API改成使用WebSocket长连接方式，实现要服务器实时的推送消息，另外还要实时监控POS机的在线状态等。</p>
-<h2 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h2><pre><code class="line-numbers language-xml">&lt;!-- netty-socketio--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;com.corundumstudio.socketio&lt;/groupId&gt;
-    &lt;artifactId&gt;netty-socketio&lt;/artifactId&gt;
-    &lt;version&gt;1.7.13&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.netty&lt;/groupId&gt;
-    &lt;artifactId&gt;netty-resolver&lt;/artifactId&gt;
-    &lt;version&gt;4.1.15.Final&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.netty&lt;/groupId&gt;
-    &lt;artifactId&gt;netty-transport&lt;/artifactId&gt;
-    &lt;version&gt;4.1.15.Final&lt;/version&gt;
-&lt;/dependency&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;io.socket&lt;/groupId&gt;
-    &lt;artifactId&gt;socket.io-client&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
+<h2 id="引入依赖"><a href="#引入依赖" class="headerlink" title="引入依赖"></a>引入依赖</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- netty-socketio--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.corundumstudio.socketio<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-socketio<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.7.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.netty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-resolver<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.15.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.netty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-transport<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.15.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.socket<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>socket.io-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
 <h2 id="服务器代码"><a href="#服务器代码" class="headerlink" title="服务器代码"></a>服务器代码</h2><p>先来服务端程序爽一把，话不多说，先上代码：</p>
-<pre><code class="line-numbers language-java">public class NamespaceSocketServer {
-    private static final Logger logger = LoggerFactory.getLogger(NamespaceSocketServer.class);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NamespaceSocketServer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(NamespaceSocketServer<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * 创建Socket，并设置监听端口</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Configuration config = <span class="keyword">new</span> Configuration();</span><br><span class="line">        <span class="comment">//设置主机名</span></span><br><span class="line">        config.setHostname(<span class="string">"localhost"</span>);</span><br><span class="line">        <span class="comment">//设置监听端口</span></span><br><span class="line">        config.setPort(<span class="number">9092</span>);</span><br><span class="line">        <span class="comment">// 协议升级超时时间（毫秒），默认10秒。HTTP握手升级为ws协议超时时间</span></span><br><span class="line">        config.setUpgradeTimeout(<span class="number">10000</span>);</span><br><span class="line">        <span class="comment">// Ping消息超时时间（毫秒），默认60秒，这个时间间隔内没有接收到心跳消息就会发送超时事件</span></span><br><span class="line">        config.setPingTimeout(<span class="number">180000</span>);</span><br><span class="line">        <span class="comment">// Ping消息间隔（毫秒），默认25秒。客户端向服务器发送一条心跳消息间隔</span></span><br><span class="line">        config.setPingInterval(<span class="number">60000</span>);</span><br><span class="line">        <span class="comment">// 连接认证，这里使用token更合适</span></span><br><span class="line">        config.setAuthorizationListener(<span class="keyword">new</span> AuthorizationListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isAuthorized</span><span class="params">(HandshakeData data)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// String token = data.getSingleUrlParam("token");</span></span><br><span class="line">                <span class="comment">// String username = JWTUtil.getSocketUsername(token);</span></span><br><span class="line">                <span class="comment">// return JWTUtil.verifySocket(token, "secret");</span></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> SocketIOServer server = <span class="keyword">new</span> SocketIOServer(config);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * 添加连接监听事件，监听是否与客户端连接到服务器</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        server.addConnectListener(<span class="keyword">new</span> ConnectListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onConnect</span><span class="params">(SocketIOClient client)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 判断是否有客户端连接</span></span><br><span class="line">                <span class="keyword">if</span> (client != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    logger.info(<span class="string">"连接成功。clientId="</span> + client.getSessionId().toString());</span><br><span class="line">                    client.joinRoom(client.getHandshakeData().getSingleUrlParam(<span class="string">"appid"</span>));</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    logger.error(<span class="string">"并没有人连接上。。。"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * 添加监听事件，监听客户端的事件</span></span><br><span class="line"><span class="comment">         * 1.第一个参数eventName需要与客户端的事件要一致</span></span><br><span class="line"><span class="comment">         * 2.第二个参数eventClase是传输的数据类型</span></span><br><span class="line"><span class="comment">         * 3.第三个参数listener是用于接收客户端传的数据，数据类型需要与eventClass一致</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        server.addEventListener(<span class="string">"login"</span>, LoginRequest<span class="class">.<span class="keyword">class</span>, <span class="title">new</span> <span class="title">DataListener</span>&lt;<span class="title">LoginRequest</span>&gt;() </span>&#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onData</span><span class="params">(SocketIOClient client, LoginRequest data, AckRequest ackRequest)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"接收到客户端login消息：code = "</span> + data.getCode() + <span class="string">",body = "</span> + data.getBody());</span><br><span class="line">                <span class="comment">// check is ack requested by client, but it's not required check</span></span><br><span class="line">                <span class="keyword">if</span> (ackRequest.isAckRequested()) &#123;</span><br><span class="line">                    <span class="comment">// send ack response with data to client</span></span><br><span class="line">                    ackRequest.sendAckData(<span class="string">"已成功收到客户端登录请求"</span>, <span class="string">"yeah"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 向客户端发送消息</span></span><br><span class="line">                List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">                list.add(<span class="string">"登录成功，sessionId="</span> + client.getSessionId());</span><br><span class="line">                <span class="comment">// 第一个参数必须与eventName一致，第二个参数data必须与eventClass一致</span></span><br><span class="line">                String room = client.getHandshakeData().getSingleUrlParam(<span class="string">"appid"</span>);</span><br><span class="line">                server.getRoomOperations(room).sendEvent(<span class="string">"login"</span>, list.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">//启动服务</span></span><br><span class="line">        server.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public static void main(String[] args) {
-        /*
-         * 创建Socket，并设置监听端口
-         */
-        Configuration config = new Configuration();
-        //设置主机名
-        config.setHostname(&quot;localhost&quot;);
-        //设置监听端口
-        config.setPort(9092);
-        // 协议升级超时时间（毫秒），默认10秒。HTTP握手升级为ws协议超时时间
-        config.setUpgradeTimeout(10000);
-        // Ping消息超时时间（毫秒），默认60秒，这个时间间隔内没有接收到心跳消息就会发送超时事件
-        config.setPingTimeout(180000);
-        // Ping消息间隔（毫秒），默认25秒。客户端向服务器发送一条心跳消息间隔
-        config.setPingInterval(60000);
-        // 连接认证，这里使用token更合适
-        config.setAuthorizationListener(new AuthorizationListener() {
-            @Override
-            public boolean isAuthorized(HandshakeData data) {
-                // String token = data.getSingleUrlParam(&quot;token&quot;);
-                // String username = JWTUtil.getSocketUsername(token);
-                // return JWTUtil.verifySocket(token, &quot;secret&quot;);
-                return true;
-            }
-        });
-
-        final SocketIOServer server = new SocketIOServer(config);
-
-        /*
-         * 添加连接监听事件，监听是否与客户端连接到服务器
-         */
-        server.addConnectListener(new ConnectListener() {
-            @Override
-            public void onConnect(SocketIOClient client) {
-                // 判断是否有客户端连接
-                if (client != null) {
-                    logger.info(&quot;连接成功。clientId=&quot; + client.getSessionId().toString());
-                    client.joinRoom(client.getHandshakeData().getSingleUrlParam(&quot;appid&quot;));
-                } else {
-                    logger.error(&quot;并没有人连接上。。。&quot;);
-                }
-            }
-        });
-
-        /*
-         * 添加监听事件，监听客户端的事件
-         * 1.第一个参数eventName需要与客户端的事件要一致
-         * 2.第二个参数eventClase是传输的数据类型
-         * 3.第三个参数listener是用于接收客户端传的数据，数据类型需要与eventClass一致
-         */
-        server.addEventListener(&quot;login&quot;, LoginRequest.class, new DataListener&lt;LoginRequest&gt;() {
-            @Override
-            public void onData(SocketIOClient client, LoginRequest data, AckRequest ackRequest) {
-                logger.info(&quot;接收到客户端login消息：code = &quot; + data.getCode() + &quot;,body = &quot; + data.getBody());
-                // check is ack requested by client, but it&#39;s not required check
-                if (ackRequest.isAckRequested()) {
-                    // send ack response with data to client
-                    ackRequest.sendAckData(&quot;已成功收到客户端登录请求&quot;, &quot;yeah&quot;);
-                }
-                // 向客户端发送消息
-                List&lt;String&gt; list = new ArrayList&lt;&gt;();
-                list.add(&quot;登录成功，sessionId=&quot; + client.getSessionId());
-                // 第一个参数必须与eventName一致，第二个参数data必须与eventClass一致
-                String room = client.getHandshakeData().getSingleUrlParam(&quot;appid&quot;);
-                server.getRoomOperations(room).sendEvent(&quot;login&quot;, list.toString());
-            }
-        });
-        //启动服务
-        server.start();
-    }
-}
-</code></pre>
 <h2 id="Android客户端"><a href="#Android客户端" class="headerlink" title="Android客户端"></a>Android客户端</h2><p>老规矩，先上代码爽爽</p>
-<pre><code class="line-numbers language-java">public class SocketClient {
-    private static Socket socket;
-    private static final Logger logger = LoggerFactory.getLogger(SocketClient.class);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SocketClient</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Socket socket;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(SocketClient<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> URISyntaxException </span>&#123;</span><br><span class="line">        IO.Options options = <span class="keyword">new</span> IO.Options();</span><br><span class="line">        options.transports = <span class="keyword">new</span> String[]&#123;<span class="string">"websocket"</span>&#125;;</span><br><span class="line">        options.reconnectionAttempts = <span class="number">2</span>;     <span class="comment">// 重连尝试次数</span></span><br><span class="line">        options.reconnectionDelay = <span class="number">1000</span>;     <span class="comment">// 失败重连的时间间隔(ms)</span></span><br><span class="line">        options.timeout = <span class="number">20000</span>;              <span class="comment">// 连接超时时间(ms)</span></span><br><span class="line">        options.forceNew = <span class="keyword">true</span>;</span><br><span class="line">        options.query = <span class="string">"username=test1&amp;password=test1&amp;appid=com.xncoding.apay2"</span>;</span><br><span class="line">        socket = IO.socket(<span class="string">"http://localhost:9092/"</span>, options);</span><br><span class="line">        socket.on(Socket.EVENT_CONNECT, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 客户端一旦连接成功，开始发起登录请求</span></span><br><span class="line">                LoginRequest message = <span class="keyword">new</span> LoginRequest(<span class="number">12</span>, <span class="string">"这是客户端消息体"</span>);</span><br><span class="line">                socket.emit(<span class="string">"login"</span>, JsonConverter.objectToJSONObject(message), (Ack) args1 -&gt; &#123;</span><br><span class="line">                    logger.info(<span class="string">"回执消息="</span> + Arrays.stream(args1).map(Object::toString).collect(Collectors.joining(<span class="string">","</span>)));</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(<span class="string">"login"</span>, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"接受到服务器房间广播的登录消息："</span> + Arrays.toString(args));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_CONNECT_ERROR, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"Socket.EVENT_CONNECT_ERROR"</span>);</span><br><span class="line">                socket.disconnect();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_CONNECT_TIMEOUT, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"Socket.EVENT_CONNECT_TIMEOUT"</span>);</span><br><span class="line">                socket.disconnect();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_PING, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"Socket.EVENT_PING"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_PONG, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"Socket.EVENT_PONG"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_MESSAGE, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"-----------接受到消息啦--------"</span> + Arrays.toString(args));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).on(Socket.EVENT_DISCONNECT, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">                logger.info(<span class="string">"客户端断开连接啦。。。"</span>);</span><br><span class="line">                socket.disconnect();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        socket.connect();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public static void main(String[] args) throws URISyntaxException {
-        IO.Options options = new IO.Options();
-        options.transports = new String[]{&quot;websocket&quot;};
-        options.reconnectionAttempts = 2;     // 重连尝试次数
-        options.reconnectionDelay = 1000;     // 失败重连的时间间隔(ms)
-        options.timeout = 20000;              // 连接超时时间(ms)
-        options.forceNew = true;
-        options.query = &quot;username=test1&amp;password=test1&amp;appid=com.xncoding.apay2&quot;;
-        socket = IO.socket(&quot;http://localhost:9092/&quot;, options);
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                // 客户端一旦连接成功，开始发起登录请求
-                LoginRequest message = new LoginRequest(12, &quot;这是客户端消息体&quot;);
-                socket.emit(&quot;login&quot;, JsonConverter.objectToJSONObject(message), (Ack) args1 -&gt; {
-                    logger.info(&quot;回执消息=&quot; + Arrays.stream(args1).map(Object::toString).collect(Collectors.joining(&quot;,&quot;)));
-                });
-            }
-        }).on(&quot;login&quot;, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;接受到服务器房间广播的登录消息：&quot; + Arrays.toString(args));
-            }
-        }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;Socket.EVENT_CONNECT_ERROR&quot;);
-                socket.disconnect();
-            }
-        }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;Socket.EVENT_CONNECT_TIMEOUT&quot;);
-                socket.disconnect();
-            }
-        }).on(Socket.EVENT_PING, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;Socket.EVENT_PING&quot;);
-            }
-        }).on(Socket.EVENT_PONG, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;Socket.EVENT_PONG&quot;);
-            }
-        }).on(Socket.EVENT_MESSAGE, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;-----------接受到消息啦--------&quot; + Arrays.toString(args));
-            }
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                logger.info(&quot;客户端断开连接啦。。。&quot;);
-                socket.disconnect();
-            }
-        });
-        socket.connect();
-    }
-}
-</code></pre>
 <h2 id="关于心跳机制"><a href="#关于心跳机制" class="headerlink" title="关于心跳机制"></a>关于心跳机制</h2><p>根据 <a href="https://github.com/socketio/engine.io#methods-1" target="_blank" rel="noopener">Socket.IO文档</a> 解释，
 客户端会定期发送心跳包，并触发一个ping事件和一个pong事件，如下：</p>
 <ul>
@@ -386,309 +274,54 @@ Socket.IO 主要使用WebSocket协议。但是如果需要的话，Socket.io可�
 客户端会在超时后断开连接。心跳包发送方向是客户端向服务器端发送，以维持在线状态。</p>
 <h2 id="关于断线和超时"><a href="#关于断线和超时" class="headerlink" title="关于断线和超时"></a>关于断线和超时</h2><p>关闭浏览器、直接关闭客户端程序、kill进程、主动执行disconnect方法都会导致立刻产生断线事件。
 而客户端把网络断开，服务器端在 <code>pingTimeout</code> ms后产生断线事件、客户端在 <code>pingTimeout</code> ms后也产生断线事件。</p>
-<p>实际上，超时后会产生一个断线事件，叫”disconnect”。客户端和服务器端都可以对这个事件作出应答，释放连接。</p>
+<p>实际上，超时后会产生一个断线事件，叫&quot;disconnect&quot;。客户端和服务器端都可以对这个事件作出应答，释放连接。</p>
 <p>客户端代码：</p>
-<pre><code class="line-numbers language-java">.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-    @Override
-    public void call(Object... args) {
-        logger.info(&quot;客户端断开连接啦。。。&quot;);
-        socket.disconnect();
-    }
-});
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.on(Socket.EVENT_DISCONNECT, <span class="keyword">new</span> Emitter.Listener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Object... args)</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"客户端断开连接啦。。。"</span>);</span><br><span class="line">        socket.disconnect();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <p>连上服务器后，断开网络。超过了心跳超时时间后，产生断线事件。如果客户端不主动断开连接的话，会自动重连，
 这时候发现连接不上，又产生连接错误事件，然后重试2次，都失败后自动断开连接了。</p>
 <p>下面是客户端日志：</p>
-<pre><code>SocketClient - 回执消息=服务器已成功收到客户端登录请求,yeah
-SocketClient - Socket.EVENT_PING
-SocketClient - Socket.EVENT_PONG
-SocketClient - 客户端断开连接啦。。。
-SocketClient - Socket.EVENT_CONNECT_ERROR
-</code></pre><p>服务器端代码：</p>
-<pre><code class="line-numbers language-java">server.addDisconnectListener(new DisconnectListener() {
-    @Override
-    public void onDisconnect(SocketIOClient client) {
-        System.out.println(&quot;服务器收到断线通知... sessionId=&quot; + client.getSessionId());
-    }
-});
-</code></pre>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">SocketClient</span> <span class="string">- 回执消息=服务器已成功收到客户端登录请求,yeah</span></span><br><span class="line"><span class="attr">SocketClient</span> <span class="string">- Socket.EVENT_PING</span></span><br><span class="line"><span class="attr">SocketClient</span> <span class="string">- Socket.EVENT_PONG</span></span><br><span class="line"><span class="attr">SocketClient</span> <span class="string">- 客户端断开连接啦。。。</span></span><br><span class="line"><span class="attr">SocketClient</span> <span class="string">- Socket.EVENT_CONNECT_ERROR</span></span><br></pre></td></tr></table></figure>
+
+<p>服务器端代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server.addDisconnectListener(<span class="keyword">new</span> DisconnectListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDisconnect</span><span class="params">(SocketIOClient client)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"服务器收到断线通知... sessionId="</span> + client.getSessionId());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
 <p>服务器逻辑是，如果在心跳超时后，就直接断开这个连接，并且产生一个断开连接事件。</p>
 <p>服务器通过netty处理心跳包ping/pong的日志如下：</p>
-<pre><code>WebSocket08FrameDecoder - Decoding WebSocket Frame opCode=1
-WebSocket08FrameDecoder - Decoding WebSocket Frame length=1
-WebSocket08FrameEncoder - Encoding WebSocket Frame opCode=1 length=1
-</code></pre><h2 id="浏览器客户端演示"><a href="#浏览器客户端演示" class="headerlink" title="浏览器客户端演示"></a>浏览器客户端演示</h2><p>对于<code>netty-socketio</code>有一个demo工程，里面通过一个网页的聊天小程序演示了各种使用方法。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">WebSocket08FrameDecoder - Decoding WebSocket Frame <span class="attribute">opCode</span>=1</span><br><span class="line">WebSocket08FrameDecoder - Decoding WebSocket Frame <span class="attribute">length</span>=1</span><br><span class="line">WebSocket08FrameEncoder - Encoding WebSocket Frame <span class="attribute">opCode</span>=1 <span class="attribute">length</span>=1</span><br></pre></td></tr></table></figure>
+
+<h2 id="浏览器客户端演示"><a href="#浏览器客户端演示" class="headerlink" title="浏览器客户端演示"></a>浏览器客户端演示</h2><p>对于<code>netty-socketio</code>有一个demo工程，里面通过一个网页的聊天小程序演示了各种使用方法。</p>
 <p>demo地址：<a href="https://github.com/mrniko/netty-socketio-demo" target="_blank" rel="noopener">netty-socketio-demo</a></p>
 <h2 id="SpringBoot集成"><a href="#SpringBoot集成" class="headerlink" title="SpringBoot集成"></a>SpringBoot集成</h2><p>最后重点讲一下如何在SpringBoot中集成。</p>
 <h3 id="修改配置"><a href="#修改配置" class="headerlink" title="修改配置"></a>修改配置</h3><p>首先maven依赖之前已经讲过了，先修改下<code>application.yml</code>配置文件来配置下几个参数，比如主机、端口、心跳时间等等。</p>
-<pre><code class="line-numbers language-yml">###################  自定义项目配置 ###################
-xncoding:
-  socket-hostname: localhost
-  socket-port: 9096
-</code></pre>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">###################  自定义项目配置 ###################</span></span><br><span class="line"><span class="attr">xncoding:</span></span><br><span class="line">  <span class="attr">socket-hostname:</span> <span class="string">localhost</span></span><br><span class="line">  <span class="attr">socket-port:</span> <span class="number">9096</span></span><br></pre></td></tr></table></figure>
+
 <h3 id="添加Bean配置"><a href="#添加Bean配置" class="headerlink" title="添加Bean配置"></a>添加Bean配置</h3><p>然后增加一个SocketServer的Bean配置：</p>
-<pre><code class="line-numbers language-java">@Configuration
-public class NettySocketConfig {
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NettySocketConfig</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> MyProperties myProperties;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> ApiService apiService;</span><br><span class="line">    <span class="meta">@Resource</span></span><br><span class="line">    <span class="keyword">private</span> ManagerInfoService managerInfoService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(NettySocketConfig<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SocketIOServer <span class="title">socketIOServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * 创建Socket，并设置监听端口</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        com.corundumstudio.socketio.Configuration config = <span class="keyword">new</span> com.corundumstudio.socketio.Configuration();</span><br><span class="line">        <span class="comment">// 设置主机名，默认是0.0.0.0</span></span><br><span class="line">        <span class="comment">// config.setHostname("localhost");</span></span><br><span class="line">        <span class="comment">// 设置监听端口</span></span><br><span class="line">        config.setPort(<span class="number">9096</span>);</span><br><span class="line">        <span class="comment">// 协议升级超时时间（毫秒），默认10000。HTTP握手升级为ws协议超时时间</span></span><br><span class="line">        config.setUpgradeTimeout(<span class="number">10000</span>);</span><br><span class="line">        <span class="comment">// Ping消息间隔（毫秒），默认25000。客户端向服务器发送一条心跳消息间隔</span></span><br><span class="line">        config.setPingInterval(<span class="number">60000</span>);</span><br><span class="line">        <span class="comment">// Ping消息超时时间（毫秒），默认60000，这个时间间隔内没有接收到心跳消息就会发送超时事件</span></span><br><span class="line">        config.setPingTimeout(<span class="number">180000</span>);</span><br><span class="line">        <span class="comment">// 这个版本0.9.0不能处理好namespace和query参数的问题。所以为了做认证必须使用全局默认命名空间</span></span><br><span class="line">        config.setAuthorizationListener(<span class="keyword">new</span> AuthorizationListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isAuthorized</span><span class="params">(HandshakeData data)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 可以使用如下代码获取用户密码信息</span></span><br><span class="line">                String username = data.getSingleUrlParam(<span class="string">"username"</span>);</span><br><span class="line">                String password = data.getSingleUrlParam(<span class="string">"password"</span>);</span><br><span class="line">                logger.info(<span class="string">"连接参数：username="</span> + username + <span class="string">",password="</span> + password);</span><br><span class="line">                ManagerInfo managerInfo = managerInfoService.findByUsername(username);</span><br><span class="line">                <span class="comment">// MD5盐</span></span><br><span class="line">                String salt = managerInfo.getSalt();</span><br><span class="line">                String encodedPassword = ShiroKit.md5(password, username + salt);</span><br><span class="line">                <span class="comment">// 如果认证不通过会返回一个Socket.EVENT_CONNECT_ERROR事件</span></span><br><span class="line">                <span class="keyword">return</span> encodedPassword.equals(managerInfo.getPassword());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> SocketIOServer server = <span class="keyword">new</span> SocketIOServer(config);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> server;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SpringAnnotationScanner <span class="title">springAnnotationScanner</span><span class="params">(SocketIOServer socketServer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> SpringAnnotationScanner(socketServer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Resource
-    private MyProperties myProperties;
-
-    @Resource
-    private ApiService apiService;
-    @Resource
-    private ManagerInfoService managerInfoService;
-
-    private static final Logger logger = LoggerFactory.getLogger(NettySocketConfig.class);
-
-    @Bean
-    public SocketIOServer socketIOServer() {
-        /*
-         * 创建Socket，并设置监听端口
-         */
-        com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
-        // 设置主机名，默认是0.0.0.0
-        // config.setHostname(&quot;localhost&quot;);
-        // 设置监听端口
-        config.setPort(9096);
-        // 协议升级超时时间（毫秒），默认10000。HTTP握手升级为ws协议超时时间
-        config.setUpgradeTimeout(10000);
-        // Ping消息间隔（毫秒），默认25000。客户端向服务器发送一条心跳消息间隔
-        config.setPingInterval(60000);
-        // Ping消息超时时间（毫秒），默认60000，这个时间间隔内没有接收到心跳消息就会发送超时事件
-        config.setPingTimeout(180000);
-        // 这个版本0.9.0不能处理好namespace和query参数的问题。所以为了做认证必须使用全局默认命名空间
-        config.setAuthorizationListener(new AuthorizationListener() {
-            @Override
-            public boolean isAuthorized(HandshakeData data) {
-                // 可以使用如下代码获取用户密码信息
-                String username = data.getSingleUrlParam(&quot;username&quot;);
-                String password = data.getSingleUrlParam(&quot;password&quot;);
-                logger.info(&quot;连接参数：username=&quot; + username + &quot;,password=&quot; + password);
-                ManagerInfo managerInfo = managerInfoService.findByUsername(username);
-                // MD5盐
-                String salt = managerInfo.getSalt();
-                String encodedPassword = ShiroKit.md5(password, username + salt);
-                // 如果认证不通过会返回一个Socket.EVENT_CONNECT_ERROR事件
-                return encodedPassword.equals(managerInfo.getPassword());
-            }
-        });
-
-        final SocketIOServer server = new SocketIOServer(config);
-
-        return server;
-    }
-
-    @Bean
-    public SpringAnnotationScanner springAnnotationScanner(SocketIOServer socketServer) {
-        return new SpringAnnotationScanner(socketServer);
-    }
-}
-</code></pre>
 <p>注意，我在<code>AuthorizationListener</code>里面通过调用service做了用户名和密码的认证。通过注解方式可以注入service，
 执行相应的连接授权动作。</p>
 <p>后面还有个<code>SpringAnnotationScanner</code>的定义不能忘记。</p>
 <h3 id="添加消息结构类"><a href="#添加消息结构类" class="headerlink" title="添加消息结构类"></a>添加消息结构类</h3><p>预先定义好客户端和服务器端直接传递的消息类型，使用简单的JavaBean即可，比如</p>
-<pre><code class="line-numbers language-java">public class ReportParam {
-    /**
-     * IMEI码
-     */
-    private String imei;
-    /**
-     * 位置
-     */
-    private String location;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ReportParam</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * IMEI码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String imei;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 位置</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String location;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getImei</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> imei;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setImei</span><span class="params">(String imei)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.imei = imei;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getLocation</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> location;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setLocation</span><span class="params">(String location)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.location = location;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public String getImei() {
-        return imei;
-    }
-
-    public void setImei(String imei) {
-        this.imei = imei;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-}
-</code></pre>
 <h3 id="添加消息处理类"><a href="#添加消息处理类" class="headerlink" title="添加消息处理类"></a>添加消息处理类</h3><p>这里才是最核心的接口处理类，所有接口处理逻辑都应该写在这里面，我只举了一个例子，就是POS上传位置接口：</p>
-<pre><code class="line-numbers language-java">/**
- * 消息事件处理器
- *
- * @author XiongNeng
- * @version 1.0
- * @since 2018/1/19
- */
-@Component
-public class MessageEventHandler {
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 消息事件处理器</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> XiongNeng</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> 1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 2018/1/19</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageEventHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> SocketIOServer server;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ApiService apiService;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(MessageEventHandler<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MessageEventHandler</span><span class="params">(SocketIOServer server, ApiService apiService)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.server = server;</span><br><span class="line">        <span class="keyword">this</span>.apiService = apiService;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//添加connect事件，当客户端发起连接时调用</span></span><br><span class="line">    <span class="meta">@OnConnect</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onConnect</span><span class="params">(SocketIOClient client)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (client != <span class="keyword">null</span>) &#123;</span><br><span class="line">            String imei = client.getHandshakeData().getSingleUrlParam(<span class="string">"imei"</span>);</span><br><span class="line">            String applicationId = client.getHandshakeData().getSingleUrlParam(<span class="string">"appid"</span>);</span><br><span class="line">            logger.info(<span class="string">"连接成功, applicationId="</span> + applicationId + <span class="string">", imei="</span> + imei +</span><br><span class="line">                    <span class="string">", sessionId="</span> + client.getSessionId().toString() );</span><br><span class="line">            client.joinRoom(applicationId);</span><br><span class="line">            <span class="comment">// 更新POS监控状态为在线</span></span><br><span class="line">            ReportParam param = <span class="keyword">new</span> ReportParam();</span><br><span class="line">            param.setImei(imei);</span><br><span class="line">            apiService.updateJustState(param, client.getSessionId().toString(), <span class="number">1</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            logger.error(<span class="string">"客户端为空"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//添加@OnDisconnect事件，客户端断开连接时调用，刷新客户端信息</span></span><br><span class="line">    <span class="meta">@OnDisconnect</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDisconnect</span><span class="params">(SocketIOClient client)</span> </span>&#123;</span><br><span class="line">        String imei = client.getHandshakeData().getSingleUrlParam(<span class="string">"imei"</span>);</span><br><span class="line">        logger.info(<span class="string">"客户端断开连接, imei="</span> + imei + <span class="string">", sessionId="</span> + client.getSessionId().toString());</span><br><span class="line">        <span class="comment">// 更新POS监控状态为离线</span></span><br><span class="line">        ReportParam param = <span class="keyword">new</span> ReportParam();</span><br><span class="line">        param.setImei(imei);</span><br><span class="line">        apiService.updateJustState(param, <span class="string">""</span>, <span class="number">2</span>);</span><br><span class="line">        client.disconnect();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 消息接收入口</span></span><br><span class="line">    <span class="meta">@OnEvent</span>(value = Socket.EVENT_MESSAGE)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(SocketIOClient client, AckRequest ackRequest, Object data)</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"接收到客户端消息"</span>);</span><br><span class="line">        <span class="keyword">if</span> (ackRequest.isAckRequested()) &#123;</span><br><span class="line">            <span class="comment">// send ack response with data to client</span></span><br><span class="line">            ackRequest.sendAckData(<span class="string">"服务器回答Socket.EVENT_MESSAGE"</span>, <span class="string">"好的"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 广播消息接收入口</span></span><br><span class="line">    <span class="meta">@OnEvent</span>(value = <span class="string">"broadcast"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onBroadcast</span><span class="params">(SocketIOClient client, AckRequest ackRequest, Object data)</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"接收到广播消息"</span>);</span><br><span class="line">        <span class="comment">// 房间广播消息</span></span><br><span class="line">        String room = client.getHandshakeData().getSingleUrlParam(<span class="string">"appid"</span>);</span><br><span class="line">        server.getRoomOperations(room).sendEvent(<span class="string">"broadcast"</span>, <span class="string">"广播啦啦啦啦"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 报告地址接口</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> client 客户端</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> ackRequest 回执消息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> param 报告地址参数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@OnEvent</span>(value = <span class="string">"doReport"</span>)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDoReport</span><span class="params">(SocketIOClient client, AckRequest ackRequest, ReportParam param)</span> </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"报告地址接口 start...."</span>);</span><br><span class="line">        BaseResponse result = postReport(param);</span><br><span class="line">        ackRequest.sendAckData(result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*----------------------------------------下面是私有方法-------------------------------------*/</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> BaseResponse <span class="title">postReport</span><span class="params">(ReportParam param)</span> </span>&#123;</span><br><span class="line">        BaseResponse result = <span class="keyword">new</span> BaseResponse();</span><br><span class="line">        <span class="keyword">int</span> r = apiService.report(param);</span><br><span class="line">        <span class="keyword">if</span> (r &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            result.setSuccess(<span class="keyword">true</span>);</span><br><span class="line">            result.setMsg(<span class="string">"报告地址成功"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            result.setSuccess(<span class="keyword">false</span>);</span><br><span class="line">            result.setMsg(<span class="string">"该POS机还没有入网，报告地址失败。"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    private final SocketIOServer server;
-    private final ApiService apiService;
-
-    private static final Logger logger = LoggerFactory.getLogger(MessageEventHandler.class);
-
-    @Autowired
-    public MessageEventHandler(SocketIOServer server, ApiService apiService) {
-        this.server = server;
-        this.apiService = apiService;
-    }
-
-    //添加connect事件，当客户端发起连接时调用
-    @OnConnect
-    public void onConnect(SocketIOClient client) {
-        if (client != null) {
-            String imei = client.getHandshakeData().getSingleUrlParam(&quot;imei&quot;);
-            String applicationId = client.getHandshakeData().getSingleUrlParam(&quot;appid&quot;);
-            logger.info(&quot;连接成功, applicationId=&quot; + applicationId + &quot;, imei=&quot; + imei +
-                    &quot;, sessionId=&quot; + client.getSessionId().toString() );
-            client.joinRoom(applicationId);
-            // 更新POS监控状态为在线
-            ReportParam param = new ReportParam();
-            param.setImei(imei);
-            apiService.updateJustState(param, client.getSessionId().toString(), 1);
-        } else {
-            logger.error(&quot;客户端为空&quot;);
-        }
-    }
-
-    //添加@OnDisconnect事件，客户端断开连接时调用，刷新客户端信息
-    @OnDisconnect
-    public void onDisconnect(SocketIOClient client) {
-        String imei = client.getHandshakeData().getSingleUrlParam(&quot;imei&quot;);
-        logger.info(&quot;客户端断开连接, imei=&quot; + imei + &quot;, sessionId=&quot; + client.getSessionId().toString());
-        // 更新POS监控状态为离线
-        ReportParam param = new ReportParam();
-        param.setImei(imei);
-        apiService.updateJustState(param, &quot;&quot;, 2);
-        client.disconnect();
-    }
-
-    // 消息接收入口
-    @OnEvent(value = Socket.EVENT_MESSAGE)
-    public void onEvent(SocketIOClient client, AckRequest ackRequest, Object data) {
-        logger.info(&quot;接收到客户端消息&quot;);
-        if (ackRequest.isAckRequested()) {
-            // send ack response with data to client
-            ackRequest.sendAckData(&quot;服务器回答Socket.EVENT_MESSAGE&quot;, &quot;好的&quot;);
-        }
-    }
-
-    // 广播消息接收入口
-    @OnEvent(value = &quot;broadcast&quot;)
-    public void onBroadcast(SocketIOClient client, AckRequest ackRequest, Object data) {
-        logger.info(&quot;接收到广播消息&quot;);
-        // 房间广播消息
-        String room = client.getHandshakeData().getSingleUrlParam(&quot;appid&quot;);
-        server.getRoomOperations(room).sendEvent(&quot;broadcast&quot;, &quot;广播啦啦啦啦&quot;);
-    }
-
-    /**
-     * 报告地址接口
-     * @param client 客户端
-     * @param ackRequest 回执消息
-     * @param param 报告地址参数
-     */
-    @OnEvent(value = &quot;doReport&quot;)
-    public void onDoReport(SocketIOClient client, AckRequest ackRequest, ReportParam param) {
-        logger.info(&quot;报告地址接口 start....&quot;);
-        BaseResponse result = postReport(param);
-        ackRequest.sendAckData(result);
-    }
-
-    /*----------------------------------------下面是私有方法-------------------------------------*/
-    private BaseResponse postReport(ReportParam param) {
-        BaseResponse result = new BaseResponse();
-        int r = apiService.report(param);
-        if (r &gt; 0) {
-            result.setSuccess(true);
-            result.setMsg(&quot;报告地址成功&quot;);
-        } else {
-            result.setSuccess(false);
-            result.setMsg(&quot;该POS机还没有入网，报告地址失败。&quot;);
-        }
-        return result;
-    }
-}
-</code></pre>
 <h2 id="添加ServerRunner"><a href="#添加ServerRunner" class="headerlink" title="添加ServerRunner"></a>添加ServerRunner</h2><p>还有一个步骤就是添加启动器，在SpringBoot启动之后立马执行：</p>
-<pre><code class="line-numbers language-java">/**
- * SpringBoot启动之后执行
- *
- * @author XiongNeng
- * @version 1.0
- * @since 2017/7/15
- */
-@Component
-@Order(1)
-public class ServerRunner implements CommandLineRunner {
-    private final SocketIOServer server;
-    private static final Logger logger = LoggerFactory.getLogger(ServerRunner.class);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * SpringBoot启动之后执行</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> XiongNeng</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> 1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 2017/7/15</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Order</span>(<span class="number">1</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ServerRunner</span> <span class="keyword">implements</span> <span class="title">CommandLineRunner</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> SocketIOServer server;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Logger logger = LoggerFactory.getLogger(ServerRunner<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ServerRunner</span><span class="params">(SocketIOServer server)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.server = server;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(String... args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        logger.info(<span class="string">"ServerRunner 开始启动啦..."</span>);</span><br><span class="line">        server.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    @Autowired
-    public ServerRunner(SocketIOServer server) {
-        this.server = server;
-    }
-
-    @Override
-    public void run(String... args) throws Exception {
-        logger.info(&quot;ServerRunner 开始启动啦...&quot;);
-        server.start();
-    }
-}
-</code></pre>
 <h2 id="nginx反向代理"><a href="#nginx反向代理" class="headerlink" title="nginx反向代理"></a>nginx反向代理</h2><p>要实现通过域名并走标准80或443端口的话，最好使用nginx做反向代理，跟正常的http反向代理基本一致，
 不过websocket需要增加一个upgrade的配置。</p>
 <p>下面我以一个实际使用例子来说明如何配置nginx的https访问websocket，并且开启301自动http跳转https。</p>
 <p>首先要有一个域名，比如<code>test.enzhico.net</code>，然后申请letsencrypt的免费证书，这个过程我不讲了，另外的博客文章里面有。</p>
 <p>配置如下:</p>
-<pre><code>map $http_upgrade $connection_upgrade {
-    default upgrade;
-    &#39;&#39; close;
-}
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">map</span> <span class="string">$http_upgrade $connection_upgrade &#123;</span></span><br><span class="line">    <span class="attr">default</span> <span class="string">upgrade;</span></span><br><span class="line">    <span class="meta">''</span> <span class="string">close;</span></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">server</span> <span class="string">&#123;</span></span><br><span class="line">      <span class="attr">server_name</span> <span class="string">test.enzhico.net;</span></span><br><span class="line">      <span class="attr">location</span> <span class="string">/ &#123;</span></span><br><span class="line">          <span class="attr">proxy_pass</span> <span class="string">http://localhost:9096;</span></span><br><span class="line">          <span class="attr">proxy_read_timeout</span> <span class="string">300s;</span></span><br><span class="line">          <span class="attr">proxy_set_header</span> <span class="string">Host $host;</span></span><br><span class="line">          <span class="attr">proxy_set_header</span> <span class="string">X-Real-IP $remote_addr;</span></span><br><span class="line">          <span class="attr">proxy_set_header</span> <span class="string">X-Forwarded-For $proxy_add_x_forwarded_for;</span></span><br><span class="line">          <span class="attr">proxy_http_version</span> <span class="string">1.1;</span></span><br><span class="line">          <span class="attr">proxy_set_header</span> <span class="string">Upgrade $http_upgrade;</span></span><br><span class="line">          <span class="attr">proxy_set_header</span> <span class="string">Connection $connection_upgrade;</span></span><br><span class="line">      <span class="attr">&#125;</span></span><br><span class="line"><span class="comment">      #root /opt/www/test.enzhico.net;</span></span><br><span class="line"><span class="comment">      #index index.html index.htm;</span></span><br><span class="line">      <span class="attr">error_page</span> <span class="string">404 /404.html;</span></span><br><span class="line">          <span class="attr">location</span> = <span class="string">/40x.html &#123;</span></span><br><span class="line">      <span class="attr">&#125;</span></span><br><span class="line"></span><br><span class="line">      <span class="attr">error_page</span> <span class="string">500 502 503 504 /50x.html;</span></span><br><span class="line">          <span class="attr">location</span> = <span class="string">/50x.html &#123;</span></span><br><span class="line">      <span class="attr">&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">listen</span> <span class="string">443 ssl; # managed by Certbot</span></span><br><span class="line">    <span class="attr">ssl_certificate</span> <span class="string">/etc/letsencrypt/live/test.enzhico.net/fullchain.pem; # managed by Certbot</span></span><br><span class="line">    <span class="attr">ssl_certificate_key</span> <span class="string">/etc/letsencrypt/live/test.enzhico.net/privkey.pem; # managed by Certbot</span></span><br><span class="line">    <span class="attr">include</span> <span class="string">/etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot</span></span><br><span class="line">    <span class="attr">ssl_dhparam</span> <span class="string">/etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot</span></span><br><span class="line"></span><br><span class="line"><span class="attr">&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">server</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="attr">listen</span> <span class="string">80;</span></span><br><span class="line">    <span class="attr">server_name</span> <span class="string">test.enzhico.net;</span></span><br><span class="line">    <span class="attr">return</span> <span class="string">301 https://$host$request_uri; # managed by Certbot</span></span><br><span class="line"><span class="attr">&#125;</span></span><br></pre></td></tr></table></figure>
 
-server {
-      server_name test.enzhico.net;
-      location / {
-          proxy_pass http://localhost:9096;
-          proxy_read_timeout 300s;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade $http_upgrade;
-          proxy_set_header Connection $connection_upgrade;
-      }
-      #root /opt/www/test.enzhico.net;
-      #index index.html index.htm;
-      error_page 404 /404.html;
-          location = /40x.html {
-      }
+<p>注意这其中和普通HTTP代理的关键不同是：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proxy_set_header<span class="built_in"> Upgrade </span><span class="variable">$http_upgrade</span>;</span><br><span class="line">proxy_set_header<span class="built_in"> Connection </span><span class="variable">$connection_upgrade</span>;</span><br></pre></td></tr></table></figure>
 
-      error_page 500 502 503 504 /50x.html;
-          location = /50x.html {
-      }
-
-    listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/test.enzhico.net/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/test.enzhico.net/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
-}
-
-server {
-    listen 80;
-    server_name test.enzhico.net;
-    return 301 https://$host$request_uri; # managed by Certbot
-}
-</code></pre><p>注意这其中和普通HTTP代理的关键不同是：</p>
-<pre><code>proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection $connection_upgrade;
-</code></pre><h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
 <li><a href="http://blog.csdn.net/u011160994/article/details/47153365" target="_blank" rel="noopener">Android端与Java服务端交互——SocketIO</a></li>
 <li><a href="http://alexpdh.com/2017/09/03/springboot-socketio/" target="_blank" rel="noopener">Spring Boot 集成 socket.io 后端实现消息实时通信</a></li>
 <li><a href="http://blog.csdn.net/sun_t89/article/details/52060946" target="_blank" rel="noopener">Spring Boot实战之netty-socketio实现简单聊天室</a></li>
@@ -696,186 +329,221 @@ proxy_set_header Connection $connection_upgrade;
 <h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-socketio" target="_blank" rel="noopener">springboot-socketio</a></p>
 
     </div>
-    
-    <div class="post-footer">
-        <div class="col-sm-10">
-            <div>
-                <b>本文链接</b>：<a href="/2017/07/16/spring/sb-socketio.html">SpringBoot系列 - 集成SocketIO实时通信</a>
-            </div>
-            <div>
-                
-                    转载声明：本博客由熊能创作，商业转载请联系作者获得授权，非商业转载请注明出处 © <a href="https://www.xncoding.com/" target="_blank">飞污熊博客</a>。
-如转载至微信公众号，请在文末添加作者公众号二维码。
-                
-            </div>
-            <div>
-                
-            </div>
-        </div>
-        <div class="col-sm-2">
-            <img src="/images/wuxiong.jpg" width=100%/>
-        </div>
-    </div>
-</article>
 
-<div class="article-nav prev-next-wrap clearfix">
-    
-        <a href="/2017/07/20/spring/sb-async.html" class="pre-post btn btn-default" title='SpringBoot系列 - 异步线程池'>
-            <i class="fa fa-angle-left fa-fw"></i><span class="hidden-lg">上一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - 异步线程池</span>
-        </a>
     
     
-        <a href="/2017/07/15/spring/sb-websocket.html" class="next-post btn btn-default" title='SpringBoot系列 - 集成WebSocket实时通信'>
-            <span class="hidden-lg">下一篇</span>
-            <span class="hidden-xs">SpringBoot系列 - 集成WebSocket实时通信</span><i class="fa fa-angle-right fa-fw"></i>
-        </a>
     
-</div>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/springboot/" rel="tag"># springboot</a>
+          </div>
 
-    <div id="comments">
         
-	<script type="text/javascript" src="https://xnstatic-1253397658.cos.ap-shanghai.myqcloud.com/gitment.browser.js"></script>
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/07/15/spring/sb-websocket.html" rel="prev" title="SpringBoot系列 - 集成WebSocket实时通信">
+      <i class="fa fa-chevron-left"></i> SpringBoot系列 - 集成WebSocket实时通信
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/07/20/spring/sb-async.html" rel="next" title="SpringBoot系列 - 异步线程池">
+      SpringBoot系列 - 异步线程池 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
 <script>
-    var gitment = new Gitment({
-        id: window.location.pathname,
-        owner:"yidao620c",
-        repo:"comments",
-        oauth: {
-          client_id:"608d980b75fc48a1873e",
-          client_secret:"56fd98792841961d31a92ce3a2b5ba36e7bc2f17"
-        },
-        perPage:"10",
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
     });
-    gitment.render('comments');
+  }
 </script>
 
-    </div>
-
-
-
-
-
-                </main>
-                
-                    <aside role="navigation" class="col-md-3 sidebar">
-    
-        <div class="widget">
-            <h3 class="title">搜索</h3>
-            <div id="search-form">
-                <div id="result-mask" class="hide"></div>
-                <div class="search-area">
-                    
-                        <input id="search-key" type="search" autocomplete="off" placeholder="搜点什么呢？">
-                        <button type="button" class="search-form-submit" id="search-local">搜索</button>
-                    
-                    
-                </div>
-                <div id="result-wrap" class="hide">
-                    <div id="search-result"></div>
-                </div>
-                <div class="hide">
-                    <template id="search-tpl">
-                        <div class="item">
-                            <a href="/{path}" title="{title}">
-                                <div class="title">{title}</div>
-                                <div class="content">{content}</div>
-                            </a>
-                        </div>
-                    </template>
-                </div>
-            </div>
         </div>
-    
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
 
-    <div class="widget">
-        <h3 class="title">文章目录</h3>
-        
-            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概述"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引入依赖"><span class="toc-text">引入依赖</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#服务器代码"><span class="toc-text">服务器代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Android客户端"><span class="toc-text">Android客户端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于心跳机制"><span class="toc-text">关于心跳机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于断线和超时"><span class="toc-text">关于断线和超时</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#浏览器客户端演示"><span class="toc-text">浏览器客户端演示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SpringBoot集成"><span class="toc-text">SpringBoot集成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#修改配置"><span class="toc-text">修改配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加Bean配置"><span class="toc-text">添加Bean配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加消息结构类"><span class="toc-text">添加消息结构类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#添加消息处理类"><span class="toc-text">添加消息处理类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#添加ServerRunner"><span class="toc-text">添加ServerRunner</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#nginx反向代理"><span class="toc-text">nginx反向代理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考文章"><span class="toc-text">参考文章</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#GitHub源码"><span class="toc-text">GitHub源码</span></a></li></ol>
-        
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-inner">
 
-    
-        <div class="widget">
-            <div class="row">
-                <div class="col-md-5">
-                    <img src="/images/wuxiong.jpg" alt="公众号" class="img-responsive">
-                </div>
-                <div class="col-md-7">
-                    <a class="series-a" style="margin-left: -15px;" href="javascript:void(0)">公众号</a>
-                    <ul style="margin-left: -15px;">
-                        <li>技术干货推送</li>
-                        <li><b>为什么我划船不用桨<br/></b></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    
-</aside>
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
 
-                
-            </div>
-        </div>
-    </section>
-    <footer class="main-footer">
-    <div class="container">
-        <div class="row">
-        </div>
-    </div>
-</footer>
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引入依赖"><span class="nav-number">2.</span> <span class="nav-text">引入依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器代码"><span class="nav-number">3.</span> <span class="nav-text">服务器代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Android客户端"><span class="nav-number">4.</span> <span class="nav-text">Android客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于心跳机制"><span class="nav-number">5.</span> <span class="nav-text">关于心跳机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于断线和超时"><span class="nav-number">6.</span> <span class="nav-text">关于断线和超时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器客户端演示"><span class="nav-number">7.</span> <span class="nav-text">浏览器客户端演示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot集成"><span class="nav-number">8.</span> <span class="nav-text">SpringBoot集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#修改配置"><span class="nav-number">8.1.</span> <span class="nav-text">修改配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加Bean配置"><span class="nav-number">8.2.</span> <span class="nav-text">添加Bean配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加消息结构类"><span class="nav-number">8.3.</span> <span class="nav-text">添加消息结构类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加消息处理类"><span class="nav-number">8.4.</span> <span class="nav-text">添加消息处理类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加ServerRunner"><span class="nav-number">9.</span> <span class="nav-text">添加ServerRunner</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx反向代理"><span class="nav-number">10.</span> <span class="nav-text">nginx反向代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">11.</span> <span class="nav-text">参考文章</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub源码"><span class="nav-number">12.</span> <span class="nav-text">GitHub源码</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
 
-<a id="back-to-top" class="icon-btn hide">
-	<i class="fa fa-chevron-up"></i>
-</a>
-<script src="/js/prism/clipboard.min.js"></script>
-<script src="/js/prism/prism.js" async></script>
-
-
-    <div class="copyright">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="busuanzi">
-    
-        访问量:
-        <strong id="busuanzi_value_site_pv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-        &nbsp; | &nbsp;
-        访客数:
-        <strong id="busuanzi_value_site_uv">
-            <i class="fa fa-spinner fa-spin"></i>
-        </strong>
-    
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
 </div>
-
-            </div>
-            <div class="col-sm-12">
-                <span>Copyright &copy; 2016
-                </span> |
-                <span>
-                    Powered by <a href="//hexo.io" class="copyright-links" target="_blank" rel="nofollow">Hexo</a>
-                </span> |
-                <span>
-                    Theme by <a href="//github.com/itmuch/hexo-theme-itmuch.git" class="copyright-links" target="_blank" rel="nofollow">ITMuch</a>
-                </span>
-            </div>
-        </div>
-    </div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">240</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">98</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
 
 
-	<script src="/js/search.js?rev=@@hash"></script>
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
 
 
 
 
 
-    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
 
-<script src="/js/app.js?rev=@@hash"></script>
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
 
 </body>
 </html>
