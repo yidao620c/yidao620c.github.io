@@ -714,13 +714,20 @@ Gitalk是一个基于 Github Issue 和 Preact 开发的评论插件，详情Demo
 * 关闭hexo的将回车当换行做法是用正常的markdown两个回车当换行，在全局_config.yml中添加配置
 ```yaml
 marked:
-  gfm: false #这个是设置解析markdown的时候不要按照原始文本换行
-  breaks: false
+  gfm: true
+  breaks: false #这里表示不要自动添加换行，按照markdown语法来
   pedantic: false
-  sanitize: false
-  tables: true
   smartLists: true
-  smartypants: false
+  smartypants: true
+  modifyAnchors: 0
+  autolink: true
+  sanitizeUrl: false
+  headerIds: true
+  prependRoot: false
+  external_link:
+    enable: false
+    exclude: []
+    nofollow: false
 ```
 * 对于行内代码引用使用单个反引号的时候，如果代码长度过长的时候，代码会自动换行，导致上面文字撑开很难看。
 解决办法是修改css文件`/themes/next/source/css/_common/scaffolding/highlight/highlight.styl`
@@ -729,6 +736,7 @@ code {
   word-break: break-all; //这一行是增加的，为了防止inline代码引用过长换行后样式变差
 }
 ```
+* `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
 
 ## 参考
 
