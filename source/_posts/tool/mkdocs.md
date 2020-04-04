@@ -390,9 +390,7 @@ extra_css:
 ```
 - list1
     - sublist1
-        ```
         code
-        ```
     - sublist2
 - list2
 ```
@@ -411,7 +409,6 @@ extra_css:
     text1 = "Hello, "
     text2 = "world!"
     print text1 + text2
-    ```
 ```
 
 类型说明
