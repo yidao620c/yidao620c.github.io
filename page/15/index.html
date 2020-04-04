@@ -235,6 +235,9 @@
 <p>mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Galera Cluster</p>
 <p>我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。
 对于小公司，一般推荐使用keepalived+双主，简单。</p>
+<p>当主从复制正在进行中时，如果想查看从库两个线程运行状态，
+可以通过执行在从库里执行 <code>show slave status\G</code> 语句，以下的字段可以给你想要的信息：</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Master_Log_File       — 上一个从主库拷贝过来的binlog文件</span><br><span class="line">Read_Master_Log_P<span class="keyword">os</span>   — 主库的binlog文件被拷贝到从库的relay <span class="keyword">log</span>中的位置</span><br><span class="line">Relay_Master_Log_File — SQL线程当前处理中的relay <span class="keyword">log</span>文件</span><br><span class="line">Exec_Master_Log_P<span class="keyword">os</span>   — 当前binlog文件正在被执行的语句的位置</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2016/09/19/database/mysql-ha2.html#more" rel="contents">
@@ -310,6 +313,12 @@
       
           <p>用了这么久的mysql数据库，是时候来一篇总结了，这里整理使用过程中觉得比较重要也比较常用的知识点。</p>
 <p>开源数据库里面mysql的份额最高，也是最流行的，其实性能也非常高，所以一直用它。</p>
+<p>在CentOS 7.2里面通过yum来安装MySQL 5.7，同时配置好root密码以及允许其他ip访问。</p>
+<p>从 MySQL 官网选取合适的 MySQL 版本，获取下载地址。然后使用 <code>wget</code> 下载：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://repo.mysql.com/mysql57-community-release-el7-8.noarch.rpm</span><br></pre></td></tr></table></figure>
+
+<p>安装 yum Repository</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install mysql57-community-release-el7-8.noarch.rpm</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2016/09/17/database/mysql.html#more" rel="contents">
@@ -467,8 +476,12 @@
       
           <p>内部需要搭建一个源码管理控制环境，选择开源的gitlab，环境为centos7。这个平台类似于github，使用起来非常方便。
 现在将搭建的步骤记录下来，因为官网上面提供的是ubuntu的流程。</p>
-<p>全部命令都是在 root 用户下执行</p>
-<p>安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。</p>
+<p>全部命令都是在 root 用户下执行。安装操作系统 (CentOS 7 Minimal)，先配置好网卡和DNS，保证网络没问题。</p>
+<p>安装和添加基础工具</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install wget</span><br></pre></td></tr></table></figure>
+
+<p>安装EPEL源</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install epel-release</span><br><span class="line">wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://www.fedoraproject.org/static/0608B895.txt</span><br><span class="line">rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6</span><br></pre></td></tr></table></figure>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2016/09/09/fullstack/gitlab.html#more" rel="contents">
@@ -544,6 +557,15 @@
       
           <p>jinja2是python中的一个优秀的模板语言，类似于django的模板。它的速度快，安全，目前被各种框架被广泛使用。
 官网地址：<a href="http://jinja.pocoo.org/" target="_blank" rel="noopener">http://jinja.pocoo.org/</a></p>
+<p>它的一些特性：</p>
+<ul>
+<li>沙箱执行机制很安全</li>
+<li>通过对HTML进行自动转义防止XSS攻击</li>
+<li>模板继承</li>
+<li>实时编译为最优化的python代码，使得它运行速度非常快</li>
+<li>可选的模板预编译</li>
+<li>容易调试，错误行数直接指向模板中的行</li>
+<li>配置文件语法也是模板
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2016/09/05/python/jinja2.html#more" rel="contents">

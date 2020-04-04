@@ -18,15 +18,15 @@
     var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="由于CPU的速度远远快于磁盘、网络等IO，我们可选择使用多进程或多线程来并发执行代码。 然而系统不能无限制增加线程，而且切换线程开销也大，一旦线程数量过多，CPU花的时间主要在切换线程上，导致性能下降。 另外一种解决方案是异步IO，当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了。 一段时间后，当IO返回结果时，再通知CPU进行处理。">
+  <meta name="description" content="由于CPU的速度远远快于磁盘、网络等IO，我们可选择使用多进程或多线程来并发执行代码。 然而系统不能无限制增加线程，而且切换线程开销也大，一旦线程数量过多，CPU花的时间主要在切换线程上，导致性能下降。 另外一种解决方案是异步IO，当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了。 一段时间后，当IO返回结果时，再通知CPU进行处理。 异步IO模型需要">
 <meta property="og:type" content="article">
 <meta property="og:title" content="python核心 - 异步IO">
 <meta property="og:url" content="https://www.xncoding.com/2015/12/21/python/nio.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="由于CPU的速度远远快于磁盘、网络等IO，我们可选择使用多进程或多线程来并发执行代码。 然而系统不能无限制增加线程，而且切换线程开销也大，一旦线程数量过多，CPU花的时间主要在切换线程上，导致性能下降。 另外一种解决方案是异步IO，当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了。 一段时间后，当IO返回结果时，再通知CPU进行处理。">
+<meta property="og:description" content="由于CPU的速度远远快于磁盘、网络等IO，我们可选择使用多进程或多线程来并发执行代码。 然而系统不能无限制增加线程，而且切换线程开销也大，一旦线程数量过多，CPU花的时间主要在切换线程上，导致性能下降。 另外一种解决方案是异步IO，当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了。 一段时间后，当IO返回结果时，再通知CPU进行处理。 异步IO模型需要">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-12-21T14:22:22.000Z">
-<meta property="article:modified_time" content="2020-04-04T04:17:07.957Z">
+<meta property="article:modified_time" content="2020-04-04T14:34:00.733Z">
 <meta property="article:author" content="Xiong Neng">
 <meta property="article:tag" content="python核心">
 <meta name="twitter:card" content="summary">
@@ -238,14 +238,14 @@
 然而系统不能无限制增加线程，而且切换线程开销也大，一旦线程数量过多，CPU花的时间主要在切换线程上，导致性能下降。</p>
 <p>另外一种解决方案是异步IO，当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了。
 一段时间后，当IO返回结果时，再通知CPU进行处理。</p>
-<a id="more"></a>
-
 <p>异步IO模型需要一个消息循环，在消息循环中，主线程不断地重复“读取消息-处理消息”这一过程：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">loop = get_event_loop()</span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    event = loop.get_event()</span><br><span class="line">    process_event(event</span><br></pre></td></tr></table></figure>
 
 <p>息模型是如何解决同步IO必须等待IO操作这一问题的呢？当遇到IO操作时，代码只负责发出IO请求，不等待IO结果，
 然后直接结束本轮消息处理，进入下一轮消息处理过程。当IO操作完成后，将收到一条“IO完成”的消息，
 处理该消息时就可以直接获取IO操作结果。</p>
+<a id="more"></a>
+
 <h2 id="协程"><a href="#协程" class="headerlink" title="协程"></a>协程</h2><p>在学习异步IO模型前，我们先来了解协程。</p>
 <p>协程，又称微线程，纤程。英文名Coroutine。一般的子程序，或者称为函数，在所有语言中都是层级调用，通过栈实现的，
 一个线程就是执行一个子程序。子程序调用总是一个入口，一次返回，调用顺序是明确的。而协程的调用和子程序不同。

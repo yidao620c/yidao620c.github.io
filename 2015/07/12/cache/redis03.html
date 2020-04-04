@@ -18,15 +18,15 @@
     var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。 1234# MULTI# SADD &quot;user:1:following&quot; 2# SADD &quot;user:2:followers&quot; 1# EXEC redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。">
+  <meta name="description" content="redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。 1234# MULTI# SADD &quot;user:1:following&quot; 2# SADD &quot;user:2:followers&quot; 1# EXEC redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。 错误处理：  语法错误，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis笔记03 - 进阶篇">
 <meta property="og:url" content="https://www.xncoding.com/2015/07/12/cache/redis03.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。 1234# MULTI# SADD &quot;user:1:following&quot; 2# SADD &quot;user:2:followers&quot; 1# EXEC redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。">
+<meta property="og:description" content="redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。 1234# MULTI# SADD &quot;user:1:following&quot; 2# SADD &quot;user:2:followers&quot; 1# EXEC redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。 错误处理：  语法错误，">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-07-12T08:15:42.000Z">
-<meta property="article:modified_time" content="2020-04-04T12:36:21.436Z">
+<meta property="article:modified_time" content="2020-04-04T14:20:51.349Z">
 <meta property="article:author" content="Xiong Neng">
 <meta property="article:tag" content="redis">
 <meta name="twitter:card" content="summary">
@@ -237,14 +237,14 @@
         <p>redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。</p>
 <figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># MULTI</span></span><br><span class="line"><span class="meta"># SADD "user:1:following" 2</span></span><br><span class="line"><span class="meta"># SADD "user:2:followers" 1</span></span><br><span class="line"><span class="meta"># EXEC</span></span><br></pre></td></tr></table></figure>
 <p>redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。</p>
-<a id="more"></a>
-
 <p>错误处理：</p>
 <ul>
 <li>语法错误，redis直接返回错误，连语法正确的其他命令也不会执行</li>
 <li>运行错误，只有那条出错的语句不会执行成功，其他照样执行</li>
 </ul>
 <p>redis木有rollback机制，这个要靠自己去处理出错情况。</p>
+<a id="more"></a>
+
 <h3 id="watch命令介绍"><a href="#watch命令介绍" class="headerlink" title="watch命令介绍"></a>watch命令介绍</h3><p>我们知道在一个事务中只有当所有的命令都执行完后才能得到每个结果的返回值，可有些情况下需要先获得一条命令的返回值，然后再根据这个值执行下一条命令。这个时候可以使用watch，watch命令可以监控一个或多个键，一旦其中有一个键被修改或删除，之后的事务就不会执行。监控一直持续到EXEC命令(因为事务中的命令是在EXEC之后才执行的，所以在MULTI命令后可以修改watch监控的键值)</p>
 <p>Tips：watch命令的作用只是当被监控的键值被修改后阻止之后一个事务的执行，而不能保证其他客户端不修改这一键值，所以我们需要在EXEC执行失败后重新执行整个函数</p>
 <p>执行EXEC命令后会取消对所有键的监控，如果不想执行事务中的命令也可以使用unwatch命令取消监控</p>

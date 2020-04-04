@@ -619,6 +619,10 @@ PythonAnywhere对于一些没有太多访问者的小应用是免费的，所以
 而网上的一些教程很多都过时了。最近看到一个外文的教程非常不错，网址是：<a href="http://tutorial.simpleblog.org/" target="_blank" rel="noopener">http://tutorial.simpleblog.org/</a>，
 这个是基于django1.9和python3.4，通俗易懂，非常适合新手入门。
 那么我自己参考这个整理了一下这个教程，同时还将源码上传到GitHub上去了。希望对于大家有帮助。教程中如果有不足之处希望大家不吝赐教 ^_^</p>
+<p>参考教程：<a href="http://tutorial.simpleblog.org/" target="_blank" rel="noopener">http://tutorial.simpleblog.org/</a></p>
+<p>GitHub项目地址：<a href="https://github.com/yidao620c/simpleblog" target="_blank" rel="noopener">https://github.com/yidao620c/simpleblog</a></p>
+<p>演示地址：<a href="https://yidao620.pythonanywhere.com/" target="_blank" rel="noopener">https://yidao620.pythonanywhere.com/</a></p>
+<p>非常期待有人合作一起完成正式版1.0。目前有74个人fork，但暂时还木有收到任何的pull requests。→_→</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2015/08/01/simpleblog-01.html#more" rel="contents">
@@ -695,6 +699,12 @@ PythonAnywhere对于一些没有太多访问者的小应用是免费的，所以
           <p>redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。</p>
 <figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># MULTI</span></span><br><span class="line"><span class="meta"># SADD "user:1:following" 2</span></span><br><span class="line"><span class="meta"># SADD "user:2:followers" 1</span></span><br><span class="line"><span class="meta"># EXEC</span></span><br></pre></td></tr></table></figure>
 <p>redis将客户端发送的事务执行链放入一个队列queue中，然后接受到EXEC请求后才顺序执行这个命令串，同时保证执行这些的时候不被其他命令打扰。</p>
+<p>错误处理：</p>
+<ul>
+<li>语法错误，redis直接返回错误，连语法正确的其他命令也不会执行</li>
+<li>运行错误，只有那条出错的语句不会执行成功，其他照样执行</li>
+</ul>
+<p>redis木有rollback机制，这个要靠自己去处理出错情况。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2015/07/12/cache/redis03.html#more" rel="contents">
@@ -773,6 +783,8 @@ PythonAnywhere对于一些没有太多访问者的小应用是免费的，所以
 其上支持的操作与Memcached的操作类似。但它的功能更丰富。</p>
 <p>string类型是二进制安全的。意思是redis的string可以包含任何数据，比如jpg图片或者序列化的对象。
 从内部实现来看其实string可以看作byte数组，最大上限是1G字节，下面是string类型的定义:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span> &#123;</span></span><br><span class="line">　　<span class="keyword">long</span> len;</span><br><span class="line">　　<span class="keyword">long</span> <span class="built_in">free</span>;</span><br><span class="line">　　<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>len是buf数组的长度。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2015/07/06/cache/redis02.html#more" rel="contents">
