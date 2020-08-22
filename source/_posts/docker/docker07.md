@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点07 - 单主机网络
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 57288
 date: 2017-04-10 12:17:22

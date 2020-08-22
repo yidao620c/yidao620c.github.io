@@ -1,7 +1,7 @@
 ---
 title: Docker安装常用软件
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 3896
 date: 2018-05-22 12:35:12

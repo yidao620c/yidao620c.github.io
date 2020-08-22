@@ -1,11 +1,11 @@
 ---
 layout: post
-title: 5分钟搭建一个license服务器
+title: 5分钟搭建一个IDEA服务
 date: 2016-10-16 20:22:22 +0800
 toc: true
-categories: linux
+categories: 开发工具
 tags:
-  - license
+  - idea
 abbrlink: 7125
 ---
 

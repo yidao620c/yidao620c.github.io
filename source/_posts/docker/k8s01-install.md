@@ -1,9 +1,9 @@
 ---
 layout: post
 title: Kubernetes安装和配置
-date: '2020-03-01 10:20:11 +0800'
+date: '2020-01-02 10:20:11 +0800'
 toc: true
-categories: k8s
+categories: 容器技术
 tags:
   - k8s
 ---

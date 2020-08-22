@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点05 - Registry
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 3685
 date: 2017-04-07 12:07:09

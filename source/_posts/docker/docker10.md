@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点10 - 容器网络overlay
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 61869
 date: 2017-04-15 09:56:12

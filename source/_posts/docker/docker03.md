@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点03 - 镜像
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 58190
 date: 2017-04-03 08:26:12

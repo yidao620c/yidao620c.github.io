@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点06 - 运行容器
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 30454
 date: 2017-04-09 09:16:33

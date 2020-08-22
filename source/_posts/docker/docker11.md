@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点11 - 容器网络macvlan
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 30376
 date: 2017-04-16 15:22:38

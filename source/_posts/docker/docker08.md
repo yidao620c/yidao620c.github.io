@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点08 - 存储卷
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 46558
 date: 2017-04-11 10:37:55

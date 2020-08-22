@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点09 - 多主机管理
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 10379
 date: 2017-04-12 19:15:36

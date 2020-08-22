@@ -3,7 +3,7 @@ layout: post
 title: Nginx重新编译添加模块
 date: 2018-03-17 22:47:02 +0800
 toc: true
-categories: linux
+categories: fullstack
 tags:
   - nginx
 abbrlink: 1244

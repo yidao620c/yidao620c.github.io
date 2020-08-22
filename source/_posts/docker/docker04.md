@@ -1,7 +1,7 @@
 ---
 title: Docker每天学一点04 - Dockerfile
 toc: true
-categories: docker
+categories: 容器技术
 tags: docker
 abbrlink: 42100
 date: 2017-04-05 15:17:09
