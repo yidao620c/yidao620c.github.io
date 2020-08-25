@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - proxy
+  - linux
 abbrlink: 12127
 ---
 

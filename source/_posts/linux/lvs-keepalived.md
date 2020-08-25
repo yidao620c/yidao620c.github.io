@@ -5,7 +5,9 @@ date: 2015-09-16 16:40:04 +0800
 toc: true
 categories: linux
 tags:
-  - 负载均衡
+  - lvs
+  - keepalived
+  - linux
 abbrlink: 18663
 ---
 

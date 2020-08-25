@@ -7,6 +7,7 @@ categories: linux
 tags:
   - dns
   - bind9
+  - linux
 abbrlink: 33172
 ---
 Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，

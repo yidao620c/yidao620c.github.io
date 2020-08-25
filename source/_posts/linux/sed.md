@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - sed
+  - linux
 abbrlink: 37690
 ---
 

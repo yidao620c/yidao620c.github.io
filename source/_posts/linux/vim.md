@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - vim
+  - linux
 abbrlink: 9657
 ---
 

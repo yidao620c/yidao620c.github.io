@@ -7,6 +7,7 @@ toc: true
 categories: linux
 tags:
   - mqtt
+  - linux
 abbrlink: 34260
 ---
 

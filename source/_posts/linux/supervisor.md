@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - supervisor
+  - linux
 abbrlink: 39907
 ---
 

@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - yum
+  - linux
 abbrlink: 41580
 ---
 

@@ -4,7 +4,7 @@ toc: true
 categories: 容器技术
 tags: docker
 abbrlink: 10379
-date: 2017-04-12 19:15:36
+date: 2019-03-12 19:15:36
 ---
 
 前面的实验都是在一个host中，而真实环境中肯定会有多个主机。

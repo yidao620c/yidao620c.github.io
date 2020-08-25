@@ -4,7 +4,7 @@ toc: true
 categories: 容器技术
 tags: docker
 abbrlink: 46558
-date: 2017-04-11 10:37:55
+date: 2019-03-11 10:37:55
 ---
 
 Docker 为容器提供了两种存放数据的资源：

@@ -6,6 +6,8 @@ toc: true
 categories: linux
 tags:
   - squid
+  - proxy
+  - linux
 abbrlink: 58371
 ---
 

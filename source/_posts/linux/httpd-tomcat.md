@@ -5,7 +5,9 @@ comments: true
 toc: true
 categories: linux
 tags:
-  - 负载均衡
+  - tomcat
+  - httpd
+  - linux
 abbrlink: 985
 ---
 

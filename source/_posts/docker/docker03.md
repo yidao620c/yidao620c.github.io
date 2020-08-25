@@ -4,7 +4,7 @@ toc: true
 categories: 容器技术
 tags: docker
 abbrlink: 58190
-date: 2017-04-03 08:26:12
+date: 2019-03-03 08:26:12
 ---
 
 镜像是 Docker 容器的基石，容器是镜像的运行实例，有了镜像才能启动容器。

@@ -1,11 +1,12 @@
 ---
 layout: post
 title: CentOS7搭建vsftpd服务
-date: '2019-02-03 22:14:22 +0800'
+date: '2018-02-08 22:14:22 +0800'
 toc: true
 categories: linux
 tags:
   - vsftpd
+  - linux
 ---
 FTP是一种在互联网中进行文件传输的协议，基于客户端/服务器模式，默认使用20、21号端口，
 其中端口20（数据端口）用于进行数据传输，端口21（命令端口）用于接受客户端发出的相关FTP命令与参数。

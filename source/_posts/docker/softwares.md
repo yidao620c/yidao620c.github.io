@@ -4,7 +4,7 @@ toc: true
 categories: 容器技术
 tags: docker
 abbrlink: 3896
-date: 2018-05-22 12:35:12
+date: 2019-03-30 12:35:12
 ---
 
 这里总结常用软件的容器化安装步骤，环境为CentOS7。

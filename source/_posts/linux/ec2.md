@@ -4,6 +4,7 @@ toc: true
 categories: linux
 tags:
   - EC2
+  - linux
 abbrlink: 22247
 date: 2017-09-30 17:29:33
 ---

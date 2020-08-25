@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - parted
+  - linux
 abbrlink: 23572
 ---
 

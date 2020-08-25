@@ -6,6 +6,7 @@ toc: true
 categories: linux
 tags:
   - ntpd
+  - linux
 abbrlink: 9758
 ---
 
