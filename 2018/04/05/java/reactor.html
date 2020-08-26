@@ -18,12 +18,12 @@
     var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为“事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多进程和多线程技术相比">
+  <meta name="description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多进程和多线程技术相比">
 <meta property="og:type" content="article">
 <meta property="og:title" content="聊聊Reactor I&#x2F;O模型">
 <meta property="og:url" content="https://www.xncoding.com/2018/04/05/java/reactor.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为“事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多进程和多线程技术相比">
+<meta property="og:description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多进程和多线程技术相比">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png">
 <meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor05.png">
@@ -31,7 +31,7 @@
 <meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor02.png">
 <meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor03.png">
 <meta property="article:published_time" content="2018-04-05T01:23:12.000Z">
-<meta property="article:modified_time" content="2020-04-04T04:11:21.366Z">
+<meta property="article:modified_time" content="2020-08-26T13:51:59.974Z">
 <meta property="article:author" content="Xiong Neng">
 <meta property="article:tag" content="java">
 <meta name="twitter:card" content="summary">
@@ -241,7 +241,7 @@
 
       
         <p>上一篇介绍了Unix系统支持的I/O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。</p>
-<p>I/O多路复用又被称为“事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），
+<p>I/O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），
 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。</p>
 <p>与多进程和多线程技术相比，I/O多路复用技术的最大优势是系统开销小，系统不必创建进程/线程，也不必维护这些进程/线程，从而大大减小了系统的开销。</p>
 <p>Reactor是一种应用在服务器端的开发模式，目的是提高服务端程序的并发能力，其实就是实现了I/O多路复用这种I/O模型。</p>
@@ -258,7 +258,7 @@
 <p>如下图所示</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png" alt=""></p>
 <p>现在餐厅的口碑好，顾客人数不断增加，这时服务员就有点处理不过来了。这时老板发现，每个服务员在服务完客人后，都要去休息一下，
-因此老板就说，“你们都别休息了，在旁边待命”。这样可能 10 个服务员也来得及服务 20 个顾客了。这也是“线程池”的方式，
+因此老板就说，”你们都别休息了，在旁边待命”。这样可能 10 个服务员也来得及服务 20 个顾客了。这也是”线程池”的方式，
 通过重用线程来减少线程的创建和销毁时间，从而提高性能。</p>
 <h3 id="Reactor方式"><a href="#Reactor方式" class="headerlink" title="Reactor方式"></a>Reactor方式</h3><p>但是客人又进一步增加了，仅仅靠剥削服务员的休息时间也没有办法服务这么多客人。老板仔细观察，
 发现其实服务员并不是一直在干活的，大部分时间他们只是站在餐桌旁边等客人点菜。</p>
@@ -415,7 +415,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">222</span>
+          <span class="site-state-item-count">221</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -428,7 +428,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-count">100</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

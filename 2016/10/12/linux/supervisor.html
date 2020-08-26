@@ -26,7 +26,7 @@
 <meta property="og:description" content="Supervisor (http:&#x2F;&#x2F;supervisord.org) 是一个用 Python 写的进程管理工具， 可以很方便的用来启动、重启、关闭进程（不仅仅是Python进程）。除了对单个进程的控制，还可以同时启动、关闭多个进程， 有时候服务器出问题导致所有应用程序都被杀死，此时可以用supervisor同时启动所有应用程序。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2016-10-12T00:22:22.000Z">
-<meta property="article:modified_time" content="2020-08-25T15:00:00.236Z">
+<meta property="article:modified_time" content="2020-08-26T13:51:59.985Z">
 <meta property="article:author" content="Xiong Neng">
 <meta property="article:tag" content="linux">
 <meta property="article:tag" content="supervisor">
@@ -264,7 +264,7 @@
 <li>supervisord（这是 server 端，对应的有 client 端：supervisorctl）</li>
 <li>应用程序（即我们要管理的程序）。</li>
 </ol>
-<p>首先来看 supervisord 的配置文件。去除里面大部分注释和“不相关”的部分，我们可以先看这些配置：</p>
+<p>首先来看 supervisord 的配置文件。去除里面大部分注释和”不相关”的部分，我们可以先看这些配置：</p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[unix_http_server]</span></span><br><span class="line"><span class="attr">file</span>=/tmp/supervisor.sock   <span class="comment">; UNIX socket 文件，supervisorctl 会使用</span></span><br><span class="line"><span class="comment">;chmod=0700                 ; socket 文件的 mode，默认是 0700</span></span><br><span class="line"><span class="comment">;chown=nobody:nogroup       ; socket 文件的 owner，格式： uid:gid</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;[inet_http_server]         ; HTTP 服务器，提供 web 管理界面</span></span><br><span class="line"><span class="comment">;port=127.0.0.1:9001        ; Web 管理后台运行的 IP 和端口，如果开放到公网，需要注意安全性</span></span><br><span class="line"><span class="comment">;username=user              ; 登录管理后台的用户名</span></span><br><span class="line"><span class="comment">;password=123               ; 登录管理后台的密码</span></span><br><span class="line"></span><br><span class="line"><span class="section">[supervisord]</span></span><br><span class="line"><span class="attr">logfile</span>=/tmp/supervisord.log <span class="comment">; 日志文件，默认是 $CWD/supervisord.log</span></span><br><span class="line"><span class="attr">logfile_maxbytes</span>=<span class="number">50</span>MB        <span class="comment">; 日志文件大小，超出会 rotate，默认 50MB</span></span><br><span class="line"><span class="attr">logfile_backups</span>=<span class="number">10</span>           <span class="comment">; 日志文件保留备份数量默认 10</span></span><br><span class="line"><span class="attr">loglevel</span>=info                <span class="comment">; 日志级别，默认 info，其它: debug,warn,trace</span></span><br><span class="line"><span class="attr">pidfile</span>=/tmp/supervisord.pid <span class="comment">; pid 文件</span></span><br><span class="line"><span class="attr">nodaemon</span>=<span class="literal">false</span>               <span class="comment">; 是否在前台启动，默认是 false，即以 daemon 的方式启动</span></span><br><span class="line"><span class="attr">minfds</span>=<span class="number">1024</span>                  <span class="comment">; 可以打开的文件描述符的最小值，默认 1024</span></span><br><span class="line"><span class="attr">minprocs</span>=<span class="number">200</span>                 <span class="comment">; 可以打开的进程数的最小值，默认 200</span></span><br><span class="line"></span><br><span class="line"><span class="comment">; the below section must remain in the config file for RPC</span></span><br><span class="line"><span class="comment">; (supervisorctl/web interface) to work, additional interfaces may be</span></span><br><span class="line"><span class="comment">; added by defining them in separate rpcinterface: sections</span></span><br><span class="line"><span class="section">[rpcinterface:supervisor]</span></span><br><span class="line"><span class="attr">supervisor.rpcinterface_factory</span> = supervisor.rpcinterface:make_main_rpcinterface</span><br><span class="line"></span><br><span class="line"><span class="section">[supervisorctl]</span></span><br><span class="line"><span class="attr">serverurl</span>=unix:///tmp/supervisor.sock <span class="comment">; 通过 UNIX socket 连接 supervisord，路径与 unix_http_server 部分的 file 一致</span></span><br><span class="line"><span class="comment">;serverurl=http://127.0.0.1:9001 ; 通过 HTTP 的方式连接 supervisord</span></span><br><span class="line"></span><br><span class="line"><span class="comment">; 包含其他的配置文件</span></span><br><span class="line"><span class="section">[include]</span></span><br><span class="line"><span class="attr">files</span> = relative/directory/*.ini    <span class="comment">; 可以是 *.conf 或 *.ini</span></span><br></pre></td></tr></table></figure>
 
 <p>然后可以通过 supervisord 命令启动 supervisord:</p>
@@ -419,7 +419,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">222</span>
+          <span class="site-state-item-count">221</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -432,7 +432,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">101</span>
+        <span class="site-state-item-count">100</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
