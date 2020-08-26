@@ -40,7 +40,7 @@ curl https://bc.gongxinke.cn/downloads/install-python-latest | bash
 现在的windows系统一般都是64位系统了，
 所以建议你去下载[64位安装版本](https://www.python.org/ftp/python/3.8.0/python-3.8.0-amd64.exe)
 
-下载下来后，双击安装包，选中"Add Python 3.8 to PATH” 这个选项，点击"Install Now”开始安装。
+下载下来后，双击安装包，选中"Add Python 3.8 to PATH" 这个选项，点击"Install Now"开始安装。
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/p02_install.png)
 

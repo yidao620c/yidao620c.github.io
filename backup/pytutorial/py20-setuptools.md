@@ -44,7 +44,7 @@ xnrpc项目的目录结果如下
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/pysetup001.png)
 
-项目最顶层的目录为"xnrpc”，其中与打包最相关的文件是setup.py，
+项目最顶层的目录为"xnrpc"，其中与打包最相关的文件是setup.py，
 这里面最核心的文件就是这个setup.py了，我们看看里面写什么：
 
 ```python
