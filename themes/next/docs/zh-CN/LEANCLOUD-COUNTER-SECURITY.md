@@ -9,7 +9,7 @@
 # 注册 LeanCloud 并创建应用
 - 首先，前往 LeanCloud 官网 [leancloud.cn](https://leancloud.cn) 进行注册，并登录。
 
-  请注意，目前华东节点和华北节点创建应用需要先在账号设置完成实名认证，并且官方表明“[在国内市场将只服务于可验证的商业客户](https://leancloudblog.com/domain-incident/)”；美国节点暂无上述要求，并且账号系统与华东节点和华北节点是独立的，如需使用请前往 LeanCloud 国际版官网 [leancloud.app](https://leancloud.app) 注册登录。
+  请注意，目前华东节点和华北节点创建应用需要先在账号设置完成实名认证，并且官方表明"[在国内市场将只服务于可验证的商业客户](https://leancloudblog.com/domain-incident/)”；美国节点暂无上述要求，并且账号系统与华东节点和华北节点是独立的，如需使用请前往 LeanCloud 国际版官网 [leancloud.app](https://leancloud.app) 注册登录。
 
 - 然后点击图示 `1` 处，进入控制台：
 
@@ -19,7 +19,7 @@
 
   ![2](https://lc-cqha0xyi.cn-n1.lcfile.com/33a56b754753a5d34b01.jpg)
 
-- 在弹出窗口 `1` 处输入应用名称（可随意输入，可更改，为演示方便取名为test），并选择 `2` 处“开发版”，然后点击 `3` 处创建：
+- 在弹出窗口 `1` 处输入应用名称（可随意输入，可更改，为演示方便取名为test），并选择 `2` 处"开发版”，然后点击 `3` 处创建：
 
   ![3](https://lc-cqha0xyi.cn-n1.lcfile.com/649ccfc6f12015d1eefb.jpg)
 

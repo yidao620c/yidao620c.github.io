@@ -28,7 +28,7 @@ abbrlink: 16870
 
 首先我们需要配置PyCharm通服务器的代码同步，打开Tools | Deployment | Configuration
 
-点击左边的“+”添加一个部署配置，输入名字，类型选SFTP
+点击左边的"+"添加一个部署配置，输入名字，类型选SFTP
 ![](https://xnstatic-1253397658.file.myqcloud.com/pcr001.png)
 
 确定之后，再配置远程服务器的ip、端口、用户名和密码。root path是文件上传的根目录，注意这个目录必须用户名有权限创建文件。
@@ -38,7 +38,7 @@ abbrlink: 16870
 Deploy path on server 这里填写相对于root path的目录，下面那个web path不用管先
 ![](https://xnstatic-1253397658.file.myqcloud.com/pcr003.png)
 
-如果你还有一些文件或文件夹不想同步，那么在配置对话框的第三个tab页“Excluded path”里面添加即可，可同时指定本地和远程。
+如果你还有一些文件或文件夹不想同步，那么在配置对话框的第三个tab页"Excluded path"里面添加即可，可同时指定本地和远程。
 
 还有一个设置，打开Tools | Deployment | Options，将"Create Empty directories"打上勾，要是指定的文件夹不存在，会自动创建。
 
@@ -75,7 +75,7 @@ Deploy path on server 这里填写相对于root path的目录，下面那个web 
 然后点击"Add Remote"，填写主机的ssh配置
 ![](https://xnstatic-1253397658.file.myqcloud.com/pcr007.png)
 
-如果之前配置过SFTP的话就直接选“Deployment configuration”，然后选择刚刚的模板名称就可以了，由于我上面配置过就直接选模板，
+如果之前配置过SFTP的话就直接选"Deployment configuration"，然后选择刚刚的模板名称就可以了，由于我上面配置过就直接选模板，
 这里请仔细看我的Python解释器是虚拟环境virtualenv，这个要在服务器上面先创建好虚拟环境。
 ![](https://xnstatic-1253397658.file.myqcloud.com/pcr009.png)
 
@@ -83,7 +83,7 @@ Deploy path on server 这里填写相对于root path的目录，下面那个web 
 完成之后选择这个远程的解释器作为工程的解释器即可,然后配置一个运行实例，打断点调试。
 这里我以另外一个django工程为例来说明，名字为zspace，因为用一个web工程来说明更具代表性。
 
-选择“Run/Debug Configuration”，添加一个“Django server”，然后配置像下面这样写
+选择"Run/Debug Configuration"，添加一个"Django server"，然后配置像下面这样写
 ![](https://xnstatic-1253397658.file.myqcloud.com/pcr010.png)
 请注意图中标出的几个点，具体什么意思就不用多解释了吧，^_^
 

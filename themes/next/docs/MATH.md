@@ -89,7 +89,7 @@ $$\begin{align}
 \end{align}$$
 ```
 
-Sometimes, you want to use more “exotic” style to refer your equation. You can use `\tag{}` to achieve this. For example:
+Sometimes, you want to use more "exotic” style to refer your equation. You can use `\tag{}` to achieve this. For example:
 
 ```latex
 $$x+1\over\sqrt{1-x^2} \tag{i}\label{eq_tag}$$
@@ -148,7 +148,7 @@ markdown:
     breaks: true
     linkify: true
     typographer: true
-    quotes: '“”‘’'
+    quotes: '"”‘’'
   plugins:
     - markdown-it-katex
 ```

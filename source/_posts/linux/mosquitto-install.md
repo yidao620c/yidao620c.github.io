@@ -18,9 +18,9 @@ MQTT（MQ Telemetry Transport），消息队列遥测传输协议，轻量级的
 
 值得一提的是mqtt提供三种不同质量的消息服务：
 
-* “至多一次”：消息发布完全依赖底层 TCP/IP 网络。会发生消息丢失或重复。这一级别可用于如下情况，环境传感器数据，丢失一次读记录无所谓，因为不久后还会有第二次发送。
-* “至少一次”：确保消息到达，但消息重复可能会发生。
-* “只有一次”：确保消息到达一次。这一级别可用于如下情况，在计费系统中，消息重复或丢失会导致不正确的结果。
+* "至多一次"：消息发布完全依赖底层 TCP/IP 网络。会发生消息丢失或重复。这一级别可用于如下情况，环境传感器数据，丢失一次读记录无所谓，因为不久后还会有第二次发送。
+* "至少一次"：确保消息到达，但消息重复可能会发生。
+* "只有一次"：确保消息到达一次。这一级别可用于如下情况，在计费系统中，消息重复或丢失会导致不正确的结果。
 <!-- more -->
 
 ### 安装
@@ -112,7 +112,7 @@ sudo yum install mosquitto mosquitto-clients libmosquitto-devel libmosquittopp-d
 # 启用PSK（Pre-shared-key）支持
 #psk_hint
 
-# SSL/TSL加密算法，可以使用“openssl ciphers”命令获取
+# SSL/TSL加密算法，可以使用"openssl ciphers"命令获取
 # as the output of that command.
 #ciphers
 
@@ -182,7 +182,7 @@ log_dest none
 # Bridges
 # =================================================================
 
-# 允许服务之间使用“桥接”模式（可用于分布式部署）
+# 允许服务之间使用"桥接"模式（可用于分布式部署）
 #connection <name>
 #address <host>[:<port>]
 #topic <topic> [[[out | in | both] qos-level] local-prefix remote-prefix]
@@ -268,7 +268,7 @@ mosquitto_pub -t 主题 -i 发布端 -h host -m '我是发布端，你好。'
 mosquitto_pub -h localhost -t mqtt -m "hello world."
 ```
 
-这时候前面那个订阅窗口就可以收到”hello world”的消息了。
+这时候前面那个订阅窗口就可以收到"hello world"的消息了。
 
 演示成功！！！
 

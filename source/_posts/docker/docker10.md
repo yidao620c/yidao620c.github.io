@@ -171,7 +171,7 @@ default via 172.18.0.1 dev eth1
 bbox1 有两个网络接口 eth0 和 eth1。eth0 IP 为 10.0.0.2，连接的是 overlay 网络 ov_net1。eth1 IP 172.18.0.2，
 容器的默认路由是走 eth1，eth1 是哪儿来的呢？
 
-其实，docker 会创建一个 bridge 网络 “docker_gwbridge”，为所有连接到 overlay 网络的容器提供访问外网的能力
+其实，docker 会创建一个 bridge 网络 "docker_gwbridge"，为所有连接到 overlay 网络的容器提供访问外网的能力
 
 ```
 [root@localhost ~]# docker network ls

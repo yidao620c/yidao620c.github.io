@@ -61,7 +61,7 @@ $ git commit -m "My simple blog first commit"
 
 ## 推送到Github上
 登录[GitHub.com](跳转到GitHub.com网站，注册一个新的免费账号)网站，如果没有就先注册一个。
-创建一个新的仓库名字为`simpleblog`，在下一屏中，你将看到你的仓库克隆 URL。选择“HTTPS”版本，拷贝地址，我们马上要把它粘贴到终端
+创建一个新的仓库名字为`simpleblog`，在下一屏中，你将看到你的仓库克隆 URL。选择"HTTPS"版本，拷贝地址，我们马上要把它粘贴到终端
 
 在控制台输入以下内容（替换<yidao620c>为你的github用户名，不包含尖括号）：
 ```bash
@@ -74,8 +74,8 @@ $ git push -u origin master
 先去<www.pythonanywhere.com>网站注册个用户名，免费的用户即可。
 
 ## 在 PythonAnywhere 上拉取我们的代码
-当然注册完 PythonAnywhere，你讲会转到仪表盘或“控制台”页面。
-选择启动“Bash”控制台这一选项，这是 PythonAnywhere 版的控制台，就像你本地电脑上的一样。
+当然注册完 PythonAnywhere，你讲会转到仪表盘或"控制台"页面。
+选择启动"Bash"控制台这一选项，这是 PythonAnywhere 版的控制台，就像你本地电脑上的一样。
 ```bash
 $ git clone https://github.com/yidao620c/simpleblog.git
 ```
@@ -115,14 +115,14 @@ pip install django
 ### 设置 virtualenv
 你将会被带到 PythonAnywhere 上你的Web 应用程序的配置屏，那个页面是每次你想修改服务器上你的应用程序时候要去的页面。
 
-在“Virtualenv”一节，点击红色文字“Enter the path to a virtualenv"，
+在"Virtualenv"一节，点击红色文字"Enter the path to a virtualenv"，
 然后键入：`/home/<your-username>/simpleblog/myvenv/`。前进之前，先点击有复选框的蓝色框以保存路径。
 
 ### 配置 WSGI 文件
-Django使用“WSGI 协议”，它是用来服务Python网站的一个标准。PythonAnywhere支持这个标准。
+Django使用"WSGI 协议"，它是用来服务Python网站的一个标准。PythonAnywhere支持这个标准。
 PythonAnywhere识别我们Django博客的方式是通过配置WSGI配置文件。
 
-点击 “WSGI configuration file”链接
+点击 "WSGI configuration file"链接
 （在"Code"一节，它将被命名为如 /var/www/<your-username>_pythonanywhere_com_wsgi.py），然后跳转到一个编辑器。
 
 删除所有的内容并用以下内容替换：
@@ -160,7 +160,7 @@ application = StaticFilesHandler(get_wsgi_application())
 * 有一些常见的调试小贴士在[debugging tips on the PythonAnywhere](https://www.pythonanywhere.com/wiki/DebuggingImportError)里.
 
 ## 你上线了！
-你网站的默认页面说“Welcome to Django”，如同你本地计算机上的一样。试着添加/admin/到URL的末尾，然后你会到达管理者的页面。输入用户名和密码登录，然后你会看到服务器上的 add new Posts 。
+你网站的默认页面说"Welcome to Django"，如同你本地计算机上的一样。试着添加/admin/到URL的末尾，然后你会到达管理者的页面。输入用户名和密码登录，然后你会看到服务器上的 add new Posts 。
 
 给你自己一个超大的鼓励！服务器部署是web开发中最棘手的部分之一，它通常要耗费人们几天时间才能搞定。但你的网站已经上线，运转在真正的互联网上，就是这样！
 

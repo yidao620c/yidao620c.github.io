@@ -69,7 +69,7 @@ Supervisor 相当强大，提供了很丰富的功能，不过我们可能只需
 1. supervisord（这是 server 端，对应的有 client 端：supervisorctl）
 2. 应用程序（即我们要管理的程序）。
 
-首先来看 supervisord 的配置文件。去除里面大部分注释和“不相关”的部分，我们可以先看这些配置：
+首先来看 supervisord 的配置文件。去除里面大部分注释和"不相关"的部分，我们可以先看这些配置：
 ```
 [unix_http_server]
 file=/tmp/supervisor.sock   ; UNIX socket 文件，supervisorctl 会使用

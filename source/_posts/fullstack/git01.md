@@ -409,7 +409,7 @@ Changes to be committed:
  create mode 100644 contact.txt
 ```
 
-一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是“干净”的：
+一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是"干净"的：
 ```
 [root@controller161 gitdemo]# git status
 On branch master
@@ -437,7 +437,7 @@ nothing to commit, working directory clean
 
 总之，就是让这个文件回到最近一次git commit或git add时的状态。
 
-`git checkout -- file` 命令中的`--`很重要，没有`--`，就变成了“切换到另一个分支”的命令，
+`git checkout -- file` 命令中的`--`很重要，没有`--`，就变成了"切换到另一个分支"的命令，
 我们在后面的分支管理中会再次遇到`git checkout`命令。
 
 还有一种情况是，你想将暂存区的修改撤销掉:

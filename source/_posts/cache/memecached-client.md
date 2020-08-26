@@ -86,7 +86,7 @@ public class SimpleCache {
             value = client.get("hello");
             System.out.println("hello=" + value);
  
-            // value=client.get(“hello”,3000);
+            // value=client.get("hello",3000);
  
             /**
              * Memcached是通过cas协议实现原子更新，所谓原子更新就是compare and set，

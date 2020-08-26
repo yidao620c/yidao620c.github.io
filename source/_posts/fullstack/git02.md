@@ -165,7 +165,7 @@ this is dev line
 现在，master分支和feature1分支各自都分别有新的提交，变成了这样:
 ![](https://xnstatic-1253397658.file.myqcloud.com/git10.png)
 
-这种情况下，Git无法执行“快速合并”，试试合并看看:
+这种情况下，Git无法执行"快速合并"，试试合并看看:
 ```bash
 [root@controller161 gitdemo]# git merge feature1
 Auto-merging readme.txt
@@ -273,7 +273,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
 
 并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？
 
-幸好，Git还提供了一个stash功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作:
+幸好，Git还提供了一个stash功能，可以把当前工作现场"储藏"起来，等以后恢复现场后继续工作:
 ```bash
 [root@controller161 gitdemo]# git stash
 Saved working directory and index state WIP on dev: a2c9e32 fix confict

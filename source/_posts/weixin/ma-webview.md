@@ -36,7 +36,7 @@ date: 2017-12-12 10:16:53
 ```html
 <!– wxml –>
 <!– 指向微信公众平台首页的web-view –>
-<web-view src=”https://mp.weixin.qq.com/”></web-view>
+<web-view src="https://mp.weixin.qq.com/"></web-view>
 ```
 
 ## web-view组件接口

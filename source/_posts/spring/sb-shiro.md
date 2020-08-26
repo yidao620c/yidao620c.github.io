@@ -44,7 +44,7 @@ Shiro可以帮助我们完成：认证、授权、加密、会话管理、与Web
 
 可以看到：应用代码直接交互的对象是Subject，也就是说Shiro的对外API核心就是Subject。
 
-* Subject：主体，代表了当前“用户”，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，如网络爬虫，机器人等；即一个抽象概念；所有Subject都绑定到SecurityManager，与Subject的所有交互都会委托给SecurityManager；可以把Subject认为是一个门面；SecurityManager才是实际的执行者；
+* Subject：主体，代表了当前"用户"，这个用户不一定是一个具体的人，与当前应用交互的任何东西都是Subject，如网络爬虫，机器人等；即一个抽象概念；所有Subject都绑定到SecurityManager，与Subject的所有交互都会委托给SecurityManager；可以把Subject认为是一个门面；SecurityManager才是实际的执行者；
 * SecurityManager：安全管理器；即所有与安全有关的操作都会与SecurityManager交互；且它管理着所有Subject；可以看出它是Shiro的核心，它负责与后边介绍的其他组件进行交互，如果学习过SpringMVC，你可以把它看成DispatcherServlet前端控制器；
 * Realm：域，Shiro从从Realm获取安全数据（如用户、角色、权限），就是说SecurityManager要验证用户身份，那么它需要从Realm获取相应的用户进行比较以确定用户身份是否合法；也需要从Realm得到用户相应的角色/权限进行验证用户是否能进行操作；可以把Realm看成DataSource，即安全数据源。
 
@@ -59,7 +59,7 @@ Shiro可以帮助我们完成：认证、授权、加密、会话管理、与Web
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/sb-shiro03.png)
 
-* Subject：主体，可以看到主体可以是任何可以与应用交互的“用户”；
+* Subject：主体，可以看到主体可以是任何可以与应用交互的"用户"；
 * SecurityManager：相当于SpringMVC中的DispatcherServlet或者Struts2中的FilterDispatcher；是Shiro的心脏；所有具体的交互都通过SecurityManager进行控制；它管理着所有Subject、且负责进行认证和授权、及会话、缓存的管理。
 * Authenticator：认证器，负责主体认证的，这是一个扩展点，如果用户觉得Shiro默认的不好，可以自定义实现；其需要认证策略（Authentication Strategy），即什么情况下算用户认证通过了；
 * Authorizer：授权器，或者访问控制器，用来决定主体是否有权限进行相应的操作；即控制着用户能访问应用中的哪些功能；
@@ -513,7 +513,7 @@ public ShiroDialect shiroDialect() {
 
 一般来讲都会讲用户的角色和权限保存到数据库，这里设计一种最通用的模型，
 使用RBAC（Role-Based Access Control，基于角色的访问控制）模型设计用户，角色和权限间的关系。简单地说，
-一个用户拥有若干角色，每一个角色拥有若干权限。这样，就构造成“用户-角色-权限”的授权模型。
+一个用户拥有若干角色，每一个角色拥有若干权限。这样，就构造成"用户-角色-权限"的授权模型。
 
 在这种模型中，用户与角色之间，角色与权限之间，一般者是多对多的关系。如下图所示：
 

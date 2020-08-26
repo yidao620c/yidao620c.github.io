@@ -223,9 +223,9 @@ mvn clean deploy -P release -Dgpg.passphrase=密码
 ## 在OSS中发布构件
 
 构建上传之后需要在OSS系统中对操作进行确认，将构件发布，进入 <https://oss.sonatype.org/> 使用你的用户名和密码登陆之后，
-在左边菜单找到“Staging Repositories”，点击，在右边上面一点有一个输入搜索框输入你的groupid进行快速定位，
-可以发现这时你的构件状态是“open”，勾选你的构件，查看校验的结果信息，
-如果没有错误就可以点击刚才勾选的checkbox上面右边一点的“close”按钮，在弹出框中“confirm”，这里又需要校验一次，稍后结果会通过邮箱通知。
+在左边菜单找到"Staging Repositories"，点击，在右边上面一点有一个输入搜索框输入你的groupid进行快速定位，
+可以发现这时你的构件状态是"open"，勾选你的构件，查看校验的结果信息，
+如果没有错误就可以点击刚才勾选的checkbox上面右边一点的"close"按钮，在弹出框中"confirm"，这里又需要校验一次，稍后结果会通过邮箱通知。
 
 我再close过程中出现过验证签名失败的问题：
 
@@ -241,8 +241,8 @@ gpg --keyserver hkp://keyserver.ubuntu.com --send-keys xxxx
 
 其中的xxxx是你的GPG key，在生成GPG密钥的时候控制台会打印。
 
-发送key完成后再次试一下close成功了。刷新页面，这是状态已经是“closed”的了，再次勾选，然后点击“close”旁边的“release”，
-在弹出框中进行“confirm”，稍后结果会通过邮件进行通知。
+发送key完成后再次试一下close成功了。刷新页面，这是状态已经是"closed"的了，再次勾选，然后点击"close"旁边的"release"，
+在弹出框中进行"confirm"，稍后结果会通过邮件进行通知。
 
 注意，你执行release成功之后，OSS里面就没有这个构件了，我一开始还在想这家伙跑哪去了，原来是跑到Maven中央库里面去啦。
 

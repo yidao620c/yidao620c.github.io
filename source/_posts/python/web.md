@@ -119,7 +119,7 @@ if __name__ == '__main__':
 使用模板，我们需要预先准备一个HTML文档，这个HTML文档不是普通的HTML，
 而是嵌入了一些变量和指令，然后，根据我们传入的数据，替换后，得到最终的HTML，发送给用户：
 ![](https://xnstatic-1253397658.file.myqcloud.com/pyweb001.png)
-这就是传说中的MVC：Model-View-Controller，中文名“模型-视图-控制器”。
+这就是传说中的MVC：Model-View-Controller，中文名"模型-视图-控制器"。
 
 Python处理URL的函数就是C：Controller，Controller负责业务逻辑，比如检查用户名是否存在，取出用户信息等等；
 

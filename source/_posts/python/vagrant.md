@@ -55,7 +55,7 @@ $ vagrant init
 一般都会将这个Vagrantfile放入版本控制系统，这样其他人都能拿到这个文件，基于它来创建相同的环境。
 
 ### Boxes
-并不需要每次都从来开始构建一个系统，Vagrant可使用一个基础镜像来快速克隆一个虚拟机，这个基础镜像就叫“box”。
+并不需要每次都从来开始构建一个系统，Vagrant可使用一个基础镜像来快速克隆一个虚拟机，这个基础镜像就叫"box"。
 在生成初始化Vagrantfile后第一步就是指定Box。
 
 如果你按照之前步骤运行过，那么你已经安装了一个box了，下面的步骤就不需要了。
@@ -64,7 +64,7 @@ $ vagrant init
 $ vagrant box add hashicorp/precise64
 ```
 
-这条命令会从 [HashiCorp's Atlas box catalog](https://atlas.hashicorp.com/boxes/search) 下载名字叫“hashicorp/precise64”的box并加进来。你还能从本地文件、自定义URL来加入一个box。
+这条命令会从 [HashiCorp's Atlas box catalog](https://atlas.hashicorp.com/boxes/search) 下载名字叫"hashicorp/precise64"的box并加进来。你还能从本地文件、自定义URL来加入一个box。
 
 当我们把box加入vagrant之后，接下来需要在Vagrantfile中指定要使用它，你还可以指定版本，下载URL等等：
 

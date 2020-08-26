@@ -146,7 +146,7 @@ markdown:
     breaks: true
     linkify: true
     typographer: true
-    quotes: '“”‘’'
+    quotes: '"”‘’'
   plugins:
     - markdown-it-katex
 ```

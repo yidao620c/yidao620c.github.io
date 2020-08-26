@@ -198,7 +198,7 @@ def delete_parent():
 
 非常简单的关联查询，外键就一个，系统知道如何去关联：
 ```python
-session.query(User).join(Address).filter(Address.email==”lzjun@qq.com”).all()
+session.query(User).join(Address).filter(Address.email=="lzjun@qq.com").all()
 ```
 指定ON字段：
 ```python

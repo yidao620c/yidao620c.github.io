@@ -260,7 +260,7 @@ A sequence of elements supporting sequential and parallel aggregate operations.
 大家可以把Stream当成一个高级版本的Iterator。原始版本的Iterator，
 用户只能一个一个的遍历元素并对其执行某些操作；高级版本的Stream，
 用户只要给出需要对其包含的元素执行什么操作，
-比如“过滤掉长度大于10的字符串”、“获取每个字符串的首字母”等，
+比如"过滤掉长度大于10的字符串"、"获取每个字符串的首字母"等，
 具体这些操作如何应用到每个元素上，就给Stream就好了！（这个秘籍，一般人我不告诉他：））
 大家看完这些可能对Stream还没有一个直观的认识，莫急，容我慢慢道来！
 
@@ -274,7 +274,7 @@ Stream管道包含三部分，缺一不可：
 
 ```java
 int sum = transactions.stream().
-        filter(t -> t.getBuyer().getCity().equals(“London”)).
+        filter(t -> t.getBuyer().getCity().equals("London")).
         mapToInt(Transaction::getPrice).
         sum();
 ```

@@ -185,7 +185,7 @@ Apache和mod_wsgi之间通过程序内部接口传递信息，mod_wsgi会实现W
 ### WSGI小例子
 上面讲了这么多废话，不然来个实际例子看看。
 
-Python内置了一个WSGI服务器，这个模块叫wsgiref，它是用纯Python编写的WSGI服务器的参考实现。所谓“参考实现”是指该实现完全符合WSGI标准，但是不考虑任何运行效率，仅供开发和测试使用。
+Python内置了一个WSGI服务器，这个模块叫wsgiref，它是用纯Python编写的WSGI服务器的参考实现。所谓"参考实现"是指该实现完全符合WSGI标准，但是不考虑任何运行效率，仅供开发和测试使用。
 
 我们先编写hello.py，实现Web应用程序的WSGI处理函数：
 ```python

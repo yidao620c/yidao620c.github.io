@@ -148,7 +148,7 @@ OK，KeepAlived安装完毕，然后进行配置。
 ```bash
 vim /etc/sysctl.conf
 ```
-打开后修改里面“net.ipv4.ip_forward = 1”，修改好后保存退出，执行如下命令使设置立即生效
+打开后修改里面"net.ipv4.ip_forward = 1"，修改好后保存退出，执行如下命令使设置立即生效
 ```bash
 sysctl -p
 ```

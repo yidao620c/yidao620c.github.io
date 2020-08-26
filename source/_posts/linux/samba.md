@@ -49,8 +49,8 @@ yum install -y samba
 [homes]   #共享默认会将用户的主目录共享, 这是不安全的, 可以将其注释
     comment = Home Directories
     valid users = %S, %D%w%S
-    browseable = no #指定共享信息是否在“网上邻居”中可见
-    writable = yes #定义是否可以执行写入操作，与“read only”相反
+    browseable = no #指定共享信息是否在"网上邻居"中可见
+    writable = yes #定义是否可以执行写入操作，与"read only"相反
     inherit acls = yes
 
 [printers]   #打印机共享
@@ -71,7 +71,7 @@ yum install -y samba
 [rootdir]   #自定义的共享文件夹
     comment = share some files
     path = /home/samba/     #共享的路径
-    public = no             #关闭“所有人可见”
+    public = no             #关闭"所有人可见"
     writable = yes          #允许写入操作
 ```
 

@@ -17,7 +17,7 @@ tags:
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/linux082601.png)
 
-第2步：在linux16参数这行的最后面追加“rd.break”参数，然后按下Ctrl + X组合键来运行修改过的内核程序。
+第2步：在linux16参数这行的最后面追加"rd.break"参数，然后按下Ctrl + X组合键来运行修改过的内核程序。
 ![](https://xnstatic-1253397658.file.myqcloud.com/linux082602.png)
 
 第3步：进入到系统的紧急求援模式，如图所示。

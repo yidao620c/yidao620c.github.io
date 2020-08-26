@@ -57,7 +57,7 @@ PS1='[\u@\h \W$(__docker_machine_ps1)]\$ '
 
 ## 创建 Machine
 
-对于 Docker Machine 来说，术语 Machine 就是运行 docker daemon 的主机。“创建 Machine” 指的就是在 host 上安装和部署 docker。
+对于 Docker Machine 来说，术语 Machine 就是运行 docker daemon 的主机。"创建 Machine" 指的就是在 host 上安装和部署 docker。
 先执行 `docker-machine ls` 查看一下当前的 machine：
 
 ```bash

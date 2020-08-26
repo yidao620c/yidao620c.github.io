@@ -10,7 +10,7 @@ abbrlink: 20610
 ---
 
 单元测试在所有编程语言中都不陌生，对于一个健壮的软件来讲单元测试是很有必要的，
-并且“测试驱动开发”（TDD：Test-Driven Development）越来越受欢迎也说明了它的重要性。
+并且"测试驱动开发"（TDD：Test-Driven Development）越来越受欢迎也说明了它的重要性。
 
 单元测试一个最大的好处，就是确保一个程序模块的行为符合我们设计的测试用例。
 在将来修改的时候，可以极大程度地保证该模块行为仍然是正确的。
@@ -301,7 +301,7 @@ def loadTestsFromTestCase(self, testCaseClass):
     return loaded_suite
 ```
 
-getTestCaseNames()是从TestCase这个类中找所有以“test”开头的方法，然后注意第9行，在构造TestSuite对象时，
+getTestCaseNames()是从TestCase这个类中找所有以"test"开头的方法，然后注意第9行，在构造TestSuite对象时，
 其参数使用了一个map方法，即对testCaseNames中的每一个元素，使用testCaseClass为其构造对象，
 其结果是一个TestCase的对象集合。
 

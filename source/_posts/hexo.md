@@ -124,7 +124,7 @@ clip < ~/.ssh/id_rsa.pub
 ```bash
 ssh -T git@github.com
 ```
-你可能会看到有警告，输入“yes”就好
+你可能会看到有警告，输入"yes"就好
 
 还要安装hexo-deployer-git这个模块:
 ```bash
@@ -299,7 +299,7 @@ hexo new "Hello World"
 会自动在D:\hexo\source\_posts文件夹生成一个hello-world.md文件，用编辑器打开，在里面写文章。
 记住hexo中写文章使用的是Markdown语法，自己去google下这个语法吧，很方便很强大。里面的初始内容
 ```
-title: Hello World #可以改成中文的，如“新文章”
+title: Hello World #可以改成中文的，如"新文章"
 date: 2016-03-06 16:04:09 #发表日期，一般不改动
 categories: blog #文章文类
 tags: [文章, 测试] #文章标签，多于一项时用这种格式，只有一项时使用tags: blog
@@ -643,7 +643,7 @@ npm remove --save hexo-renderer-pandoc
 
 参考这篇文章：<https://www.zfl9.com/hexo-code.html>
 
-hexo 默认的代码高亮插件为 highlight.js，highlight.js 的代码高亮个人感觉不是很好看（主要是配色方面，感觉不够“高亮”），
+hexo 默认的代码高亮插件为 highlight.js，highlight.js 的代码高亮个人感觉不是很好看（主要是配色方面，感觉不够"高亮"），
 然后偶然之间发现了一个还不错的代码高亮插件：prism.js，所以就琢磨着如何将 hexo 的 highlight.js 替换为 prism.js。
 
 ### 禁用 highlight.js
