@@ -10,12 +10,12 @@ tags:
   - linux
 abbrlink: 33172
 ---
+
 作为互联网基础设施中重要一环的DNS域名解析服务，在互联网中所承担的重要角色和发挥的重要作用。
 Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
 全名为`Berkeley Internet Name Domain`，它是目前世界上使用最为广泛的DNS服务器软件。
 
-本篇演示如何在CentOS 7上架设域名服务器，部署DNS从服务器以及DNS缓存服务器来提升用户的域名查询体验。
-以及如何使用chroot牢笼机制插件来保障bind服务程序的可靠性，
+本篇演示如何在CentOS 7上架设域名服务器，以及如何使用chroot牢笼机制插件来保障bind服务程序的可靠性，
 并向大家演示如何在主服务器与从服务器之间部署TSIG密钥加密功能，来进一步保障迭代查询中数据的安全性。
 <!-- more -->
 
@@ -67,7 +67,7 @@ options {
 }
 ```
 
-bind服务程序的区域配置文件（/etc/named.rfc1912.zones）用来保存域名和IP地址对应关系的所在位置。在这个文件中，
+bind服务程序的区域配置文件`/etc/named.rfc1912.zones`用来保存域名和IP地址对应关系的所在位置。在这个文件中，
 定义了域名与IP地址解析规则保存的文件位置以及服务类型等内容，而没有包含具体的域名、IP地址对应关系等信息。
 服务类型有三种，分别为hint（根区域）、master（主区域）、slave（辅助区域），其中常用的master和slave指的就是主服务器和从服务器。
 将域名解析为IP地址的正向解析参数和将IP地址解析为域名的反向解析参数分别如下所示。
@@ -210,5 +210,210 @@ ns      A       192.168.1.20
 
 ## 部署从服务器
 
+在DNS域名解析服务中，从服务器可以从主服务器上获取指定的区域数据文件，从而起到备份解析记录与负载均衡的作用，
+因此通过部署从服务器可以减轻主服务器的负载压力，还可以提升用户的查询效率。
 
+主服务器与从服务器分别使用的操作系统与IP地址信息
 
+主机用途	 | 操作系统	| IP地址
+---------|----------|------------------
+主服务器  | RHEL 7   | 192.168.1.20
+从服务器  | RHEL 7   | 192.168.1.21
+
+第1步：在主服务器的区域配置文件中允许该从服务器的更新请求，即修改allow-update {允许更新区域信息的主机地址;};参数，
+然后重启主服务器的DNS服务程序。`vim /etc/named.rfc1912.zones`，内容修改如下。
+```
+zone "xncoding.com" IN {
+  type master;
+  file "xncoding.com.zone";
+  allow-update {192.168.1.21;};
+};
+
+zone "1.168.192.in-addr.arpa" IN {
+  type master;
+  file "192.168.1.arpa";
+  allow-update {192.168.1.21;};
+};
+```
+
+第2步，在从服务器上也安装bind-chroot程序。
+```bash
+yum install -y bind-chroot
+```
+编辑`/etc/named.conf`，跟主DNS配置一样，修改`listen-on`和`allow-query`的值为`any`。
+再编辑区域配置文件`/etc/named.rfc1912.zones`如下，注意这里的type设置为slave，
+masters参数后面应该为主服务器的IP地址，而且file参数后面定义的是同步数据配置文件后要保存到的位置，
+稍后可以在该目录内看到同步的文件。这里无需手动
+```
+zone "xncoding.com" IN {
+  type slave;
+  masters { 192.168.1.20; };
+  file "slaves/xncoding.com.zone";
+};
+
+zone "1.168.192.in-addr.arpa" IN {
+  type slave;
+  masters { 192.168.1.20; };
+  file "slaves/192.168.1.arpa";
+};
+```
+
+重启named服务：
+```bash
+systemctl restart named
+```
+
+查看是否有同步过来：
+```bash
+[root@host1 ~]# ll /var/named/slaves/
+总用量 8
+-rw-r--r-- 1 named named 413 9月  20 23:02 192.168.1.arpa
+-rw-r--r-- 1 named named 402 9月  20 23:02 xncoding.com.zone
+```
+
+第3步：检验解析结果。当从服务器的DNS服务程序在重启后，一般就已经自动从主服务器上同步了数据配置文件，
+而且该文件默认会放置在区域配置文件中所定义的目录位置中。然后随便找个机器，修改下DNS配置为从服务器地址，
+重启网络，使用nslookup测试下结果。
+```bash
+[root@master ~]# vim /etc/sysconfig/network-scripts/ifcfg-enp0s3 
+[root@master ~]# systemctl restart network
+[root@master ~]# nslookup 
+> www.xncoding.com
+Server:		192.168.1.21
+Address:	192.168.1.21#53
+
+Name:	www.xncoding.com
+Address: 192.168.1.20
+> bbs.xncoding.com
+Server:		192.168.1.21
+Address:	192.168.1.21#53
+
+Name:	bbs.xncoding.com
+Address: 192.168.1.21
+> 192.168.1.20
+20.1.168.192.in-addr.arpa	name = www.xncoding.com.
+20.1.168.192.in-addr.arpa	name = mail.xncoding.com.
+20.1.168.192.in-addr.arpa	name = ns.xncoding.com.
+> 
+```
+
+## 安全的加密传输
+互联网中的绝大多数DNS服务器（超过95%）都是基于BIND域名解析服务搭建的，而bind服务程序为了提供安全的解析服务，
+已经对TSIG（RFC 2845）加密机制提供了支持。TSIG主要是利用了密码编码的方式来保护区域信息的传输（Zone Transfer），
+即TSIG加密机制保证了DNS服务器之间传输域名区域信息的安全性。
+
+前面在从服务器上配妥bind服务程序并重启后，即可看到从主服务器中获取到的数据配置文件。但是这里数据同步是明文的，
+这里先删除从服务器上面的数据配置文件，然后通过加密通道传输数据配置文件。
+```bash
+rm -rf /var/named/slaves/*
+```
+
+第1步：在主服务器中生成密钥。dnssec-keygen命令用于生成安全的DNS服务密钥，
+其格式为`dnssec-keygen [参数]`，常用的参数以及作用如表13-3所示。
+
+参数	| 作用
+----|-----------------------------------------------------------------------------
+-a	| 指定加密算法，包括RSAMD5（RSA）、RSASHA1、DSA、NSEC3RSASHA1、NSEC3DSA等
+-b	| 密钥长度（HMAC-MD5的密钥长度在1~512位之间）
+-n	| 密钥的类型（HOST表示与主机相关）
+
+使用下述命令生成一个主机名称为master-slave的128位HMAC-MD5算法的密钥文件。
+在执行该命令后默认会在当前目录中生成公钥和私钥文件，我们需要把私钥文件中Key参数后面的值记录下来，
+一会儿要将其写入传输配置文件中。
+```bash
+[root@master ~]# dnssec-keygen -a HMAC-MD5 -b 128 -n HOST master-slave
+Kmaster-slave.+157+16883
+[root@master ~]# ls -al Kmaster-slave.+157+16883.*
+-rw-------. 1 root root  56 9月  20 23:12 Kmaster-slave.+157+16883.key
+-rw-------. 1 root root 165 9月  20 23:12 Kmaster-slave.+157+16883.private
+[root@master ~]# cat *.private
+Private-key-format: v1.3
+Algorithm: 157 (HMAC_MD5)
+Key: oD2MuaTy/0EjpRHQJNAQ5Q==
+Bits: AAA=
+Created: 20200920151247
+Publish: 20200920151247
+Activate: 20200920151247
+```
+
+第2步：在主服务器中创建密钥验证文件。进入bind服务程序用于保存配置文件的目录，
+把刚刚生成的密钥名称、加密算法和私钥加密字符串按照下面格式写入到tansfer.key传输配置文件中。
+为了安全起见，我们需要将文件的所属组修改成named，并将文件权限设置得要小一点，
+然后把该文件做一个硬链接到/etc目录中。
+```bash
+[root@master ~]# cd /var/named/chroot/etc/
+[root@master etc]# vim transfer.key
+key "master-slave" {
+  algorithm hmac-md5;
+  secret "oD2MuaTy/0EjpRHQJNAQ5Q==";
+};
+[root@master etc]# chown root:named transfer.key
+[root@master etc]# chmod 640 transfer.key
+[root@master etc]# ln transfer.key /etc/transfer.key
+```
+
+第3步：开启并加载Bind服务的密钥验证功能。首先需要在主服务器的主配置文件中加载密钥验证文件，然后进行设置，
+使得只允许带有master-slave密钥认证的DNS服务器同步数据配置文件：
+```
+[root@master etc]# vim /etc/named.conf
+include "/etc/transfer.key";
+options {
+        listen-on port 53 { any; };
+        listen-on-v6 port 53 { ::1; };
+        directory       "/var/named";
+        dump-file       "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+        recursing-file  "/var/named/data/named.recursing";
+        secroots-file   "/var/named/data/named.secroots";
+        allow-query     { any; };
+        allow-transfer { key master-slave; };
+[root@master etc]# systemctl restart named
+```
+
+至此，DNS主服务器的TSIG密钥加密传输功能就已经配置完成。此时清空DNS从服务器同步目录中所有的数据配置文件，
+然后再次重启bind服务程序，这时就已经不能像刚才那样自动获取到数据配置文件了。
+
+第4步：配置从服务器，使其支持密钥验证。配置DNS从服务器和主服务器的方法大致相同，
+都需要在bind服务程序的配置文件目录中创建密钥认证文件，并设置相应的权限，
+然后把该文件做一个硬链接到/etc目录中。
+```bash
+[root@host1 ~]# cd /var/named/chroot/etc
+[root@host1 etc]# vim transfer.key
+key "master-slave" {
+  algorithm hmac-md5;
+  secret "oD2MuaTy/0EjpRHQJNAQ5Q==";
+};
+[root@host1 etc]# chown root:named transfer.key
+[root@host1 etc]# chmod 640 transfer.key
+[root@host1 etc]# ln transfer.key /etc/transfer.key
+```
+
+第5步：开启并加载从服务器的密钥验证功能。这一步的操作步骤也同样是在主配置文件`/etc/named.conf`中加载密钥认证文件，
+然后按照指定格式写上主服务器的IP地址和密钥名称。注意，密钥名称等参数位置不要太靠前，
+大约在logging配置前面比较合适，否则bind服务程序会因为没有加载完预设参数而报错：
+```
+include "/etc/transfer.key";
+options {
+        listen-on port 53 { any; };
+        listen-on-v6 port 53 { ::1; };
+        省略很多...
+};
+server 192.168.1.20 {
+  keys { master-slave; };
+};
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+        };
+};
+```
+
+第6步：DNS从服务器同步域名区域数据。现在，两台服务器的bind服务程序都已经配置妥当，并匹配到了相同的密钥认证文件。
+接下来在从服务器上重启bind服务程序，可以发现又能顺利地同步到数据配置文件了。
+```bash
+[root@host1 etc]# systemctl restart named
+[root@host1 etc]# ls /var/named/slaves/
+192.168.1.arpa  xncoding.com.zone
+```
