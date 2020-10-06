@@ -18,24 +18,20 @@
     var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的， 全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。 DNS服务由BIND软件提供，启动后服务名为named，管理工具为rndc，debug工具为dig。主要配置文件为&#x2F;etc&#x2F;named.conf。 本篇演示如何在CentOS 7上架设主域">
+  <meta name="description" content="作为互联网基础设施中重要一环的DNS域名解析服务，在互联网中所承担的重要角色和发挥的重要作用。 Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的， 全名为Berkeley Internet Name Domain，它是目前世界上使用最为广泛的DNS服务器软件。 本篇演示如何在CentOS 7上架设域名服务器，以及如何使用chroot牢笼机制插件来保障">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CentOS7.2搭建DNS服务器">
 <meta property="og:url" content="https://www.xncoding.com/2016/07/01/linux/bind9.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的， 全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。 DNS服务由BIND软件提供，启动后服务名为named，管理工具为rndc，debug工具为dig。主要配置文件为&#x2F;etc&#x2F;named.conf。 本篇演示如何在CentOS 7上架设主域">
+<meta property="og:description" content="作为互联网基础设施中重要一环的DNS域名解析服务，在互联网中所承担的重要角色和发挥的重要作用。 Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的， 全名为Berkeley Internet Name Domain，它是目前世界上使用最为广泛的DNS服务器软件。 本篇演示如何在CentOS 7上架设域名服务器，以及如何使用chroot牢笼机制插件来保障">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/dns01.png">
-<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/dns02.png">
-<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/dns02.png">
 <meta property="article:published_time" content="2016-07-01T01:33:22.000Z">
-<meta property="article:modified_time" content="2020-08-25T14:58:25.459Z">
+<meta property="article:modified_time" content="2020-09-20T15:33:04.048Z">
 <meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
 <meta property="article:tag" content="dns">
 <meta property="article:tag" content="bind9">
-<meta property="article:tag" content="linux">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/dns01.png">
 
 <link rel="canonical" href="https://www.xncoding.com/2016/07/01/linux/bind9.html">
 
@@ -240,42 +236,192 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
-全名为Berkeley Internet Name Domain它是目前世界上使用最为广泛的DNS服务器软件。</p>
-<p>DNS服务由BIND软件提供，启动后服务名为<code>named</code>，管理工具为<code>rndc</code>，debug工具为<code>dig</code>。主要配置文件为<code>/etc/named.conf</code>。</p>
-<p>本篇演示如何在CentOS 7上架设主域名服务器。</p>
-<p>当局域网内主机要访问外网域名时，DNS服务器会先查本地缓存，查不到则将该解析请求转发给ISP的DNS服务器
-（假设IP为<code>211.155.23.88</code>和<code>211.155.27.88</code>），而不是转发给.（root）服务器。
-并且，只会对内网主机的解析请求进行转发（假设内网网段范围为<code>192.168.0.0/16</code>），而不会对外网主机的解析请求进行转发。</p>
+        <p>作为互联网基础设施中重要一环的DNS域名解析服务，在互联网中所承担的重要角色和发挥的重要作用。
+Bind是一款开放源码的DNS服务器软件，Bind由美国加州大学Berkeley分校开发和维护的，
+全名为<code>Berkeley Internet Name Domain</code>，它是目前世界上使用最为广泛的DNS服务器软件。</p>
+<p>本篇演示如何在CentOS 7上架设域名服务器，以及如何使用chroot牢笼机制插件来保障bind服务程序的可靠性，
+并向大家演示如何在主服务器与从服务器之间部署TSIG密钥加密功能，来进一步保障迭代查询中数据的安全性。</p>
 <a id="more"></a>
 
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里选择将bind运行在chroot环境下面，更加安全。只需要安装<code>bind-chroot</code>即可，其他软件比如<code>bind</code>本身也会自动安装，
-也即执行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">yum install -y <span class="built_in">bind</span>-chroot</span><br><span class="line">systemctl start named-chroot</span><br><span class="line">systemctl <span class="built_in">enable</span> named-chroot</span><br><span class="line">systemctl status named-chroot</span><br><span class="line">``</span><br><span class="line"></span><br><span class="line"><span class="comment">## 配置</span></span><br><span class="line">```bash</span><br><span class="line">cp -a /etc/named.conf /etc/named.conf.raw</span><br><span class="line">vi /etc/named.conf</span><br></pre></td></tr></table></figure>
+<h2 id="DNS域名解析服务简介"><a href="#DNS域名解析服务简介" class="headerlink" title="DNS域名解析服务简介"></a>DNS域名解析服务简介</h2><p>相较于由数字构成的IP地址，域名更容易被理解和记忆，所以我们通常更习惯通过域名的方式来访问网络中的资源。
+DNS用于管理和解析域名与IP地址对应关系的技术，简单来说，就是能够接受用户输入的域名或IP地址，
+然后自动查找与之匹配（或者说具有映射关系）的IP地址或域名，即将域名解析为IP地址（正向解析），
+或将IP地址解析为域名（反向解析）。</p>
+<p>DNS域名解析服务采用了类似目录树的层次结构来记录域名与IP地址之间的对应关系，从而形成了一个分布式的数据库系统。
+提供了下面三种类型的服务器。</p>
+<ol>
+<li>主服务器：在特定区域内具有唯一性，负责维护该区域内的域名与IP地址之间的对应关系。</li>
+<li>从服务器：从主服务器中获得域名与IP地址的对应关系并进行维护，以防主服务器宕机等情况。</li>
+<li>缓存服务器：通过向其他域名解析服务器查询获得域名与IP地址的对应关系，并将经常查询的域名信息保存到服务器本地，
+以此来提高重复查询时的效率。</li>
+</ol>
+<p>简单来说，主服务器是用于管理域名和IP地址对应关系的真正服务器，从服务器帮助主服务器“打下手”，分散部署在各个国家、省市或地区，
+以便让用户就近查询域名，从而减轻主服务器的负载压力。缓存服务器不太常用，一般部署在企业内网的网关位置，用于加速用户的域名查询请求。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>这里选择将bind运行在chroot环境下面，更加安全。只需要安装<code>bind-chroot</code>即可，其他软件比如<code>bind</code>本身也会自动安装。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y <span class="built_in">bind</span>-chroot</span><br></pre></td></tr></table></figure>
 
-<p>修改如下：</p>
-<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">options</span> &#123;</span><br><span class="line">    <span class="keyword">listen</span>-<span class="keyword">on</span> port <span class="number">53</span> &#123; <span class="keyword">any</span>; &#125;;</span><br><span class="line">    <span class="keyword">listen</span>-<span class="keyword">on</span>-v6 port <span class="number">53</span> &#123; ::<span class="number">1</span>; &#125;;</span><br><span class="line">    directory 	"/var/named";</span><br><span class="line">    dump-file 	"/var/named/data/cache_dump.db";</span><br><span class="line">    <span class="keyword">statistics</span>-file "/var/named/data/named_stats.txt";</span><br><span class="line">    memstatistics-file "/var/named/data/named_mem_stats.txt";</span><br><span class="line">    allow-query     &#123; <span class="number">192.168</span><span class="number">.0</span><span class="number">.0</span>/<span class="number">16</span>; &#125;;</span><br><span class="line">    recursion yes;</span><br><span class="line">    allow-recursion &#123; <span class="number">192.168</span><span class="number">.0</span><span class="number">.0</span>/<span class="number">16</span>; &#125;;</span><br><span class="line">    forward first;</span><br><span class="line">    forwarders &#123;</span><br><span class="line">        <span class="number">211.155</span><span class="number">.23</span><span class="number">.88</span>;</span><br><span class="line">        <span class="number">211.155</span><span class="number">.27</span><span class="number">.88</span>;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    dnssec-<span class="keyword">enable</span> <span class="keyword">no</span>;</span><br><span class="line">    dnssec-validation <span class="keyword">no</span>;</span><br><span class="line">    dnssec-lookaside <span class="keyword">no</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Path to ISC DLV key */</span></span><br><span class="line">    bindkeys-file "/etc/named.iscdlv.key";</span><br><span class="line"></span><br><span class="line">    managed-keys-directory "/var/named/dynamic";</span><br><span class="line"></span><br><span class="line">    pid-file "/run/named/named.pid";</span><br><span class="line">    <span class="keyword">session</span>-keyfile "/run/named/session.key";</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">logging &#123;</span><br><span class="line">        channel default_debug &#123;</span><br><span class="line">                file "data/named.run";</span><br><span class="line">                severity dynamic;</span><br><span class="line">        &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">zone</span> "." <span class="keyword">IN</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> hint;</span><br><span class="line">    file "named.ca";</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*新增xn.local的域名解析*/</span></span><br><span class="line"><span class="type">zone</span> "xn.local" <span class="keyword">IN</span> &#123;</span><br><span class="line">    <span class="keyword">type</span> master;</span><br><span class="line">    file "fwd.xn.local.db";</span><br><span class="line">    allow-<span class="keyword">update</span> &#123; <span class="keyword">none</span>; &#125;;</span><br><span class="line">    allow-query &#123; <span class="keyword">any</span>; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> "/etc/named.rfc1912.zones";</span><br><span class="line"><span class="keyword">include</span> "/etc/named.root.key";</span><br></pre></td></tr></table></figure>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>bind服务程序的配置并不简单，因为要想为用户提供健全的DNS查询服务，要在本地保存相关的域名数据库，
+而如果把所有域名和IP地址的对应关系都写入到某个配置文件中，估计要有上千万条的参数，这样既不利于程序的执行效率，
+也不方便日后的修改和维护。因此在bind服务程序中有下面这三个比较关键的文件。</p>
+<pre><code>主配置文件（/etc/named.conf）：这些参数用来定义bind服务程序的运行。
+区域配置文件（/etc/named.rfc1912.zones）：用来保存域名和IP地址对应关系的所在位置。当需要查看或修改时，可根据这个位置找到相关文件。
+数据配置文件目录（/var/named）：该目录用来保存域名和IP地址真实对应关系的数据配置文件。</code></pre><p>在Linux系统中，bind服务程序的名称为named。首先需要在/etc目录中找到该服务程序的主配置文件，修改<code>listen-on</code>和<code>allow-query</code>的值为<code>any</code>，
+分别表示服务器上的所有IP地址均可提供DNS域名解析服务，以及允许所有人对本服务器发送DNS查询请求。这两个地方一定要修改准确。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">        listen-on<span class="built_in"> port </span>53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6<span class="built_in"> port </span>53 &#123; ::1; &#125;;</span><br><span class="line">        directory       <span class="string">"/var/named"</span>;</span><br><span class="line">        dump-file       <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">        statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">        memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">        recursing-file  <span class="string">"/var/named/data/named.recursing"</span>;</span><br><span class="line">        secroots-file   <span class="string">"/var/named/data/named.secroots"</span>;</span><br><span class="line">        allow-query     &#123; any; &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>新增一个文件 <code>vi /var/named/fwd.xn.local.db</code>，内容如下：</p>
-<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">$TTL <span class="number">86400</span></span><br><span class="line">@ IN SOA primary.xn.local. root.xn.local. (</span><br><span class="line"><span class="number">2016042112</span> ;Serial</span><br><span class="line"><span class="number">3600</span> ;Refresh</span><br><span class="line"><span class="number">1800</span> ;Retry</span><br><span class="line"><span class="number">604800</span> ;Expire</span><br><span class="line"><span class="number">43200</span> ;Minimum TTL</span><br><span class="line">)</span><br><span class="line">;Name Server Information</span><br><span class="line">@ IN NS primary.xn.local.</span><br><span class="line"></span><br><span class="line">;IP address of Name Server</span><br><span class="line">primary IN A <span class="number">192.168</span><span class="number">.217</span><span class="number">.161</span></span><br><span class="line"></span><br><span class="line">;Mail exchanger</span><br><span class="line">xn.local. IN MX <span class="number">10</span> mail.xn.local.</span><br><span class="line"></span><br><span class="line">;A - Record HostName To Ip Address</span><br><span class="line">www IN A <span class="number">192.168</span><span class="number">.217</span><span class="number">.161</span></span><br><span class="line">mail IN A <span class="number">192.168</span><span class="number">.217</span><span class="number">.161</span></span><br><span class="line"></span><br><span class="line">;CNAME record</span><br><span class="line">ftp IN CNAME www.xn.local.</span><br></pre></td></tr></table></figure>
+<p>bind服务程序的区域配置文件<code>/etc/named.rfc1912.zones</code>用来保存域名和IP地址对应关系的所在位置。在这个文件中，
+定义了域名与IP地址解析规则保存的文件位置以及服务类型等内容，而没有包含具体的域名、IP地址对应关系等信息。
+服务类型有三种，分别为hint（根区域）、master（主区域）、slave（辅助区域），其中常用的master和slave指的就是主服务器和从服务器。
+将域名解析为IP地址的正向解析参数和将IP地址解析为域名的反向解析参数分别如下所示。</p>
+<p><em>正向解析配置例子：</em></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"xncoding.com"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>master;  #服务类型</span><br><span class="line">  file <span class="string">"xncoding.com.zone"</span>;  #域名与IP解析规则保存的文件位置</span><br><span class="line">  allow-update &#123;none;&#125;;  #运行哪些客户端动态更新解析信息</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
+<p><em>反向解析配置例子：</em></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"1.168.192.in-addr.arpa"</span> <span class="keyword">IN</span> &#123;  #表示192.168.1.0/24网段的反向解析区域</span><br><span class="line"> <span class="built_in"> type </span>master; #服务类型</span><br><span class="line">  file <span class="string">"192.168.1.arpa"</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<p>最后启动<code>named</code>服务：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl start named</span><br><span class="line">systemctl <span class="built_in">enable</span> named</span><br><span class="line">systemctl status named</span><br></pre></td></tr></table></figure>
+<p>在修改配置文件过程中，可执行<code>named-checkconf</code>命令和<code>named-checkzone</code>命令，分别检查主配置文件与数据配置文件中语法或参数的错误。</p>
+<h3 id="正向解析配置"><a href="#正向解析配置" class="headerlink" title="正向解析配置"></a>正向解析配置</h3><p>第1步：编辑区域配置文件<code>/etc/named.rfc1912.zones</code>。该文件中默认已经有了一些无关紧要的解析参数，旨在让用户有一个参考。
+我们可以将下面的参数添加到区域配置文件的最下面，
+当然，也可以将该文件中的原有信息全部清空，而只保留自己的域名解析信息：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"xncoding.com"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>master;</span><br><span class="line">  file <span class="string">"xncoding.com.zone"</span>;</span><br><span class="line">  allow-update &#123;none;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
-<h2 id="测试与验证"><a href="#测试与验证" class="headerlink" title="测试与验证"></a>测试与验证</h2><p>默认情况下，DNS服务的日志信息会放置到<code>/var/log/messages</code>文档中。如果有修改配置文件，
-并启动或重启named服务的话，建议第一时间先查看这个日志文档，看有没有报错：</p>
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns01.png" alt=""></p>
-<p>检查DNS服务的端口（端口53）是否有开启：</p>
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns02.png" alt=""></p>
-<h2 id="指定DNS服务器"><a href="#指定DNS服务器" class="headerlink" title="指定DNS服务器"></a>指定DNS服务器</h2><p>CentOS7指定DNS服务器方法：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart NetworkManager.service</span><br><span class="line">nmcli connection show</span><br><span class="line">nmcli con mod eth0 ipv4.dns <span class="string">"192.168.217.161"</span></span><br><span class="line"><span class="comment"># nmcli con mod eth0 ipv4.dns "192.168.217.161 8.8.8.8"</span></span><br><span class="line">nmcli con up eth0</span><br></pre></td></tr></table></figure>
+<p>第2步：编辑数据配置文件。我们可以从<code>/var/named</code>目录中复制一份正向解析的模板文件<code>named.localhost</code>，
+然后把域名和IP地址的对应数据填写数据配置文件中并保存。在复制时记得加上-a参数，这可以保留原始文件的所有者、所属组、权限属性等信息，
+以便让bind服务程序顺利读取文件内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># cd /var/named/</span></span><br><span class="line">[root@master named]<span class="comment"># ls -al named.localhost</span></span><br><span class="line">-rw-r-----. 1 root named 152 6月  21 2007 named.localhost</span><br><span class="line">[root@master named]<span class="comment"># cp -a named.localhost xncoding.com.zone</span></span><br></pre></td></tr></table></figure>
+<p>然后编辑文件<code>xncoding.com.zone</code>如下所示：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">$TTL</span> <span class="string">1D</span> <span class="comment">#生存周期为1天</span></span><br><span class="line"><span class="string">@</span>       <span class="string">IN</span> <span class="string">SOA</span>      <span class="string">xncoding.com.</span> <span class="string">root.xncoding.com.</span> <span class="string">(</span></span><br><span class="line">        <span class="comment">#授权信息开始 #DNS区域的地址  #域名管理员的邮箱(不要用@符号)</span></span><br><span class="line">                                        <span class="number">0</span>       <span class="string">;</span> <span class="string">serial</span>   <span class="comment">#更新序列号</span></span><br><span class="line">                                        <span class="string">1D</span>      <span class="string">;</span> <span class="string">refresh</span>  <span class="comment">#更新时间</span></span><br><span class="line">                                        <span class="string">1H</span>      <span class="string">;</span> <span class="string">retry</span>    <span class="comment">#重试延时</span></span><br><span class="line">                                        <span class="string">1W</span>      <span class="string">;</span> <span class="string">expire</span>   <span class="comment">#失效时间</span></span><br><span class="line">                                        <span class="string">3H</span> <span class="string">)</span>    <span class="string">;</span> <span class="string">minimum</span>  <span class="comment">#无效解析记录的缓存时间</span></span><br><span class="line">        <span class="string">NS</span>          <span class="string">ns.xncoding.com.</span>    <span class="comment">#域名服务器记录</span></span><br><span class="line"><span class="string">ns</span>      <span class="string">IN</span> <span class="string">A</span>        <span class="number">192.168</span><span class="number">.1</span><span class="number">.20</span>        <span class="comment">#地址记录(ns.xncoding.com.)</span></span><br><span class="line">        <span class="string">IN</span> <span class="string">MX</span> <span class="number">10</span>    <span class="string">mail.xncoding.com.</span>  <span class="comment">#邮箱交换记录</span></span><br><span class="line"><span class="string">mail</span>    <span class="string">IN</span> <span class="string">A</span>        <span class="number">192.168</span><span class="number">.1</span><span class="number">.20</span>        <span class="comment">#地址记录(mail.xncoding.com.)</span></span><br><span class="line"><span class="string">www</span>     <span class="string">IN</span> <span class="string">A</span>        <span class="number">192.168</span><span class="number">.1</span><span class="number">.20</span>        <span class="comment">#地址记录(www.xncoding.com.)</span></span><br><span class="line"><span class="string">bbs</span>     <span class="string">IN</span> <span class="string">A</span>        <span class="number">192.168</span><span class="number">.1</span><span class="number">.21</span>        <span class="comment">#地址记录(bbs.xncoding.com.)</span></span><br></pre></td></tr></table></figure>
 
-<p>利用<code>dig</code>工具测试主DNS能否正常解析外网网址：</p>
-<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果没安装dig命令，可以使用下面命令安装</span></span><br><span class="line">yum <span class="keyword">install </span><span class="keyword">bind-utils</span></span><br><span class="line"><span class="keyword">dig </span>@<span class="number">192</span>.<span class="number">168</span>.<span class="number">217</span>.<span class="number">161</span> www.<span class="keyword">baidu.com</span></span><br></pre></td></tr></table></figure>
+<p>然后重启named服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart named</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/dns02.png" alt=""></p>
-<p>搞定！</p>
+<p>第3步：检验解析结果。为了检验解析结果，一定要先把Linux系统网卡中的DNS地址参数修改成本机IP地址，
+这样就可以使用由本机提供的DNS查询服务了。nslookup命令用于检测能否从DNS服务器中查询到域名与IP地址的解析记录，
+进而更准确地检验DNS服务器是否已经能够为用户提供服务。</p>
+<p>编辑<code>vim /etc/sysconfig/network-scripts/ifcfg</code>，将DNS1的值改成本机IP。然后重启网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart network</span><br></pre></td></tr></table></figure>
+
+<p>使用nslookup命令来测试DNS解析：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">yum install -y <span class="built_in">bind</span>-utils</span><br><span class="line">[root@master named]<span class="comment"># nslookup</span></span><br><span class="line">&gt; www.xncoding.com</span><br><span class="line">Server:		192.168.1.20</span><br><span class="line">Address:	192.168.1.20<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	www.xncoding.com</span><br><span class="line">Address: 192.168.1.20</span><br><span class="line">&gt; bbs.xncoding.com</span><br><span class="line">Server:		192.168.1.20</span><br><span class="line">Address:	192.168.1.20<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	bbs.xncoding.com</span><br><span class="line">Address: 192.168.1.21</span><br></pre></td></tr></table></figure>
+
+<h3 id="反向解析配置"><a href="#反向解析配置" class="headerlink" title="反向解析配置"></a>反向解析配置</h3><p>在DNS域名解析服务中，反向解析的作用是将用户提交的IP地址解析为对应的域名信息。</p>
+<p>第1步：编辑区域配置文件<code>/etc/named.rfc1912.zones</code>。在编辑该文件时，除了不要写错格式之外，还需要记住此处定义的数据配置文件名称，
+因为一会儿还需要在<code>/var/named</code>目录中建立与其对应的同名文件。反向解析是把IP地址解析成域名格式，
+因此在定义zone（区域）时应该要把IP地址反写，比如原来是<code>192.168.1.0</code>，反写后应该就是<code>1.168.192</code>，而且只需写出IP地址的网络位即可。
+把下列参数添加至正向解析参数的后面。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"1.168.192.in-addr.arpa"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>master;</span><br><span class="line">  file <span class="string">"192.168.1.arpa"</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>第2步：编辑数据配置文件。首先从<code>/var/named</code>目录中复制一份反向解析的模板文件<code>named.loopback</code>，然后把下面的参数填写到文件中。
+其中，IP地址仅需要写主机位。</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$TTL <span class="number">1</span>D</span><br><span class="line">@       IN SOA  xncoding.com.   root.xncoding.com. (</span><br><span class="line">                                        <span class="number">0</span>       ; serial</span><br><span class="line">                                        <span class="number">1</span>D      ; <span class="built_in">ref</span>resh</span><br><span class="line">                                        <span class="number">1</span>H      ; retry</span><br><span class="line">                                        <span class="number">1</span>W      ; expire</span><br><span class="line">                                        <span class="number">3</span>H )    ; minimum</span><br><span class="line">        NS      ns.xncoding.com.</span><br><span class="line">ns      A       <span class="number">192.168</span><span class="number">.1</span><span class="number">.20</span></span><br><span class="line"><span class="number">20</span>      PTR     ns.xncoding.com.   #PTR为指针记录，仅用于反向解析中</span><br><span class="line"><span class="number">20</span>      PTR     www.xncoding.com.</span><br><span class="line"><span class="number">20</span>      PTR     mail.xncoding.com.</span><br><span class="line"><span class="number">21</span>      PTR     bbs.xncoding.com.</span><br></pre></td></tr></table></figure>
+
+<p>重启named服务后验证：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@master named]<span class="comment"># systemctl restart named</span></span><br><span class="line">[root@master named]<span class="comment"># nslookup </span></span><br><span class="line">&gt; 192.168.1.20</span><br><span class="line">20.1.168.192.in-addr.arpa	name = mail.xncoding.com.</span><br><span class="line">20.1.168.192.in-addr.arpa	name = ns.xncoding.com.</span><br><span class="line">20.1.168.192.in-addr.arpa	name = www.xncoding.com.</span><br><span class="line">&gt; 192.168.1.21</span><br><span class="line">21.1.168.192.in-addr.arpa	name = bbs.xncoding.com.</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="部署从服务器"><a href="#部署从服务器" class="headerlink" title="部署从服务器"></a>部署从服务器</h2><p>在DNS域名解析服务中，从服务器可以从主服务器上获取指定的区域数据文件，从而起到备份解析记录与负载均衡的作用，
+因此通过部署从服务器可以减轻主服务器的负载压力，还可以提升用户的查询效率。</p>
+<p>主服务器与从服务器分别使用的操作系统与IP地址信息</p>
+<table>
+<thead>
+<tr>
+<th>主机用途</th>
+<th>操作系统</th>
+<th>IP地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主服务器</td>
+<td>RHEL 7</td>
+<td>192.168.1.20</td>
+</tr>
+<tr>
+<td>从服务器</td>
+<td>RHEL 7</td>
+<td>192.168.1.21</td>
+</tr>
+</tbody></table>
+<p>第1步：在主服务器的区域配置文件中允许该从服务器的更新请求，即修改allow-update {允许更新区域信息的主机地址;};参数，
+然后重启主服务器的DNS服务程序。<code>vim /etc/named.rfc1912.zones</code>，内容修改如下。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"xncoding.com"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>master;</span><br><span class="line">  file <span class="string">"xncoding.com.zone"</span>;</span><br><span class="line">  allow-update &#123;192.168.1.21;&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">zone <span class="string">"1.168.192.in-addr.arpa"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>master;</span><br><span class="line">  file <span class="string">"192.168.1.arpa"</span>;</span><br><span class="line">  allow-update &#123;192.168.1.21;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>第2步，在从服务器上也安装bind-chroot程序。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y <span class="built_in">bind</span>-chroot</span><br></pre></td></tr></table></figure>
+<p>编辑<code>/etc/named.conf</code>，跟主DNS配置一样，修改<code>listen-on</code>和<code>allow-query</code>的值为<code>any</code>。
+再编辑区域配置文件<code>/etc/named.rfc1912.zones</code>如下，注意这里的type设置为slave，
+masters参数后面应该为主服务器的IP地址，而且file参数后面定义的是同步数据配置文件后要保存到的位置，
+稍后可以在该目录内看到同步的文件。这里无需手动</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">zone <span class="string">"xncoding.com"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>slave;</span><br><span class="line">  masters &#123; 192.168.1.20; &#125;;</span><br><span class="line">  file <span class="string">"slaves/xncoding.com.zone"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">zone <span class="string">"1.168.192.in-addr.arpa"</span> <span class="keyword">IN</span> &#123;</span><br><span class="line"> <span class="built_in"> type </span>slave;</span><br><span class="line">  masters &#123; 192.168.1.20; &#125;;</span><br><span class="line">  file <span class="string">"slaves/192.168.1.arpa"</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>重启named服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart named</span><br></pre></td></tr></table></figure>
+
+<p>查看是否有同步过来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 ~]<span class="comment"># ll /var/named/slaves/</span></span><br><span class="line">总用量 8</span><br><span class="line">-rw-r--r-- 1 named named 413 9月  20 23:02 192.168.1.arpa</span><br><span class="line">-rw-r--r-- 1 named named 402 9月  20 23:02 xncoding.com.zone</span><br></pre></td></tr></table></figure>
+
+<p>第3步：检验解析结果。当从服务器的DNS服务程序在重启后，一般就已经自动从主服务器上同步了数据配置文件，
+而且该文件默认会放置在区域配置文件中所定义的目录位置中。然后随便找个机器，修改下DNS配置为从服务器地址，
+重启网络，使用nslookup测试下结果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># vim /etc/sysconfig/network-scripts/ifcfg-enp0s3 </span></span><br><span class="line">[root@master ~]<span class="comment"># systemctl restart network</span></span><br><span class="line">[root@master ~]<span class="comment"># nslookup </span></span><br><span class="line">&gt; www.xncoding.com</span><br><span class="line">Server:		192.168.1.21</span><br><span class="line">Address:	192.168.1.21<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	www.xncoding.com</span><br><span class="line">Address: 192.168.1.20</span><br><span class="line">&gt; bbs.xncoding.com</span><br><span class="line">Server:		192.168.1.21</span><br><span class="line">Address:	192.168.1.21<span class="comment">#53</span></span><br><span class="line"></span><br><span class="line">Name:	bbs.xncoding.com</span><br><span class="line">Address: 192.168.1.21</span><br><span class="line">&gt; 192.168.1.20</span><br><span class="line">20.1.168.192.in-addr.arpa	name = www.xncoding.com.</span><br><span class="line">20.1.168.192.in-addr.arpa	name = mail.xncoding.com.</span><br><span class="line">20.1.168.192.in-addr.arpa	name = ns.xncoding.com.</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<h2 id="安全的加密传输"><a href="#安全的加密传输" class="headerlink" title="安全的加密传输"></a>安全的加密传输</h2><p>互联网中的绝大多数DNS服务器（超过95%）都是基于BIND域名解析服务搭建的，而bind服务程序为了提供安全的解析服务，
+已经对TSIG（RFC 2845）加密机制提供了支持。TSIG主要是利用了密码编码的方式来保护区域信息的传输（Zone Transfer），
+即TSIG加密机制保证了DNS服务器之间传输域名区域信息的安全性。</p>
+<p>前面在从服务器上配妥bind服务程序并重启后，即可看到从主服务器中获取到的数据配置文件。但是这里数据同步是明文的，
+这里先删除从服务器上面的数据配置文件，然后通过加密通道传输数据配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf /var/named/slaves/*</span><br></pre></td></tr></table></figure>
+
+<p>第1步：在主服务器中生成密钥。dnssec-keygen命令用于生成安全的DNS服务密钥，
+其格式为<code>dnssec-keygen [参数]</code>，常用的参数以及作用如表13-3所示。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-a</td>
+<td>指定加密算法，包括RSAMD5（RSA）、RSASHA1、DSA、NSEC3RSASHA1、NSEC3DSA等</td>
+</tr>
+<tr>
+<td>-b</td>
+<td>密钥长度（HMAC-MD5的密钥长度在1~512位之间）</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>密钥的类型（HOST表示与主机相关）</td>
+</tr>
+</tbody></table>
+<p>使用下述命令生成一个主机名称为master-slave的128位HMAC-MD5算法的密钥文件。
+在执行该命令后默认会在当前目录中生成公钥和私钥文件，我们需要把私钥文件中Key参数后面的值记录下来，
+一会儿要将其写入传输配置文件中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># dnssec-keygen -a HMAC-MD5 -b 128 -n HOST master-slave</span></span><br><span class="line">Kmaster-slave.+157+16883</span><br><span class="line">[root@master ~]<span class="comment"># ls -al Kmaster-slave.+157+16883.*</span></span><br><span class="line">-rw-------. 1 root root  56 9月  20 23:12 Kmaster-slave.+157+16883.key</span><br><span class="line">-rw-------. 1 root root 165 9月  20 23:12 Kmaster-slave.+157+16883.private</span><br><span class="line">[root@master ~]<span class="comment"># cat *.private</span></span><br><span class="line">Private-key-format: v1.3</span><br><span class="line">Algorithm: 157 (HMAC_MD5)</span><br><span class="line">Key: oD2MuaTy/0EjpRHQJNAQ5Q==</span><br><span class="line">Bits: AAA=</span><br><span class="line">Created: 20200920151247</span><br><span class="line">Publish: 20200920151247</span><br><span class="line">Activate: 20200920151247</span><br></pre></td></tr></table></figure>
+
+<p>第2步：在主服务器中创建密钥验证文件。进入bind服务程序用于保存配置文件的目录，
+把刚刚生成的密钥名称、加密算法和私钥加密字符串按照下面格式写入到tansfer.key传输配置文件中。
+为了安全起见，我们需要将文件的所属组修改成named，并将文件权限设置得要小一点，
+然后把该文件做一个硬链接到/etc目录中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># cd /var/named/chroot/etc/</span></span><br><span class="line">[root@master etc]<span class="comment"># vim transfer.key</span></span><br><span class="line">key <span class="string">"master-slave"</span> &#123;</span><br><span class="line">  algorithm hmac-md5;</span><br><span class="line">  secret <span class="string">"oD2MuaTy/0EjpRHQJNAQ5Q=="</span>;</span><br><span class="line">&#125;;</span><br><span class="line">[root@master etc]<span class="comment"># chown root:named transfer.key</span></span><br><span class="line">[root@master etc]<span class="comment"># chmod 640 transfer.key</span></span><br><span class="line">[root@master etc]<span class="comment"># ln transfer.key /etc/transfer.key</span></span><br></pre></td></tr></table></figure>
+
+<p>第3步：开启并加载Bind服务的密钥验证功能。首先需要在主服务器的主配置文件中加载密钥验证文件，然后进行设置，
+使得只允许带有master-slave密钥认证的DNS服务器同步数据配置文件：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@master etc]# vim /etc/named.conf</span><br><span class="line">include <span class="string">"/etc/transfer.key"</span>;</span><br><span class="line">options &#123;</span><br><span class="line">        listen-on<span class="built_in"> port </span>53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6<span class="built_in"> port </span>53 &#123; ::1; &#125;;</span><br><span class="line">        directory       <span class="string">"/var/named"</span>;</span><br><span class="line">        dump-file       <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">        statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">        memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">        recursing-file  <span class="string">"/var/named/data/named.recursing"</span>;</span><br><span class="line">        secroots-file   <span class="string">"/var/named/data/named.secroots"</span>;</span><br><span class="line">        allow-query     &#123; any; &#125;;</span><br><span class="line">        allow-transfer &#123; key master-slave; &#125;;</span><br><span class="line">[root@master etc]# systemctl restart named</span><br></pre></td></tr></table></figure>
+
+<p>至此，DNS主服务器的TSIG密钥加密传输功能就已经配置完成。此时清空DNS从服务器同步目录中所有的数据配置文件，
+然后再次重启bind服务程序，这时就已经不能像刚才那样自动获取到数据配置文件了。</p>
+<p>第4步：配置从服务器，使其支持密钥验证。配置DNS从服务器和主服务器的方法大致相同，
+都需要在bind服务程序的配置文件目录中创建密钥认证文件，并设置相应的权限，
+然后把该文件做一个硬链接到/etc目录中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 ~]<span class="comment"># cd /var/named/chroot/etc</span></span><br><span class="line">[root@host1 etc]<span class="comment"># vim transfer.key</span></span><br><span class="line">key <span class="string">"master-slave"</span> &#123;</span><br><span class="line">  algorithm hmac-md5;</span><br><span class="line">  secret <span class="string">"oD2MuaTy/0EjpRHQJNAQ5Q=="</span>;</span><br><span class="line">&#125;;</span><br><span class="line">[root@host1 etc]<span class="comment"># chown root:named transfer.key</span></span><br><span class="line">[root@host1 etc]<span class="comment"># chmod 640 transfer.key</span></span><br><span class="line">[root@host1 etc]<span class="comment"># ln transfer.key /etc/transfer.key</span></span><br></pre></td></tr></table></figure>
+
+<p>第5步：开启并加载从服务器的密钥验证功能。这一步的操作步骤也同样是在主配置文件<code>/etc/named.conf</code>中加载密钥认证文件，
+然后按照指定格式写上主服务器的IP地址和密钥名称。注意，密钥名称等参数位置不要太靠前，
+大约在logging配置前面比较合适，否则bind服务程序会因为没有加载完预设参数而报错：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">include <span class="string">"/etc/transfer.key"</span>;</span><br><span class="line">options &#123;</span><br><span class="line">        listen-on<span class="built_in"> port </span>53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6<span class="built_in"> port </span>53 &#123; ::1; &#125;;</span><br><span class="line">        省略很多<span class="built_in">..</span>.</span><br><span class="line">&#125;;</span><br><span class="line">server 192.168.1.20 &#123;</span><br><span class="line">  keys &#123; master-slave; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">logging &#123;</span><br><span class="line">        channel default_debug &#123;</span><br><span class="line">                file <span class="string">"data/named.run"</span>;</span><br><span class="line">                severity dynamic;</span><br><span class="line">        &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>第6步：DNS从服务器同步域名区域数据。现在，两台服务器的bind服务程序都已经配置妥当，并匹配到了相同的密钥认证文件。
+接下来在从服务器上重启bind服务程序，可以发现又能顺利地同步到数据配置文件了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 etc]<span class="comment"># systemctl restart named</span></span><br><span class="line">[root@host1 etc]<span class="comment"># ls /var/named/slaves/</span></span><br><span class="line">192.168.1.arpa  xncoding.com.zone</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -285,9 +431,9 @@
 
       <footer class="post-footer">
           <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
               <a href="/tags/dns/" rel="tag"># dns</a>
               <a href="/tags/bind9/" rel="tag"># bind9</a>
-              <a href="/tags/linux/" rel="tag"># linux</a>
           </div>
 
         
@@ -362,7 +508,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试与验证"><span class="nav-number">2.</span> <span class="nav-text">测试与验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指定DNS服务器"><span class="nav-number">3.</span> <span class="nav-text">指定DNS服务器</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS域名解析服务简介"><span class="nav-number">1.</span> <span class="nav-text">DNS域名解析服务简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">3.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#正向解析配置"><span class="nav-number">3.1.</span> <span class="nav-text">正向解析配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反向解析配置"><span class="nav-number">3.2.</span> <span class="nav-text">反向解析配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署从服务器"><span class="nav-number">4.</span> <span class="nav-text">部署从服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全的加密传输"><span class="nav-number">5.</span> <span class="nav-text">安全的加密传输</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -378,7 +524,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">221</span>
+          <span class="site-state-item-count">222</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -391,7 +537,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">100</span>
+        <span class="site-state-item-count">101</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
