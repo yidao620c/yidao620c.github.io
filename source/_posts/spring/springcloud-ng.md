@@ -19,8 +19,8 @@ Hystrix	                  | Sentinel/Resilience4j
 Hystrix Dashboard/Turbine | Micrometer + Prometheus
 Ribbon                    | Spring Cloud Loadbalancer
 Zuul 1                    | Spring Cloud Gateway
-Eureka                    | Nacos
-Spring Cloud Config       | Nacos
+Eureka                    | Nacos Discovery
+Spring Cloud Config       | Nacos Config
 
 出自[【官方新闻】Spring Cloud Greenwich.RC1 available now](https://spring.io/blog/2018/12/12/spring-cloud-greenwich-rc1-available-now)
 <!-- more -->
