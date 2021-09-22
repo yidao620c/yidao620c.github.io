@@ -18,6 +18,7 @@
     <i class="{{ theme.footer.icon.name }}"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">{{ theme.footer.copyright or author }}</span>
+  <span class="author" itemprop="copyrightHolder">{{ next_url('https://beian.miit.gov.cn/', '粤ICP备17025554号-1', {class: 'theme-link'}) }}</span>
 
   {%- if config.symbols_count_time.total_symbols %}
     <span class="post-meta-divider">|</span>
