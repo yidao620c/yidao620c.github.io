@@ -1,8 +1,8 @@
 ---
 title: 使用hexo搭建github博客
 toc: true
-categories: 朝花夕拾
-tags: hexo
+categories: [朝花夕拾]
+tags: [hexo]
 abbrlink: 27592
 date: 2016-03-06 19:47:53
 ---
@@ -737,6 +737,13 @@ code {
 }
 ```
 * `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
+
+## 升级指南
+如果遇到如下错误：
+```
+EBUSY: resource busy or locked, open
+```
+右键当前项目文件夹，将只读属性去掉。
 
 ## 参考
 
