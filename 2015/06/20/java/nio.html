@@ -5,25 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
 
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":false,"nav":null,"activeClass":"gitalk"},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&#x3D;position，p">
+  <meta name="description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&amp;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="NIO笔记-缓存器细节">
 <meta property="og:url" content="https://www.xncoding.com/2015/06/20/java/nio.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&#x3D;position，p">
+<meta property="og:description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&amp;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2015-06-20T10:15:42.000Z">
 <meta property="article:modified_time" content="2020-04-04T12:38:42.180Z">
@@ -115,27 +117,27 @@
   <ul id="menu" class="menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+    <a href="/" rel="section"><i class="fa fa-fw fa-fa fa-home"></i>首页</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-fa fa-archive"></i>归档</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-fa fa-th"></i>分类</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-fa fa-tags"></i>标签</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-fa fa-user"></i>关于</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -207,7 +209,7 @@
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
+                <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
 
@@ -215,7 +217,7 @@
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
+                <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -224,6 +226,13 @@
             </span>
 
           
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
 
         </div>
       </header>
@@ -249,11 +258,11 @@
 </tr>
 <tr>
 <td>clear()</td>
-<td>清空缓存区，position=0，limit=capacity，此方法可覆写缓存区</td>
+<td>清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区</td>
 </tr>
 <tr>
 <td>flip()</td>
-<td>limit=position，position=0，用于准备从缓存区读取已经写入的数据</td>
+<td>limit&#x3D;position，position&#x3D;0，用于准备从缓存区读取已经写入的数据</td>
 </tr>
 <tr>
 <td>limit()</td>
@@ -293,10 +302,10 @@
 </tr>
 </tbody></table>
 <p>在缓存区中插入和提取数据的方法会更新这些索引，用于反映所发生的变化。</p>
-<a id="more"></a>
+<span id="more"></span>
 
 <p>下面的示例用到一个很简单的算法 - 交换相邻字符，以对CharBuffer中的字符进行编码和译码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UsingBuffers</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">symmetricScramble</span><span class="params">(CharBuffer buffer)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (buffer.hasRemaining()) &#123;</span><br><span class="line">            buffer.mark();</span><br><span class="line">            <span class="keyword">char</span> c1 = buffer.get();</span><br><span class="line">            <span class="keyword">char</span> c2 = buffer.get();</span><br><span class="line">            buffer.reset();</span><br><span class="line">            buffer.put(c2).put(c1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">char</span>[] data = <span class="string">"UsingBuffers"</span>.toCharArray();</span><br><span class="line">        ByteBuffer bb = ByteBuffer.allocate(data.length * <span class="number">2</span>);</span><br><span class="line">        CharBuffer cb = bb.asCharBuffer();</span><br><span class="line">        cb.put(data);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="comment">/*</span></span><br><span class="line"><span class="comment">  * Output: UsingBuffers sUniBgfuefsr UsingBuffers</span></span><br><span class="line"><span class="comment">  */</span><span class="comment">// :~</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UsingBuffers</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">symmetricScramble</span><span class="params">(CharBuffer buffer)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (buffer.hasRemaining()) &#123;</span><br><span class="line">            buffer.mark();</span><br><span class="line">            <span class="type">char</span> <span class="variable">c1</span> <span class="operator">=</span> buffer.get();</span><br><span class="line">            <span class="type">char</span> <span class="variable">c2</span> <span class="operator">=</span> buffer.get();</span><br><span class="line">            buffer.reset();</span><br><span class="line">            buffer.put(c2).put(c1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">char</span>[] data = <span class="string">&quot;UsingBuffers&quot;</span>.toCharArray();</span><br><span class="line">        <span class="type">ByteBuffer</span> <span class="variable">bb</span> <span class="operator">=</span> ByteBuffer.allocate(data.length * <span class="number">2</span>);</span><br><span class="line">        <span class="type">CharBuffer</span> <span class="variable">cb</span> <span class="operator">=</span> bb.asCharBuffer();</span><br><span class="line">        cb.put(data);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="comment">/*</span></span><br><span class="line"><span class="comment">  * Output: UsingBuffers sUniBgfuefsr UsingBuffers</span></span><br><span class="line"><span class="comment">  */</span><span class="comment">// :~</span></span><br></pre></td></tr></table></figure>
 
 <p>尽管可以通过对某个char数组调用wrap方法直接产生一个CharBuffer，但是在本例中取而代之的是分配一个底层的ByteBuffer，产生的CharBuffer只是ByteBuffer上的一个视图而已。这里强调的是，我们总是以操纵ByteBuffer为目标，因为只有它才可以和通道进行交互。</p>
 <p>刚开始的时候，position指向缓存区第一个元素，capacity和limit指向最后一个元素。</p>
@@ -307,17 +316,17 @@
 <p>while循环最后，position指向缓存区的末尾了。如果要打印缓存区，只能打印出position和limit之间的字符，也就是啥都没了。因此这时候要显示缓存区的内容，必须使用rewind()把position设置到缓存区开始位置，这时候mark值变得不明确了。</p>
 <p><strong>内存映射文件 - 创建和修改大文件</strong></p>
 <p>先看一个瞬间创建一个128M的大文件的例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LargeMappedFiles</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">int</span> length = <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    MappedByteBuffer out =</span><br><span class="line">      <span class="keyword">new</span> RandomAccessFile(<span class="string">"test.dat"</span>, <span class="string">"rw"</span>).getChannel()</span><br><span class="line">      .map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, length);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; length; i++)</span><br><span class="line">      out.put((<span class="keyword">byte</span>)<span class="string">'x'</span>);</span><br><span class="line">    print(<span class="string">"Finished writing"</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = length/<span class="number">2</span>; i &lt; length/<span class="number">2</span> + <span class="number">6</span>; i++)</span><br><span class="line">      printnb((<span class="keyword">char</span>)out.get(i));</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">///:~</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LargeMappedFiles</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">MappedByteBuffer</span> <span class="variable">out</span> <span class="operator">=</span></span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">RandomAccessFile</span>(<span class="string">&quot;test.dat&quot;</span>, <span class="string">&quot;rw&quot;</span>).getChannel()</span><br><span class="line">      .map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, length);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; length; i++)</span><br><span class="line">      out.put((<span class="type">byte</span>)<span class="string">&#x27;x&#x27;</span>);</span><br><span class="line">    print(<span class="string">&quot;Finished writing&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> length/<span class="number">2</span>; i &lt; length/<span class="number">2</span> + <span class="number">6</span>; i++)</span><br><span class="line">      printnb((<span class="type">char</span>)out.get(i));</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">///:~</span></span><br></pre></td></tr></table></figure>
 <p>为了既能读又能写，我们先由RandomAccessFile开始，获得该文件上的通道，然后调用map()产生MappedByteBuffer，这是一种特殊类型的直接缓存器。我们必须指定映射文件的初始位置和映射区域的长度，这意味着我们可以映射某个大文件的较小的部分。</p>
 <p>用这种方式，很大的文件可达2GB也可以很容易的修改。</p>
 <p>相比较旧的IO流而言，映射文件访问方式可以大大的提高性能。映射写必须要用RandomAccessFile。</p>
 <p><strong>文件加锁</strong></p>
 <p>Java的文件加锁直接映射到了本地操作系统的加锁工具上，因此文件锁对于其他操作系统进程是可见的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FileLocking</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    FileOutputStream fos= <span class="keyword">new</span> FileOutputStream(<span class="string">"file.txt"</span>);</span><br><span class="line">    FileLock fl = fos.getChannel().tryLock();</span><br><span class="line">    <span class="keyword">if</span>(fl != <span class="keyword">null</span>) &#123;</span><br><span class="line">      System.out.println(<span class="string">"Locked File"</span>);</span><br><span class="line">      TimeUnit.MILLISECONDS.sleep(<span class="number">100</span>);</span><br><span class="line">      fl.release();</span><br><span class="line">      System.out.println(<span class="string">"Released Lock"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fos.close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">Locked File</span></span><br><span class="line"><span class="comment">Released Lock</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FileLocking</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    FileOutputStream fos= <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;file.txt&quot;</span>);</span><br><span class="line">    <span class="type">FileLock</span> <span class="variable">fl</span> <span class="operator">=</span> fos.getChannel().tryLock();</span><br><span class="line">    <span class="keyword">if</span>(fl != <span class="literal">null</span>) &#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;Locked File&quot;</span>);</span><br><span class="line">      TimeUnit.MILLISECONDS.sleep(<span class="number">100</span>);</span><br><span class="line">      fl.release();</span><br><span class="line">      System.out.println(<span class="string">&quot;Released Lock&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fos.close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">Locked File</span></span><br><span class="line"><span class="comment">Released Lock</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
 
 <p><strong>对映射文件的部分加锁</strong></p>
 <p>文件映射通常应用于极大文件，我们可能需要对这种巨大文件进行部分加锁，其他进程可以修改文件中未被加锁的部分。例如数据库文件就是这样。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LockingMappedFiles</span> </span>&#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LENGTH = <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="keyword">static</span> FileChannel fc;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    fc =</span><br><span class="line">      <span class="keyword">new</span> RandomAccessFile(<span class="string">"test.dat"</span>, <span class="string">"rw"</span>).getChannel();</span><br><span class="line">    MappedByteBuffer out =</span><br><span class="line">      fc.map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, LENGTH);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; LENGTH; i++)</span><br><span class="line">      out.put((<span class="keyword">byte</span>)<span class="string">'x'</span>);</span><br><span class="line">    <span class="keyword">new</span> LockAndModify(out, <span class="number">0</span>, <span class="number">0</span> + LENGTH/<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">new</span> LockAndModify(out, LENGTH/<span class="number">2</span>, LENGTH/<span class="number">2</span> + LENGTH/<span class="number">4</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LockAndModify</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> ByteBuffer buff;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> start, end;</span><br><span class="line">    LockAndModify(ByteBuffer mbb, <span class="keyword">int</span> start, <span class="keyword">int</span> end) &#123;</span><br><span class="line">      <span class="keyword">this</span>.start = start;</span><br><span class="line">      <span class="keyword">this</span>.end = end;</span><br><span class="line">      mbb.limit(end);</span><br><span class="line">      mbb.position(start);</span><br><span class="line">      buff = mbb.slice();</span><br><span class="line">      start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// Exclusive lock with no overlap:</span></span><br><span class="line">        FileLock fl = fc.lock(start, end, <span class="keyword">false</span>);</span><br><span class="line">        System.out.println(<span class="string">"Locked: "</span>+ start +<span class="string">" to "</span>+ end);</span><br><span class="line">        <span class="comment">// Perform modification:</span></span><br><span class="line">        <span class="keyword">while</span>(buff.position() &lt; buff.limit() - <span class="number">1</span>)</span><br><span class="line">          buff.put((<span class="keyword">byte</span>)(buff.get() + <span class="number">1</span>));</span><br><span class="line">        fl.release();</span><br><span class="line">        System.out.println(<span class="string">"Released: "</span>+start+<span class="string">" to "</span>+ end);</span><br><span class="line">      &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LockingMappedFiles</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">LENGTH</span> <span class="operator">=</span> <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="keyword">static</span> FileChannel fc;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    fc =</span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">RandomAccessFile</span>(<span class="string">&quot;test.dat&quot;</span>, <span class="string">&quot;rw&quot;</span>).getChannel();</span><br><span class="line">    <span class="type">MappedByteBuffer</span> <span class="variable">out</span> <span class="operator">=</span></span><br><span class="line">      fc.map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, LENGTH);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; LENGTH; i++)</span><br><span class="line">      out.put((<span class="type">byte</span>)<span class="string">&#x27;x&#x27;</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">LockAndModify</span>(out, <span class="number">0</span>, <span class="number">0</span> + LENGTH/<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">LockAndModify</span>(out, LENGTH/<span class="number">2</span>, LENGTH/<span class="number">2</span> + LENGTH/<span class="number">4</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LockAndModify</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> ByteBuffer buff;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> start, end;</span><br><span class="line">    LockAndModify(ByteBuffer mbb, <span class="type">int</span> start, <span class="type">int</span> end) &#123;</span><br><span class="line">      <span class="built_in">this</span>.start = start;</span><br><span class="line">      <span class="built_in">this</span>.end = end;</span><br><span class="line">      mbb.limit(end);</span><br><span class="line">      mbb.position(start);</span><br><span class="line">      buff = mbb.slice();</span><br><span class="line">      start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// Exclusive lock with no overlap:</span></span><br><span class="line">        <span class="type">FileLock</span> <span class="variable">fl</span> <span class="operator">=</span> fc.lock(start, end, <span class="literal">false</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Locked: &quot;</span>+ start +<span class="string">&quot; to &quot;</span>+ end);</span><br><span class="line">        <span class="comment">// Perform modification:</span></span><br><span class="line">        <span class="keyword">while</span>(buff.position() &lt; buff.limit() - <span class="number">1</span>)</span><br><span class="line">          buff.put((<span class="type">byte</span>)(buff.get() + <span class="number">1</span>));</span><br><span class="line">        fl.release();</span><br><span class="line">        System.out.println(<span class="string">&quot;Released: &quot;</span>+start+<span class="string">&quot; to &quot;</span>+ end);</span><br><span class="line">      &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
     </div>
@@ -325,13 +334,6 @@
     
     
     
-
-      <div>
-        
-          
-
-        
-      </div>
 
       <footer class="post-footer">
           <div class="post-tags">
@@ -445,10 +447,10 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fa fa-fw fa-fab fa-github"></i>GitHub</a>
       </span>
       <span class="links-of-author-item">
-        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-fa fa-envelope"></i>E-Mail</a>
       </span>
   </div>
 
@@ -482,12 +484,31 @@
     <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
-  <span class="author" itemprop="copyrightHolder"><a href="https://beian.miit.gov.cn/" class="theme-link" rel="noopener" target="_blank">粤ICP备17025554号-1</a></span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div>
 
         
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
 
 
 
@@ -539,6 +560,19 @@
 
 
 
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
   
