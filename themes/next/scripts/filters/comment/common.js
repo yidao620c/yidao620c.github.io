@@ -11,7 +11,7 @@ module.exports = {
     }
     return `
       <span class="post-meta-item-icon">
-        <i class="${icon}"></i>
+        <i class="fa fa-${icon}"></i>
       </span>
       {%- set post_meta_comment = __('post.comments.${key}') %}
       {%- if post_meta_comment == 'post.comments.${key}' %}

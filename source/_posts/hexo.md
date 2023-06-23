@@ -739,11 +739,16 @@ code {
 * `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
 
 ## 升级指南
-如果遇到如下错误：
+直接先升级hexo-cli，然后再升级next主题。
+
+把next最新包下载下来，建一个新文件夹，然后修改全局_config.yml指向新的next版本。
+对于next的自定义配置、自定义样式放到`source\_date\`目录下面。配置就新建一个next.yml，第一行加入`override: false`。
+然后将自定义的放里面，其他默认的不变，这样子后面升级就只需要全局替换原有的next主题文件夹即可，自定义配置保留。
+样式的话，就新建一个`styles.styl`文件，把自己定义样式放进去即可。 另外还必须在next.yml打开自定义配置项
+```yml
+custom_file_path:
+  style: source/_data/styles.styl
 ```
-EBUSY: resource busy or locked, open
-```
-右键当前项目文件夹，将只读属性去掉。
 
 ## 参考
 

@@ -11,7 +11,7 @@
         <div class="social-item">
           <a target="_blank" class="social-link" href="{{ link }}">
             <span class="icon">
-              <i class="{{ icon }}"></i>
+              <i class="fa fa-{{ icon }}"></i>
             </span>
 
             <span class="label">{{ name }}</span>

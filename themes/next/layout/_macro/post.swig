@@ -21,16 +21,16 @@
           {%- if post.link %}
             {%- if post.sticky > 0 %}
               <span class="post-sticky-flag" title="{{ __('post.sticky') }}">
-                <i class="fa fa-thumbtack"></i>
+                <i class="fa fa-thumb-tack"></i>
               </span>
             {%- endif %}
-            {%- set postTitleIcon = '<i class="fa fa-external-link-alt"></i>' %}
+            {%- set postTitleIcon = '<i class="fa fa-external-link"></i>' %}
             {%- set postText = post.title or post.link %}
             {{ next_url(post.link, postText + postTitleIcon, {class: 'post-title-link post-title-link-external', itemprop: 'url'}) }}
           {% elif is_index %}
             {%- if post.sticky > 0 %}
               <span class="post-sticky-flag" title="{{ __('post.sticky') }}">
-                <i class="fa fa-thumbtack"></i>
+                <i class="fa fa-thumb-tack"></i>
               </span>
             {%- endif %}
             {{ next_url(post.path, post.title or __('post.untitled'), {class: 'post-title-link', itemprop: 'url'}) }}
@@ -49,7 +49,7 @@
           {%- if theme.post_meta.created_at %}
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
+                <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">{{ __('post.posted') }}</span>
 
@@ -69,7 +69,7 @@
             {%- if display_updated or not theme.post_meta.created_at %}
               <span class="post-meta-item">
                 <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
+                  <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">{{ __('post.edited') }}</span>
                 <time title="{{ __('post.modified') + __('symbol.colon') + full_date(post.updated) }}" itemprop="dateModified" datetime="{{ moment(post.updated).format() }}">{{ date(post.updated) }}</time>
@@ -80,7 +80,7 @@
           {%- if post.categories and post.categories.length and theme.post_meta.categories %}
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
+                <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">{{ __('post.in') }}</span>
               {%- for cat in post.categories.toArray() %}
@@ -120,7 +120,7 @@
           {%- if not is_index and theme.busuanzi_count.enable and theme.busuanzi_count.post_views %}
             <span class="post-meta-item" title="{{ __('post.views') }}" id="busuanzi_container_page_pv" style="display: none;">
               <span class="post-meta-item-icon">
-                <i class="{{ theme.busuanzi_count.post_views_icon }}"></i>
+                <i class="fa fa-{{ theme.busuanzi_count.post_views_icon }}"></i>
               </span>
               <span class="post-meta-item-text">{{ __('post.views') + __('symbol.colon') }}</span>
               <span id="busuanzi_value_page_pv"></span>
@@ -133,7 +133,7 @@
           {%- if theme.symbols_count_time.separated_meta %}<br>{%- endif %}
             <span class="post-meta-item" title="{{ __('symbols_count_time.count') }}">
               <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
+                <i class="fa fa-file-word-o"></i>
               </span>
               {%- if theme.symbols_count_time.item_text_post %}
                 <span class="post-meta-item-text">{{ __('symbols_count_time.count') + __('symbol.colon') }}</span>
@@ -145,7 +145,7 @@
           {%- if config.symbols_count_time.time %}
             <span class="post-meta-item" title="{{ __('symbols_count_time.time') }}">
               <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
+                <i class="fa fa-clock-o"></i>
               </span>
               {%- if theme.symbols_count_time.item_text_post %}
                 <span class="post-meta-item-text">{{ __('symbols_count_time.time') }} &asymp;</span>
@@ -229,12 +229,6 @@
       {%- if theme.follow_me %}
         {{ partial('_partials/post/post-followme.swig', {}, {cache: theme.cache.enable}) }}
       {%- endif %}
-
-      <div>
-        {% if not is_index %}
-          {% include 'baidu_union.swig' %}
-        {% endif %}
-      </div>
 
       <footer class="post-footer">
         {%- if post.tags and post.tags.length %}
