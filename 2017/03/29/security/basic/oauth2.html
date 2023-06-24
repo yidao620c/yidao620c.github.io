@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表）， 而无需将用户名和密码提供给第三方应用。 OAuth允许用户提供一个令牌，而不是用户名和密码来访问他们存放在特定服务提供者的数据。 每一个令牌授权一个特定的网站（例如，视频编辑网站)在特定的时段（例如，接下来的2小时内）内访问特定的资源（例如仅仅是某一相册中的视频）。 这样">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【安全贴士】简单介绍OAuth2.0的授权流程">
+<meta property="og:url" content="https://www.xncoding.com/2017/03/29/Security/basic/oauth2.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表）， 而无需将用户名和密码提供给第三方应用。 OAuth允许用户提供一个令牌，而不是用户名和密码来访问他们存放在特定服务提供者的数据。 每一个令牌授权一个特定的网站（例如，视频编辑网站)在特定的时段（例如，接下来的2小时内）内访问特定的资源（例如仅仅是某一相册中的视频）。 这样">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/oauth01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/oauth02.png">
+<meta property="article:published_time" content="2017-03-29T04:52:17.000Z">
+<meta property="article:modified_time" content="2023-06-24T15:35:07.406Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="安全贴士">
+<meta property="article:tag" content="oauth">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/oauth01.png">
+
+<link rel="canonical" href="https://www.xncoding.com/2017/03/29/Security/basic/oauth2.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>【安全贴士】简单介绍OAuth2.0的授权流程 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">飞污熊博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-fa fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-fa fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-fa fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-fa fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-fa fa-user"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="algolia-results">
+  <div id="algolia-stats"></div>
+  <div id="algolia-hits"></div>
+  <div id="algolia-pagination" class="algolia-pagination"></div>
+</div>
+
+      
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2017/03/29/Security/basic/oauth2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【安全贴士】简单介绍OAuth2.0的授权流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-03-29 12:52:17" itemprop="dateCreated datePublished" datetime="2017-03-29T12:52:17+08:00">2017-03-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>OAuth（开放授权）是一个开放标准，允许用户让第三方应用访问该用户在某一网站上存储的私密的资源（如照片，视频，联系人列表），
+而无需将用户名和密码提供给第三方应用。</p>
+<p>OAuth允许用户提供一个令牌，而不是用户名和密码来访问他们存放在特定服务提供者的数据。
+每一个令牌授权一个特定的网站（例如，视频编辑网站)在特定的时段（例如，接下来的2小时内）内访问特定的资源（例如仅仅是某一相册中的视频）。
+这样，OAuth让用户可以授权第三方网站访问他们存储在另外服务提供者的某些特定信息，而非所有内容。</p>
+<p>目前最新版本是OAuth 2.0，这里我通过用户使用 github 登录在我的博客网站上留言为例，简述 OAuth 2.0 的运作流程。</p>
+<span id="more"></span>
+
+<h2 id="名词定义"><a href="#名词定义" class="headerlink" title="名词定义"></a>名词定义</h2><p>在详细讲解OAuth 2.0之前，需要了解几个专用名词：</p>
+<ol>
+<li>Third-party application：第三方应用程序，本文中又称”客户端”（client），这里是我的博客网站。</li>
+<li>HTTP service：HTTP服务提供商，本文中简称”服务提供商”，这里是GitHub。</li>
+<li>Resource Owner：资源所有者，本文中又称”用户”（user），这里是想要留言的用户。</li>
+<li>User Agent：用户代理，本文中就是指浏览器。</li>
+<li>Authorization server：认证服务器，即服务提供商专门用来处理认证的服务器。</li>
+<li>Resource server：资源服务器，即服务提供商存放用户生成的资源的服务器。它与认证服务器，可以是同一台服务器，也可以是不同的服务器。</li>
+</ol>
+<h2 id="客户端的授权模式"><a href="#客户端的授权模式" class="headerlink" title="客户端的授权模式"></a>客户端的授权模式</h2><p>客户端必须得到用户的授权（authorization grant），才能获得令牌（access token）。OAuth 2.0定义了四种授权方式：</p>
+<ul>
+<li>授权码模式（authorization code）</li>
+<li>简化模式（implicit）</li>
+<li>密码模式（resource owner password credentials）</li>
+<li>客户端模式（client credentials）</li>
+</ul>
+<p>本篇只介绍最常用、功能最完整、流程最严密的授权模式，也就是授权码模式（authorization code）。</p>
+<h2 id="授权码模式详细步骤"><a href="#授权码模式详细步骤" class="headerlink" title="授权码模式详细步骤"></a>授权码模式详细步骤</h2><ol>
+<li>用户访问客户端，后者将前者导向认证服务器。</li>
+<li>用户选择是否给予客户端授权。如果选”否”，整个授权流程结束。</li>
+<li>假设用户给予授权，认证服务器将用户导向客户端事先指定的”重定向URI”（redirection URI），同时附上一个授权码。</li>
+<li>客户端收到授权码，附上早先的”重定向URI”，向认证服务器申请令牌。这一步是在客户端的后台的服务器上完成的，对用户不可见。</li>
+<li>认证服务器核对了授权码和”重定向URI”，确认无误后，向客户端发送访问令牌（access token）和更新令牌（refresh token）。</li>
+</ol>
+<h3 id="第1步详解"><a href="#第1步详解" class="headerlink" title="第1步详解"></a>第1步详解</h3><p>用户访问客户端，后者将前者导向认证服务器。</p>
+<p>客户端申请认证的URI，包含以下参数：</p>
+<ul>
+<li>response_type：表示授权类型，必选项，此处的值固定为”code”</li>
+<li>client_id：表示客户端的ID，必选项</li>
+<li>redirect_uri：表示重定向URI，可选项</li>
+<li>scope：表示申请的权限范围，可选项</li>
+<li>state：表示客户端的当前状态，可以指定任意值（最好是随机字符串），认证服务器会原封不动地返回这个值，可防止CSRF攻击</li>
+</ul>
+<p>下面是一个例子：</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET /authorize?response_type<span class="operator">=</span>code&amp;client_id<span class="operator">=</span>s<span class="number">6</span>BhdRkqt<span class="number">3</span>&amp;state<span class="operator">=</span>xyz</span><br><span class="line">        &amp;redirect_uri<span class="operator">=</span>https<span class="variable">%3</span>A<span class="variable">%2</span>F<span class="variable">%2</span>Fclient<span class="variable">%2</span>Eexample<span class="variable">%2</span>Ecom<span class="variable">%2</span>Fcb HTTP/<span class="number">1.1</span></span><br><span class="line">Host: server.example.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="第2步详解"><a href="#第2步详解" class="headerlink" title="第2步详解"></a>第2步详解</h3><p>用户选择是否给予客户端授权。如果选”否”，整个授权流程结束。</p>
+<p>这一步其实就是引导用户登录认证服务器，查看获取的权限列表，点击同意授权按钮。
+比如某个博客网站使用了畅言评论，它支持微信、QQ登录：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/oauth01.png"></p>
+<p>我点击QQ登录后会跳出这个确认窗口（如果你没有登录QQ这里还需要输入账号和密码登录）：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/oauth02.png"></p>
+<p>可以查看到畅言评论将获得的权限列表，你还可以选择哪些权限不让它获取，点击头像后授权成功。</p>
+<h3 id="第3步详解"><a href="#第3步详解" class="headerlink" title="第3步详解"></a>第3步详解</h3><p>假设用户给予授权，认证服务器将用户导向客户端事先指定的”重定向URI”（redirection URI），同时附上一个授权码。</p>
+<p>服务器回应客户端的URI，包含以下参数：</p>
+<ul>
+<li>code：表示授权码，必选项。该码的有效期应该很短，通常设为10分钟，客户端只能使用该码一次，
+否则会被授权服务器拒绝。该码与客户端ID和重定向URI，是一一对应关系。</li>
+<li>state：如果客户端的请求中包含这个参数，认证服务器的回应也必须一模一样包含这个参数。</li>
+</ul>
+<p>下面是一个例子：</p>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HTTP/<span class="number">1.1</span> <span class="number">302</span> Found</span><br><span class="line">Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA</span><br><span class="line">          &amp;<span class="keyword">state</span>=xyz</span><br></pre></td></tr></table></figure>
+
+<h3 id="第4步详解"><a href="#第4步详解" class="headerlink" title="第4步详解"></a>第4步详解</h3><p>客户端收到授权码，附上早先的”重定向URI”，向认证服务器申请令牌。这一步是在客户端的后台的服务器上完成的，对用户不可见。</p>
+<p>客户端向认证服务器申请令牌的HTTP请求，包含以下参数：</p>
+<ul>
+<li>grant_type：表示使用的授权模式，必选项，此处的值固定为”authorization_code”。</li>
+<li>code：表示上一步获得的授权码，必选项。</li>
+<li>redirect_uri：表示重定向URI，必选项，且必须与A步骤中的该参数值保持一致。</li>
+<li>client_id：表示客户端ID，必选项。</li>
+<li>client_secret: 表示客户端密钥，必选项。</li>
+</ul>
+<p>下面是一个例子：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/token</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>server.example.com</span><br><span class="line"><span class="attribute">Authorization</span><span class="punctuation">: </span>Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json</span><br><span class="line"></span><br><span class="line"><span class="language-dts"><span class="attr">params</span> <span class="operator">=</span> <span class="punctuation">&#123;</span></span></span><br><span class="line"><span class="language-dts"><span class="symbol">  grant_type:</span> <span class="string">&quot;authorization_code&quot;</span>,</span></span><br><span class="line"><span class="language-dts"><span class="symbol">  code:</span> <span class="string">&quot;SplxlOBeZQQYbYS6WxSbIA&quot;</span>,</span></span><br><span class="line"><span class="language-dts"><span class="symbol">  client_id:</span> <span class="string">&quot;s6BhdRkqt3&quot;</span>,</span></span><br><span class="line"><span class="language-dts"><span class="symbol">  client_secret:</span> <span class="string">&quot;xxx&quot;</span>,</span></span><br><span class="line"><span class="language-dts"><span class="symbol">  redirect_uri:</span> <span class="string">&quot;https://client.example.com/cb&quot;</span></span></span><br><span class="line"><span class="language-dts"><span class="punctuation">&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="第5步详解"><a href="#第5步详解" class="headerlink" title="第5步详解"></a>第5步详解</h3><p>认证服务器核对了授权码和”重定向URI”，确认无误后，向客户端发送访问令牌（access token）和更新令牌（refresh token）。</p>
+<p>认证服务器发送的HTTP回复，包含以下内容：</p>
+<ul>
+<li>access_token：表示访问令牌，必选项。</li>
+<li>token_type：表示令牌类型，该值大小写不敏感，必选项，可以是bearer类型或mac类型。</li>
+<li>expires_in：表示过期时间，单位为秒。如果省略该参数，必须其他方式设置过期时间。</li>
+<li>refresh_token：表示更新令牌，用来获取下一次的访问令牌，可选项。</li>
+<li>scope：表示权限范围，如果与客户端申请的范围一致，此项可省略。</li>
+</ul>
+<p>下面是一个例子：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">HTTP/1.1</span> <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>application/json;charset=UTF-8</span><br><span class="line"><span class="attribute">Cache-Control</span><span class="punctuation">: </span>no-store</span><br><span class="line"><span class="attribute">Pragma</span><span class="punctuation">: </span>no-cache</span><br><span class="line"></span><br><span class="line"><span class="language-json"><span class="punctuation">&#123;</span></span></span><br><span class="line"><span class="language-json">  <span class="attr">&quot;access_token&quot;</span><span class="punctuation">:</span><span class="string">&quot;2YotnFZFEjr1zCsicMWpAA&quot;</span><span class="punctuation">,</span></span></span><br><span class="line"><span class="language-json">  <span class="attr">&quot;token_type&quot;</span><span class="punctuation">:</span><span class="string">&quot;bearer&quot;</span><span class="punctuation">,</span></span></span><br><span class="line"><span class="language-json">  <span class="attr">&quot;expires_in&quot;</span><span class="punctuation">:</span><span class="number">3600</span><span class="punctuation">,</span></span></span><br><span class="line"><span class="language-json">  <span class="attr">&quot;refresh_token&quot;</span><span class="punctuation">:</span><span class="string">&quot;tGzv3JOkF0XG5Qx2TlKWIA&quot;</span><span class="punctuation">,</span></span></span><br><span class="line"><span class="language-json">  <span class="attr">&quot;example_parameter&quot;</span><span class="punctuation">:</span><span class="string">&quot;example_value&quot;</span></span></span><br><span class="line"><span class="language-json"><span class="punctuation">&#125;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>从上面代码可以看到，相关参数使用JSON格式发送（Content-Type: application&#x2F;json）。
+此外，HTTP头信息中明确指定不得缓存。</p>
+<h2 id="场景介绍"><a href="#场景介绍" class="headerlink" title="场景介绍"></a>场景介绍</h2><p>假如我有一个网站，你是我网站上的访客，看了文章想留言表示「朕已阅」，留言时发现有这个网站的帐号才能够留言，
+此时给了你两个选择：</p>
+<ul>
+<li>一个是在我的网站上注册拥有一个新账户，然后用注册的用户名来留言；</li>
+<li>一个是使用 github 帐号登录，使用你的 github 用户名来留言。</li>
+</ul>
+<p>前者你觉得过于繁琐，于是惯性地点击了 github 登录按钮，此时 OAuth 认证流程就开始了。</p>
+<p>需要明确的是，即使用户刚登录过 github，我的网站也不可能向 github 发一个什么请求便能够拿到访客信息，这显然是不安全的。
+就算用户允许你获取他在 github 上的信息，github 为了保障用户信息安全，也不会让你随意获取。
+所以操作之前，我的网站与 github 之间需要要有一个协商。</p>
+<h2 id="网站和-Github-之间的协商"><a href="#网站和-Github-之间的协商" class="headerlink" title="网站和 Github 之间的协商"></a>网站和 Github 之间的协商</h2><p>Github 会对用户的权限做分类，比如读取仓库信息的权限、写入仓库的权限、读取用户信息的权限、修改用户信息的权限等等。
+如果我想获取用户的信息，Github 会要求我，先在它的平台上注册一个应用，在申请的时候标明需要获取用户信息的哪些权限，
+用多少就申请多少，并且在申请的时候填写你的网站域名，Github 只允许在这个域名中获取用户信息。</p>
+<p>此时我的网站已经和 Github 之间达成了共识，Github 也给我发了两张门票，
+一张门票叫做 Client Id，另一张门票叫做 Client Secret。</p>
+<h2 id="用户和-Github-之间的协商"><a href="#用户和-Github-之间的协商" class="headerlink" title="用户和 Github 之间的协商"></a>用户和 Github 之间的协商</h2><p>用户进入我的网站，点击 github 登录按钮的时候，我的网站会把上面拿到的 Client Id 交给用户，让他进入到 Github 的授权页面，
+Github 看到了用户手中的门票，就知道这是我的网站让他过来的，于是它就把我的网站想要获取的权限摆出来，并询问用户是否允许我获取这些权限。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">//</span> 用户登录 github，协商</span><br><span class="line">GET <span class="regexp">//gi</span>thub.com<span class="regexp">/login/</span>oauth/authorize</span><br><span class="line"><span class="regexp">//</span> 协商凭证</span><br><span class="line">params = &#123;</span><br><span class="line">  client_id: <span class="string">&quot;xxxx&quot;</span>,</span><br><span class="line">  redirect_uri: <span class="string">&quot;http://my-website.com&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果用户觉得我的网站要的权限太多，或者压根就不想我知道他这些信息，选择了拒绝的话，整个 OAuth 2.0 的认证就结束了，认证也以失败告终。
+如果用户觉得 OK，在授权页面点击了确认授权后，页面会跳转到我预先设定的 redirect_uri 并附带一个盖了章的门票 code：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">//</span> 协商成功后带着盖了章的 code</span><br><span class="line">Location: http:<span class="regexp">//my</span>-website.com?code=xxx</span><br></pre></td></tr></table></figure>
+
+<p>这个时候，用户和 Github 之间的协商就已经完成，Github 也会在自己的系统中记录这次协商，
+表示该用户已经允许在我的网站访问上直接操作和使用他的部分资源。</p>
+<h2 id="告诉-Github-我的网站要来拜访了"><a href="#告诉-Github-我的网站要来拜访了" class="headerlink" title="告诉 Github 我的网站要来拜访了"></a>告诉 Github 我的网站要来拜访了</h2><p>第二步中，我们已经拿到了盖过章的门票 code，但这个 code 只能表明，用户允许我的网站从 github 上获取该用户的数据，
+如果我直接拿这个 code 去 github 访问数据一定会被拒绝，因为任何人都可以持有 code，github 并不知道 code 持有方就是我本人。</p>
+<p>还记得之前申请应用的时候 github 给我的两张门票么，Client Id 在上一步中已经用过了，接下来轮到另一张门票 Client Secret：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">//</span> 网站和 github 之间的协商</span><br><span class="line">POST <span class="regexp">//gi</span>thub.com<span class="regexp">/login/</span>oauth/access_token</span><br><span class="line"><span class="regexp">//</span> 协商凭证包括 github 给用户盖的章和 github 发给我的门票</span><br><span class="line">params = &#123;</span><br><span class="line">  code: <span class="string">&quot;xxx&quot;</span>,</span><br><span class="line">  client_id: <span class="string">&quot;xxx&quot;</span>,</span><br><span class="line">  client_secret: <span class="string">&quot;xxx&quot;</span>,</span><br><span class="line">  redirect_uri: <span class="string">&quot;http://my-website.com&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拿着用户盖过章的 code 和能够标识个人身份的 client_id、client_secret 去拜访 github，拿到最后的绿卡 access_token：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 拿到最后的绿卡</span></span><br><span class="line"><span class="attr">response</span> <span class="operator">=</span> <span class="punctuation">&#123;</span></span><br><span class="line"><span class="symbol">  access_token:</span> <span class="string">&quot;e72e16c7e42f292c6912e7710c838347ae178b4a&quot;</span></span><br><span class="line"><span class="symbol">  scope:</span> <span class="string">&quot;user,gist&quot;</span></span><br><span class="line"><span class="symbol">  token_type:</span> <span class="string">&quot;bearer&quot;</span>,</span><br><span class="line"><span class="symbol">  refresh_token:</span> <span class="string">&quot;xxxx&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="用户开始使用-github-帐号在我的页面上留言"><a href="#用户开始使用-github-帐号在我的页面上留言" class="headerlink" title="用户开始使用 github 帐号在我的页面上留言"></a>用户开始使用 github 帐号在我的页面上留言</h2><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">//</span> 访问用户数据</span><br><span class="line">GET <span class="regexp">//</span>api.github.com/user?access_token=e72e16c7e42f292c6912e7710c838347ae178b4a</span><br></pre></td></tr></table></figure>
+
+<p>上一步 github 已经把最后的绿卡 access_token 给我了，通过 github 提供的 API 加绿卡就能够访问用户的信息了，
+能获取用户的哪些权限在 response 中也给了明确的说明，scope 为 user 和 gist，也就是只能获取 user 组和 gist 组两个小组的权限，
+user 组中就包含了用户的名字和邮箱等信息了：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 告诉我用户的名字和邮箱</span></span><br><span class="line"><span class="attr">response</span> <span class="operator">=</span> <span class="punctuation">&#123;</span></span><br><span class="line"><span class="symbol">  username:</span> <span class="string">&quot;barretlee&quot;</span>,</span><br><span class="line"><span class="symbol">  email:</span> <span class="string">&quot;barret.china@gmail.com&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>整个 OAuth2 流程在这里也基本完成了，文章中的表述很粗糙，比如 access_token 这个绿卡是有过期时间的，
+如果过期了需要使用 refresh_token 重新签证。重点是让读者理解整个流程，
+细节部分可以阅读 <a target="_blank" rel="noopener" href="http://www.rfcreader.com/#rfc6749">RFC6749 文档</a>。</p>
+<h2 id="OpenID协议"><a href="#OpenID协议" class="headerlink" title="OpenID协议"></a>OpenID协议</h2><p>本文最后顺便提一下这个OpenID协议，以及跟OAuth协议的区别。简而言之，OAuth关注的是authorization授权，
+即：”用户能做什么”，而OpenID侧重的是authentication认证，即：”用户是谁”。</p>
+<p>也许你每次去一个网站都得申请一个用户名和密码，要记住这么多的用户名和密码真是麻烦，
+OpenID就是基于解决这类问题而提出的一个国际标准，用于打通各大网站之间的用户体系。
+你可以使用某一网站的帐号去登录另一网站，只要这些网站都是实现了OpenID的服务。
+目前，google，yahoo，flickr等都支持OpenID服务。2009年2月初，facebook也宣布加入OpenId基金会。</p>
+<p>OpenID官方网站 <a target="_blank" rel="noopener" href="http://openid.net/">http://openid.net</a> 。官方首页介绍说：OpenID是一个单一的免费的数字身份标识。
+使用它，你就可以登录你经常登录的网站。OpenID系统的身份认证是通过URI来认证用户身份。</p>
+<p>OpenID常见的应用场景：某用户试图登录一个外部网站。与提交用户名和密码的方式不同，他只提交了属于自己的一个URL，
+例如：<code>http://johnsmith.example.com/</code> 。这个URL即指向用户的OpenID认证服务器，同时又是用户的身份标识。
+因此外部网站使用此URL便可以找到用户的认证服务器，并询问认证服务器：”该用户声称他拥有此URL。而这个URL说明了你负责认证工作，
+那么请告诉我，该用户能否访问我的站点？”。 认证服务器将提示用户登入认证系统，并询问用户是否允许和外部网站进行认证。
+如果用户同意的话，那么认证服务器将通知外部网站——用户已经通过认证。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%89%E5%85%A8%E8%B4%B4%E5%A3%AB/" rel="tag"># 安全贴士</a>
+              <a href="/tags/oauth/" rel="tag"># oauth</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/03/27/Tool/jenkins/jenkins04.html" rel="prev" title="Jenkins持续集成 - 高级特性">
+      <i class="fa fa-chevron-left"></i> Jenkins持续集成 - 高级特性
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/05/02/Web/basic/async.html" rel="next" title="使用Ajax实现异步任务">
+      使用Ajax实现异步任务 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E5%AE%9A%E4%B9%89"><span class="nav-number">1.</span> <span class="nav-text">名词定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E6%8E%88%E6%9D%83%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">客户端的授权模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%88%E6%9D%83%E7%A0%81%E6%A8%A1%E5%BC%8F%E8%AF%A6%E7%BB%86%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">授权码模式详细步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC1%E6%AD%A5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.1.</span> <span class="nav-text">第1步详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC2%E6%AD%A5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.2.</span> <span class="nav-text">第2步详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC3%E6%AD%A5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.3.</span> <span class="nav-text">第3步详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC4%E6%AD%A5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.4.</span> <span class="nav-text">第4步详解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC5%E6%AD%A5%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.5.</span> <span class="nav-text">第5步详解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.</span> <span class="nav-text">场景介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%AB%99%E5%92%8C-Github-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8D%8F%E5%95%86"><span class="nav-number">5.</span> <span class="nav-text">网站和 Github 之间的协商</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C-Github-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%8D%8F%E5%95%86"><span class="nav-number">6.</span> <span class="nav-text">用户和 Github 之间的协商</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%8A%E8%AF%89-Github-%E6%88%91%E7%9A%84%E7%BD%91%E7%AB%99%E8%A6%81%E6%9D%A5%E6%8B%9C%E8%AE%BF%E4%BA%86"><span class="nav-number">7.</span> <span class="nav-text">告诉 Github 我的网站要来拜访了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%BC%80%E5%A7%8B%E4%BD%BF%E7%94%A8-github-%E5%B8%90%E5%8F%B7%E5%9C%A8%E6%88%91%E7%9A%84%E9%A1%B5%E9%9D%A2%E4%B8%8A%E7%95%99%E8%A8%80"><span class="nav-number">8.</span> <span class="nav-text">用户开始使用 github 帐号在我的页面上留言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenID%E5%8D%8F%E8%AE%AE"><span class="nav-number">9.</span> <span class="nav-text">OpenID协议</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">250</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">104</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener" target="_blank"><i class="fa fa-fw fa-fab fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-fa fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Xiong Neng</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
+<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+<script src="/js/algolia-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : '608d980b75fc48a1873e',
+      clientSecret: '56fd98792841961d31a92ce3a2b5ba36e7bc2f17',
+      repo        : 'comments',
+      owner       : 'yidao620c',
+      admin       : ['yidao620c'],
+      id          : '17d1fca6011b406f96173261ca7fac66',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+</body>
+</html>

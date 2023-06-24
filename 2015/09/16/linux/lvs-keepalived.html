@@ -23,21 +23,20 @@
   <meta name="description" content="我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。 1、什么是LVS？ 请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。  LVS项目介绍：http:&#x2F;&#x2F;www.linuxvirtualserver.org&#x2F;zh&#x2F;lvs1.html LVS集群的体系结构：http:&#x2F;&#x2F;www.linuxvirtu">
 <meta property="og:type" content="article">
 <meta property="og:title" content="CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群">
-<meta property="og:url" content="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
+<meta property="og:url" content="https://www.xncoding.com/2015/09/16/Linux/lvs-keepalived.html">
 <meta property="og:site_name" content="飞污熊博客">
 <meta property="og:description" content="我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。 1、什么是LVS？ 请阅读作者章文嵩博士自己的研究报告，共计4部分，看完后对集群和LVS就有了初步的了解，不懂时可以翻翻。  LVS项目介绍：http:&#x2F;&#x2F;www.linuxvirtualserver.org&#x2F;zh&#x2F;lvs1.html LVS集群的体系结构：http:&#x2F;&#x2F;www.linuxvirtu">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/0002.png">
 <meta property="article:published_time" content="2015-09-16T08:40:04.000Z">
-<meta property="article:modified_time" content="2020-08-26T13:52:00.018Z">
+<meta property="article:modified_time" content="2023-06-24T15:20:49.082Z">
 <meta property="article:author" content="Xiong Neng">
-<meta property="article:tag" content="keepalived">
-<meta property="article:tag" content="linux">
 <meta property="article:tag" content="lvs">
+<meta property="article:tag" content="keepalived">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/0002.png">
 
-<link rel="canonical" href="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
+<link rel="canonical" href="https://www.xncoding.com/2015/09/16/Linux/lvs-keepalived.html">
 
 
 <script id="page-configurations">
@@ -194,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2015/09/16/linux/lvs-keepalived.html">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/2015/09/16/Linux/lvs-keepalived.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/my.png">
@@ -225,7 +224,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+                  <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
                 </span>
             </span>
 
@@ -254,8 +253,10 @@
 <li>LVS项目介绍：<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/zh/lvs1.html">http://www.linuxvirtualserver.org/zh/lvs1.html</a></li>
 <li>LVS集群的体系结构：<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/zh/lvs2.html">http://www.linuxvirtualserver.org/zh/lvs2.html</a></li>
 <li>LVS集群中的IP负载均衡技术：<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/zh/lvs3.html">http://www.linuxvirtualserver.org/zh/lvs3.html</a></li>
-<li>LVS集群的负载调度：<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/zh/lvs4.html">http://www.linuxvirtualserver.org/zh/lvs4.html</a><span id="more"></span></li>
+<li>LVS集群的负载调度：<a target="_blank" rel="noopener" href="http://www.linuxvirtualserver.org/zh/lvs4.html">http://www.linuxvirtualserver.org/zh/lvs4.html</a></li>
 </ul>
+<span id="more"></span>
+
 <p><strong>2、什么是KeepAlived?</strong></p>
 <p>Keepalived原理与实战精讲： <a target="_blank" rel="noopener" href="http://zhumeng8337797.blog.163.com/blog/static/100768914201191762253640/">http://zhumeng8337797.blog.163.com/blog/static/100768914201191762253640/</a></p>
 <p><strong>3、什么是CentOS?</strong></p>
@@ -301,6 +302,7 @@ OK，KeepAlived安装完毕，然后进行配置。</p>
 <h4 id="4-KeepAlivde的配置"><a href="#4-KeepAlivde的配置" class="headerlink" title="4) KeepAlivde的配置"></a>4) KeepAlivde的配置</h4><p><strong>第一步：打开IP Forward 功能</strong></p>
 <p>（LVS现有三种负载均衡规则都需要打开此功能，如果不打开此功能，下面的配置配得再好都无济于事）</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+
 <p>打开后修改里面”net.ipv4.ip_forward &#x3D; 1”，修改好后保存退出，执行如下命令使设置立即生效</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl -p</span><br></pre></td></tr></table></figure>
 
@@ -312,8 +314,10 @@ OK，KeepAlived安装完毕，然后进行配置。</p>
 
 <p>以上就完成了keepAlived的配置，下面进行启动</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chkconfig keepalived on</span><br><span class="line">service keepalived start</span><br></pre></td></tr></table></figure>
+
 <p>查看进程</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps aux | grep keepalived</span><br></pre></td></tr></table></figure>
+
 <p>Keepalived正常运行时，共启动3个进程，其中一个进程是父进程，负责监控其子进程；
 一个是vrrp子进程；另外一个是checkers子进程。</p>
 <p>查看下虚拟IP是否已经加上（重要）</p>
@@ -330,8 +334,10 @@ OK，KeepAlived安装完毕，然后进行配置。</p>
 <h4 id="5-WEB服务器WEB1-RealServer的配置"><a href="#5-WEB服务器WEB1-RealServer的配置" class="headerlink" title="5) WEB服务器WEB1_RealServer的配置"></a>5) WEB服务器WEB1_RealServer的配置</h4><p>1. 克隆虚拟机WEB1_RealServer(192.168.203.93)；
 2. 配置虚拟IP启动脚本</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/init.d/realserver.sh</span><br></pre></td></tr></table></figure>
+
 <p>在文件中输入如下脚本：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line">SNS_VIP=192.168.203.107</span><br><span class="line">. /etc/rc.d/init.d/functions</span><br><span class="line"><span class="keyword">case</span> <span class="string">&quot;<span class="variable">$1</span>&quot;</span> <span class="keyword">in</span></span><br><span class="line">start)</span><br><span class="line"> ifconfig lo:0 <span class="variable">$SNS_VIP</span> netmask 255.255.255.255 broadcast <span class="variable">$SNS_VIP</span></span><br><span class="line"> /sbin/route add -host <span class="variable">$SNS_VIP</span> dev lo:0</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;1&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;2&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line"> sysctl -p &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;RealServer Start OK&quot;</span></span><br><span class="line"> ;;</span><br><span class="line">stop)</span><br><span class="line"> ifconfig lo:0 down</span><br><span class="line"> route del <span class="variable">$SNS_VIP</span> &gt;/dev/null 2&gt;&amp;1</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;0&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;0&quot;</span> &gt;/proc/sys/net/ipv4/conf/lo/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;0&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_ignore</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;0&quot;</span> &gt;/proc/sys/net/ipv4/conf/all/arp_announce</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;RealServer Stoped&quot;</span></span><br><span class="line"> ;;</span><br><span class="line"> *)</span><br><span class="line"> <span class="built_in">echo</span> <span class="string">&quot;Usage: <span class="variable">$0</span> &#123;start|stop&#125;&quot;</span></span><br><span class="line"> <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">esac</span></span><br><span class="line"><span class="built_in">exit</span> 0</span><br></pre></td></tr></table></figure>
+
 <p>3. 安装配置TOMCAT</p>
 <p>我测试用的是TOMCAT6</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum -y install tomcat6 tomcat6-webapps tomcat6-admin-webapps</span><br><span class="line">service tomcat6 start</span><br></pre></td></tr></table></figure>
@@ -344,18 +350,23 @@ OK，KeepAlived安装完毕，然后进行配置。</p>
 <p>为了测试负载均衡，我们将这个页面改下，以更好的标识这个网页是本服务器的</p>
 <p>Tomcat6安装目录位于&#x2F;usr&#x2F;share&#x2F;tomcat6，所以我们要编辑tomcat下的webapps&#x2F;ROOT&#x2F;index.html这个文件。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /usr/share/tomcat6/webapps/ROOT/</span><br><span class="line"><span class="built_in">cat</span> /dev/null &gt; index.html</span><br><span class="line">vim index.html</span><br></pre></td></tr></table></figure>
+
 <p>将如下文本写入index.html，然后打开浏览器：<a target="_blank" rel="noopener" href="http://192.168.203.93:8080/">http://192.168.203.93:8080</a>，已经改变：</p>
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">web1</span> <span class="number">192.168.203.93</span></span><br></pre></td></tr></table></figure>
+
 <ul>
-<li>启动虚拟IP的脚本<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh /etc/init.d/realserver.sh start</span><br><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
-运行后会看到网络有一个虚拟IP：<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@centos01 ROOT]# ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr <span class="number">08</span>:<span class="number">00</span>:<span class="number">27</span>:<span class="number">59</span>:AB:<span class="number">1</span>D</span><br><span class="line">          inet addr:<span class="number">192.168</span>.<span class="number">203.93</span>  Bcas<span class="variable">t:192</span>.<span class="number">168.203</span>.<span class="number">255</span>  Mask:<span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line">          inet6 addr: fe80::a00:<span class="number">27</span>ff:fe59:ab1d/<span class="number">64</span> Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packet<span class="variable">s:81006</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packet<span class="variable">s:12305</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> carrier:<span class="number">0</span></span><br><span class="line">          collision<span class="variable">s:0</span> txqueuelen:<span class="number">1000</span></span><br><span class="line">          RX byte<span class="variable">s:83023415</span> (<span class="number">79.1</span> MiB)  TX byte<span class="variable">s:1645604</span> (<span class="number">1.5</span> MiB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">lo</span>        Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">127.0</span>.<span class="number">0.1</span>  Mask:<span class="number">255.0</span>.<span class="number">0.0</span></span><br><span class="line">          inet6 addr: ::<span class="number">1</span>/<span class="number">128</span> Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packet<span class="variable">s:46</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packet<span class="variable">s:46</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> carrier:<span class="number">0</span></span><br><span class="line">          collision<span class="variable">s:0</span> txqueuelen:<span class="number">0</span></span><br><span class="line">          RX byte<span class="variable">s:3559</span> (<span class="number">3.4</span> KiB)  TX byte<span class="variable">s:3559</span> (<span class="number">3.4</span> KiB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">lo</span>:<span class="number">0</span>      Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">192.168</span>.<span class="number">203.107</span>  Mask:<span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br></pre></td></tr></table></figure></li>
+<li>启动虚拟IP的脚本</li>
 </ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sh /etc/init.d/realserver.sh start</span><br><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+
+<p>运行后会看到网络有一个虚拟IP：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@centos01 ROOT]# ifconfig</span><br><span class="line">eth0      Link encap:Ethernet  HWaddr <span class="number">08</span>:<span class="number">00</span>:<span class="number">27</span>:<span class="number">59</span>:AB:<span class="number">1</span>D</span><br><span class="line">          inet addr:<span class="number">192.168</span>.<span class="number">203.93</span>  Bcas<span class="variable">t:192</span>.<span class="number">168.203</span>.<span class="number">255</span>  Mask:<span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line">          inet6 addr: fe80::a00:<span class="number">27</span>ff:fe59:ab1d/<span class="number">64</span> Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:<span class="number">1500</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packet<span class="variable">s:81006</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packet<span class="variable">s:12305</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> carrier:<span class="number">0</span></span><br><span class="line">          collision<span class="variable">s:0</span> txqueuelen:<span class="number">1000</span></span><br><span class="line">          RX byte<span class="variable">s:83023415</span> (<span class="number">79.1</span> MiB)  TX byte<span class="variable">s:1645604</span> (<span class="number">1.5</span> MiB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">lo</span>        Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">127.0</span>.<span class="number">0.1</span>  Mask:<span class="number">255.0</span>.<span class="number">0.0</span></span><br><span class="line">          inet6 addr: ::<span class="number">1</span>/<span class="number">128</span> Scope:Host</span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br><span class="line">          RX packet<span class="variable">s:46</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> frame:<span class="number">0</span></span><br><span class="line">          TX packet<span class="variable">s:46</span> error<span class="variable">s:0</span> dropped:<span class="number">0</span> overrun<span class="variable">s:0</span> carrier:<span class="number">0</span></span><br><span class="line">          collision<span class="variable">s:0</span> txqueuelen:<span class="number">0</span></span><br><span class="line">          RX byte<span class="variable">s:3559</span> (<span class="number">3.4</span> KiB)  TX byte<span class="variable">s:3559</span> (<span class="number">3.4</span> KiB)</span><br><span class="line"></span><br><span class="line"><span class="keyword">lo</span>:<span class="number">0</span>      Link encap:Local Loopback</span><br><span class="line">          inet addr:<span class="number">192.168</span>.<span class="number">203.107</span>  Mask:<span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">          UP LOOPBACK RUNNING  MTU:<span class="number">16436</span>  Metric:<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
 <p>4. 去LVS_MASTER服务器的终端查看下ipvsadm，查看已经连接上了WEB1服务器，运行命令</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm -<span class="built_in">ln</span></span><br></pre></td></tr></table></figure>
 
 <p>结果如下：</p>
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@centos03 keepalived-1.2.7]# ipvsadm -ln<span class="built_in"></span></span><br><span class="line"><span class="built_in">IP </span>Virtual<span class="built_in"> Server </span>version 1.2.1 (<span class="attribute">size</span>=4096)</span><br><span class="line">Prot LocalAddress:Port<span class="built_in"> Scheduler </span>Flags</span><br><span class="line">  -&gt; RemoteAddress:Port           Forward Weight ActiveConn InActConn</span><br><span class="line">TCP  192.168.203.107:8080 rr persistent 50</span><br><span class="line">  -&gt; 192.168.203.93:8080         <span class="built_in"> Route </span>  1      0          0</span><br></pre></td></tr></table></figure>
-
 
 <p>已经可以看到有服务器加入进来了。
 此时我们访问网页<a target="_blank" rel="noopener" href="http://192.168.203.107:8080/">http://192.168.203.107:8080</a>，出现界面显示web1 192.168.203.93；
@@ -369,6 +380,7 @@ MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instanc
 </ol>
 <p>配置好的如下文：</p>
 <figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">! Configuration File <span class="keyword">for</span> keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">     <span class="symbol">test@</span>sina.com</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from <span class="symbol">admin@</span>test.com</span><br><span class="line">   smtp_server <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">   smtp_connect_timeout <span class="number">30</span></span><br><span class="line">   router_id LVS_BACKUP</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    <span class="keyword">interface</span> <span class="symbol">eth0</span></span><br><span class="line">    <span class="symbol">virtual_router_id</span> <span class="symbol">60</span></span><br><span class="line">    <span class="symbol">priority</span> <span class="symbol">90</span></span><br><span class="line">    <span class="symbol">advert_int</span> <span class="symbol">1</span></span><br><span class="line">    <span class="symbol">authentication</span> &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass <span class="number">1111</span></span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.107</span> <span class="number">8080</span> &#123;</span><br><span class="line">    delay_loop <span class="number">6</span></span><br><span class="line">    lb_algo rr</span><br><span class="line">    lb_kind DR</span><br><span class="line">    nat_mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">    persistence_timeout <span class="number">50</span></span><br><span class="line">    protocol TCP</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.93</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    real_server <span class="number">192.168</span><span class="number">.203</span><span class="number">.94</span> <span class="number">8080</span> &#123;</span><br><span class="line">        weight <span class="number">1</span></span><br><span class="line">        TCP_CHECK &#123;</span><br><span class="line">            connect_timeout <span class="number">3</span></span><br><span class="line">            nb_get_retry <span class="number">3</span></span><br><span class="line">            delay_before_retry <span class="number">3</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <ol start="2">
 <li><p>从WEB1_RealServer克隆一个WEB2_RealServer，将tomcat的index.html文件改为web2 192.168.203.94。
 （这里的IP是我测试的，您的可以自定义）启动realserver.sh脚本。</p>
@@ -409,9 +421,8 @@ MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instanc
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/keepalived/" rel="tag"># keepalived</a>
-              <a href="/tags/linux/" rel="tag"># linux</a>
               <a href="/tags/lvs/" rel="tag"># lvs</a>
+              <a href="/tags/keepalived/" rel="tag"># keepalived</a>
           </div>
 
         
@@ -420,11 +431,11 @@ MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instanc
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2015/09/07/python/pyinstaller.html" rel="prev" title="使用PyInstaller打包Python程序">
+    <a href="/2015/09/07/Python/basic/pyinstaller.html" rel="prev" title="使用PyInstaller打包Python程序">
       <i class="fa fa-chevron-left"></i> 使用PyInstaller打包Python程序
     </a></div>
       <div class="post-nav-item">
-    <a href="/2015/09/22/algorithm/merge-sort.html" rel="next" title="归并排序中对小数组采用插入排序">
+    <a href="/2015/09/22/Algorithm/merge-sort.html" rel="next" title="归并排序中对小数组采用插入排序">
       归并排序中对小数组采用插入排序 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
@@ -502,20 +513,20 @@ MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instanc
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">224</span>
+          <span class="site-state-item-count">250</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">102</span>
+        <span class="site-state-item-count">104</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -665,7 +676,7 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       repo        : 'comments',
       owner       : 'yidao620c',
       admin       : ['yidao620c'],
-      id          : '229eeea6c0eb9a80813b8fed39ea87aa',
+      id          : 'e9312f05d92e43a63383a8ad1c5ee144',
         language: 'zh-CN',
       distractionFreeMode: true
     });
