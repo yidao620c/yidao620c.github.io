@@ -750,6 +750,36 @@ custom_file_path:
   style: source/_data/styles.styl
 ```
 
+### 问题记录
+中文目录单击不跳转问题解决方案
+
+生成文章的中文目录点击后不会自动跳转到相应位置。在next github 上已经提出了该问题并给出了
+[解决方案](https://github.com/theme-next/hexo-theme-next/pull/1540/files)
+
+![20230624-01.png](https://xnstatic-1253397658.file.myqcloud.com/20230624-01.png)
+
+主要修改了如下函数（next/source/js/utils.js）：
+```js
+registerSidebarTOC: function() {
+  const navItems = document.querySelectorAll('.post-toc li');
+  const sections = [...navItems].map(element => {
+    var link = element.querySelector('a.nav-link');
+    var target = document.getElementById(decodeURI(link.getAttribute('href')).replace('#', ''));
+    // TOC item animation navigate.
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      var offset = target.getBoundingClientRect().top + window.scrollY;
+      window.anime({
+        targets  : document.scrollingElement,
+        duration : 500,
+        easing   : 'linear',
+        scrollTop: offset + 10
+      });
+    });
+    return target;
+  });
+```
+
 ## 参考
 
 * [hexo干货系列](http://tengj.top/tags/hexo/)
