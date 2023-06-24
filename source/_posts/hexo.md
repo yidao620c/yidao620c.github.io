@@ -738,6 +738,20 @@ code {
 ```
 * `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
 
+## 不蒜子阅读统计
+```yaml
+# Show Views / Visitors of the website / page with busuanzi.
+# Get more information on http://ibruce.info/2015/04/04/busuanzi
+busuanzi_count:
+  enable: true
+  total_visitors: true
+  total_visitors_icon: user
+  total_views: true
+  total_views_icon: eye
+  post_views: true
+  post_views_icon: eye
+```
+
 ## 升级指南
 直接先升级hexo-cli，然后再升级next主题。
 
