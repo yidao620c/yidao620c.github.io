@@ -3,10 +3,8 @@ layout: post
 title: 使用supervisor管理进程
 date: 2016-10-12 08:22:22 +0800
 toc: true
-categories: linux
-tags:
-  - supervisor
-  - linux
+categories: [ Linux ]
+tags: [ supervisor ]
 abbrlink: 39907
 ---
 
@@ -16,27 +14,34 @@ Supervisor (http://supervisord.org) 是一个用 Python 写的进程管理工具
 <!-- more -->
 
 ## 组成部分
+
 supervisor 主要由两部分组成：
 
 1. supervisord(server 部分)：主要负责管理子进程，响应客户端命令以及日志的输出等；
 2. supervisorctl(client 部分)：命令行客户端，用户可以通过它与不同的 supervisord 进程联系，获取子进程的状态等。
 
 ## 安装
+
 可以直接使用 pip 安装：
+
 ```bash
 sudo pip install supervisor
 ```
+
 如果是 Ubuntu 系统，也可以使用 apt-get 来安装
 
 安装完成之后，可以运行 echo_supervisord_conf 生成默认的配置文件：
+
 ```bash
 echo_supervisord_conf > /etc/supervisord.conf
 ```
 
 ## supervisor自启动服务
+
 这里只介绍在CentOS7上面添加supervisord服务为自启动，其他平台请自行google
 
 修改 ``/lib/systemd/system/supervisord.service`，添加如下内容：
+
 ```
 # supervisord service for systemd (CentOS 7.0+)
 [Unit]
@@ -56,6 +61,7 @@ WantedBy=multi-user.target
 ```
 
 无需修改/etc/supervisord.conf配置文件，该启动脚本都能够添加到systemctl自启动服务:
+
 ```bash
 systemctl enable supervisord.service
 systemctl start/restart/stop supervisord.service
@@ -70,6 +76,7 @@ Supervisor 相当强大，提供了很丰富的功能，不过我们可能只需
 2. 应用程序（即我们要管理的程序）。
 
 首先来看 supervisord 的配置文件。去除里面大部分注释和"不相关"的部分，我们可以先看这些配置：
+
 ```
 [unix_http_server]
 file=/tmp/supervisor.sock   ; UNIX socket 文件，supervisorctl 会使用
@@ -107,15 +114,19 @@ files = relative/directory/*.ini    ; 可以是 *.conf 或 *.ini
 ```
 
 然后可以通过 supervisord 命令启动 supervisord:
+
 ```bash
 supervisord -c /etc/supervisord.conf
 ```
+
 查看 supervisord 是否在运行：
+
 ```bash
 ps aux | grep supervisord
 ```
 
 我们可以看到 supervisord 已经被启动了， 然后进入 supervisorctl 的 shell 界面:
+
 ```bash
 $ supervisorctl
 supervisor> status
@@ -124,6 +135,7 @@ supervisor>
 
 由于目前没有添加任何需要管理的进程，所以 status 没有输出人和结果，
 接下来我们添加一个需要管理的进程 (以启动一个 celery 的 worker 为例)：
+
 ```
 [program:celeryd]
 user=tomcat                                          ; 用哪个用户启动
@@ -144,6 +156,7 @@ startsecs=10                                         ; 启动 10 秒后没有异
 ## 使用 supervisorctl
 
 然后运行以下命令更新配置并启动进程：
+
 ```bash
 $ supervisorctl reread (只更新配置文件)
 celeryd: available
@@ -156,6 +169,7 @@ celeryd                          RUNNING    pid 1919, uptime 0:00:18
 ```
 
 我们看到 celery worker 已经被成功启动了。你可以使用不同的命令来控制进程的启动和关闭:
+
 ```bash
 $ supervisorctl stop celeryd
 celeryd: stopped
@@ -168,6 +182,7 @@ celeryd: started
 
 把所有的配置文件都放在 supervisord.conf 并不是个好主意，一旦管理的进程过多，就很麻烦。
 所以一般都会 新建一个目录来专门放置进程的配置文件，然后通过 include 的方式来获取这些配置信息:
+
 ```bash
 [include]
 files = /etc/supervisor/conf.d/*.conf
@@ -183,7 +198,8 @@ files = /etc/supervisor/conf.d/*.conf
 4. supervisorctl reload: 载入最新的配置文件，停止原来的所有进程并按新的配置启动管理所有进程;
 5. supervisorctl update: 根据最新的配置文件，启动新配置或有改动的进程，配置没有改动的进程不会受影响而重启;
 
-##  其他
+## 其他
+
 除了 supervisorctl 之外，还可以配置 supervisrod 启动 web 管理界面，这个 web 后台使用 Basic Auth 的方式进行身份认证。
 
 除了单个进程的控制，还可以配置 group，进行分组管理。
@@ -194,27 +210,37 @@ files = /etc/supervisor/conf.d/*.conf
 Supervisor有很丰富的功能，还有其他很多配置，可以在官方文档获取更多信息：http://supervisord.org/index.html
 
 ## FAQ
+
 最后记录一下问题和解决办法:
 
 reload的时候报错
+
 ```
 No such file or directory: file: /usr/lib64/python2.7/socket.py
 ```
+
 原因是没有指定program的执行用户，指定即可`user=root`
 
 status命令的时候报错
+
 ```
 unix:///tmp/supervisor.sock no such file
 ```
+
 原因是supervisord进程根本就没启动，请重新执行启动命令。
+
 ```
 supervisord -c /etc/supervisord.conf
 ```
+
 这时候启动又报错
+
 ```
 /var/log/supervisor/xxx_out.log does not exist
 ```
+
 原因是`/var/log/supervisor`目录不存在，去mkdir一个就可以了。
+
 ```
 mkdir /var/log/supervisor
 ```

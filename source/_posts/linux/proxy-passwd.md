@@ -3,16 +3,15 @@ layout: post
 title: 设置代理时候保护个人密码
 date: '2018-09-28 14:04:10 +0800'
 toc: true
-categories: linux
-tags:
-  - proxy
-  - linux
+categories: [ Linux ]
+tags: [ proxy ]
 abbrlink: 12127
 ---
 
 一般设置代理方式是，全局的代理设置`vi /etc/profile`
 
 添加下面内容
+
 ```bash
 export http_proxy = http://username:password@yourproxy.com:8080/
 export ftp_proxy = http://username:password@yourproxy:8080/
@@ -27,17 +26,20 @@ export ftp_proxy = http://username:password@yourproxy:8080/
 ```bash
 openssl enc -aes-256-cbc -in /etc/profile.d/pw.txt -out /etc/profile.d/pw.bin
 ```
+
 得到加密后的密文，然后删除明文密码文件pw.txt。
 <!-- more -->
 
 接下来在`/etc/profile`中创建2个别名命令：
 
 1. 设置代理的别名
+
 ```bash
 alias myproxy='PW=`openssl aes-256-cbc -d -in /etc/profile.d/pw.bin`; PROXY="http://$USER:$PW@yourproxy.com:8080"; export http_proxy=$PROXY; export https_proxy=$PROXY; export ftp_proxy=$PROXY'
 ```
 
 2. 清空代理的别名
+
 ```bash
 alias clearproxy ='export http_proxy=; export https_proxy=; ftp_proxy='
 ```

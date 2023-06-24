@@ -3,11 +3,8 @@ layout: post
 title: CentOS6.5上LVS和KeepAlived搭建高可用负载均衡集群
 date: 2015-09-16 16:40:04 +0800
 toc: true
-categories: linux
-tags:
-  - lvs
-  - keepalived
-  - linux
+categories: [ Linux ]
+tags: [lvs, keepalived]
 abbrlink: 18663
 ---
 
@@ -21,6 +18,7 @@ abbrlink: 18663
 + LVS集群的体系结构：<http://www.linuxvirtualserver.org/zh/lvs2.html>
 + LVS集群中的IP负载均衡技术：<http://www.linuxvirtualserver.org/zh/lvs3.html>
 + LVS集群的负载调度：<http://www.linuxvirtualserver.org/zh/lvs4.html>
+
 <!-- more -->
 
 **2、什么是KeepAlived?**
@@ -40,6 +38,7 @@ Keepalived原理与实战精讲： <http://zhumeng8337797.blog.163.com/blog/stat
 ![](https://xnstatic-1253397658.file.myqcloud.com/0002.png)
 
 ## 服务器的安装
+
 我们会用到4个服务器，横向分2层：
 
 第1层是LVS服务器（1个主，1个从；从可以多个）用来转发请求，需要安装ipvsadm和keepAlived；
@@ -47,6 +46,7 @@ Keepalived原理与实战精讲： <http://zhumeng8337797.blog.163.com/blog/stat
 安装的是具体的服务，这里我们安装的是TOMCAT。
 
 主机环境如下：
+
 ```
 192.168.203.107　 LVS_VIP（VIP：Virtual IP）
 192.168.203.103　 LVS_Master　　
@@ -69,6 +69,7 @@ Keepalived原理与实战精讲： <http://zhumeng8337797.blog.163.com/blog/stat
 拷贝eth1的硬件地址到eth0，删除eth1信息
 
 #### 2) 配置/etc/sysconfig/network-scripts/ifcfg-eth0
+
 ```
 DEVICE="eth0"
 BOOTPROTO="static"
@@ -97,6 +98,7 @@ GATEWAY=192.168.203.254
 从Linux内核版本2.6起，IPVS模块已经编译进了Linux内核。
 
 使用yum命令进行安装，系统会选择最适合内核版本的ipvsadm
+
 ```
 yum -y install ipvsadm
 ```
@@ -106,6 +108,7 @@ yum -y install ipvsadm
 为了测试方便，我们直接关闭防火墙，在实际使用中开启需要的端口即可。
 
 具体配置可参考：<http://www.cnblogs.com/rockee/archive/2012/05/17/2506671.html>
+
 ```
 service iptables stop
 ```
@@ -145,10 +148,13 @@ OK，KeepAlived安装完毕，然后进行配置。
 **第一步：打开IP Forward 功能**
 
 （LVS现有三种负载均衡规则都需要打开此功能，如果不打开此功能，下面的配置配得再好都无济于事）
+
 ```bash
 vim /etc/sysctl.conf
 ```
+
 打开后修改里面"net.ipv4.ip_forward = 1"，修改好后保存退出，执行如下命令使设置立即生效
+
 ```bash
 sysctl -p
 ```
@@ -159,6 +165,7 @@ sysctl -p
 
 启动KeepAlived时，它默认会去/etc/keepalived下面找它的配置文件，
 所以上面命令中我们已经将这个配置文件复制过来了。现在进行修改：
+
 ```
 ! Configuration File for keepalived
 
@@ -216,18 +223,23 @@ virtual_server 192.168.203.107 8080 {
 ```
 
 以上就完成了keepAlived的配置，下面进行启动
+
 ```bash
 chkconfig keepalived on
 service keepalived start
 ```
+
 查看进程
+
 ```bash
 ps aux | grep keepalived
 ```
+
 Keepalived正常运行时，共启动3个进程，其中一个进程是父进程，负责监控其子进程；
 一个是vrrp子进程；另外一个是checkers子进程。
 
 查看下虚拟IP是否已经加上（重要）
+
 ```
 [root@centos03 keepalived-1.2.7]# ip a
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue state UNKNOWN
@@ -257,10 +269,13 @@ Keepalived正常运行时，共启动3个进程，其中一个进程是父进程
 
 1\. 克隆虚拟机WEB1_RealServer(192.168.203.93)；
 2\. 配置虚拟IP启动脚本
+
 ```bash
 vim /etc/init.d/realserver.sh
 ```
+
 在文件中输入如下脚本：
+
 ```bash
 #!/bin/bash
 SNS_VIP=192.168.203.107
@@ -291,15 +306,18 @@ stop)
 esac
 exit 0
 ```
+
 3\. 安装配置TOMCAT
 
 我测试用的是TOMCAT6
+
 ```bash
 yum -y install tomcat6 tomcat6-webapps tomcat6-admin-webapps
 service tomcat6 start
 ```
 
 关闭防火墙
+
 ```bash
 service iptables stop
 ```
@@ -311,21 +329,28 @@ service iptables stop
 为了测试负载均衡，我们将这个页面改下，以更好的标识这个网页是本服务器的
 
 Tomcat6安装目录位于/usr/share/tomcat6，所以我们要编辑tomcat下的webapps/ROOT/index.html这个文件。
+
 ```bash
 cd /usr/share/tomcat6/webapps/ROOT/
 cat /dev/null > index.html
 vim index.html
 ```
+
 将如下文本写入index.html，然后打开浏览器：<http://192.168.203.93:8080>，已经改变：
+
 ```
 web1 192.168.203.93
 ```
+
 + 启动虚拟IP的脚本
+
 ```bash
 sh /etc/init.d/realserver.sh start
 ifconfig
 ```
+
 运行后会看到网络有一个虚拟IP：
+
 ```
 [root@centos01 ROOT]# ifconfig
 eth0      Link encap:Ethernet  HWaddr 08:00:27:59:AB:1D
@@ -352,11 +377,13 @@ lo:0      Link encap:Local Loopback
 ```
 
 4\. 去LVS_MASTER服务器的终端查看下ipvsadm，查看已经连接上了WEB1服务器，运行命令
+
 ```bash
 ipvsadm -ln
 ```
 
 结果如下：
+
 ```
 [root@centos03 keepalived-1.2.7]# ipvsadm -ln
 IP Virtual Server version 1.2.1 (size=4096)
@@ -366,7 +393,6 @@ TCP  192.168.203.107:8080 rr persistent 50
   -> 192.168.203.93:8080          Route   1      0          0
 ```
 
-
 已经可以看到有服务器加入进来了。
 此时我们访问网页<http://192.168.203.107:8080>，出现界面显示web1 192.168.203.93；
 OK，至此已经能实现负载均衡了，接下来我们通过克隆实现多个主机的试验。
@@ -374,11 +400,12 @@ OK，至此已经能实现负载均衡了，接下来我们通过克隆实现多
 5\. 服务器克隆
 
 1) 从LVS_MASTER克隆一个LVS_BACKUP服务器，然后修改其中的参数，
-MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instance中的state、priority
-（注意keepAlived的配置文件中有一个网卡设备，虚拟机的网卡设备可能是不一样的，
-有的是eth0，有的是eth1，所以也是要改动的，否则从服务器的服务器很有可能服务不正常）
+   MASTER与BACKUP配置仅三处不同：global_defs中的router_id、vrrp_instance中的state、priority
+   （注意keepAlived的配置文件中有一个网卡设备，虚拟机的网卡设备可能是不一样的，
+   有的是eth0，有的是eth1，所以也是要改动的，否则从服务器的服务器很有可能服务不正常）
 
 配置好的如下文：
+
 ```
 ! Configuration File for keepalived
 
@@ -434,11 +461,12 @@ virtual_server 192.168.203.107 8080 {
     }
 }
 ```
+
 2) 从WEB1_RealServer克隆一个WEB2_RealServer，将tomcat的index.html文件改为web2 192.168.203.94。
-（这里的IP是我测试的，您的可以自定义）启动realserver.sh脚本。
+   （这里的IP是我测试的，您的可以自定义）启动realserver.sh脚本。
 
 3) OK，至此我们已经虚拟出2个LVS服务器，一对主从；2个WEB服务器，web1和web2。
-接下来我们进行测试，看能否满足我们的初始需求。
+   接下来我们进行测试，看能否满足我们的初始需求。
 
 ## 负载和可用性测试
 
@@ -447,6 +475,7 @@ virtual_server 192.168.203.107 8080 {
 测试LVS层
 
 1）首先执行ip a命令，主服务器会存在一个虚拟IP，从服务器不会存在这个虚拟IP。现在浏览网页显示正常。虚拟IP如图所示：
+
 ```
 显示集群中服务器ip信息：ipvsadm -ln
 查看日志：tail -f /var/log/messages

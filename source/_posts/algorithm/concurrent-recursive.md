@@ -3,9 +3,8 @@ layout: post
 title: 利用递归算法并行化解决谜题框架
 date: 2015-04-14 15:41:16 +0800
 toc: true
-categories: 算法之美
-tags:
-  - 算法
+categories: [ 算法之美 ]
+tags: [ 算法 ]
 abbrlink: 1643
 ---
 

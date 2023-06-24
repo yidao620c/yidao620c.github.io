@@ -3,11 +3,10 @@ layout: post
 title: 使用VirtualBox 6安装Centos7
 date: '2018-02-01 00:29:12 +0800'
 toc: true
-categories: linux
-tags:
-  - virtualbox
-  - linux
+categories: [ Linux ]
+tags: [ virtualbox ]
 ---
+
 VirtualBox 是一款开源虚拟机软件。VirtualBox 是由德国 Innotek 公司开发，
 由Sun Microsystems公司出品的软件，使用Qt编写，在 Sun 被 Oracle 收购后正式更名成
 Oracle VM VirtualBox。
@@ -26,6 +25,7 @@ Oracle VM VirtualBox。
 
 安装完成后配置静态IP地址，先用ifconfig看看windows宿主机上面的ip。
 然后编辑文件`/etc/sysconfig/network-scripts/ifcfg-enp0s3`，注意IP设置为跟宿主机上同网段。
+
 ```
 TYPE=Ethernet
 BOOTPROTO=static
@@ -44,20 +44,26 @@ DNS1=114.114.114.114
 ```
 
 SSH连接报一个警告：`Reject X11 forwarding...`。
+
 ```bash
 yum -y install xorg-x11-xauth
 ```
+
 然后再修改`/etc/ssh/sshd_config`
+
 ```
 X11Forwarding yes
 AllowAgentForwarding yes
 ```
 
 想修改为多用户状态只需执行：
+
 ```bash
 systemctl set-default multi-user.target
 ```
+
 修改为图形界面执行
+
 ```bash
 systemctl set-default graphical.target
 ```
@@ -68,7 +74,9 @@ yum -y install net-tools wget telnet vim
 ```
 
 ## 后台运行
+
 关闭虚拟机。在win10上面创建一个bat脚本，以后台方式启动虚拟机：
+
 ```
 @echo off
 cd /d "D:\Program Files\Oracle\VirtualBox"
@@ -78,6 +86,7 @@ VBoxManage.exe startvm "host2" --type headless
 ```
 
 ## VirtualBox常用命令
+
 ```
 #查看帮助
 VBoxManage help

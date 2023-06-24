@@ -3,8 +3,8 @@ layout: post
 title: 回溯法解决八皇后问题
 date: 2015-04-15 17:11:42 +0800
 toc: true
-categories: 算法之美
-tags: 算法
+categories: [ 算法之美 ]
+tags: [ 算法 ]
 abbrlink: 45162
 ---
 
@@ -30,8 +30,8 @@ def conflict(state, nextX):
         if abs(state[i] - nextX) in (0, nextY - i):
             return True
     return False
- 
- 
+
+
 # num：皇后的总数
 # state：已经注册了的每行的皇后的位置列表（X坐标）
 def queens(num=8, state=()):
@@ -48,7 +48,8 @@ def queens(num=8, state=()):
                     yield (pos,) + result
     if not find:
         print("HO, NO..." + str(state))
- 
+
+
 print(list(queens(4)))
 ```
 
@@ -60,9 +61,11 @@ print(list(queens(4)))
 于是再次回溯，直到回到开始点，在那里选择了右边的门。
 
 比较难理解的是这两行代码：
+
 ```python
 for result in queens(num, state + (pos,)):
 ```
+
 递归的调用queens生成器，将state + (pos)当做参数传给queens，state是已经存在的合法状态列表，
 而pos是对要操作的该行进行遍历的位置参数，请注意state + (pos) 并没有将它赋值给state，
 是因为如果后面的返回没有合法值的话可以回溯到前面的状态，也就是说这次迭代里面我并没有说pos是合法状态，
@@ -71,6 +74,7 @@ for result in queens(num, state + (pos,)):
 ```python
 yield (pos,) + result：
 ```
+
 这行的意思是我将当前状态pos作为前缀再加上一直到到底的迭代位置序列，也就是正序排列位置。
 就好比是这样的调用：(0+(1+(2+(3+(…..)))))，这样够清楚了吧。^_^
 

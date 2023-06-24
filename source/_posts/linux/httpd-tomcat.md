@@ -3,11 +3,8 @@ title: 利用httpd对Tomcat进行负载均衡
 date: 2015-10-13 10:59:15 +0800
 comments: true
 toc: true
-categories: linux
-tags:
-  - tomcat
-  - httpd
-  - linux
+categories: [ Linux ]
+tags: [tomcat, httpd]
 abbrlink: 985
 ---
 
@@ -69,22 +66,27 @@ sudo alternatives --set javac /opt/jdk1.8.0_51/bin/javac
 ```
 
 查看下JDK版本
+
 ```bash
 java -version
 ```
 
 修改环境变量
+
 ```bash
 sudo vim /etc/profile
 ```
 
 输入以下内容
+
 ```bash
 export JAVA_HOME=/opt/jdk1.8.0_51
 export JRE_HOME=/opt/jdk1.8.0_51/jre
 export PATH=$PATH:$JAVA_HOME/bin
 ```
+
 执行
+
 ```bash
 source /etc/profile
 ```
@@ -92,6 +94,7 @@ source /etc/profile
 ### 二、两台机器安装tomcat
 
 1.下载安装tomcat
+
 ```bash
 wget http://mirrors.cnnic.cn/apache/tomcat/tomcat-8/v8.0.24/bin/apache-tomcat-8.0.24.tar.gz
 tar xf apache-tomcat-8.0.24.tar.gz -C /usr/local/
@@ -100,6 +103,7 @@ ln -sv apache-tomcat-8.0.24 tomcat
 ```
 
 2.配置环境变量
+
 ```bash
 vim /etc/profile.d/tomcat.sh
 ```
@@ -109,12 +113,15 @@ CATALINA_BASE=/usr/local/tomcat
 PATH=$CATALINA_BASE/bin:$PATH
 export PATH CATALINA_BASE
 ```
+
 执行：
+
 ```bash
 . /etc/profile.d/tomcat.sh
 ```
 
 3.查看状态：
+
 ```bash
 catalina.sh version
 ```
@@ -189,6 +196,7 @@ sudo vim /usr/local/tomcat/conf/server.xml
 ```
 
 修改下面这句：
+
 ```
 <Engine name="Catalina" defaultHost="localhost" jvmRoute="TomcatB">
 ```
@@ -196,10 +204,12 @@ sudo vim /usr/local/tomcat/conf/server.xml
 6.提供测试页面
 
 第一台机器上：
+
 ```bash
 sudo mkdir -pv /usr/local/tomcat/webapps/test/WEB-INF/{classes,lib}
 sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
+
 写一个简单的JSP页面：
 
 ```html
@@ -218,16 +228,20 @@ sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 
 然后启动tomcat
+
 ```bash
 sudo service tomcat start
 ```
+
 这时候可以通过访问 `http://192.168.203.103:8080/test` 访问到这个页面
 
 第二台机器上：
+
 ```bash
 sudo mkdir -pv /usr/local/tomcat/webapps/test/WEB-INF/{classes,lib}
 sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
+
 写一个简单的JSP页面：
 
 ```html
@@ -246,9 +260,11 @@ sudo vim /usr/local/tomcat/webapps/test/index.jsp
 ```
 
 然后启动tomcat
+
 ```bash
 sudo service tomcat start
 ```
+
 这时候可以通过访问`http://192.168.203.104:8080/test`访问到这个页面
 
 ### 三、利用mod_jk模块对tomcat进行负载均衡
@@ -313,17 +329,20 @@ worker.stat1.type = status
 
 5.启动httpd测试：
 我们先去修改下hostname，还有httpd的domainname，`sudo vim /etc/hosts`
+
 ```
 127.0.0.1	localhost centos03
 ```
 
 然后修改httpd的配置文件，`sudo vim /etc/httpd/conf/httpd.conf`
 修改这一行：
+
 ```
 ServerName localhost:80
 ```
 
 最后我们启动httpd服务：
+
 ```bash
 sudo service httpd start
 ```

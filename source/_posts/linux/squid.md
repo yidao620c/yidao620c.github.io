@@ -3,11 +3,8 @@ layout: post
 title: CentOS7.2搭建代理服务器
 date: 2016-07-07 21:15:16 +0800
 toc: true
-categories: linux
-tags:
-  - squid
-  - proxy
-  - linux
+categories: [ Linux ]
+tags: [ squid, proxy ]
 abbrlink: 58371
 ---
 
@@ -19,6 +16,7 @@ abbrlink: 58371
 <!-- more -->
 
 ## 安装
+
 ```bash
 yum install squid -y
 yum install httpd-tools -y
@@ -47,6 +45,7 @@ OK
 ```
 
 ## 配置
+
 ```
 vim /etc/squid/squid.conf
 
@@ -63,11 +62,13 @@ http_port 0.0.0.0:3128
 ```
 
 ## 权限控制
+
 squid的权限控制很灵活，具体配置方法可以参考 [官方文档](http://www.squid-cache.org/Doc/config/acl/)，
 或者 [Squid中文权威指南](http://home.arcor.de/pangj/squid/chap06.html)，
 具体工作原理有点像iptables，用规则去卡控流量。默认的配置只能允许内网用户访问，如果有更多需求，你还可以指定很多规则！
 
 下面是我的配置实例：
+
 ```
 # Example rule allowing access from your local networks.
 # Adapt to list your (internal) IP networks from where browsing
@@ -124,7 +125,9 @@ http_access deny all
 ```
 
 ## 日志
+
 squid的日志默认是打开的，位于目录`/var/log/squid/`，当然这个地址还有日志的格式都是可以完全自定义的
+
 ```
 [root@controller161 ~]# ll /var/log/squid/
 total 496
@@ -137,6 +140,7 @@ total 496
 ```
 
 ## 启动服务
+
 ```bash
 # 开启启动
 systemctl enable squid.service
@@ -149,9 +153,11 @@ systemctl restart squid.service
 ```
 
 ## 代理服务器设置
+
 在其他CentOS机器上面配置各种代理方法
 
 ### 全局代理
+
 `vim /etc/profile`，在最后加入
 
 ```bash
@@ -160,14 +166,18 @@ export https_proxy="http://username:password@proxy_ip:port"
 ```
 
 ### yum代理设置
+
 编辑`/etc/yum.conf`，在最后加入
+
 ```
 # Proxy
 proxy=http://username:password@proxy_ip:port/
 ```
 
 ### wget的代理设置
+
 编辑`/etc/wgetrc`，在最后加入
+
 ```
 # Proxy
 http_proxy=http://username:password@proxy_ip:port/
@@ -176,12 +186,15 @@ ftp_proxy=http://username:password@proxy_ip:port/
 ```
 
 ### curl的代理设置
+
 在`~/.bashrc`里面增加一个别名:
+
 ```bash
 alias curl="curl -x http://username:password@proxy_ip:port"
 ```
 
 另外一种方法是编辑`~/.curlrc`文件 (没有就创建一个):
+
 ```
 proxy = http://username:password@proxy_ip:port
 ```

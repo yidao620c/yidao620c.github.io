@@ -1,10 +1,8 @@
 ---
 title: EC2虚拟主机搭建SS
 toc: true
-categories: linux
-tags:
-  - EC2
-  - linux
+categories: [ Linux ]
+tags: [EC2]
 abbrlink: 22247
 date: 2017-09-30 17:29:33
 ---
@@ -17,7 +15,7 @@ date: 2017-09-30 17:29:33
 也就不能干扰我们访问那些「不存在」的网站了。
 
 如果你希望不花钱就能用上优质的服务──醒醒，别做梦了，免费和优质从来不可能划上等号。
-不过想要共享或建立多账户来出售的话，能赚钱也说不定🙃 
+不过想要共享或建立多账户来出售的话，能赚钱也说不定🙃
 <!-- more -->
 
 ## 创建EC2虚拟主机
@@ -42,6 +40,7 @@ date: 2017-09-30 17:29:33
 然后用xshell工具来连接，主机名选择上面实例详情的名称，使用密钥对来登录，用户名选择centos即可。
 
 ## 部署SS
+
 好了，现在开始正式部署ss了，这里使用 [teddysun](https://teddysun.com/342.html) 的一键安装脚本。
 
 先切换到root用户，可使用 `sudo passwd root` 先修改root密码，然后执行：
@@ -69,16 +68,19 @@ echo 3 > /proc/sys/net/ipv4/tcp_fastopen
 ```
 
 然后修改`/etc/sysctl.conf`，在最后增加如下内容：
+
 ```
 net.ipv4.tcp_fastopen = 3
 ```
 
 再打开一个 Shadowsocks 配置文件，编辑`/etc/shadowsocks.json`，修改如下：
+
 ```
 "fast_open":true
 ```
 
 最后，输入以下命令重启 Shadowsocks：
+
 ```
 /etc/init.d/shadowsocks restart
 ```
@@ -108,12 +110,13 @@ BBR解决了两个问题：
 
 1. 在有一定丢包率的网络链路上充分利用带宽。非常适合高延迟，高带宽的网络链路。
 2. 降低网络链路上的buffer占用率，从而降低延迟。非常适合慢速接入网络的用户。
-Google 在 2016年9月份开源了他们的优化网络拥堵算法BBR，最新版本的 Linux内核(4.9-rc8)中已经集成了该算法。
+   Google 在 2016年9月份开源了他们的优化网络拥堵算法BBR，最新版本的 Linux内核(4.9-rc8)中已经集成了该算法。
 
 对于TCP单边加速，并非所有人都很熟悉，不过有另外一个大名鼎鼎的商业软件"锐速"，相信很多人都清楚。
 特别是对于使用国外服务器或者VPS的人来说，效果更佳。
 
 BBR项目地址：
+
 ```
 https://github.com/google/bbr
 ```
@@ -121,17 +124,20 @@ https://github.com/google/bbr
 升级内核，第一步首先是升级内核到支持BBR的版本：
 
 1.yum更新系统版本：
+
 ```
 yum update
 ```
 
 2.查看系统版本：
+
 ```
 [centos@ip-172-31-23-1 ~]$ cat /etc/redhat-release 
 CentOS Linux release 7.5.1804 (Core)
 ```
 
 3.安装elrepo并升级内核：
+
 ```
 [root@ip-172-31-23-1 ~]# rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 [root@ip-172-31-23-1 ~]# rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
@@ -139,6 +145,7 @@ CentOS Linux release 7.5.1804 (Core)
 ```
 
 4.更新grub文件并重启系统：
+
 ```
 [root@ip-172-31-23-1 ~]# egrep ^menuentry /etc/grub2.cfg | cut -f 2 -d \'
 CentOS Linux (4.20.0-1.el7.elrepo.x86_64) 7 (Core)
@@ -149,12 +156,14 @@ CentOS Linux (0-rescue-b30d0f2110ac3807b210c19ede3ce88f) 7 (Core)
 ```
 
 5.重启完成后查看内核是否已更换为4.xx版本：
+
 ```
 [centos@ip-172-31-23-1 ~]$ uname -r
 4.20.0-1.el7.elrepo.x86_64
 ```
 
 6.开启bbr：
+
 ```
 vim /etc/sysctl.conf    # 在文件末尾添加如下内容
 net.core.default_qdisc = fq
@@ -162,6 +171,7 @@ net.ipv4.tcp_congestion_control = bbr
 ```
 
 7.加载系统参数：
+
 ```
 [root@ip-172-31-23-1 ~]# sysctl -p
 net.core.default_qdisc = fq
@@ -171,6 +181,7 @@ net.ipv4.tcp_congestion_control = bbr
 输出了我们添加的那两行配置代表正常。
 
 8.确定bbr已经成功开启：
+
 ```
 [root@ip-172-31-23-1 ~]#  sysctl net.ipv4.tcp_available_congestion_control
 net.ipv4.tcp_available_congestion_control = reno cubic bbr

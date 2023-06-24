@@ -3,10 +3,8 @@ layout: post
 title: vim简易教程
 date: 2016-06-02 20:07:22 +0800
 toc: true
-categories: linux
-tags:
-  - vim
-  - linux
+categories: [ Linux ]
+tags: [ vim ]
 abbrlink: 9657
 ---
 
@@ -21,11 +19,15 @@ vim 是 Linux 系统上的最著名的文本/代码编辑器，也是早年的 V
 <!-- more -->
 
 ## 安装
+
 将来要支持python开发，先安装
+
 ```bash
 yum install python-devel
 ```
+
 这一步比较简单，在centos上面一条命令:
+
 ```bash
 yum install vim
 vim --version
@@ -33,6 +35,7 @@ VIM - Vi IMproved 7.4
 ```
 
 下载源码并进行编译安装(8.0有些问题，暂时不建议安装):
+
 ```bash
 wget https://github.com/vim/vim/archive/master.zip
 unzip master.zip
@@ -55,13 +58,16 @@ Vim有多个扩展管理器，但是我们强烈推荐[Vundle](https://github.co
 你可以把它想象成Vim的pip，有了Vundle，安装和更新包这种事情不费吹灰之力。
 
 我们现在来安装Vundle：
+
 ```bash
 git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
+
 该命令将下载Vundle插件管理器，并将它放置在你的Vim编辑器bundles文件夹中。
 现在，你可以通过.vimrc配置文件来管理所有扩展了。
 
 我这里有一个比较优化的配置了，将vim打造成一个IDE， 编辑`~/.vimrc`，输入如下内容
+
 ```vim
 "vundle
 set nocompatible
@@ -224,6 +230,7 @@ vnoremap ,s y:%s/<C-R>=escape(@", '\\/.*$^~[]')<CR>/
 出现过问题"ouCompleteMe unavailable: No module named ycmd"
 
 解决办法:
+
 ```bash
 cd ~/.vim/bundle/YouCompleteMe
 git pull
@@ -238,9 +245,11 @@ git submodule update --init --recursive
 The ycmd server SHUT DOWN (restart with ':YcmRestartServer')
 
 YCM需要手动编译才行，到`.vim/bundle/YouCompleteMe`下跑
+
 ```bash
  ./install.sh --clang-completer
 ```
+
 耐心等待大概1个小时可以下载并安装完...
 
 下面是我配置完成后的vim:
@@ -264,6 +273,7 @@ vim有三种模式：
 * 如果你想返回 Normal 模式，请按 ESC 键
 
 现在，你知道如何在 Insert 和 Normal 模式下切换了。下面是一些命令，可以让你在 Normal 模式下幸存下来：
+
 ```
 i   → Insert 模式，按 ESC 回到 Normal 模式.
 x   → 删当前光标所在的一个字符。
@@ -273,15 +283,18 @@ p   → 粘贴剪贴板
 ```
 
 推荐:
+
 ```
 hjkl (强例推荐使用其移动光标，但不必需) →你也可以使用光标键 (←↓↑→). 注: j 就像下箭头。
 :help <command> → 显示相关命令的帮助。你也可以就输入 :help 而不跟命令。（陈皓注：退出帮助需要输入:q）
 ```
 
 ## 进阶1
+
 现在是时候学习一些更多的命令了，下面是我的建议：
 
 各种插入模式
+
 ```
 a  → 在光标后插入
 o  → 在当前行后插入一个新行
@@ -290,6 +303,7 @@ cw → 替换从光标所在位置后到一个单词结尾的字符
 ```
 
 简单的移动光标
+
 ```
 0         → 数字零，到行头
 ^         → 到本行第一个不是blank字符的位置（所谓blank字符就是空格，tab，换行，回车等）
@@ -299,18 +313,21 @@ g_        → 到本行最后一个不是blank字符的位置。
 ```
 
 拷贝/粘贴(p/P都可以，p是表示在当前位置之后，P表示在当前位置之前)
+
 ```
 P  → 粘贴
 yy → 拷贝当前行当行于 ddP
 ```
 
 Undo/Redo
+
 ```
 u     → undo
 <C-r> → redo
 ```
 
 打开/保存/退出/改变文件(Buffer)
+
 ```
 :e <path/to/file>      → 打开一个文件
 :w                     → 存盘
@@ -321,7 +338,9 @@ u     → undo
 ```
 
 ## 进阶2
+
 重复命令次数
+
 ```
 N<command> → 重复某个命令N次
 2dd        → 删除2行
@@ -329,29 +348,35 @@ N<command> → 重复某个命令N次
 ```
 
 你要让你的光标移动更有效率，你一定要了解下面的这些命令，千万别跳过
+
 ```
 NG → 到第 N 行 （陈皓注：注意命令中的G是大写的，另我一般使用 : N 到第N行，如 :137 到第137行）
 gg → 到第一行。（陈皓注：相当于1G，或 :1）
 G  → 到最后一行
 ```
+
 按单词移动
+
 ```
 w      → 到下一个单词的开头。
 e      → 到下一个单词的结尾。
 ```
 
 下面这三个命令对程序员来说是相当强大的
+
 ```
 %      → 匹配括号移动，包括 (, {, [. （你需要把光标先移到括号上）
 * 和 #  →  匹配光标当前所在的单词，移动光标到下一个（或上一个）匹配单词（*是下一个，#是上一个）
 ```
 
 很多命令都是如下方式工作：
+
 ```
 <start position><command><end position>
 ```
 
 例如`0y$`命令意味着：
+
 ```
 0 → 先到行头
 y → 从这里开始拷贝
@@ -359,6 +384,7 @@ $ → 拷贝到本行最后一个字符
 ```
 
 还有很多时间并不一定你就一定要按y才会拷贝，下面的命令也会被拷贝
+
 ```
 d  (删除 )
 v  (可视化的选择)
@@ -367,9 +393,11 @@ gu (变小写)
 ```
 
 ## 进阶3
+
 你只需要掌握前面的命令，你就可以很舒服的使用VIM了。但是，现在，我们向你介绍的是VIM杀手级的功能
 
 在当前行上移动光标:
+
 ```
 0      → 到行头
 ^      → 到本行的第一个非blank字符
@@ -380,8 +408,11 @@ t,     → 到逗号前的第一个字符。逗号可以变成其它字符。
 3fa    → 在当前行查找第三个出现的a。
 F 和 T  → 和 f 和 t 一样，只不过是相反方向。
 ```
+
 ## 区块操作
+
 典型列编辑模式：
+
 ```
 <Ctrl-v>  → 开始块操作
 <hjkl>    → 移动光标
@@ -392,7 +423,9 @@ F 和 T  → 和 f 和 t 一样，只不过是相反方向。
 可视化选择： v,V,<C-v>
 
 ## 多tab编辑
+
 在不同的tab中打开多个文档，这个特性我一直很喜欢，就跟浏览器或各个IDE中是一样的
+
 ```
 :tabnew filename在一个新的tab中打开文件
 gt在不同的tab中切换，use 5gt to switch to tab 5，从1开始
@@ -426,6 +459,7 @@ gt在不同的tab中切换，use 5gt to switch to tab 5，从1开始
 专业贴士：记得在输入完:sv后，利用tab补全功能，快速查找文件
 
 窗口跳转指令:
+
 ```
 <Ctrl-w><Ctrl-j> 切换到下方的分割窗口
 <Ctrl-w><Ctrl-k> 切换到上方的分割窗口
@@ -437,34 +471,42 @@ gt在不同的tab中切换，use 5gt to switch to tab 5，从1开始
 ```
 
 ## 缓冲区(Buffers)
+
 虽然Vim支持tab操作，仍有很多人更喜欢缓冲区和分割布局，你可以把缓冲区想象成最近打开的一个文件。
 Vim提供了方便访问近期缓冲区的方式，只需要输入`:b <buffer name or number>`
 就可以切换到一个已经开启的缓冲区（此处也可使用自动补全功能），你还可以通过`:ls`命令查看所有的缓冲区。
 
 ## FAQ
+
 不小心按到ctrl+s，结果就不动了
 
 原来是Linux的一个快捷键呀，干什么用的？
 原来Ctrl+S在Linux里，是锁定屏幕的快捷键。如果要解锁，按下Ctrl+Q就可以了
 
 ## NERDTree插件
+
 NERDTree的作用就是列出当前路径的目录树，一般IDE都是有的。
 可以方便的浏览项目的总体的目录结构和创建删除重命名文件或文件名。
 至于它的配置我做了如下修改:
+
 ```vim
 " NERDTree config
 map <F2> :NERDTreeToggle<CR>
 ```
+
 使用F2键快速调出和隐藏它；
 
 如果想打开vim时自动打开NERDTree，可以如下设定:
+
 ```vim
 autocmd vimenter * NERDTree
 ```
+
 下面总结一些命令,非常的多，只要记住一些你常用的就行了，后名添加！！！的是我常用的
 (原文地址：<http://yang3wei.github.io/blog/2013/01/29/nerdtree-kuai-jie-jian-ji-lu/>）
 
 最常用窗口跳转:
+
 ```
 ctrl + w + h    光标 focus 左侧树形目录
 ctrl + w + l    光标 focus 右侧文件显示窗口
@@ -473,6 +515,7 @@ ctrl + w + r    移动当前窗口的布局位置
 ```
 
 主要命令集合:
+
 ```
 o       在已有窗口中打开文件、目录或书签，并跳到该窗口
 go      在已有窗口中打开文件、目录或书签，但不跳到该窗口
@@ -513,6 +556,7 @@ q       关闭 NerdTree 窗口
 ```
 
 tab页操作:
+
 ```
 :tabnew file 建立对指定文件新的tab
 :tabc        关闭当前的 tab

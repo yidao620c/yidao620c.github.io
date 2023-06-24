@@ -3,9 +3,8 @@ layout: post
 title: CentOS7忘记root密码解决办法
 date: '2018-02-03 09:06:17 +0800'
 toc: true
-categories: linux
-tags:
-  - linux
+categories: [ Linux ]
+tags: [linux]
 ---
 
 平日里让运维人员头疼的事情已经很多了，因此偶尔把Linux系统的密码忘记了并不用慌，
@@ -24,6 +23,7 @@ tags:
 ![](https://xnstatic-1253397658.file.myqcloud.com/linux082603.png)
 
 第4步：依次输入以下命令，等待系统重启操作完毕，耐心等待后就可以使用新密码来登录Linux系统了。
+
 ```bash
 mount -o remount,rw /sysroot
 chroot /sysroot
