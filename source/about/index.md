@@ -27,11 +27,3 @@ comments: false
 ----------
 
 ![](/images/wuxiong.jpg)
-
-## 🔖 愿景
-
-计划在2023年开源两套自己的快速开发平台框架：柠檬树（LemonTree）、北极星（NorthStar）。敬请期待...
-
-* LemonTree：基于SpringBoot+Vue3的Java快速开发平台
-* NorthStar：基于Django+Vue3的Python快速开发平台
-
