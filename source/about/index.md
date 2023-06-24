@@ -30,10 +30,7 @@ comments: false
 
 ## 🔖 愿景
 
-自从有了docsify后越来越喜欢记录笔记，同时也把之前Hexo博客上写的东西都转过来了。
-期待将来有一天这里应有尽有，想找的东西在这里都能搜到。
-
-计划在2023年开源两套自己的快速开发平台框架：柠檬树（LemonTree）、北极星（NorthStar）
+计划在2023年开源两套自己的快速开发平台框架：柠檬树（LemonTree）、北极星（NorthStar）。敬请期待...
 
 * LemonTree：基于SpringBoot+Vue3的Java快速开发平台
 * NorthStar：基于Django+Vue3的Python快速开发平台
