@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 日期和时间
 date: 2015-12-16 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 58127
 ---
 
@@ -110,8 +110,8 @@ timestamp也可以直接被转换到UTC标准时区的时间：
 
 ```python
 t = 1456114822.0
-print(datetime.fromtimestamp(t)) # 本地时间
-print(datetime.utcfromtimestamp(t)) # UTC时间
+print(datetime.fromtimestamp(t))  # 本地时间
+print(datetime.utcfromtimestamp(t))  # UTC时间
 # 2016-02-22 12:20:22
 # 2016-02-22 04:20:22
 ```
@@ -148,7 +148,8 @@ print(dt.strftime('%a, %b %d %H:%M'))
 
 ```python
 from datetime import datetime, timedelta
-dt = datetime(2016, 2, 22, 12, 20, 22) # 用指定日期时间创建datetime
+
+dt = datetime(2016, 2, 22, 12, 20, 22)  # 用指定日期时间创建datetime
 print(dt + timedelta(hours=10))
 print(dt - timedelta(days=1))
 print(dt + timedelta(days=2, hours=12))
@@ -166,10 +167,11 @@ print(dt + timedelta(days=2, hours=12))
 
 ```python
 from datetime import datetime, timedelta, timezone
-tz_utc_8 = timezone(timedelta(hours=8)) # 创建时区UTC+8:00
-dt = datetime(2016, 2, 22, 12, 20, 22) # 用指定日期时间创建datetime
+
+tz_utc_8 = timezone(timedelta(hours=8))  # 创建时区UTC+8:00
+dt = datetime(2016, 2, 22, 12, 20, 22)  # 用指定日期时间创建datetime
 print(dt)
-dt = dt.replace(tzinfo=tz_utc_8) # 强制设置为UTC+8:00
+dt = dt.replace(tzinfo=tz_utc_8)  # 强制设置为UTC+8:00
 print(dt)
 # 2016-02-22 12:20:22
 # 2016-02-22 12:20:22+08:00

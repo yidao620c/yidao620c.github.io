@@ -3,8 +3,8 @@ layout: post
 title: python核心 - IO编程
 date: 2015-12-20 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 62128
 ---
 
@@ -36,7 +36,7 @@ Input Stream就是数据从外面（磁盘、网络）流进内存，Output Stre
 def basic_rw():
     with open('/path/to/file', 'r', encoding='utf-8', errors='ignore') as f:
         print(f.read(200))  # 一次读取200字节bytes
-        print(f.read())  #一次性读完
+        print(f.read())  # 一次性读完
     with open('/Users/michael/test.txt', 'w', encoding='utf-8') as f:
         f.write('Hello, world!')
     # 读取二进制文件
@@ -68,6 +68,7 @@ def stringio_rw():
         if not s:
             break
         print(s.strip())
+
 
 def bytesio_rw():
     f = BytesIO()
@@ -103,7 +104,7 @@ def file_dir():
     # 列出当前目录所有文件夹
     all_dir = [x for x in os.listdir('.') if os.path.isdir(x)]
     # 列出所有py文件
-    all_py = [x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1]=='.py']
+    all_py = [x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1] == '.py']
 ```
 
 还有些功能比如复制操作cp在os模块中并未定义，不过我们可以通过shutil模块来达到目的。
@@ -152,11 +153,13 @@ Python内置的json模块提供了非常完善的Python对象到JSON格式的转
 def dict2student(d):
     return Student(d['name'], d['age'], d['score'])
 
+
 class Student(object):
     def __init__(self, name, age, score):
         self.name = name
         self.age = age
         self.score = score
+
 
 def _json():
     """
@@ -244,6 +247,7 @@ for line in fileinput.input('data.txt'):
 ```python
 def process(line):
     return line.rstrip() + ' line'
+
 
 for line in fileinput.input(['1.txt', '2.txt'], inplace=1):
     print(process(line))

@@ -3,7 +3,7 @@ layout: post
 title: 使用VirtualBox 6安装Centos7
 date: '2018-02-01 00:29:12 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ virtualbox ]
 ---
 

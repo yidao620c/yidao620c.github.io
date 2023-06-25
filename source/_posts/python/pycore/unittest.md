@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 单元测试
 date: 2015-12-22 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 20610
 ---
 
@@ -39,6 +39,7 @@ python自带unittest模块来方便我们编写单元测试，先引入：
 
 ```python
 import unittest
+
 
 class TestDict(unittest.TestCase):
 
@@ -159,6 +160,7 @@ class TestDict(unittest.TestCase):
 def setUpModule():
     createConnection()
 
+
 def tearDownModule():
     closeConnection()
 ```
@@ -199,8 +201,10 @@ class MySkippedTestCase(unittest.TestCase):
 
 ```python
 @unittest.expectedFailure
-    def test_fail(self):
-        self.assertEqual(1, 0, "broken")
+
+
+def test_fail(self):
+    self.assertEqual(1, 0, "broken")
 ```
 
 ## assert方法列表
@@ -281,6 +285,7 @@ overriding the 'setUp' and 'tearDown' methods respectively.
 import random
 import unittest
 
+
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -293,7 +298,7 @@ class TestSequenceFunctions(unittest.TestCase):
         self.assertEqual(self.seq, range(10))
 
         # should raise an exception for an immutable sequence
-        self.assertRaises(TypeError, random.shuffle, (1,2,3))
+        self.assertRaises(TypeError, random.shuffle, (1, 2, 3))
 
     def test_choice(self):
         element = random.choice(self.seq)
@@ -304,6 +309,7 @@ class TestSequenceFunctions(unittest.TestCase):
             random.sample(self.seq, 20)
         for element in random.sample(self.seq, 5):
             self.assertTrue(element in self.seq)
+
 
 if __name__ == '__main__':
     unittest.main()
@@ -317,8 +323,8 @@ if __name__ == '__main__':
 def loadTestsFromTestCase(self, testCaseClass):
     """Return a suite of all tests cases contained in testCaseClass"""
     if issubclass(testCaseClass, suite.TestSuite):
-        raise TypeError("Test cases should not be derived from TestSuite." \
-                            " Maybe you meant to derive from TestCase?")
+        raise TypeError("Test cases should not be derived from TestSuite."
+                        " Maybe you meant to derive from TestCase?")
     testCaseNames = self.getTestCaseNames(testCaseClass)
     if not testCaseNames and hasattr(testCaseClass, 'runTest'):
         testCaseNames = ['runTest']

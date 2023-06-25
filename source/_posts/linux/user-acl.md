@@ -3,7 +3,7 @@ layout: post
 title: Linux用户身份和文件权限
 date: '2018-02-02 15:41:32 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ linux ]
 ---
 

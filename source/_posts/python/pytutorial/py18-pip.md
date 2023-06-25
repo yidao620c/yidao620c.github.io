@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（18） - 包管理工具pip
 date: '2019-06-18 14:22:13 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 30888
 ---
 

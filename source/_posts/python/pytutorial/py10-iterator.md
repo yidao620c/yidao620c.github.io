@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（10） - 迭代器
 date: '2019-06-10 10:36:12 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 56932
 ---
 

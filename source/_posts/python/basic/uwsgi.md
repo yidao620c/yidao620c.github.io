@@ -3,8 +3,8 @@ title: Nginx+uWSGI部署Python Web应用
 date: 2017-01-20 07:32:15 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [uwsgi]
+categories: [ python ]
+tags: [ uwsgi ]
 abbrlink: 63589
 ---
 

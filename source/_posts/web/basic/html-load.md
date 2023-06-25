@@ -3,7 +3,7 @@ title: HTML页面性能指标
 date: '2018-08-23 08:54:28 +0800'
 comments: true
 toc: true
-categories: [Web]
+categories: [ web ]
 tags:
   - html
 abbrlink: 11601

@@ -3,8 +3,8 @@ layout: post
 title: SQLAlchemy入门
 date: 2016-03-07 10:12:42 +0800
 toc: true
-categories: [Python]
-tags: [SQLAlchemy]
+categories: [ python ]
+tags: [ SQLAlchemy ]
 abbrlink: 50240
 ---
 
@@ -60,6 +60,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class Address(Base):
     """电子邮件表"""
     __tablename__ = 'addresses'
@@ -71,6 +72,7 @@ class Address(Base):
 
     def __repr__(self):
         return "<Address(email_address='{}')>".format(self.email_address)
+
 
 class User(Base):
     """用户表"""
@@ -197,7 +199,7 @@ jack = session.query(User).filter_by(name='jack').one()
 jack.addresses
 
 # join查询
-session.query(User).join(Address).filter(Address.email_address=='jack@google.com').all()
+session.query(User).join(Address).filter(Address.email_address == 'jack@google.com').all()
 ```
 
 有时候我们不想使用懒加载，而是要强制一次性加载某个关联数据，那么可以使用`subqueryload`或者`joinedload`

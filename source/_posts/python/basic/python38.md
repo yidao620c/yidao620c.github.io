@@ -3,8 +3,8 @@ layout: post
 title: 一分钟了解Python3.8新特性
 date: '2019-10-15 19:02:42 +0800'
 toc: true
-categories: [Python]
-tags: [python]
+categories: [ python ]
+tags: [ python ]
 abbrlink: 24109
 ---
 
@@ -45,9 +45,11 @@ def f(a, b, /, c, d, *, e, f):
 import sys
 import urlib.request
 
+
 def audit_hook(event, args):
     if event in ['urllib.Request']:
         print(f'Network {event=} {args=}')
+
 
 sys.addaudithook(audit_hook
 ```
@@ -63,15 +65,15 @@ sys.addaudithook(audit_hook
 新模块`importlib.metadata`提供了读取第三方包原信息的能力。比如它能从第三方包中读取版本号、实体列表
 
 ```python
->>> # Note following example requires that the popular "requests"
->>> # package has been installed.
->>>
->>> from importlib.metadata import version, requires, files
->>> version('requests')
+>> >  # Note following example requires that the popular "requests"
+>> >  # package has been installed.
+>> >
+>> > from importlib.metadata import version, requires, files
+>> > version('requests')
 '2.22.0'
->>> list(requires('requests'))
+>> > list(requires('requests'))
 ['chardet (<3.1.0,>=3.0.2)']
->>> list(files('requests'))[:5]
+>> > list(files('requests'))[:5]
 [PackagePath('requests-2.22.0.dist-info/INSTALLER'),
  PackagePath('requests-2.22.0.dist-info/LICENSE'),
  PackagePath('requests-2.22.0.dist-info/METADATA'),
@@ -87,6 +89,7 @@ sys.addaudithook(audit_hook
 @lru_cache
 def f(x):
     pass
+
 
 @lru_cache(maxsize=256)
 def f(x):

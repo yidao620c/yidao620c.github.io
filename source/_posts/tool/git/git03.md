@@ -3,7 +3,7 @@ title: git简明教程 - 协作篇
 date: 2017-02-08 22:52:36 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - git
 abbrlink: 23853

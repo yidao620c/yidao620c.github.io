@@ -3,7 +3,7 @@ title: NPM版本号规则以及更新策略
 date: '2018-05-07 00:21:18 +0800'
 comments: true
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - npm
 abbrlink: 48779

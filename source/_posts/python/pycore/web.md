@@ -3,8 +3,8 @@ layout: post
 title: python核心 - web开发
 date: 2015-12-30 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 31460
 ---
 
@@ -69,9 +69,11 @@ from flask import request
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     return '<h1>Home</h1>'
+
 
 @app.route('/signin', methods=['GET'])
 def signin_form():
@@ -81,12 +83,14 @@ def signin_form():
               <p><button type="submit">Sign In</button></p>
               </form>'''
 
+
 @app.route('/signin', methods=['POST'])
 def signin():
     # 需要从request对象读取表单内容：
-    if request.form['username']=='admin' and request.form['password']=='password':
+    if request.form['username'] == 'admin' and request.form['password'] == 'password':
         return '<h3>Hello, admin!</h3>'
     return '<h3>Bad username or password.</h3>'
+
 
 if __name__ == '__main__':
     app.run()
@@ -139,21 +143,25 @@ from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('home.html')
+
 
 @app.route('/signin', methods=['GET'])
 def signin_form():
     return render_template('form.html')
 
+
 @app.route('/signin', methods=['POST'])
 def signin():
     username = request.form['username']
     password = request.form['password']
-    if username=='admin' and password=='password':
+    if username == 'admin' and password == 'password':
         return render_template('signin-ok.html', username=username)
     return render_template('form.html', message='Bad username or password', username=username)
+
 
 if __name__ == '__main__':
     app.run()
@@ -169,12 +177,13 @@ pip install jinja2
 然后，开始编写jinja2首页模板：
 
 ```html home.html
+
 <html>
 <head>
-  <title>Home</title>
+    <title>Home</title>
 </head>
 <body>
-  <h1 style="font-style:italic">Home</h1>
+<h1 style="font-style:italic">Home</h1>
 </body>
 </html>
 ```
@@ -182,20 +191,23 @@ pip install jinja2
 用来显示登录表单的模板：
 
 ```html form.html
+
 <html>
 <head>
-  <title>Please Sign In</title>
+    <title>Please Sign In</title>
 </head>
 <body>
-  @% if message %@
-  <p style="color:red">@@ message @@</p>
-  @% endif %@
-  <form action="/signin" method="post">
+@% if message %@
+<p style="color:red">@@ message @@</p>
+@% endif %@
+<form action="/signin" method="post">
     <legend>Please sign in:</legend>
     <p><input name="username" placeholder="Username" value="@@ username @@"></p>
     <p><input name="password" placeholder="Password" type="password"></p>
-    <p><button type="submit">Sign In</button></p>
-  </form>
+    <p>
+        <button type="submit">Sign In</button>
+    </p>
+</form>
 </body>
 </html>
 ```
@@ -203,12 +215,13 @@ pip install jinja2
 登录成功的模板：
 
 ```html signin-ok.html
+
 <html>
 <head>
-  <title>Welcome, @@ username @@</title>
+    <title>Welcome, @@ username @@</title>
 </head>
 <body>
-  <p>Welcome, @@ username @@!</p>
+<p>Welcome, @@ username @@!</p>
 </body>
 </html>
 ```

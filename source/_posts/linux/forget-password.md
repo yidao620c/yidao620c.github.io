@@ -3,7 +3,7 @@ layout: post
 title: CentOS7忘记root密码解决办法
 date: '2018-02-03 09:06:17 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [linux]
 ---
 

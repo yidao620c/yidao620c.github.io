@@ -3,8 +3,8 @@ layout: post
 title: Vagrant创建虚拟化开发环境
 date: 2016-09-02 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [vagrant]
+categories: [ python ]
+tags: [ vagrant ]
 abbrlink: 35980
 ---
 
@@ -128,6 +128,7 @@ Vagrant可以自动帮你同步宿主机和虚拟机的文件夹。
 
 * Provision：远程配置和安装工具，通过它来通过ssh来完成远程虚拟机的各个软件安装和配置，比如shell、Ansible、Chef
 *
+
 Provider：用来创建虚拟机并为其提供环境和基础设施，比如VirtualBox、VMware、AWS或[其他provider](https://www.vagrantup.com/docs/providers/)
 平台
 

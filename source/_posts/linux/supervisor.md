@@ -3,7 +3,7 @@ layout: post
 title: 使用supervisor管理进程
 date: 2016-10-12 08:22:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ supervisor ]
 abbrlink: 39907
 ---

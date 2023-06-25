@@ -3,7 +3,7 @@ title: HTTP缓存介绍
 date: 2016-07-20 20:17:08 +0800
 comments: true
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - http
   - cache

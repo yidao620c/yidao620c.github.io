@@ -3,7 +3,7 @@ title: 使用Swagger生成RESTful API文档
 date: 2017-06-09 12:32:08 +0800
 comments: true
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - swagger
 abbrlink: 61300

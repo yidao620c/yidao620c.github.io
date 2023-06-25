@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（01） - 入门简介
 date: '2019-06-01 12:30:20 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 35013
 ---
 

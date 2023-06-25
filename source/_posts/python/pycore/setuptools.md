@@ -3,8 +3,8 @@ title: python核心 - 打包与发布
 date: 2015-10-26 22:22:22 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 60723
 ---
 
@@ -54,7 +54,7 @@ from setuptools import setup, find_packages
 setup(
     name='xnrpc',
     version='1.0.0',
-    packages = find_packages(),
+    packages=find_packages(),
     # Project uses , so ensure
     install_requires=[
         "gevent>=1.1.2",
@@ -78,7 +78,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    package_data = {
+    package_data={
         # If any package contains *.txt or *.rst files, include them:
         '': ['*.txt', '*.rst'],
         # include any *.msg files found in the 'test' package, too:

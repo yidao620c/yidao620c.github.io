@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（15） - 闭包
 date: '2019-06-15 21:33:27 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 27824
 ---
 

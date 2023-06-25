@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 迭代器
 date: 2015-12-01 20:02:42 +0800
 toc: false
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 17610
 ---
 
@@ -27,23 +27,26 @@ abbrlink: 17610
 下面一个例子可以非常清晰的解释清楚：
 
 ```python
->>> s = 'cat'      # s is an ITERABLE
+>> > s = 'cat'  # s is an ITERABLE
 
->>> t = iter(s)    # t is an ITERATOR
-                   # t has state (it starts by pointing at the "c")
-                   # t has a next() method and an __iter__() method
->>> next(t)        # the next() function returns the next value and advances the state
+>> > t = iter(s)  # t is an ITERATOR
+# t has state (it starts by pointing at the "c")
+# t has a next() method and an __iter__() method
+>> > next(t)  # the next() function returns the next value and advances the state
 'c'
->>> next(t)        # the next() function returns the next value and advances
+>> > next(t)  # the next() function returns the next value and advances
 'a'
->>> next(t)        # the next() function returns the next value and advances
+>> > next(t)  # the next() function returns the next value and advances
 't'
->>> next(t)        # next() raises StopIteration to signal that iteration is complete
-Traceback (most recent call last):
+>> > next(t)  # next() raises StopIteration to signal that iteration is complete
+Traceback(most
+recent
+call
+last):
 ...
 StopIteration
 
->>> iter(t) is t   # the iterator is self-iterable
+>> > iter(t) is t  # the iterator is self-iterable
 ```
 
 可以使用isinstance()判断一个对象是否是Iterable对象：

@@ -3,7 +3,7 @@ title: IDEA集成JRebel热部署和远程调试
 date: 2017-10-29 18:09:22 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - jrebel
 abbrlink: 41865

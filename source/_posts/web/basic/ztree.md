@@ -3,7 +3,7 @@ title: 树形控件zTree使用
 date: 2016-06-09 17:55:22 +0800
 comments: true
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - ztree
 abbrlink: 12206

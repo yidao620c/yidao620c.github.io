@@ -3,7 +3,7 @@ layout: post
 title: OSGi简易教程
 date: 2016-04-16 01:02:42 +0800
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags: [ osgi ]
 abbrlink: 36872
 ---

@@ -3,8 +3,8 @@ title: Scrapy笔记04- Selector详解
 date: 2016-03-14 02:00:15 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [scrapy]
+categories: [ python ]
+tags: [ scrapy ]
 abbrlink: 30592
 ---
 

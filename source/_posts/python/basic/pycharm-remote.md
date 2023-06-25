@@ -3,8 +3,8 @@ layout: post
 title: 使用PyCharm进行远程开发和调试
 date: 2016-05-26 10:02:42 +0800
 toc: true
-categories: [Python]
-tags: [python]
+categories: [ python ]
+tags: [ python ]
 abbrlink: 16870
 ---
 

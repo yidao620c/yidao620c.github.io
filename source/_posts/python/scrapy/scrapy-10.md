@@ -3,8 +3,8 @@ title: Scrapy笔记10- 动态配置爬虫
 date: 2016-04-10 00:16:12 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [scrapy]
+categories: [ python ]
+tags: [ scrapy ]
 abbrlink: 17944
 ---
 

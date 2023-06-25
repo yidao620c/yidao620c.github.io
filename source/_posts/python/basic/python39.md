@@ -3,8 +3,8 @@ layout: post
 title: Python3.9正式版发布
 date: '2020-10-07 16:24:10 +0800'
 toc: true
-categories: [Python]
-tags: [python]
+categories: [ python ]
+tags: [ python ]
 ---
 
 Python3.9在2020年10月5号正式发布，官网release说明地址为<https://www.python.org/downloads/release/python-390/>
@@ -53,6 +53,7 @@ def removeprefix(self: str, prefix: str, /) -> str:
         return self[len(prefix):]
     else:
         return self[:]
+
 
 def removesuffix(self: str, suffix: str, /) -> str:
     # suffix='' should not call self[:-0].

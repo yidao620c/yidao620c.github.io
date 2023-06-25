@@ -3,7 +3,7 @@ layout: post
 title: CentOS7搭建postfix邮件服务器
 date: '2018-02-25 16:43:32 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ postfix ]
 ---
 

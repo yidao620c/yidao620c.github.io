@@ -3,8 +3,8 @@ title: Scrapy笔记02- 完整示例
 date: 2016-03-10 09:59:15 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [scrapy]
+categories: [ python ]
+tags: [ scrapy ]
 abbrlink: 23055
 ---
 

@@ -3,7 +3,7 @@ title: Scrapy笔记12- 抓取动态网站
 date: 2016-04-15 00:38:12 +0800
 comments: true
 toc: true
-categories: [ Python ]
+categories: [ python ]
 tags: [ scrapy ]
 abbrlink: 42468
 ---

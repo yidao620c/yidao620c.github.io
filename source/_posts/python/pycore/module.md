@@ -3,8 +3,8 @@ title: python核心 - 模块和包
 date: 2015-10-30 22:22:22 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 42645
 ---
 
@@ -48,8 +48,11 @@ abbrlink: 42645
 __author__ = "Xiong Neng"
 
 import sys
+
+
 def demo():
     print('\n'.join(sys.path))
+
 
 if __name__ == '__main__':
     demo()
@@ -132,6 +135,7 @@ print('\n'.join(sys.path))
 ```python
 # 打印python解释器路径和PYTHONPATH
 import sys
+
 print(sys.executable)
 print('----------------------------------------------------')
 
@@ -140,6 +144,7 @@ print('----------------------------------------------------')
 
 # aa是一个模块函数
 from samples.main import aa
+
 print("type={}".format(type(aa)))
 # AttributeError: 'function' object has no attribute '__package__'
 # print("aa.__package__={}".format(aa.__package__))
@@ -151,6 +156,7 @@ print('----------------------------------------------------')
 
 # main是一个模块
 import samples.main as main
+
 print("type={}".format(type(main)))
 print("init.__package__={}".format(main.__package__))
 # AttributeError: 'module' object has no attribute '__module__'
@@ -161,6 +167,7 @@ print('----------------------------------------------------')
 
 # samples是一个模块，同时也是一个包
 import samples
+
 print("type={}".format(type(samples)))
 print("samples.__package__={}".format(samples.__package__))
 # AttributeError: 'module' object has no attribute '__module__'
@@ -171,6 +178,7 @@ print('----------------------------------------------------')
 
 # 导入包samples的__init__模块看看
 import samples.__init__ as sample_init
+
 print("type={}".format(type(sample_init)))
 print("sample_init.__package__={}".format(sample_init.__package__))
 # AttributeError: 'module' object has no attribute '__module__'
@@ -186,6 +194,7 @@ print('----------------------------------------------------')
 
 # 类的导入
 from samples.main import User
+
 print("type={}".format(type(User)))
 # AttributeError: type object 'User' has no attribute '__package__'
 # print("User.__package__={}".format(User.__package__))

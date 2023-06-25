@@ -3,7 +3,7 @@ layout: post
 title: awk命令笔记
 date: 2016-09-22 22:22:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ awk,linux ]
 abbrlink: 33710
 ---

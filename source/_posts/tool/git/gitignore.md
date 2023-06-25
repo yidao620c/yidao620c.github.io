@@ -3,7 +3,7 @@ title: gitignore文件示例
 date: '2018-10-06 21:22:18 +0800'
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - git
 abbrlink: 25153

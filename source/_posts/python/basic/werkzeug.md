@@ -1,8 +1,8 @@
 ---
 title: Werkzeug简易教程
 toc: true
-categories: [Python]
-tags: [werkzeug]
+categories: [ python ]
+tags: [ werkzeug ]
 abbrlink: 56707
 date: 2016-12-02 19:52:21
 ---
@@ -324,9 +324,9 @@ def on_short_link_details(self, request, short_id):
 <title>@% block title %@@% endblock %@ | shortly</title>
 <link rel=stylesheet href=/static/style.css type=text/css>
 <div class=box>
-  <h1><a href=/>shortly</a></h1>
-  <p class=tagline>Shortly is a URL shortener written with Werkzeug
-  @% block body %@@% endblock %@
+    <h1><a href=/>shortly</a></h1>
+    <p class=tagline>Shortly is a URL shortener written with Werkzeug
+        @% block body %@@% endblock %@
 </div>
 ```
 
@@ -336,15 +336,15 @@ def on_short_link_details(self, request, short_id):
 @% extends "layout.html" %@
 @% block title %@Create New Short URL@% endblock %@
 @% block body %@
-  <h2>Submit URL</h2>
-  <form action="" method=post>
+<h2>Submit URL</h2>
+<form action="" method=post>
     @% if error %@
-      <p class=error><strong>Error:</strong> @@ error @@
-    @% endif %@
+    <p class=error><strong>Error:</strong> @@ error @@
+        @% endif %@
     <p>URL:
-      <input type=text name=url value="@@ url @@" class=urlinput>
-      <input type=submit value="Shorten">
-  </form>
+        <input type=text name=url value="@@ url @@" class=urlinput>
+        <input type=submit value="Shorten">
+</form>
 @% endblock %@
 ```
 
@@ -354,13 +354,14 @@ def on_short_link_details(self, request, short_id):
 @% extends "layout.html" %@
 @% block title %@Details about /@@ short_id @@@% endblock %@
 @% block body %@
-  <h2><a href="/@@ short_id @@">/@@ short_id @@</a></h2>
-  <dl>
+<h2><a href="/@@ short_id @@">/@@ short_id @@</a></h2>
+<dl>
     <dt>Full link
-    <dd class=link><div>@@ link_target @@</div>
+    <dd class=link>
+        <div>@@ link_target @@</div>
     <dt>Click count:
     <dd>@@ click_count @@
-  </dl>
+</dl>
 @% endblock %@
 ```
 

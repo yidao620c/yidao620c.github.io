@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 面向对象编程
 date: 2015-12-06 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 59306
 ---
 
@@ -44,6 +44,7 @@ class Student(object):
 
     def print_score(self):
         print('%s: %s' % (self.name, self.score))
+
 
 zsan = Student('Zhang Shan', 22)
 zsan.print_score()
@@ -99,13 +100,17 @@ class Animal(object):
     def run(self):
         print('Animal is running...')
 
+
 class Dog(Animal):
     def run(self):
         print('Dog is running...')
 
+
 class Cat(Animal):
     def run(self):
         print('Cat is running...')
+
+
 dog = Dog()
 dog.run()
 
@@ -124,10 +129,10 @@ isinstance(cat, Animal)
 dir('ABC')
 
 # 配合getattr()、setattr()以及hasattr()，我们可以直接操作一个对象的状态
-hasattr(obj, 'x') # 有属性'x'吗？
-setattr(obj, 'y', 19) # 设置一个属性'y'
-getattr(obj, 'y') # 获取属性'y'
-getattr(obj, 'y'， 'none') # 获取属性'y'，带默认值
+hasattr(obj, 'x')  # 有属性'x'吗？
+setattr(obj, 'y', 19)  # 设置一个属性'y'
+getattr(obj, 'y')  # 获取属性'y'
+getattr(obj, 'y'， 'none')  # 获取属性'y'，带默认值
 ```
 
 pythony允许多继承，也就是我们通常所说的MixIn。MixIn的目的就是给一个类增加多个功能，在设计类的时候，
@@ -154,13 +159,15 @@ class MyUDPServer(UDPServer, ThreadingMixIn):
 给一个实例绑定一个新的方法：
 
 ```python
-def set_age(self, age): # 定义一个函数作为实例方法
+def set_age(self, age):  # 定义一个函数作为实例方法
     self.age = age
 
+
 from types import MethodType
-s.set_age = MethodType(set_age, s) # 给实例绑定一个方法
-s.set_age(25) # 调用实例方法
-s.age # 测试结果
+
+s.set_age = MethodType(set_age, s)  # 给实例绑定一个方法
+s.set_age(25)  # 调用实例方法
+s.age  # 测试结果
 25
 ```
 
@@ -169,7 +176,7 @@ Python允许在定义class的时候，定义一个特殊的__slots__变量，来
 
 ```python
 class Student(object):
-    __slots__ = ('name', 'age') # 用tuple定义允许绑定的属性名称
+    __slots__ = ('name', 'age')  # 用tuple定义允许绑定的属性名称
 ```
 
 注：__slots__定义的属性仅对当前类实例起作用，对继承的子类是不起作用的
@@ -196,6 +203,8 @@ class Student(object):
         if value < 0 or value > 100:
             raise ValueError('score must between 0 ~ 100!')
         self._score = value
+
+
 s = Student()
 s.score = 60
 s.score
@@ -209,15 +218,19 @@ s.score
 
 ```python
 from enum import Enum, unique
+
+
 @unique
 class Weekday(Enum):
-    Sun = 0 # Sun的value被设定为0
+    Sun = 0  # Sun的value被设定为0
     Mon = 1
     Tue = 2
     Wed = 3
     Thu = 4
     Fri = 5
     Sat = 6
+
+
 day1 = Weekday.Mon
 print(day1 == Weekday.Mon)
 print(Weekday.Tue)

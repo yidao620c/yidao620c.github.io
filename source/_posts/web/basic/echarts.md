@@ -3,7 +3,7 @@ title: JavaScript图表库ECharts使用
 date: 2016-06-22 12:09:08 +0800
 comments: true
 toc: true
-categories: [Web]
+categories: [ web ]
 tags:
   - echarts
 abbrlink: 27094

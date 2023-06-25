@@ -3,8 +3,8 @@ title: python核心 - 字符串编码
 date: 2015-10-24 10:06:22 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 48683
 ---
 
@@ -199,14 +199,16 @@ encode的作用是将unicode编码转换成其他编码的字符串，如str2.en
 
 ```python
 #!/usr/bin/env python
-#coding=utf-8
-s="中文"
+# coding=utf-8
+s = "中文"
 if isinstance(s, unicode):
-    #s=u"中文"
-    print s.encode('gb2312')
+    # s=u"中文"
+    print
+    s.encode('gb2312')
 else:
-    #s="中文"
-    print s.decode('utf-8').encode('gb2312')
+    # s="中文"
+    print
+    s.decode('utf-8').encode('gb2312')
 ```
 
 这是你在编程中保持 Unicode 清洁的三个建议:

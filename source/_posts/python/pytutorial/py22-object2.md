@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（22） - 继承与多态
 date: '2019-06-22 20:09:02 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 61769
 ---
 

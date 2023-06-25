@@ -3,8 +3,8 @@ layout: post
 title: 一些有趣的python技巧
 date: 2016-05-20 19:32:56 +0800
 toc: true
-categories: [Python]
-tags: [python]
+categories: [ python ]
+tags: [ python ]
 abbrlink: 37138
 ---
 

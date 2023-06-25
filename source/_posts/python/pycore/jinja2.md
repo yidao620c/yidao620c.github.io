@@ -3,8 +3,8 @@ layout: post
 title: jinja2模板
 date: 2016-09-05 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [jinja2]
+categories: [ python ]
+tags: [ jinja2 ]
 abbrlink: 16052
 ---
 
@@ -36,9 +36,9 @@ pip install jinja2
 通过创建一个Template类，不过这种方法不是推荐方式：
 
 ```python
->> > from jinja2 import Template
->> > template = Template('Hello @@ name @@!')
->> > template.render(name='John Doe')
+from jinja2 import Template
+template = Template('Hello @@ name @@!')
+template.render(name='John Doe')
 u'Hello John Doe!'
 ```
 
@@ -75,6 +75,7 @@ template.render(the='variables', go='here')
 ```
 
 #### Unicode
+
 Jinja2内部使用Unicode，所以传给render方法的参数必须是unicode对象，另外换行符是unix的'\n'，
 最好在每个python模块第一行添加
 
@@ -86,10 +87,10 @@ Jinja2的模板默认编码是utf-8，一些库会严格检查str类型比如`da
 所以Jinja2对于ascii字符串返回str，其他的返回unicode，比如：
 
 ```python
->> > m = Template(u"@% set a, b = 'foo', 'föö' %@").module
->> > m.a
+m = Template(u"@% set a, b = 'foo', 'föö' %@").module
+m.a
 'foo'
->> > m.b
+m.b
 u'f\xf6\xf6'
 ```
 
@@ -104,6 +105,7 @@ def guess_autoescape(template_name):
         return False
     ext = template_name.rsplit('.', 1)[1]
     return ext in ('html', 'htm', 'xml')
+
 
 env = Environment(autoescape=guess_autoescape,
                   loader=PackageLoader('mypackage'),
@@ -121,6 +123,7 @@ env = Environment(autoescape=guess_autoescape,
 ```python
 from jinja2 import BaseLoader, TemplateNotFound
 from os.path import join, exists, getmtime
+
 
 class MyLoader(BaseLoader):
 
@@ -180,6 +183,7 @@ from jinja2 import evalcontextfilter, Markup, escape
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
+
 @evalcontextfilter
 def nl2br(eval_ctx, value):
     result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', Markup('<br>\n'))
@@ -204,16 +208,16 @@ def nl2br(eval_ctx, value):
     <title>My Webpage</title>
 </head>
 <body>
-    <ul id="navigation">
+<ul id="navigation">
     @% for item in navigation %@
-        <li><a href="@@ item.href @@">@@ item.caption @@</a></li>
+    <li><a href="@@ item.href @@">@@ item.caption @@</a></li>
     @% endfor %@
-    </ul>
+</ul>
 
-    <h1>My Webpage</h1>
-    @@ a_variable @@
+<h1>My Webpage</h1>
+@@ a_variable @@
 
-    {# a comment #}
+{# a comment #}
 </body>
 </html>
 ```
@@ -247,16 +251,17 @@ def nl2br(eval_ctx, value):
 下面等价
 
 ```html
+
 <ul>
-# for item in seq
+    # for item in seq
     <li>@@ item @@</li>
-# endfor
+    # endfor
 </ul>
 
 <ul>
-@% for item in seq %@
+    @% for item in seq %@
     <li>@@ item @@</li>
-@% endfor %@
+    @% endfor %@
 </ul>
 ```
 
@@ -269,17 +274,17 @@ def nl2br(eval_ctx, value):
 <html lang="en">
 <head>
     @% block head %@
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css"/>
     <title>@% block title %@@% endblock %@ - My Webpage</title>
     @% endblock %@
 </head>
 <body>
-    <div id="content">@% block content %@@% endblock %@</div>
-    <div id="footer">
-        @% block footer %@
-        &copy; Copyright 2008 by <a href="http://domain.invalid/">you</a>.
-        @% endblock %@
-    </div>
+<div id="content">@% block content %@@% endblock %@</div>
+<div id="footer">
+    @% block footer %@
+    &copy; Copyright 2008 by <a href="http://domain.invalid/">you</a>.
+    @% endblock %@
+</div>
 </body>
 </html>
 ```
@@ -290,16 +295,18 @@ def nl2br(eval_ctx, value):
 @% extends "base.html" %@
 @% block title %@Index@% endblock %@
 @% block head %@
-    @@ super() @@
-    <style type="text/css">
-        .important { color: #336699; }
-    </style>
+@@ super() @@
+<style type="text/css">
+    .important {
+        color: #336699;
+    }
+</style>
 @% endblock %@
 @% block content %@
-    <h1>Index</h1>
-    <p class="important">
-      Welcome to my awesome homepage.
-    </p>
+<h1>Index</h1>
+<p class="important">
+    Welcome to my awesome homepage.
+</p>
 @% endblock %@
 ```
 
@@ -333,25 +340,26 @@ def nl2br(eval_ctx, value):
 ```html
 <h1>Members</h1>
 <ul>
-@% for user in users %@
-  <li>@@ user.username|e @@</li>
-@% endfor %@
+    @% for user in users %@
+    <li>@@ user.username|e @@</li>
+    @% endfor %@
 </ul>
 
 @% for user in users %@
-    @%- if loop.index is even %@@% continue %@@% endif %@
-    ...
+@%- if loop.index is even %@@% continue %@@% endif %@
+...
 @% endfor %@
 ```
 
 key-value形式的循环：
 
 ```html
+
 <dl>
-@% for key, value in my_dict.iteritems() %@
+    @% for key, value in my_dict.iteritems() %@
     <dt>@@ key|e @@</dt>
     <dd>@@ value|e @@</dd>
-@% endfor %@
+    @% endfor %@
 </dl>
 ```
 

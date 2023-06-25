@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（02） - 安装Python
 date: '2019-06-02 09:35:12 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 52542
 ---
 

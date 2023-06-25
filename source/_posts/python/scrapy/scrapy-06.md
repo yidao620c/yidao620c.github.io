@@ -3,8 +3,8 @@ title: Scrapy笔记06- Item Pipeline
 date: 2016-03-18 01:00:12 +0800
 comments: true
 toc: true
-categories: [Python]
-tags: [scrapy]
+categories: [ python ]
+tags: [ scrapy ]
 abbrlink: 40609
 ---
 

@@ -3,7 +3,7 @@ layout: post
 title: CentOS7.2搭建DNS服务器
 date: 2016-07-01 09:33:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [dns]
 abbrlink: 33172
 ---

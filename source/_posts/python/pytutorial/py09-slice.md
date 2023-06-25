@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（09） - 切片
 date: '2019-06-09 09:56:22 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 9759
 ---
 

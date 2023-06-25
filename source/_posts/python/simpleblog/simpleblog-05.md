@@ -3,7 +3,7 @@ layout: post
 title: Django1.9开发博客05- 页面美化
 date: 2015-08-12 10:23:50 +0800
 toc: true
-categories: [ Python ]
+categories: [ python ]
 tags: [ django ]
 abbrlink: 30400
 ---

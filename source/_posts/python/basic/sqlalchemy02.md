@@ -3,8 +3,8 @@ layout: post
 title: SQLAlchemy进阶
 date: 2016-03-07 23:50:22 +0800
 toc: true
-categories: [Python]
-tags: [SQLAlchemy]
+categories: [ python ]
+tags: [ SQLAlchemy ]
 abbrlink: 52241
 ---
 
@@ -27,6 +27,7 @@ class Parent(Base):
     children = relationship("Child")
     # 在父表类中通过 relationship() 方法来引用子表的类集合
 
+
 class Child(Base):
     __tablename__ = 'child'
     id = Column(Integer, primary_key=True)
@@ -44,6 +45,7 @@ class Parent(Base):
     __tablename__ = 'parent'
     id = Column(Integer, primary_key=True)
     children = relationship("Child", back_populates="parent")
+
 
 class Child(Base):
     __tablename__ = 'child'
@@ -65,6 +67,7 @@ class Parent(Base):
     id = Column(Integer, primary_key=True)
     children = relationship("Child", backref="parent")
 
+
 class Child(Base):
     __tablename__ = 'child'
     id = Column(Integer, primary_key=True)
@@ -83,6 +86,7 @@ class Parent(Base):
     id = Column(Integer, primary_key=True)
     child = relationship("Child", uselist=False, backref="parent")
 
+
 class Child(Base):
     __tablename__ = 'child'
     id = Column(Integer, primary_key=True)
@@ -98,6 +102,7 @@ class Parent(Base):
     child_id = Column(Integer, ForeignKey('child.id'))
     child = relationship("Child", backref=backref("parent", uselist=False))
 
+
 class Child(Base):
     __tablename__ = 'child'
     id = Column(Integer, primary_key=True)
@@ -110,43 +115,49 @@ class Child(Base):
 
 ```python
 from sqlalchemy import Table, Text
-post_keywords = Table('post_keywords',Base.metadata,
-    Column('post_id',Integer,ForeignKey('posts.id')),
-    Column('keyword_id',Integer,ForeignKey('keywords.id'))
-)
+
+post_keywords = Table('post_keywords', Base.metadata,
+                      Column('post_id', Integer, ForeignKey('posts.id')),
+                      Column('keyword_id', Integer, ForeignKey('keywords.id'))
+                      )
+
 
 class BlogPost(Base):
     __tablename__ = 'posts'
-    id = Column(Integer,primary_key=True)
+    id = Column(Integer, primary_key=True)
     body = Column(Text)
-    keywords = relationship('Keyword',secondary=post_keywords,backref='posts')
+    keywords = relationship('Keyword', secondary=post_keywords, backref='posts')
+
 
 class Keyword(Base):
     __tablename__ = 'keywords'
-    id = Column(Integer,primary_key = True)
-    keyword = Column(String(50),nullable=False,unique=True)
+    id = Column(Integer, primary_key=True)
+    keyword = Column(String(50), nullable=False, unique=True)
 ```
 
 如果使用`back_populates`，那么两个都要定义：
 
 ```python
 from sqlalchemy import Table, Text
-post_keywords = Table('post_keywords',Base.metadata,
-    Column('post_id',Integer,ForeignKey('posts.id')),
-    Column('keyword_id',Integer,ForeignKey('keywords.id'))
-)
+
+post_keywords = Table('post_keywords', Base.metadata,
+                      Column('post_id', Integer, ForeignKey('posts.id')),
+                      Column('keyword_id', Integer, ForeignKey('keywords.id'))
+                      )
+
 
 class BlogPost(Base):
     __tablename__ = 'posts'
-    id = Column(Integer,primary_key=True)
+    id = Column(Integer, primary_key=True)
     body = Column(Text)
-    keywords = relationship('Keyword',secondary=post_keywords,back_populates="parents")
+    keywords = relationship('Keyword', secondary=post_keywords, back_populates="parents")
+
 
 class Keyword(Base):
     __tablename__ = 'keywords'
-    id = Column(Integer,primary_key = True)
-    keyword = Column(String(50),nullable=False,unique=True)
-    parents = relationship('BlogPost',secondary=post_keywords,back_populates="keywords")
+    id = Column(Integer, primary_key=True)
+    keyword = Column(String(50), nullable=False, unique=True)
+    parents = relationship('BlogPost', secondary=post_keywords, back_populates="keywords")
 ```
 
 ## 一些重要参数
@@ -160,11 +171,11 @@ class Keyword(Base):
 
 ```python
   class Node(Base):
-      __tablename__ = 'node'
-      id = Column(Integer, primary_key=True)
-      parent_id = Column(Integer, ForeignKey('node.id'))
-      data = Column(String(50))
-      parent = relationship("Node", remote_side=[id])
+    __tablename__ = 'node'
+    id = Column(Integer, primary_key=True)
+    parent_id = Column(Integer, ForeignKey('node.id'))
+    data = Column(String(50))
+    parent = relationship("Node", remote_side=[id])
 ```
 
 * secondary: 多对多指定中间表关键字
@@ -172,10 +183,10 @@ class Keyword(Base):
 
 ```python
 class User(Base):
-  # ...
-  addresses = relationship(lambda: Address,
-                   order_by=lambda: desc(Address.email),
-                   primaryjoin=lambda: Address.user_id==User.id)
+    # ...
+    addresses = relationship(lambda: Address,
+                             order_by=lambda: desc(Address.email),
+                             primaryjoin=lambda: Address.user_id == User.id)
 ```
 
 * cascade: 级联删除
@@ -183,8 +194,9 @@ class User(Base):
 ```python
 class Parent(Base):
     __tablename__ = 'parent'
-    id = Column(Integer,primary_key = True)
-    children = relationship("Child",cascade='all',backref='parent')
+    id = Column(Integer, primary_key=True)
+    children = relationship("Child", cascade='all', backref='parent')
+
 
 def delete_parent():
     session = Session()
@@ -234,8 +246,8 @@ q = session.query(User).join(User.orders).join(Order.items).join(Item.keywords)
 
 ```python
 address_subq = session.query(Address).
-    filter(Address.email_address == 'ed@foo.com').
-    subquery()
+filter(Address.email_address == 'ed@foo.com').
+subquery()
 
 q = session.query(User).join(address_subq, User.addresses)
 ```
@@ -244,23 +256,24 @@ join from:
 
 ```python
 q = session.query(Address).select_from(User).
-    join(User.addresses).
-    filter(User.name == 'ed')
+join(User.addresses).
+filter(User.name == 'ed')
 ```
 
 和下面的SQL等价：
 
 ```sql
-SELECT address.* FROM user
-    JOIN address ON user.id=address.user_id
-    WHERE user.name = :name_1
+SELECT address.*
+FROM user
+         JOIN address ON user.id = address.user_id
+WHERE user.name = :name_1
 ```
 
 左外连接，指定`isouter=True`，等价于` Query.outerjoin()`：
 
 ```python
 q = session.query(Node).
-    join("children", "children", aliased=True, isouter=True).
-    filter(Node.name == 'grandchild 1')
+join("children", "children", aliased=True, isouter=True).
+filter(Node.name == 'grandchild 1')
 ```
 

@@ -1,7 +1,7 @@
 ---
 title: 小程序开发 - 跳转支付
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - 小程序
   - 微信支付

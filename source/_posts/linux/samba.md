@@ -3,7 +3,7 @@ layout: post
 title: CentOS7通过samba共享文件夹
 date: 2018-02-20 19:09:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ samba ]
 abbrlink: 22054
 ---

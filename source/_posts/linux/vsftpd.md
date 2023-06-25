@@ -3,7 +3,7 @@ layout: post
 title: CentOS7搭建vsftpd服务
 date: '2018-02-08 22:14:22 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ vsftpd ]
 ---
 

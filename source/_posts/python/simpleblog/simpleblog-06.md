@@ -3,7 +3,7 @@ layout: post
 title: Django1.9开发博客06- 模板继承
 date: 2015-08-15 21:44:21 +0800
 toc: true
-categories: [ Python ]
+categories: [ python ]
 tags: [ django ]
 abbrlink: 40067
 ---

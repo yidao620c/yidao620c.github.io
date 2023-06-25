@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 访问数据库
 date: 2015-12-24 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 28821
 ---
 

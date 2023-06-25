@@ -3,7 +3,7 @@ layout: post
 title: CentOS7.2搭建代理服务器
 date: 2016-07-07 21:15:16 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ squid, proxy ]
 abbrlink: 58371
 ---

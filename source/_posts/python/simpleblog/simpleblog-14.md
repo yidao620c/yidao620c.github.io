@@ -3,7 +3,7 @@ layout: post
 title: Django1.9开发博客14- 集成Xadmin
 date: 2015-08-26 21:45:29 +0800
 toc: true
-categories: [ Python ]
+categories: [ python ]
 tags: [ django ]
 abbrlink: 61965
 ---

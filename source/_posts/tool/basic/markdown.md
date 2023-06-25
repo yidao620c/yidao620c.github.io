@@ -3,7 +3,7 @@ title: markdown语法详解
 date: 2015-03-22 16:22:15 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - markdown
 abbrlink: 6135

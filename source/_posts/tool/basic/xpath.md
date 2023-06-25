@@ -4,7 +4,7 @@ title: xpath入门笔记
 date: 2015-05-19 14:01:07 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - xpath
 abbrlink: 60536

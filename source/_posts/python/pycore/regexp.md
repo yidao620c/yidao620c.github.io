@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 正则表达式
 date: 2015-12-12 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 53031
 ---
 
@@ -104,7 +104,7 @@ python通过re模块提供对正则表达式的完全支持。由于Python的字
 所以在构造正则表达式字符串的时候，强烈建议使用原始字符串，也就是带r前缀：
 
 ```python
-s = r'ABC\.001' # Python的字符串
+s = r'ABC\.001'  # Python的字符串
 # 对应的正则表达式字符串不变：
 # 'ABC\.001'
 ```
@@ -205,7 +205,7 @@ patt = r'.+?(\d+-\d+-\d+)'
 print(re.match(patt, data).group(1))  # 打印出  1237598457-6-9
 # 只获取三个数的中间那个数字：
 patt = r'-(\d+)-'
-print(re.search(patt, data).group())   # 打印-6-
+print(re.search(patt, data).group())  # 打印-6-
 print(re.search(patt, data).group(1))  # 打印6
 ```
 
@@ -253,12 +253,14 @@ Topic: 正则式分组替换示例
 """
 import re
 
+
 class Nth(object):
     """
     如果 sub 函数的第二个参数是个函数，则每次匹配到的时候都会执行这个函数。
     函数接受匹配到的那个 match object 作为参数，返回用来替换的字符串。
     利用这个特性就可以只在第 N 次匹配的时候返回要替换成的字符串，其他时候原样返回不做替换即可。
     """
+
     def __init__(self, nth, replacement):
         self.nth = nth
         self.replacement = replacement
@@ -269,6 +271,7 @@ class Nth(object):
         if self.calls == self.nth:
             return self.replacement
         return matchobj.group(0)
+
 
 def re_sub():
     a = re.sub(r'(foo)(bar)', r'\g<1>123\g<2>', 'foobar')
@@ -309,6 +312,7 @@ def re_sub():
     # 所以如果想定位前面字符为可变长字符串时，需要使用到组
     pat = re.compile(r'(a{1,2} )(good)(?= (story){1,2})')
     print(pat.sub(lambda m: m.group(1) + 'bad', 'This is a good story, very good.'))
+
 
 if __name__ == '__main__':
     pp = re.compile(r'((http|https|ftp)://[a-zA-Z0-9+\-&@#/%?=~_|!:,.;]*[a-zA-Z0-9+\-&@#/%=~_|])')

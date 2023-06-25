@@ -3,7 +3,7 @@ title: JVM应用度量框架Micrometer
 date: 2020-04-12 23:06:23 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - micrometer
 ---

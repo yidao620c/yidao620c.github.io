@@ -3,8 +3,8 @@ layout: post
 title: python核心 - 异步IO
 date: 2015-12-21 22:22:22 +0800
 toc: true
-categories: [Python]
-tags: [python核心]
+categories: [ python ]
+tags: [ python核心 ]
 abbrlink: 56268
 ---
 
@@ -55,6 +55,8 @@ Topic: 协程
 生产者-消费者实现
 """
 import time
+
+
 def consumer():
     r = ''
     while True:
@@ -65,6 +67,7 @@ def consumer():
         time.sleep(1)
         r = '200 OK'
 
+
 def producer(c):
     c.next()
     n = 0
@@ -74,6 +77,7 @@ def producer(c):
         r = c.send(n)
         print('[PRODUCER] Consumer return: %s' % r)
     c.close()
+
 
 if __name__ == '__main__':
     c = consumer()
@@ -110,12 +114,14 @@ asyncio的编程模型就是一个消息循环。我们从asyncio模块中直接
 ```python
 import asyncio
 
+
 @asyncio.coroutine
 def hello():
     print("Hello world!")
     # 异步调用asyncio.sleep(1):
     r = yield from asyncio.sleep(1)
     print("Hello again!")
+
 
 # 获取EventLoop:
 loop = asyncio.get_event_loop()
@@ -141,11 +147,13 @@ loop.close()
 import asyncio
 import threading
 
+
 @asyncio.coroutine
 def hello():
     print('Hello world! (%s)' % threading.currentThread())
     yield from asyncio.sleep(1)
     print('Hello again! (%s)' % threading.currentThread())
+
 
 loop = asyncio.get_event_loop()
 tasks = [hello(), hello()]
@@ -172,6 +180,7 @@ Hello again! (<_MainThread(MainThread, started 11168)>)
 ```python
 import asyncio
 
+
 @asyncio.coroutine
 def wget(host):
     print('wget %s...' % host)
@@ -187,6 +196,7 @@ def wget(host):
         print('%s header > %s' % (host, line.decode('utf-8').rstrip()))
     # Ignore the body, close the socket
     writer.close()
+
 
 loop = asyncio.get_event_loop()
 tasks = [wget(host) for host in ['www.sina.com.cn', 'www.sohu.com', 'www.163.com']]
@@ -257,14 +267,17 @@ import asyncio
 
 from aiohttp import web
 
+
 async def index(request):
     await asyncio.sleep(0.5)
     return web.Response(body=b'<h1>Index</h1>')
+
 
 async def hello(request):
     await asyncio.sleep(0.5)
     text = '<h1>hello, %s!</h1>' % request.match_info['name']
     return web.Response(body=text.encode('utf-8'))
+
 
 async def init(loop):
     app = web.Application(loop=loop)
@@ -273,6 +286,7 @@ async def init(loop):
     srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8000)
     print('Server started at http://127.0.0.1:8000...')
     return srv
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(init(loop))

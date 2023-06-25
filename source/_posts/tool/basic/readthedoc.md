@@ -3,7 +3,7 @@ title: 使用ReadtheDocs托管文档
 date: 2017-01-22 20:16:09 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - sphinx
   - readthedocs

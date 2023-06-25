@@ -3,7 +3,7 @@ layout: post
 title: python核心 - 并发编程
 date: 2015-12-18 22:22:22 +0800
 toc: true
-categories: [ Python ]
+categories: [ python ]
 tags: [ python核心 ]
 abbrlink: 64578
 ---

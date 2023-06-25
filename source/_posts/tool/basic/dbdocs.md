@@ -3,7 +3,7 @@ title: 数据库文档生成工具
 date: '2020-03-12 20:20:05 +0800'
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - screw
 ---

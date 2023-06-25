@@ -3,8 +3,8 @@ layout: post
 title: Django1.9开发博客02- 模型
 date: 2015-08-03 18:49:57 +0800
 toc: true
-categories: [Python]
-tags: [django]
+categories: [ python ]
+tags: [ django ]
 abbrlink: 40618
 ---
 

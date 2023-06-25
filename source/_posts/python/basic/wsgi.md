@@ -3,8 +3,8 @@ layout: post
 title: WGSI简易教程
 date: 2016-04-22 20:02:42 +0800
 toc: true
-categories: [Python]
-tags: [wsgi]
+categories: [ python ]
+tags: [ wsgi ]
 abbrlink: 57725
 ---
 
@@ -184,7 +184,9 @@ WSGI Middleware（中间件）也是WSGI规范的一部分。我们之前讲过W
 2. Server调用Middleware的application对象，传递的参数是environ_s和start_response_s。
 3. Middleware会根据environ执行业务逻辑，生成environ_m，并且已经定义了start_response_m。
 4.
+
 Middleware决定调用Application的application对象，传递参数是environ_m和start_response_m。Application的application对象处理完成后，会调用start_response_m并且返回结果给Middleware，存放在result_m中。
+
 5. Middleware处理result_m，然后生成result_s，接着调用start_response_s，并返回结果result_s给Server端。Server端获取到result_s后就可以发送结果给客户端了。
 
 从上面的流程可以看出middleware应用的几个特点：

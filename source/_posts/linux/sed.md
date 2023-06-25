@@ -3,7 +3,7 @@ layout: post
 title: sed命令笔记
 date: 2016-09-20 22:22:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ sed ]
 abbrlink: 37690
 ---

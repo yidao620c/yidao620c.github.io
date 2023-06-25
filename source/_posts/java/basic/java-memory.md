@@ -4,7 +4,7 @@ title: Java内存区域与内存溢出异常
 date: 2015-05-05 00:42:11 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags: [ java ]
 abbrlink: 13805
 ---

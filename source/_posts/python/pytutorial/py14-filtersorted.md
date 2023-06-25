@@ -3,8 +3,8 @@ layout: post
 title: 每天5分钟玩转Python（14） - 函数式编程之filter/sorted
 date: '2019-06-14 20:19:57 +0800'
 toc: true
-categories: [Python]
-tags: [python教程]
+categories: [ python ]
+tags: [ python教程 ]
 abbrlink: 4853
 ---
 

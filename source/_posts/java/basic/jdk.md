@@ -3,7 +3,7 @@ layout: post
 title: JDK的两个版本解释
 date: '2018-05-28 12:09:11 +0800'
 toc: false
-categories: [ Java ]
+categories: [ java ]
 tags: [ jdk ]
 abbrlink: 59441
 ---

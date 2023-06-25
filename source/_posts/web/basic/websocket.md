@@ -3,7 +3,7 @@ title: 聊一聊WebSocket
 date: 2017-05-03 12:09:22 +0800
 comments: true
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags:
   - websocket
 abbrlink: 27115

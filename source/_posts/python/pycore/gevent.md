@@ -3,8 +3,8 @@ layout: post
 title: 浅谈coroutine和gevent
 date: 2016-01-02 08:16:18 +0800
 toc: true
-categories: [Python]
-tags: [gevent]
+categories: [ python ]
+tags: [ gevent ]
 abbrlink: 14237
 ---
 
@@ -53,6 +53,7 @@ def foo():
         # 暂时返回一个值，并将控制权交出去
         yield i
         print(u'foo: 控制权又回到我手上了，叫我大笨蛋')
+
 
 bar = foo()
 # 执行coroutine
@@ -107,14 +108,15 @@ monkey.patch_all()
 
 import urllib2
 
+
 def print_head(url):
     print（'Starting %s' % url）
     data = urllib2.urlopen(url).read()
     print（'%s: %s bytes: %r' % (url, len(data), data[:50])）
 
-jobs = [gevent.spawn(print_head, url) for url in urls]
+    jobs = [gevent.spawn(print_head, url) for url in urls]
 
-gevent.joinall(jobs)
+    gevent.joinall(jobs)
 ```
 
 写起来非常简单，不过里面有一句`monkey.patch_all()`会让人有点疑惑。
@@ -136,15 +138,18 @@ gevent里面的上下文切换是非常平滑的。在下面的例子程序中�
 ```python
 import gevent
 
+
 def foo():
     print('Running in foo')
     gevent.sleep(0)
     print('Explicit context switch to foo again')
 
+
 def bar():
     print('Explicit context to bar')
     gevent.sleep(0)
     print('Implicit context switch back to bar')
+
 
 gevent.joinall([
     gevent.spawn(foo),
@@ -158,20 +163,24 @@ gevent.joinall([
 import gevent
 import random
 
+
 def task(pid):
     """
     Some non-deterministic task
     """
-    gevent.sleep(random.randint(0,2)*0.001)
+    gevent.sleep(random.randint(0, 2) * 0.001)
     print('Task', pid, 'done')
 
+
 def synchronous():
-    for i in range(1,10):
+    for i in range(1, 10):
         task(i)
+
 
 def asynchronous():
     threads = [gevent.spawn(task, i) for i in xrange(10)]
     gevent.joinall(threads)
+
 
 print('Synchronous:')
 synchronous()
@@ -197,6 +206,7 @@ asynchronous()
 import gevent
 from gevent import Greenlet
 
+
 class MyGreenlet(Greenlet):
 
     def __init__(self, message, n):
@@ -207,6 +217,7 @@ class MyGreenlet(Greenlet):
     def _run(self):
         print(self.message)
         gevent.sleep(self.n)
+
 
 g = MyGreenlet("Hi there!", 3)
 g.start()
@@ -228,16 +239,19 @@ greenlet的内部状态通常是一个依赖时间的参数。greenlet有一些�
 ```python
 import gevent
 
+
 def win():
     return 'You win!'
+
 
 def fail():
     raise Exception('You fail at failing.')
 
+
 winner = gevent.spawn(win)
 loser = gevent.spawn(fail)
 
-print(winner.started) # True
+print(winner.started)  # True
 print(loser.started)  # True
 
 # Exceptions raised in the Greenlet, stay inside the Greenlet.
@@ -246,13 +260,13 @@ try:
 except Exception as e:
     print('This will never be reached')
 
-print(winner.value) # 'You win!'
+print(winner.value)  # 'You win!'
 print(loser.value)  # None
 
-print(winner.ready()) # True
+print(winner.ready())  # True
 print(loser.ready())  # True
 
-print(winner.successful()) # True
+print(winner.successful())  # True
 print(loser.successful())  # False
 
 # The exception raised in fail, will not propogate outside the
@@ -271,8 +285,10 @@ print(loser.exception)
 import gevent
 import signal
 
+
 def run_forever():
     gevent.sleep(1000)
+
 
 if __name__ == '__main__':
     gevent.signal(signal.SIGQUIT, gevent.shutdown)
@@ -288,10 +304,12 @@ if __name__ == '__main__':
 import gevent
 from gevent import Timeout
 
-time_to_wait = 5 # seconds
+time_to_wait = 5  # seconds
+
 
 class TooLong(Exception):
     pass
+
 
 with Timeout(time_to_wait, TooLong):
     gevent.sleep(10)
@@ -342,6 +360,7 @@ Illustrates the use of events
 
 evt = Event()
 
+
 def setter():
     '''After 3 seconds, wake all threads waiting on the value of evt'''
     print('A: Hey wait for me, I have to do something')
@@ -349,11 +368,13 @@ def setter():
     print("Ok, I'm done")
     evt.set()
 
+
 def waiter():
     '''After 3 seconds the get call will unblock'''
     print("I'll wait for you")
     evt.wait()  # blocking
     print("It's about time")
+
 
 def main():
     gevent.joinall([
@@ -362,6 +383,7 @@ def main():
         gevent.spawn(waiter),
         gevent.spawn(waiter),
     ])
+
 
 if __name__ == '__main__':
     main()
@@ -374,7 +396,9 @@ if __name__ == '__main__':
 ```python
 import gevent
 from gevent.event import AsyncResult
+
 a = AsyncResult()
+
 
 def setter():
     """
@@ -383,12 +407,14 @@ def setter():
     gevent.sleep(3)
     a.set('Hello!')
 
+
 def waiter():
     """
     After 3 seconds the get call will unblock after the setter
     puts a value into the AsyncResult.
     """
     print(a.get())
+
 
 gevent.joinall([
     gevent.spawn(setter),
@@ -408,6 +434,7 @@ from gevent.queue import Queue
 
 tasks = Queue()
 
+
 def worker(n):
     while not tasks.empty():
         task = tasks.get()
@@ -416,9 +443,11 @@ def worker(n):
 
     print('Quitting time!')
 
+
 def boss():
-    for i in range(1,25):
+    for i in range(1, 25):
         tasks.put_nowait(i)
+
 
 gevent.spawn(boss).join()
 
@@ -442,14 +471,16 @@ from gevent.queue import Queue, Empty
 
 tasks = Queue(maxsize=3)
 
+
 def worker(n):
     try:
         while True:
-            task = tasks.get(timeout=1) # decrements queue size by 1
+            task = tasks.get(timeout=1)  # decrements queue size by 1
             print('Worker %s got task %s' % (n, task))
             gevent.sleep(0)
     except Empty:
         print('Quitting time!')
+
 
 def boss():
     """
@@ -457,13 +488,14 @@ def boss():
     free since the maxsize of the task queue is 3.
     """
 
-    for i in xrange(1,10):
+    for i in xrange(1, 10):
         tasks.put(i)
     print('Assigned all work in iteration 1')
 
-    for i in xrange(10,20):
+    for i in xrange(10, 20):
         tasks.put(i)
     print('Assigned all work in iteration 2')
+
 
 gevent.joinall([
     gevent.spawn(boss),
@@ -482,9 +514,11 @@ gevent.joinall([
 import gevent
 from gevent.pool import Group
 
+
 def talk(msg):
     for i in xrange(3):
         print(msg)
+
 
 g1 = gevent.spawn(talk, 'bar')
 g2 = gevent.spawn(talk, 'foo')
@@ -506,6 +540,7 @@ group.join()
 
 ```python
 from gevent.pool import Pool
+
 
 class SocketPool(object):
 
@@ -540,6 +575,7 @@ from gevent.coros import BoundedSemaphore
 
 sem = BoundedSemaphore(2)
 
+
 def worker1(n):
     sem.acquire()
     print('Worker %i acquired semaphore' % n)
@@ -547,15 +583,17 @@ def worker1(n):
     sem.release()
     print('Worker %i released semaphore' % n)
 
+
 def worker2(n):
     with sem:
         print('Worker %i acquired semaphore' % n)
         sleep(0)
     print('Worker %i released semaphore' % n)
 
+
 pool = Pool()
-pool.map(worker1, xrange(0,2))
-pool.map(worker2, xrange(3,6))
+pool.map(worker1, xrange(0, 2))
+pool.map(worker2, xrange(3, 6))
 ```
 
 范围为1的信号量也称为锁(lock)，它向单个greenlet提供了互斥访问。信号量和锁常常用来保证资源只在程序上下文被单次使用。
@@ -568,10 +606,12 @@ pool.map(worker2, xrange(3,6))
 import gevent
 from gevent.subprocess import Popen, PIPE
 
+
 def cron():
     while True:
         print("cron")
         gevent.sleep(0.2)
+
 
 g = gevent.spawn(cron)
 sub = Popen(['sleep 1; uname'], stdout=PIPE, shell=True)
@@ -590,6 +630,7 @@ Gevent没有原生的Actor类型，但在一个子类化的Greenlet内使用队�
 ```python
 import gevent
 from gevent.queue import Queue
+
 
 class Actor(gevent.Greenlet):
 
@@ -618,17 +659,20 @@ import gevent
 from gevent.queue import Queue
 from gevent import Greenlet
 
+
 class Pinger(Actor):
     def receive(self, message):
         print(message)
         pong.inbox.put('ping')
         gevent.sleep(0)
 
+
 class Ponger(Actor):
     def receive(self, message):
         print(message)
         ping.inbox.put('pong')
         gevent.sleep(0)
+
 
 ping = Pinger()
 pong = Ponger()

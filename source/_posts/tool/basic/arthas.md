@@ -3,7 +3,7 @@ title: 开源JVM诊断工具Arthas介绍
 date: 2020-03-15 20:20:19 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - arthas
 ---

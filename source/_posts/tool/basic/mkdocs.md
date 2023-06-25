@@ -3,7 +3,7 @@ title: Mkdocs 配置和使用
 date: '2020-03-01 13:08:23 +0800'
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - mkdocs
 abbrlink: 51350

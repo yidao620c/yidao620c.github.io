@@ -3,7 +3,7 @@ layout: post
 title: CentOS7搭建NFS网络文件系统
 date: 2018-02-19 22:46:01 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ nfs ]
 ---
 

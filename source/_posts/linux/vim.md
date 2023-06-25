@@ -3,7 +3,7 @@ layout: post
 title: vim简易教程
 date: 2016-06-02 20:07:22 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ vim ]
 abbrlink: 9657
 ---

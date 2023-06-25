@@ -3,7 +3,7 @@ layout: post
 title: CentOS7搭建NTP服务器
 date: 2018-02-16 12:55:13 +0800
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ntpd]
 abbrlink: 9758
 ---

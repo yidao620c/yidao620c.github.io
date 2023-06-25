@@ -3,7 +3,7 @@ layout: post
 title: 设置代理时候保护个人密码
 date: '2018-09-28 14:04:10 +0800'
 toc: true
-categories: [ Linux ]
+categories: [ linux ]
 tags: [ proxy ]
 abbrlink: 12127
 ---

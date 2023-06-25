@@ -1,7 +1,7 @@
 ---
 title: 小程序开发 - websocket
 toc: true
-categories: [ Web ]
+categories: [ web ]
 tags: [ 小程序 ]
 abbrlink: 31542
 date: 2017-12-15 12:47:12

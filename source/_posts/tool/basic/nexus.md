@@ -3,7 +3,7 @@ title: maven私服nexus3.x环境配置
 date: 2017-09-02 22:10:25 +0800
 comments: true
 toc: true
-categories: [开发工具]
+categories: [ 开发工具 ]
 tags:
   - nexus
 abbrlink: 23421
