@@ -5,7 +5,6 @@ date: 2015-12-12 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 53031
 ---
 
 字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。

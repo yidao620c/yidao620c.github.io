@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - jenkins
-abbrlink: 1844
 ---
 
 前面一篇介绍了Jenkins的入门安装和简单演示，这篇讲解最核心的Pipeline部分。

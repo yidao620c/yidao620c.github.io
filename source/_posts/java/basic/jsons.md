@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ java ]
 tags: [ json ]
-abbrlink: 13614
 ---
 
 上一篇介绍了Java性能测试框架JMH的使用方法，本篇通过JMH来测试一下Java中几种常见的JSON解析库的性能。

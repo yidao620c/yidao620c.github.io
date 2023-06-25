@@ -6,7 +6,6 @@ toc: true
 categories: [我的日记]
 tags:
   - 高可用
-abbrlink: 2381
 ---
 
 高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，

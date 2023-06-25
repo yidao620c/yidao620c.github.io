@@ -5,7 +5,6 @@ date: '2018-05-30 12:22:11 +0800'
 toc: false
 categories: [ java ]
 tags: [ java ]
-abbrlink: 59441
 ---
 
 在泛型编程时，使用部分限定的形参时，`<? super T>`和`<? extends T>`的使用场景容易混淆，

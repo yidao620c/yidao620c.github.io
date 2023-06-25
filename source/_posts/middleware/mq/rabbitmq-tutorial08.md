@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]
-abbrlink: 26448
 ---
 
 RabbitMQ任务调度默认是阻塞的，使用pika中的`channel.start_consuming()`的时候，

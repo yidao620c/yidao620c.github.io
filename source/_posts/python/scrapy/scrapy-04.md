@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 30592
 ---
 
 在你爬取网页的时候，最普遍的事情就是在页面源码中提取需要的数据，我们有几个库可以帮你完成这个任务：

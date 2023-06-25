@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - maven
-abbrlink: 36871
 ---
 
 本地生成预览，修改父模块的pom.xml:

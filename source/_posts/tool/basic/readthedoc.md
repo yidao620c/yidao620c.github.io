@@ -7,7 +7,6 @@ categories: [ 开发工具 ]
 tags:
   - sphinx
   - readthedocs
-abbrlink: 715
 ---
 
 [Read the Docs](https://readthedocs.org/)是一个在线文档托管服务，

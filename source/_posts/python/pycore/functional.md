@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 36045
 ---
 
 函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量(或者说不能给变量重新赋值)，

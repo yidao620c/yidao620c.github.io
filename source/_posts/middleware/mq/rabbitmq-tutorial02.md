@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [中间件]
 tags: [rabbitmq]
-abbrlink: 10613
 ---
 
 这里演示的官网通过python使用消息队列的教程：<https://www.rabbitmq.com/getstarted.html>

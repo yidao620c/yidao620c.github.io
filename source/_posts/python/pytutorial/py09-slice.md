@@ -5,7 +5,6 @@ date: '2019-06-09 09:56:22 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 9759
 ---
 
 我们经常会遇见只取列表、元组或者字符串中一部分的场景。比如一个列表如下：

@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - idea
-abbrlink: 22010
 ---
 
 IDEA里面按Alt+Insert可弹出生成getter/setter方法模板的提示，默认的模板并不会带JavaDoc。可自定义模板

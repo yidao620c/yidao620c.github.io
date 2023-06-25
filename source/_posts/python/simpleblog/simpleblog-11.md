@@ -5,7 +5,6 @@ date: 2015-08-22 15:27:29 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 21740
 ---
 
 TinyMCE是一个轻量级的基于浏览器的所见即所得编辑器，支持目前流行的各种浏览器，由JavaScript写成。

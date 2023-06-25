@@ -5,7 +5,6 @@ date: 2015-04-19 16:36:41 +0800
 toc: true
 categories: [中间件]
 tags: [memcached]
-abbrlink: 995
 ---
 
 Xmemcached是基于java nio实现的高性能可扩展的memcached客户端。它的主要特点：

@@ -5,7 +5,6 @@ date: '2019-06-22 20:09:02 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 61769
 ---
 
 这一篇开始讲解面向对象中最核心的基础知识，包含了继承、多态以及对象的属性访问等。

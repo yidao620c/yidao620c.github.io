@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - jenkins
-abbrlink: 54290
 ---
 
 这一篇记录一下Jenkins的一些有趣的东西，或者说更加接近于实战的东西，也许我写的这几篇内容只覆盖了20%左右的内容，

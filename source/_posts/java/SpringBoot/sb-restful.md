@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 38776
 ---
 
 REST，即Representational State Transfer的缩写，对这个词组的翻译是`表现层状态转化`。

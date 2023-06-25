@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ nginx ]
-abbrlink: 60436
 ---
 
 nginx是一个优秀的 HTTP 和反向代理服务器，一个邮件代理服务器，

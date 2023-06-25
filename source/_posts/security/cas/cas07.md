@@ -6,7 +6,6 @@ toc: true
 categories: [网络安全]
 tags:
   - CAS
-abbrlink: 24884
 ---
 
 如果每个Web应用有自己的登录界面，不想使用Cas服务器的登录界面。也不需要改动Cas服务器去适配各种客户端登录界面需求。

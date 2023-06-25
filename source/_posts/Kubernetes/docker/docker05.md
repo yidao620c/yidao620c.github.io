@@ -3,7 +3,6 @@ title: Docker每天学一点05 - Registry
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 3685
 date: 2019-03-07 12:07:09
 ---
 

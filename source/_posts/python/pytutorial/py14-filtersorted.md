@@ -5,7 +5,6 @@ date: '2019-06-14 20:19:57 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 4853
 ---
 
 这一篇再讲两个高阶函数，一个是过滤器函数filter，一个是排序函数sorted。这些都是使用最频繁的函数，也很具有代表性。

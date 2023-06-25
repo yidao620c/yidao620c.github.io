@@ -5,7 +5,6 @@ date: '2019-06-11 21:27:10 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 6633
 ---
 
 这篇开始要展示python这门语言真正的魅力所在了。python有一些高级功能，

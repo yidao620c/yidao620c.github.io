@@ -7,7 +7,6 @@ categories: [ 网络安全 ]
 tags:
   - CSRF
   - 安全贴士
-abbrlink: 16060
 ---
 
 CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。

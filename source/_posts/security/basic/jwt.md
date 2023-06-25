@@ -7,7 +7,6 @@ categories: [ 网络安全 ]
 tags:
   - jwt
   - 安全贴士
-abbrlink: 21652
 ---
 
 Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，

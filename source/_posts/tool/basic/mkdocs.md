@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - mkdocs
-abbrlink: 51350
 ---
 
 MkDocs是一个快速、简单、华丽的静态网站生成器，适用于构建项目文档。文档源文件以Markdown编写，并使用一个YAML文件来进行配置。

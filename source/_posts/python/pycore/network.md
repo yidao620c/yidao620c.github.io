@@ -5,7 +5,6 @@ date: 2015-12-28 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 64729
 ---
 
 自从互联网诞生以来，现在基本上所有的程序都是网络程序。

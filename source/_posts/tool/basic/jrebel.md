@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - jrebel
-abbrlink: 41865
 ---
 
 在Java Web开发中，一般更新了Java文件后要手动重启Tomcat服务器才能生效，浪费不少生命啊，

@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - websocket
-abbrlink: 27115
 ---
 
 WebSocket是HTML5开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。

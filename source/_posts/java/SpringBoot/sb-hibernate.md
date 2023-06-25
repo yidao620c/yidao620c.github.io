@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 30340
 ---
 
 Hibernate与MyBatis都是流行的持久层开发框架，前一遍介绍了怎样在SpringBoot中集成MyBatis，本篇来介绍如何集成Hibernate作为DAO层。

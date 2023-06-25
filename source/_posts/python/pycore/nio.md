@@ -5,7 +5,6 @@ date: 2015-12-21 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 56268
 ---
 
 由于CPU的速度远远快于磁盘、网络等IO，我们可选择使用多进程或多线程来并发执行代码。

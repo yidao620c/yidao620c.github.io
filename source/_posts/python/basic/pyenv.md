@@ -5,7 +5,6 @@ date: 2016-05-09 12:28:39 +0800
 toc: true
 categories: [ python ]
 tags: [ pyenv ]
-abbrlink: 18290
 ---
 
 以前一直使用`virtualenv`来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。

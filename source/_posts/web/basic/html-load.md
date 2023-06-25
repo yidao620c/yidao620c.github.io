@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - html
-abbrlink: 11601
 ---
 
 前端页面的性能一直都是一个热议的话题，从老早雅虎提出的35条"军规"开始我们就一直在关注页面的性能问题。

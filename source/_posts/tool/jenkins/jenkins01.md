@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - jenkins
-abbrlink: 34143
 ---
 
 Jenkins是一个用Java编写的开源的持续集成工具，前身是Hudson项目。

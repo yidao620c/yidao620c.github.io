@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - idea
-abbrlink: 7125
 ---
 
 作为一个码农对于那些优秀的开发工具爱不释手，它们对框架的支持、界面、插件都是那么的优秀，

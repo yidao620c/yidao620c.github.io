@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - npm
-abbrlink: 48779
 ---
 
 初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。

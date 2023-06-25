@@ -5,7 +5,6 @@ date: '2019-06-01 12:30:20 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 35013
 ---
 
 人生苦短，我用Python！

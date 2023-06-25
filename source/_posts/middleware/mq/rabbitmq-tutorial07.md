@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [中间件]
 tags: [rabbitmq]
-abbrlink: 41092
 ---
 
 之前写过一篇 [使用Ajax实现异步任务](https://www.xncoding.com/2017/05/02/web/async.html) 的文章，

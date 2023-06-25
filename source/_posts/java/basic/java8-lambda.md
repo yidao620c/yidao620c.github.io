@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [ java ]
 tags: [ java ]
-abbrlink: 58803
 ---
 
 2014年3月18日，Oracle终于发布Java8正式版。在新的版本里面加入了很多特性，

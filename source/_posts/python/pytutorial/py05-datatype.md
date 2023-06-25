@@ -5,7 +5,6 @@ date: '2019-06-05 20:10:35 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 43604
 ---
 
 在介绍数据类型之前，有必要先讲一下变量赋值语法。

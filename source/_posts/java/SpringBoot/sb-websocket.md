@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 60613
 ---
 
 WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。

@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 61524
 ---
 
 所有数据访问技术都有事务机制，这些技术提供了API来开启事务、提交事务完成数据操作，或者在发生错误的时候回滚数据。

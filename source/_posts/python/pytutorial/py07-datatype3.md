@@ -5,7 +5,6 @@ date: '2019-06-07 11:35:12 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 52308
 ---
 
 继续上一篇的数据结构讲解，这篇讲解Set（集合）和Dictionary（字典）的使用方法。

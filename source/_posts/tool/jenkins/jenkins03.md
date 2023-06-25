@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - jenkins
-abbrlink: 15782
 ---
 
 这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。

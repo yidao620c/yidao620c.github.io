@@ -5,7 +5,6 @@ date: 2015-09-16 16:40:04 +0800
 toc: true
 categories: [ linux ]
 tags: [lvs, keepalived]
-abbrlink: 18663
 ---
 
 我们不仅要知其然，而且要知其所以然，所以先给大家准备一些理论知识课，这样对以后的应用将会事半功倍。

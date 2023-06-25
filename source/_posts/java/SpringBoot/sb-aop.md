@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 25952
 ---
 
 AOP（面向切面编程）是Spring的两大核心功能之一，功能非常强大，为解耦提供了非常优秀的解决方案。

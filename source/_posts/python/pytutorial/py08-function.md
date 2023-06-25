@@ -5,7 +5,6 @@ date: '2019-06-08 22:13:33 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 43101
 ---
 
 函数是组织好的、可重复使用的、用来实现单一或相关联功能的代码段。

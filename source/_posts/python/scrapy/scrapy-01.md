@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 18790
 ---
 
 Scrapy是一个为了爬取网站数据，提取结构性数据而编写的应用框架。可以应用在包括数据挖掘，

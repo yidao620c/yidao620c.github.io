@@ -7,7 +7,6 @@ categories: [ java ]
 tags:
   - spring
   - axis2
-abbrlink: 57631
 ---
 
 虽然现在做WebService开发的越来越少了，但是还是会碰到很多老的系统用到这个技术。

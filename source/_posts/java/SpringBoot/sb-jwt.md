@@ -7,7 +7,6 @@ categories: [ java ]
 tags:
   - springboot
   - jwt
-abbrlink: 40840
 ---
 
 

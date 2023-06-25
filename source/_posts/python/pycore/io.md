@@ -5,7 +5,6 @@ date: 2015-12-20 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 62128
 ---
 
 IO在计算机中指Input/Output，也就是输入和输出。由于程序和运行时数据是在内存中驻留，

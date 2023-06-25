@@ -5,7 +5,6 @@ date: '2019-06-18 14:22:13 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 30888
 ---
 
 安装完python后就已经安装了所有的内置模块，如果只是需要内置模块之间导入即可，

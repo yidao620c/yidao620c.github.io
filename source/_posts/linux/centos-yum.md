@@ -5,7 +5,6 @@ date: 2015-04-13 19:02:42 +0800
 toc: true
 categories: [ linux ]
 tags: [yum]
-abbrlink: 41580
 ---
 
 先备份

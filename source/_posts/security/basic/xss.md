@@ -7,7 +7,6 @@ categories: [ 网络安全 ]
 tags:
   - XSS
   - 安全贴士
-abbrlink: 27828
 ---
 
 XSS攻击：跨站脚本攻击(Cross-Site Scripting)，为了不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，

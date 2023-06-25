@@ -3,7 +3,6 @@ title: Docker安装常用软件
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 3896
 date: 2019-03-30 12:35:12
 ---
 

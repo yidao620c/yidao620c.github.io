@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 42645
 ---
 
 模块和包都是用来组织代码用的，在python中一个模块就是一个.py文件，而一个包就是一个包含了`__init__.py`的文件夹。

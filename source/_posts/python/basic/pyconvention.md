@@ -5,7 +5,6 @@ date: '2018-08-05 10:02:33 +0800'
 toc: true
 categories: [ python ]
 tags: [ python ]
-abbrlink: 60767
 ---
 
 应该避免的名称

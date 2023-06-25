@@ -7,7 +7,6 @@ categories: [ 开发工具 ]
 tags:
   - idea
   - maven
-abbrlink: 42706
 ---
 
 有时候在IDEA里面直接点击查看源码，报：cannot download sources

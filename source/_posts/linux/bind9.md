@@ -5,7 +5,6 @@ date: 2016-07-01 09:33:22 +0800
 toc: true
 categories: [ linux ]
 tags: [dns]
-abbrlink: 33172
 ---
 
 作为互联网基础设施中重要一环的DNS域名解析服务，在互联网中所承担的重要角色和发挥的重要作用。

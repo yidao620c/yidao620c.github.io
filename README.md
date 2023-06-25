@@ -14,7 +14,7 @@ hexo clean && hexo g && hexo d
 ```
 
 ### 更新索引
-
+先登录algolia网站，找到blogindex，在manage里面clear所有的索引数据库。然后更新：
 ```
 hexo algolia
 ```

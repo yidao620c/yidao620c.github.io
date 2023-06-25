@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 47698
 ---
 
 `Apache Shiro`是Java的一个安全框架。目前，使用`Apache Shiro`的人越来越多，相比`Spring Security`而言相当简单，

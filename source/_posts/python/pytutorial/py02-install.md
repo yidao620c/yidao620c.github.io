@@ -5,7 +5,6 @@ date: '2019-06-02 09:35:12 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 52542
 ---
 
 要学习和运行Python得先安装才行，安装后会得到Python解释器、命令行交互环境和一个简单的集成开发环境。

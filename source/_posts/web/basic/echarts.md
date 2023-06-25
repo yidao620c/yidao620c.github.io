@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - echarts
-abbrlink: 27094
 ---
 
 ECharts是一款由百度前端技术部开发的，基于Javascript的数据可视化图表库，提供直观，生动，

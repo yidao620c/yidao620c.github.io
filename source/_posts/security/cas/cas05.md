@@ -6,7 +6,6 @@ toc: true
 categories: [网络安全]
 tags:
   - CAS
-abbrlink: 1488
 ---
 
 cas客户端接入称之为service，必须经过cas的允许才能进行登录，当然不同的客户端可以做不同的事情，其中包括：

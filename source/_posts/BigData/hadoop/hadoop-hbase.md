@@ -5,7 +5,6 @@ date: 2015-05-27 14:01:57 +0800
 toc: true
 categories: [大数据]
 tags: [hadoop]
-abbrlink: 23240
 ---
 
 操作系统：CentOS 6.5 64位

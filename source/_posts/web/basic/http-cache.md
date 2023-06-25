@@ -7,7 +7,6 @@ categories: [ web ]
 tags:
   - http
   - cache
-abbrlink: 7649
 ---
 
 Http协议里包含了控制缓存的部分，以使Http客户端可以缓存和重用以前获取的资源，从而优化性能，提升体验。

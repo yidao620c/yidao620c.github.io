@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ nginx, https ]
-abbrlink: 35706
 ---
 
 TLS(transport layer security), 和它的后继者SSL是一个安全套接字层协议，是为了给普通的网络传输内容加密传输而来。

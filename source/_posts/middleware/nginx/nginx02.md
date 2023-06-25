@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ nginx ]
-abbrlink: 18549
 ---
 
 本篇介绍nginx的一些进阶使用方法，包括反向代理、虚拟主机、负载均衡、页面缓存等等。

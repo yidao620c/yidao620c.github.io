@@ -5,7 +5,6 @@ date: 2016-01-02 08:16:18 +0800
 toc: true
 categories: [ python ]
 tags: [ gevent ]
-abbrlink: 14237
 ---
 
 一般将coroutine称之为协程（或微线程，也有称纤程的）。

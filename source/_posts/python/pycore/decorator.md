@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 33998
 ---
 
 python有着强大的表达式语法和函数特性，其中一个我的最爱便是装饰器。

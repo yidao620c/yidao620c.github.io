@@ -5,7 +5,6 @@ date: '2019-06-19 15:22:56 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 18848
 ---
 
 如果正常使用pip安装会将软件包安装到python系统包目录下面，也就是site-packages目录。

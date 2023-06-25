@@ -5,7 +5,6 @@ date: 2015-12-24 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 28821
 ---
 
 操作数据库是最常见的任务，这里用MySQL来做演示，也是我们用的最多的一个开源数据库，其他都类似的。

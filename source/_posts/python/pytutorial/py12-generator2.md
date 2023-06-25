@@ -5,7 +5,6 @@ date: '2019-06-12 22:19:29 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 44567
 ---
 
 这一章开始介绍生成器函数和`yield`关键字，以及Python中的协程的概念。

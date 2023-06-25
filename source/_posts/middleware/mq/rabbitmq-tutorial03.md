@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [中间件]
 tags: [rabbitmq]
-abbrlink: 59466
 ---
 
 前面一篇介绍的任务队列是每个消息只能被一个工作者取走。这一篇讲解发布/订阅消息模式，

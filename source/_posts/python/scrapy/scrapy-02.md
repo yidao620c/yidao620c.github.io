@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 23055
 ---
 
 这篇文章我们通过一个比较完整的例子来教你使用Scrapy，我选择爬取[虎嗅网首页](http://www.huxiu.com/)的新闻列表。

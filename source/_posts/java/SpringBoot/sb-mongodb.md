@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 13296
 ---
 
 MongoDB是一个高性能、开源、无模式的文档型数据库，是当前NoSql数据库中比较热门的一种。

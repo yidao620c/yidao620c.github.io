@@ -3,7 +3,6 @@ title: Werkzeug简易教程
 toc: true
 categories: [ python ]
 tags: [ werkzeug ]
-abbrlink: 56707
 date: 2016-12-02 19:52:21
 ---
 

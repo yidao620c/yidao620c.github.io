@@ -5,7 +5,6 @@ date: 2015-12-30 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 31460
 ---
 
 Web应用开发可以说是目前软件开发中最重要的部分。Web开发也经历了好几个阶段：静态Web页面、CGI、ASP/JSP/PHP、MVC。

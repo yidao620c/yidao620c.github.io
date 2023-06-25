@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - gradle
-abbrlink: 42153
 ---
 
 在开发Spring Boot应用的时候，除了Maven以外，Gradle也是一个不错的构建选择。

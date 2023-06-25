@@ -3,7 +3,6 @@ title: Docker每天学一点01 - 入门
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 41901
 date: 2019-03-01 16:11:23
 ---
 

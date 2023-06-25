@@ -5,7 +5,6 @@ date: '2019-06-20 12:35:22 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 39462
 ---
 
 当需要将写的程序打包分发出去的时候，就要使用到setuptools工具了，这里我通过一个实际例子来介绍它的使用方法。

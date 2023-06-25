@@ -3,7 +3,6 @@ title: Docker每天学一点03 - 镜像
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 58190
 date: 2019-03-03 08:26:12
 ---
 

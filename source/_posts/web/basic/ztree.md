@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - ztree
-abbrlink: 12206
 ---
 
 经常有这个需求，用用到树形菜单做展示或者选择，基于jquery的一个控件zTree非常简单好用，这里做一下记录。

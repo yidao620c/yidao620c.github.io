@@ -7,7 +7,6 @@ categories: [ 网络安全 ]
 tags:
   - https
   - 安全贴士
-abbrlink: 44627
 ---
 
 HTTPS（全称：`Hypertext Transfer Protocol over Secure Socket Layer`），是以安全为目标的HTTP通道，简单讲是HTTP的安全版。

@@ -3,7 +3,6 @@ title: Docker每天学一点04 - Dockerfile
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 42100
 date: 2019-03-05 15:17:09
 ---
 

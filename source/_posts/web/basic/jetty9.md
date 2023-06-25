@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - jetty9
-abbrlink: 18126
 ---
 
 Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。

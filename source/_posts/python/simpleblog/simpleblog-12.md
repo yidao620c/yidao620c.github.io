@@ -5,7 +5,6 @@ date: 2015-08-24 19:12:29 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 24954
 ---
 
 国际化与本地化的目的为了能为各个不同的用户以他们最熟悉的语言和格式来显示网页。

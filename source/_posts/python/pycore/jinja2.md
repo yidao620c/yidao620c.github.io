@@ -5,7 +5,6 @@ date: 2016-09-05 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ jinja2 ]
-abbrlink: 16052
 ---
 
 jinja2是python中的一个优秀的模板语言，类似于django的模板。它的速度快，安全，目前被各种框架被广泛使用。

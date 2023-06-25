@@ -3,7 +3,6 @@ title: Docker每天学一点11 - 容器网络macvlan
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 30376
 date: 2019-03-16 15:22:38
 ---
 

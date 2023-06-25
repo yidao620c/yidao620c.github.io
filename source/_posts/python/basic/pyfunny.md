@@ -5,7 +5,6 @@ date: 2016-05-20 19:32:56 +0800
 toc: true
 categories: [ python ]
 tags: [ python ]
-abbrlink: 37138
 ---
 
 python有时候简单起来连我自己都怕，有时候其他语言需要几十写出来的python几行搞定。

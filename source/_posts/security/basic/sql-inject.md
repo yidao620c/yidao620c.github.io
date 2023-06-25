@@ -7,7 +7,6 @@ categories: [ 网络安全 ]
 tags:
   - SQL注入
   - 安全贴士
-abbrlink: 40930
 ---
 
 SQL注入攻击（SQL Injection），简称注入攻击，是Web开发中最常见的一种安全漏洞。

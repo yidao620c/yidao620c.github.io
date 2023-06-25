@@ -5,7 +5,6 @@ date: '2019-06-03 12:03:21 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 60589
 ---
 
 安装完Python之后还需要安装集成开发环境，也就是通常所说的IDE。虽然你可以用python自带的IDLE，

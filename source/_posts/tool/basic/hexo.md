@@ -3,7 +3,6 @@ title: 使用hexo搭建github博客
 toc: true
 categories: [ 开发工具 ]
 tags: [ hexo ]
-abbrlink: 27592
 date: 2016-03-06 19:47:53
 ---
 

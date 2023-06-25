@@ -4,7 +4,6 @@ toc: true
 comments: true
 categories: [我的日记]
 tags: [笑话]
-abbrlink: 23366
 date: 2015-02-07 14:02:04
 ---
 

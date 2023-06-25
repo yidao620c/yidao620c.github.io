@@ -3,7 +3,6 @@ title: Docker每天学一点10 - 容器网络overlay
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 61869
 date: 2019-03-15 09:56:12
 ---
 

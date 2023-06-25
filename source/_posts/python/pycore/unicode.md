@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 48683
 ---
 
 字符串也是一种数据类型，但是，字符串比较特殊的是还有一个编码问题。

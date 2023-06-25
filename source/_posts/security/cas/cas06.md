@@ -6,7 +6,6 @@ toc: true
 categories: [网络安全]
 tags:
   - CAS
-abbrlink: 15155
 ---
 
 默认情况下，cas是将票据信息存储到内存中，我们可以将票据存储到redis服务器中，cas采用的spring data redis 来控制redis

@@ -5,7 +5,6 @@ date: 2015-08-25 20:27:55 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 38345
 ---
 
 Redis 是一个高性能的key-value数据库。redis的出现，

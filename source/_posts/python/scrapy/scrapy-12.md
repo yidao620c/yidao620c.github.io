@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 42468
 ---
 
 前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。

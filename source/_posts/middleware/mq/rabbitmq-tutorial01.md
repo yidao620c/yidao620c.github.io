@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]
-abbrlink: 24310
 ---
 
 最近又开始捣鼓RabbitMQ了，一个超好用的队列中间件，官网教程更新，自己也将有用的东东记录下来。

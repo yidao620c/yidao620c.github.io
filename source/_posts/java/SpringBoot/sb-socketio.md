@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 59332
 ---
 
 上一篇讲解了基于STOMP协议实现的WebSocket方案，本篇我讲一下Socket.IO的实现方案。

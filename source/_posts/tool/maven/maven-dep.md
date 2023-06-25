@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - maven
-abbrlink: 64830
 ---
 
 今天一个传递依赖问题搞了我半天，终于搞明白原因了。一个jar包A依赖了httpclient，然后另一个jar包B引入A，

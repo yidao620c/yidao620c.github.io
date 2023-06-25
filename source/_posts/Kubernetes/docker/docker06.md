@@ -3,7 +3,6 @@ title: Docker每天学一点06 - 运行容器
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-abbrlink: 30454
 date: 2019-03-09 09:16:33
 ---
 

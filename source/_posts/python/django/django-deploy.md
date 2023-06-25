@@ -5,7 +5,6 @@ date: 2016-04-30 16:02:42 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 56538
 ---
 
 Django是一个非常强大的web框架，能让你快速的构建应用，它本身包含了一个简单的服务器程序，让你在开发环境里调试用。

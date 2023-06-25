@@ -5,7 +5,6 @@ date: 2015-09-07 10:22:26 +0800
 toc: true
 categories: [ python ]
 tags: [ python ]
-abbrlink: 57730
 ---
 
 PyInstaller是一个能将Python程序转换成单个可执行文件的程序，

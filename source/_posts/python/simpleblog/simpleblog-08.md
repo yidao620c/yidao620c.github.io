@@ -5,7 +5,6 @@ date: 2015-08-18 08:24:11 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 17738
 ---
 
 到现在为止我们已经完成的差不多了，并且基本的东西都已经学到了，是时候用起来了。

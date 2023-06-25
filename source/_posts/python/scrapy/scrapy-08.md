@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 23354
 ---
 
 Scrapy为我们提供了可重用的[item pipelines](http://doc.scrapy.org/en/1.0/topics/item-pipeline.html)为某个特定的Item去下载文件。

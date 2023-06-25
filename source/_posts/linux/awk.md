@@ -5,7 +5,6 @@ date: 2016-09-22 22:22:22 +0800
 toc: true
 categories: [ linux ]
 tags: [ awk,linux ]
-abbrlink: 33710
 ---
 
 awk是一种样式扫描与处理工具。但其功能却大大强于sed和grep。awk提供了极其强大的功能，它几乎可以完成grep和sed所能完成的全部工作，

@@ -5,7 +5,6 @@ date: '2019-06-17 12:30:35 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 37675
 ---
 
 模块和包都是用来组织代码用的，在python中一个模块就是一个.py文件，

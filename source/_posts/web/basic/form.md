@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - form
-abbrlink: 9619
 ---
 
 在平时开发中，如果网速比较慢的情况下，用户提交表单后，发现服务器半天都没有响应，

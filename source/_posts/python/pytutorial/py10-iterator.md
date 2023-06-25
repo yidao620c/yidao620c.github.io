@@ -5,7 +5,6 @@ date: '2019-06-10 10:36:12 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 56932
 ---
 
 迭代(iteration)指的是去获取元素的一种方式，一个接一个。当你显式或隐式的使用循环来遍历某个元素集的时候，那就是迭代。

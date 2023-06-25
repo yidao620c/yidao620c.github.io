@@ -5,7 +5,6 @@ date: '2019-06-04 09:37:12 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 8474
 ---
 
 学一门语言最开始还是得先了解一下这门语言的基本语法，Python跟C语言语法有很大差别。

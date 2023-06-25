@@ -5,7 +5,6 @@ date: '2018-09-28 14:04:10 +0800'
 toc: true
 categories: [ linux ]
 tags: [ proxy ]
-abbrlink: 12127
 ---
 
 一般设置代理方式是，全局的代理设置`vi /etc/profile`

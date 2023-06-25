@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]
-abbrlink: 11718
 ---
 
 前面一篇实现了一个非常基础的日志系统，交换机将所有接收到的消息广播到它所知道的多个接受者。

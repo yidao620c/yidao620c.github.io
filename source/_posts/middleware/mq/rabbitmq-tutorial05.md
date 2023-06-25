@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [中间件]
 tags: [rabbitmq]
-abbrlink: 44320
 ---
 
 前面一篇通过使用`direct`类型的交换机代替`fanout`广播类型交换机，

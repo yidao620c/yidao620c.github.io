@@ -6,7 +6,6 @@ toc: true
 categories: [ 网络安全 ]
 tags:
   - CAS
-abbrlink: 47979
 ---
 
 这篇开始写一个系列，讲解如何使用配置和使用CAS实现单点登录。

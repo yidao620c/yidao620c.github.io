@@ -5,7 +5,6 @@ date: 2016-03-07 23:50:22 +0800
 toc: true
 categories: [ python ]
 tags: [ SQLAlchemy ]
-abbrlink: 52241
 ---
 
 前面一篇介绍了SQLAlchemy的入门，这里我讲讲它的进阶用法，其实主要是通过它来轻松实现一些复杂查询。

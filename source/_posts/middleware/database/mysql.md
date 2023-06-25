@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ mysql ]
-abbrlink: 58473
 ---
 
 用了这么久的mysql数据库，是时候来一篇总结了，这里整理使用过程中觉得比较重要也比较常用的知识点。

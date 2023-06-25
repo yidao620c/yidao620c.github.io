@@ -6,7 +6,6 @@ comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ mqtt ]
-abbrlink: 34260
 ---
 
 Mosquitto是一个开源(BSD许可证)的消息代理，实现MQTT(消息队列遥测传输)协议版本3.1.1。

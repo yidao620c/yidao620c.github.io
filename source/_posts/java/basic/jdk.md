@@ -5,7 +5,6 @@ date: '2018-05-28 12:09:11 +0800'
 toc: false
 categories: [ java ]
 tags: [ jdk ]
-abbrlink: 59441
 ---
 
 每次去Oracle官网去下载JDK，就会发现有两个版本，一个基数版本，一个偶数版本。比如最新的jdk-8u191和jdk-8u192。这是咋回事？

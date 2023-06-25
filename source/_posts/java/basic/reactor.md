@@ -5,7 +5,6 @@ date: 2018-04-05 09:23:12 +0800
 toc: true
 categories: [ java ]
 tags: [ java ]
-abbrlink: 44126
 ---
 
 上一篇介绍了Unix系统支持的I/O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。

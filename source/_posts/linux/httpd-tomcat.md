@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ linux ]
 tags: [tomcat, httpd]
-abbrlink: 985
 ---
 
 操作系统：CentOS 6.5_x86_64

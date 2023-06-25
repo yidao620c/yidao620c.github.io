@@ -5,7 +5,6 @@ date: 2015-08-03 18:49:57 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 40618
 ---
 
 django的模型就是用于在数据库中存储的某种类型的对象。在我们的博客系统中，

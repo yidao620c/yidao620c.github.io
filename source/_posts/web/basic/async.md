@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - ajax
-abbrlink: 47600
 ---
 
 我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。

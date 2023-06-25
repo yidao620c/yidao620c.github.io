@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - swagger
-abbrlink: 61300
 ---
 
 REST API都是要对外提供服务的，那么文档是必须的。Swagger是一个简单但功能强大的API表达工具。

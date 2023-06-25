@@ -5,7 +5,6 @@ date: 2015-08-20 21:47:47 +0800
 toc: true
 categories: [ python ]
 tags: [ django ]
-abbrlink: 56478
 ---
 
 你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录，

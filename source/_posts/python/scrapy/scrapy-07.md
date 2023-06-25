@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 34374
 ---
 
 Scrapy使用Python内置的的日志系统来记录事件日志。

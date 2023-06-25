@@ -5,7 +5,6 @@ date: '2019-10-15 19:02:42 +0800'
 toc: true
 categories: [ python ]
 tags: [ python ]
-abbrlink: 24109
 ---
 
 今天Python3.8版本刚刚发布，添加了很多新功能。这里介绍几个我觉得最酷的特性，感受一下小Python的美。

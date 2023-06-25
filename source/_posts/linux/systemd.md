@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ linux ]
 tags: [ systemd ]
-abbrlink: 11751
 ---
 
 CentOS 7继承了RHEL 7的新的特性，例如强大的systemd，

@@ -5,7 +5,6 @@ date: 2015-06-18 18:15:42 +0800
 toc: false
 categories: [ java ]
 tags: [ java ]
-abbrlink: 42382
 ---
 
 最近学习内部类的时候，对Java实现回调函数机制有了进一步了解，自己整理点比较，希望大家可以相互讨论。

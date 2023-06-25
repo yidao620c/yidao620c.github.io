@@ -5,7 +5,6 @@ date: 2015-07-06 16:15:42 +0800
 toc: false
 categories: [中间件]
 tags: [redis]
-abbrlink: 6110
 ---
 
 strings类型及操作

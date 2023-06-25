@@ -5,7 +5,6 @@ date: 2015-12-16 22:22:22 +0800
 toc: true
 categories: [ python ]
 tags: [ python核心 ]
-abbrlink: 58127
 ---
 
 日期和时间是我们编程经常需要处理的事情，相比较其他语言，python中的日期和时间处理非常简洁。

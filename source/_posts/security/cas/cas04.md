@@ -6,7 +6,6 @@ toc: true
 categories: [网络安全]
 tags:
   - CAS
-abbrlink: 60619
 ---
 
 通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。

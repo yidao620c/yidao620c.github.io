@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - wireshark
-abbrlink: 60059
 ---
 
 wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。

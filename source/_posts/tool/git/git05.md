@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - git
-abbrlink: 48915
 ---
 
 这一篇会介绍git的一些常用技巧，开发中经常会遇到的问题，让我们感受git的强大之处。

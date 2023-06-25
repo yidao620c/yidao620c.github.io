@@ -5,7 +5,6 @@ date: 2016-05-26 10:02:42 +0800
 toc: true
 categories: [ python ]
 tags: [ python ]
-abbrlink: 16870
 ---
 
 你是否经常要在Windows 7或MAC OS X上面开发Python或Web应用程序，但是它们最后需要在linux上面来运行呢？

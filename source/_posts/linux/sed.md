@@ -5,7 +5,6 @@ date: 2016-09-20 22:22:22 +0800
 toc: true
 categories: [ linux ]
 tags: [ sed ]
-abbrlink: 37690
 ---
 
 在linux中通常要进行文本处理，sed是一个非常强大的文本处理命令工具。

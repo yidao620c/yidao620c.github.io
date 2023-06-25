@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 12880
 ---
 
 说起web service最近几年restful大行其道，大有取代传统soap web service的趋势，

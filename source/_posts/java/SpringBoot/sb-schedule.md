@@ -6,7 +6,6 @@ toc: true
 categories: [ java ]
 tags:
   - springboot
-abbrlink: 7172
 ---
 
 很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。

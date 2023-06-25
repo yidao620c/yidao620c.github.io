@@ -5,7 +5,6 @@ date: '2019-06-16 09:58:33 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 48355
 ---
 
 Python有着强大的表达式语法和函数特性，其中一个我的最爱便是装饰器。

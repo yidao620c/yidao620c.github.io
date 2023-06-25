@@ -6,7 +6,6 @@ toc: true
 categories: [ 网络安全 ]
 tags:
   - CAS
-abbrlink: 1019
 ---
 
 现在开始对CasServer进行二次开发，比如如何设置数据库连接，如何使用数据库的用户名和密码登录，

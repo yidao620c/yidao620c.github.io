@@ -3,7 +3,6 @@ title: 使用GitBook编写项目文档
 toc: true
 categories: [ 开发工具 ]
 tags: [gitbook]
-abbrlink: 61295
 date: 2017-11-30 12:16:53
 ---
 

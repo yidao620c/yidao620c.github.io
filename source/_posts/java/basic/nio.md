@@ -5,7 +5,6 @@ date: 2015-06-20 18:15:42 +0800
 toc: false
 categories: [ java ]
 tags: [ java ]
-abbrlink: 32455
 ---
 
 Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。

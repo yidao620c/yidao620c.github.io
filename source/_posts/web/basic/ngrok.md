@@ -6,7 +6,6 @@ toc: true
 categories: [ web ]
 tags:
   - ngrok
-abbrlink: 65249
 ---
 
 ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过公共的端口和外部建立一个安全的通道，

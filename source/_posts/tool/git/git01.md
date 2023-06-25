@@ -6,7 +6,6 @@ toc: true
 categories: [ 开发工具 ]
 tags:
   - git
-abbrlink: 59934
 ---
 
 很早就想些一篇关于git的文章了，这玩意儿实在好用，但是内容又比较多，

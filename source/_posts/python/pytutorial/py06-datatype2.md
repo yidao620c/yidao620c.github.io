@@ -5,7 +5,6 @@ date: '2019-06-06 17:22:35 +0800'
 toc: true
 categories: [ python ]
 tags: [ python教程 ]
-abbrlink: 26974
 ---
 
 继续上一篇的数据结构讲解，这篇讲解列表List（列表）和Tuple（元组）的使用方法。

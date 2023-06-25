@@ -5,7 +5,6 @@ date: '2018-09-02 10:24:40 +0800'
 toc: true
 categories: [ 中间件 ]
 tags: [ redis ]
-abbrlink: 26224
 ---
 
 Redis集群分两种模式，一种是Master-Slave模式，就是主从模式，一个master带多个slave，

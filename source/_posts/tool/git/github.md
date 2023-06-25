@@ -7,7 +7,6 @@ categories: [ 开发工具 ]
 tags:
   - git
   - github
-abbrlink: 7936
 ---
 
 GitHub用了这么久才发现其实上面也可以做很多好玩的东西，让我可以更加喜欢它了。

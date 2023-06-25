@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 17944
 ---
 
 有很多时候我们需要从多个网站爬取所需要的数据，比如我们想爬取多个网站的新闻，将其存储到数据库同一个表中。我们是不是要对每个网站都得去定义一个Spider类呢？

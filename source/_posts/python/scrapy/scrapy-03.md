@@ -5,7 +5,6 @@ comments: true
 toc: true
 categories: [ python ]
 tags: [ scrapy ]
-abbrlink: 52404
 ---
 
 Spider是爬虫框架的核心，爬取流程如下：
