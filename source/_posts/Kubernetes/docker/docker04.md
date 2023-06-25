@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点04 - Dockerfile
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 42100
 date: 2019-03-05 15:17:09
 ---
@@ -83,6 +83,7 @@ Dockerfile 中可以有多个 ENTRYPOINT 指令，但只有最后一个生效。
 CMD 或 docker run 之后的参数会被当做参数传递给 ENTRYPOINT。
 
 下面我们来看一个较为全面的 Dockerfile：
+
 ```
 # my centos dockerfile
 FROM centos
@@ -147,6 +148,7 @@ ENTRYPOINT ["/bin/echo", "Hello world"]
 当指令执行时，会直接调用 <command>，不会被 shell 解析。
 
 如果希望使用环境变量，照如下修改:
+
 ```
 ENV name Cloud Man  
 ENTRYPOINT ["/bin/sh", "-c", "echo Hello, $name"]
@@ -156,8 +158,8 @@ ENTRYPOINT ["/bin/sh", "-c", "echo Hello, $name"]
 
 1. 使用 RUN 指令安装应用和软件包，构建镜像。
 2. 如果 Docker 镜像的用途是运行应用程序或服务，比如运行一个 MySQL，
-应该优先使用 Exec 格式的 ENTRYPOINT 指令。CMD 可为 ENTRYPOINT 提供额外的默认参数，
-同时可利用 docker run 命令行替换默认参数。
+   应该优先使用 Exec 格式的 ENTRYPOINT 指令。CMD 可为 ENTRYPOINT 提供额外的默认参数，
+   同时可利用 docker run 命令行替换默认参数。
 3. 如果想为容器设置默认的启动命令，可使用 CMD 指令。用户可在 docker run 命令行中替换此默认命令。
 4. apt-get update 和 apt-get install 被放在一个 RUN 指令中执行，这样能够保证每次安装的是最新的包
 

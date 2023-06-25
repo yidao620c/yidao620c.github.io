@@ -3,7 +3,7 @@ title: SpringBoot系列 - Redis数据库
 date: 2017-07-30 12:21:58 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 61516

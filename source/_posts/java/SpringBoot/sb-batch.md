@@ -3,7 +3,7 @@ title: SpringBoot系列 - 批处理
 date: 2017-08-01 19:10:22 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 6509

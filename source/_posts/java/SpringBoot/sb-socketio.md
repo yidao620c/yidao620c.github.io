@@ -3,7 +3,7 @@ title: SpringBoot系列 - 集成SocketIO实时通信
 date: 2017-07-16 19:09:58 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 59332

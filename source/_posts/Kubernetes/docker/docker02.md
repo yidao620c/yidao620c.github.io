@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点02 - 架构详解
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 45614
 date: 2019-03-02 09:21:56
 ---

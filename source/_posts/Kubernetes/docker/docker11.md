@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点11 - 容器网络macvlan
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 30376
 date: 2019-03-16 15:22:38
 ---
@@ -29,6 +29,7 @@ ip link set enp0s3 promisc on
 ## 创建 macvlan 网络
 
 先看网卡配置：
+
 ```
 2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
     link/ether 08:00:27:78:b4:16 brd ff:ff:ff:ff:ff:ff
@@ -39,6 +40,7 @@ ip link set enp0s3 promisc on
 ```
 
 ip地址为192.168.1.21，为了不和这个IP冲突，我们需要在创建macvlan的时候，排除此IP，使用docker network命令创建：
+
 ```
 docker network create -d macvlan \
  --subnet=192.168.1.0/24 \
@@ -55,16 +57,19 @@ docker network create -d macvlan \
 在 host2 中也要执行相同的命令创建macvlan网络。
 
 在 host1 中运行容器 bbox1 并连接到 mac_net1，指定ip地址为192.168.1.10
+
 ```
 docker run -itd --name bbox1 --ip=192.168.1.10 --network mac_net1 busybox
 ```
 
 在 host2 中运行容器 bbox2 并连接到 mac_net1，指定ip地址为192.168.1.11
+
 ```
 docker run -itd --name bbox2 --ip=192.168.1.11 --network mac_net1 busybox
 ```
 
 验证 bbox1 和 bbox1 的连通性
+
 ```
 [root@host2 ~]# docker exec bbox2 ping 192.168.1.10
 PING 192.168.1.10 (192.168.1.10): 56 data bytes
@@ -73,6 +78,7 @@ PING 192.168.1.10 (192.168.1.10): 56 data bytes
 ```
 
 ping主机名：
+
 ```
 [root@host2 ~]# docker exec bbox2 ping -c 2 bbox1
 ping: bad address 'bbox1'

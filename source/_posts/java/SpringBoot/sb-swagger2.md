@@ -3,7 +3,7 @@ title: SpringBoot系列 - 集成Swagger2
 date: 2017-07-08 15:26:19 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 34284

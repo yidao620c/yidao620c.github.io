@@ -3,7 +3,7 @@ title: SpringBoot系列 - 定时任务
 date: 2017-07-12 10:59:25 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 7172

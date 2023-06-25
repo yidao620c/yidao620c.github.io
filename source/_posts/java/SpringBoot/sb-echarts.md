@@ -3,7 +3,7 @@ title: SpringBoot系列 - 集成Echarts导出图片
 date: 2017-08-19 15:17:28 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 11587

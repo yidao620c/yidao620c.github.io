@@ -3,7 +3,7 @@ title: SpringBoot系列 - 声明式事务
 date: 2017-07-26 15:55:36 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 61524

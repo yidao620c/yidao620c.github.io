@@ -3,7 +3,7 @@ title: SpringBoot系列 - 异步线程池
 date: 2017-07-20 12:56:22 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 22433

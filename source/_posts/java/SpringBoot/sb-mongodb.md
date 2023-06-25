@@ -3,7 +3,7 @@ title: SpringBoot系列 - 集成MongoDB
 date: 2017-07-04 12:25:38 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 13296

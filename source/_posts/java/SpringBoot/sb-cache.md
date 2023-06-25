@@ -3,7 +3,7 @@ title: SpringBoot系列 - 缓存
 date: 2017-07-28 20:12:33 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 27112

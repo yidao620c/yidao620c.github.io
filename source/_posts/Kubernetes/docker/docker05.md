@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点05 - Registry
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 3685
 date: 2019-03-07 12:07:09
 ---
@@ -14,7 +14,9 @@ date: 2019-03-07 12:07:09
 <!-- more -->
 
 ## 镜像命名
+
 其实就跟maven库管理一样，镜像名字由两部分组成：repository 和 tag：
+
 ```
 [image name] = [repository]:[tag]
 ```
@@ -56,6 +58,7 @@ Docker Hub 是 Docker 公司维护的公共 Registry。
 1\. 首先在 [Docker Hub](https://hub.docker.com/) 上面注册一个账号。
 
 2\. 在 Docker Host 上登录：
+
 ```
 docker login -u yidao620
 ```

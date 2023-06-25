@@ -1,8 +1,8 @@
 ---
 title: Docker安装常用软件
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 3896
 date: 2019-03-30 12:35:12
 ---
@@ -14,6 +14,7 @@ date: 2019-03-30 12:35:12
 这里演示如何在CentOS7上面通过Docker安装MySQL8版本。
 
 拉取镜像文件：
+
 ```
 docker pull mysql/mysql-server
 ```
@@ -26,9 +27,11 @@ docker run -d -p 13306:3306 --name mysql \
 -v /data/mysql/data:/var/lib/mysql \
 mysql/mysql-server
 ```
+
 <!-- more -->
 
 首先执行下面命令查看容器日志，找到MySql的root账户的密码：
+
 ```
 docker logs mysql
 
@@ -36,6 +39,7 @@ docker logs mysql
 ```
 
 看到类似上面那一行，复制一下密码。执行下面命令进入到容器中并连接MySQL：
+
 ```
 docker exec -it mysql bash
 mysql -uroot -p
@@ -48,6 +52,7 @@ alter user 'root'@'localhost' identified by 'vs_654321';
 ```
 
 修改完root密码后，可以使用下面代码切换到mysql数据库并查看用户信息：
+
 ```
 use mysql
 select user,host from user;

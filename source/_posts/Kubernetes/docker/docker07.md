@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点07 - 单主机网络
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 57288
 date: 2019-03-10 12:17:22
 ---
@@ -48,7 +48,8 @@ lo        Link encap:Local Loopback
 
 **host 网络**
 
-连接到 host 网络的容器共享 Docker host 的网络栈，容器的网络配置与 host 完全一样。可以通过 `--network=host` 指定使用 host 网络。
+连接到 host 网络的容器共享 Docker host 的网络栈，容器的网络配置与 host 完全一样。可以通过 `--network=host` 指定使用 host
+网络。
 
 ```bash
 [root@VM_22_2_centos docker]# docker run -it --network=host busybox
@@ -72,11 +73,13 @@ lo        Link encap:Local Loopback
 Docker 安装时会创建一个 命名为 docker0 的网桥。如果不指定--network，创建的容器默认都会挂到 docker0 上。
 
 比如我创建一个容器看看
+
 ```bash
 docker run --name httpd -d httpd
 ```
 
 然后看一下网络接口：
+
 ```bash
 [root@ecs-hw01 ~]# brctl show
 bridge name     bridge id           STP enabled	    interfaces
@@ -109,7 +112,8 @@ docker0         8000.024206a84de0   no              veth5c8e660
 可以把它们想象成由一根虚拟网线连接起来的一对网卡，网卡的一头（eth0@if146）在容器中，另一头（veth5c8e660）挂在网桥 docker0 上，
 其效果就是将 eth0@if146 也挂在了 docker0 上。
 
-我们还看到 eth0@if146 已经配置了 IP 172.17.0.2，为什么是这个网段呢？让我们通过 docker network inspect bridge 看一下 bridge 网络的配置信息:
+我们还看到 eth0@if146 已经配置了 IP 172.17.0.2，为什么是这个网段呢？让我们通过 docker network inspect bridge 看一下 bridge
+网络的配置信息:
 
 ```bash
 [root@ecs-hw01 ~]# docker network inspect bridge
@@ -154,6 +158,7 @@ afc81d275d293b5c978b3a57a71901a030874c4f86d4b61fb6f6bad2183b3c9a
 ```
 
 然后再看一下主机现在的网络：
+
 ```bash
 [root@VM_22_2_centos docker]# clear
 [root@VM_22_2_centos docker]# ip l
@@ -265,6 +270,7 @@ br-5e9a17690dea: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
 ```
 
 还能根据--ip指定静态ip地址：
+
 ```bash
 [root@VM_22_2_centos docker]# docker run -it --network my_net2 --ip 172.22.16.5 busybox
 / # ip a
@@ -288,6 +294,7 @@ br-5e9a17690dea: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
 如果不同时连着同一个网桥，就不能ping通了。比如httpd连的是docker0网桥，而busybox连接的是my_net2网络，那此时怎么办呢？
 
 答案就是为httpd容器添加my_net2网桥。
+
 ```bash
 docker network connect my_net2 33077e568886
 ```
@@ -367,6 +374,7 @@ docker run -d -it --name=web1 httpd
 ```
 
 然后创建 busybox 容器并通过 `--network=container:web1` 指定 jointed 容器为 web1：
+
 ```bash
 [root@VM_22_2_centos ~]# docker run -it --network=container:web1 busybox
 / # ip a
@@ -382,6 +390,7 @@ docker run -d -it --name=web1 httpd
 ```
 
 请注意 busybox 容器中的网络配置信息。下面我们查看一下 web1 的网络：
+
 ```bash
 root@f0c9d4aa4a88:/usr/local/apache2# ip a
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1

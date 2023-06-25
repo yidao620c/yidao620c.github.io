@@ -3,7 +3,7 @@ title: SpringBoot系列 - 实现RESTful接口
 date: 2017-07-05 12:10:37 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 38776

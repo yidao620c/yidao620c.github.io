@@ -3,7 +3,7 @@ title: SpringBoot系列 - 使用RestTemplate
 date: 2017-07-06 18:29:52 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 35668

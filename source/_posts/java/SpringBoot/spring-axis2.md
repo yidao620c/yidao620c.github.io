@@ -3,7 +3,7 @@ title: Spring集成Axis2
 date: 2017-09-06 15:22:10 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - spring
   - axis2

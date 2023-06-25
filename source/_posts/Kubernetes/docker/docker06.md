@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点06 - 运行容器
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 30454
 date: 2019-03-09 09:16:33
 ---
@@ -21,9 +21,11 @@ docker run -d --name "node001" httpd
 docker ps
 docker container ls
 ```
+
 <!-- more -->
 
 返回结果：
+
 ```bash
 [root@VM_22_2_centos ~]# docker ps
 CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
@@ -33,6 +35,7 @@ ef4e11f77711        my-image            "/bin/bash"              2 days ago     
 ```
 
 加一个`-a`选项可把所有容器都列出来：
+
 ```bash
 docker ps -a
 ```
@@ -49,12 +52,14 @@ docker run -d httpd
 如果不指定，docker 会自动为容器分配名字。
 
 对于容器的后续操作，我们需要通过 "长ID"、"短ID" 或者 "名称" 来指定要操作的容器。比如下面停止一个容器：
+
 ```bash
 docker stop 3d5ea3e73344
 ```
 
 查看容器启动时候执行的所有命令，`docker history` 会显示镜像的构建历史，也就是 Dockerfile 的执行过程。
 注意前面讲的容器是一个层次结构，从底部向上面一层一层构建的：
+
 ```bash
 docker history httpd
 ```
@@ -75,11 +80,13 @@ docker history httpd
 我们经常需要进到容器里去做一些工作，比如查看日志、调试、启动其他进程等。有两种方法进入容器：attach 和 exec。
 
 attach 方式：
+
 ```bash
 docker attach long_id
 ```
 
 exec方式：
+
 ```bash
 docker exec -it <container> bash|sh
 ```
@@ -91,6 +98,7 @@ attach 与 exec 主要区别如下:
 3. 如果想直接在终端中查看启动命令的输出，用attach；其他情况使用 exec。
 
 如果只是为了查看启动命令的输出，可以使用 docker logs 命令：
+
 ```bash
 docker logs -f 3d5ea3e73344
 ```
@@ -104,6 +112,7 @@ docker top busybox
 ```
 
 **查看容器端口映射**
+
 ```bash
 docker port busybox
 ```
@@ -132,6 +141,7 @@ docker run -it busybox
 ## 容器常用操作
 
 启动、停止、重启容器：
+
 ```bash
 docker stop boring_bardeen
 docker start boring_bardeen
@@ -146,6 +156,7 @@ docker run -d --restart=always httpd
 ```
 
 暂停容器：
+
 ```bash
 docker pause boring_bardeen
 ```
@@ -153,6 +164,7 @@ docker pause boring_bardeen
 ![](https://xnstatic-1253397658.file.myqcloud.com/docker20.png)
 
 处于暂停状态的容器不会占用 CPU 资源，直到通过 docker unpause 恢复运行：
+
 ```bash
 docker unpause boring_bardeen
 ```
@@ -171,6 +183,7 @@ docker rm de97841fbc9e
 ```
 
 docker rm 一次可以指定多个容器，如果希望批量删除所有已经退出的容器，可以执行如下命令：
+
 ```bash
 docker rm -v $(docker ps -aq -f status=exited)
 ```
@@ -191,6 +204,7 @@ docker rm -v $(docker ps -aq -f status=exited)
 ### docker commit
 
 可以通过 `docker commit` 将一个运行中的容器变成一个新的镜像，命令如下：
+
 ```bash
 docker commit <containner-id> image-name
 ```
@@ -250,6 +264,7 @@ docker history image-name
 2. --memory-swap：设置 `内存+swap` 的使用限额。
 
 当我们执行如下命令：
+
 ```bash
 docker run -m 200M --memory-swap=300M httpd
 ```
@@ -310,6 +325,7 @@ docker run -it --name container_B --blkio-weight 300 centos
 4. --device-write-iops，限制写某个设备的 iops。
 
 下面这个例子限制容器写 /dev/sda 的速率为 30 MB/s ：
+
 ```
 docker run -it --device-write-bps /dev/sda:30MB centos
 ```

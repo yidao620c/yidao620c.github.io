@@ -1,8 +1,8 @@
 ---
 title: Docker每天学一点08 - 存储卷
 toc: true
-categories: [Kubernetes]
-tags: [docker]
+categories: [ kubernetes ]
+tags: [ docker ]
 abbrlink: 46558
 date: 2019-03-11 10:37:55
 ---
@@ -21,7 +21,8 @@ Docker 为容器提供了两种存放数据的资源：
 
 ![](https://xnstatic-1253397658.file.myqcloud.com/docker33.png)
 
-容器由最上面一个可写的容器层，以及若干只读的镜像层组成，容器的数据就存放在这些层中。这样的分层结构最大的特性是 Copy-on-Write：
+容器由最上面一个可写的容器层，以及若干只读的镜像层组成，容器的数据就存放在这些层中。这样的分层结构最大的特性是
+Copy-on-Write：
 
 1. 新数据会直接存放在最上面的容器层。
 1. 修改现有数据会先从镜像层将数据复制到容器层，修改后的数据直接保存在容器层中，镜像层保持不变。
@@ -114,9 +115,11 @@ updated index page
 host 中的修改确实生效了，bind mount 可以让 host 与容器共享数据。这在管理上是非常方便的。
 
 除了 bind mount 目录，还可以单独指定一个文件。
+
 ```
 docker run -d -p 80:80 -v ~/htdocs/index.html:/usr/local/apache2/htdocs/new_index.html httpd
 ```
+
 使用 bind mount 单个文件的场景是：只需要向容器添加文件，不希望覆盖整个目录。
 在上面的例子中，我们将 html 文件加到 apache 中，同时也保留了容器原有的数据。
 使用单一文件有一点要注意：host 中的源文件必须要存在，不然会当作一个新目录 bind mount 给容器。
@@ -156,7 +159,8 @@ docker managed volume 的创建过程：
 
 ## volume container
 
-volume container（数据卷容器） 是专门为其他容器提供 volume 的容器。它提供的卷可以是 bind mount，也可以是 docker managed volume。
+volume container（数据卷容器） 是专门为其他容器提供 volume 的容器。它提供的卷可以是 bind mount，也可以是 docker managed
+volume。
 
 接下来我创建一个volume container试试看：
 
@@ -206,7 +210,7 @@ this content is from a volume containner
 总结一下 volume container 的特点：
 
 1. 与 bind mount 相比，不必为每一个容器指定 host path，所有 path 都在 volume container 中定义好了，
-容器只需与 volume container 关联，实现了容器与 host 的解耦。
+   容器只需与 volume container 关联，实现了容器与 host 的解耦。
 1. 使用 volume container 的容器其 mount point 是一致的，有利于配置的规范和标准化，但也带来一定的局限，使用时需要综合考虑。
 
 ## data-packed volume container

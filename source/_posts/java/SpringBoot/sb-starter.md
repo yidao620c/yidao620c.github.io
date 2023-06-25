@@ -3,7 +3,7 @@ title: SpringBoot系列 - 自己写starter
 date: 2017-07-22 16:22:19 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 398

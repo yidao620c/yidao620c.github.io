@@ -3,7 +3,7 @@ title: SpringBoot系列 - 集成MyBatis
 date: 2017-07-02 10:23:53 +0800
 comments: true
 toc: true
-categories: [ Java ]
+categories: [ java ]
 tags:
   - springboot
 abbrlink: 2255
