@@ -3,7 +3,7 @@ title: 下一代SpringCloud技术栈
 date: 2020-02-10 10:15:22 +0800
 comments: true
 toc: true
-categories: [Java]
+categories: [ java ]
 tags:
   - springcloud
 ---
