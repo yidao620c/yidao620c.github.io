@@ -3,7 +3,7 @@ title: 常见互联网高可用架构
 date: 2017-06-30 12:36:25 +0800
 comments: true
 toc: true
-categories: [ 我的日记 ]
+categories: [ 架构设计 ]
 tags: [ 高可用 ]
 ---
 
