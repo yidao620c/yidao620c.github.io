@@ -4,8 +4,7 @@ title: Jenkins持续集成 - 管道详解
 date: 2017-03-22 09:32:16 +0800
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - jenkins
+tags: [ jenkins ]
 ---
 
 前面一篇介绍了Jenkins的入门安装和简单演示，这篇讲解最核心的Pipeline部分。

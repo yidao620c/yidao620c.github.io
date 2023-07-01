@@ -4,8 +4,7 @@ date: 2015-03-22 16:22:15 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - markdown
+tags: [ markdown ]
 ---
 
 Markdown 是一种轻量级标记语言。它允许人们"使用易读易写的纯文本格式编写文档，

@@ -4,8 +4,7 @@ date: 2017-02-06 21:32:30 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - git
+tags: [ git ]
 ---
 
 很早就想些一篇关于git的文章了，这玩意儿实在好用，但是内容又比较多，

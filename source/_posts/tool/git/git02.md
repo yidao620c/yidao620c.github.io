@@ -4,8 +4,7 @@ date: 2017-02-07 22:08:25 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - git
+tags: [ git ]
 ---
 
 终于要介绍git的杀手级特性分支了，这也是大部分人使用git的原因。

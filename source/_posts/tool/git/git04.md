@@ -4,8 +4,7 @@ date: 2017-02-08 23:58:12 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - git
+tags: [ git ]
 ---
 
 在实际使用git的过程中，我发现最常遇到的就是撤销，git里面有reset、checkout、revert来帮助我们撤回修改。

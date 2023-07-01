@@ -5,8 +5,7 @@ date: 2015-05-22 13:53:45 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - yaml
+tags: [ yaml ]
 ---
 
 YAML是一个可读性高，用来表达资料序列的格式。YAML参考了其他多种语言，包括：XML、C语言、Python、Perl以及电子邮件格式RFC2822。
@@ -25,37 +24,37 @@ YAML是一个可读性高，用来表达资料序列的格式。YAML参考了其
 
 ---
 # 这一行是注释部分，不会被解析
-receipt:     Oz-Ware Purchase Invoice
-date:        2007-08-06
+receipt: Oz-Ware Purchase Invoice
+date: 2007-08-06
 customer:
-    given:   Dorothy
-    family:  Gale
+  given: Dorothy
+  family: Gale
 
 items:
-    - part_no:   A4786
-      descrip:   Water Bucket (Filled)
-      price:     1.47
-      quantity:  4
+  - part_no: A4786
+    descrip: Water Bucket (Filled)
+    price: 1.47
+    quantity: 4
 
-    - part_no:   E1628
-      descrip:   High Heeled "Ruby" Slippers
-      price:     100.27
-      quantity:  1
+  - part_no: E1628
+    descrip: High Heeled "Ruby" Slippers
+    price: 100.27
+    quantity: 1
 
-bill-to:  &id001
-    street: |
-            123 Tornado Alley
-            Suite 16
-    city:   East Westville
-    state:  KS
+bill-to: &id001
+  street: |
+    123 Tornado Alley
+    Suite 16
+  city: East Westville
+  state: KS
 
-ship-to:  *id001
+ship-to: *id001
 
-specialDelivery:  >
-    Follow the Yellow Brick
-    Road to the Emerald City.
-    Pay no attention to the
-    man behind the curtain.
+specialDelivery: >
+  Follow the Yellow Brick
+  Road to the Emerald City.
+  Pay no attention to the
+  man behind the curtain.
 ```
 
 ### 基本技巧
@@ -109,23 +108,23 @@ node5:
 ```yaml
 
 ---
-- step:  &id001                    # 定义锚点标记&id001
-    instrument:      Lasik 2000
-    pulseEnergy:     5.4
-    pulseDuration:   12
-    repetition:      1000
-    spotSize:        1mm
+- step: &id001                    # 定义锚点标记&id001
+    instrument: Lasik 2000
+    pulseEnergy: 5.4
+    pulseDuration: 12
+    repetition: 1000
+    spotSize: 1mm
 
 - step:
-     <<: *id001                  # 合并键值：使用在锚点标签定义的內容
-     spotSize:       2mm         # 覆盖"spotSize"键值
+    <<: *id001                  # 合并键值：使用在锚点标签定义的內容
+    spotSize: 2mm         # 覆盖"spotSize"键值
 
 - step:
-     <<: *id001                  # 合并键值：使用在锚点标签定义的內容
-     pulseEnergy:    500.0       # 覆盖键值
-     alert: >                    # 加入其他键值
-           warn patient of
-           audible pop
+    <<: *id001                  # 合并键值：使用在锚点标签定义的內容
+    pulseEnergy: 500.0       # 覆盖键值
+    alert: >                    # 加入其他键值
+      warn patient of
+      audible pop
 ```
 
 #### 需要换行书写的字符串，两种方式

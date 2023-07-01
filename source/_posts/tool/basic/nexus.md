@@ -4,8 +4,7 @@ date: 2017-09-02 22:10:25 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - nexus
+tags: [ nexus ]
 ---
 
 私服是指私有服务器，是架设在局域网的一种特殊的远程仓库，目的是代理远程仓库及部署第三方构建。
@@ -165,6 +164,7 @@ Nexus提供了一系列可配置的调度任务来方便用户管理系统。用
 安装和配置好之后，在开发中如何使用呢。可在maven的默认配置`settings.xml`中修改如下：
 
 ```xml
+
 <servers>
     <server>
         <id>releases</id>
@@ -179,48 +179,49 @@ Nexus提供了一系列可配置的调度任务来方便用户管理系统。用
 </servers>
 
 <mirrors>
-    <mirror>
-        <id>nexus</id>
-        <mirrorOf>*</mirrorOf>
-        <url>http://123.207.66.156:8081/repository/maven-public/</url>
-    </mirror>
+<mirror>
+    <id>nexus</id>
+    <mirrorOf>*</mirrorOf>
+    <url>http://123.207.66.156:8081/repository/maven-public/</url>
+</mirror>
 </mirrors>
 
 <profiles>
-    <profile>  
-      <id>dev</id>
-      <repositories>
+<profile>
+    <id>dev</id>
+    <repositories>
         <repository>
-          <id>Nexus</id>
-          <url>http://123.207.66.156:8081/repository/maven-public/</url>
-          <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>true</enabled>
-            <updatePolicy>always</updatePolicy>
-          </snapshots>
+            <id>Nexus</id>
+            <url>http://123.207.66.156:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
         </repository>
-      </repositories>
-      <activation>
-        <activeByDefault>true</activeByDefault>      
+    </repositories>
+    <activation>
+        <activeByDefault>true</activeByDefault>
         <jdk>1.8</jdk>
-      </activation>
-      <properties>
+    </activation>
+    <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
-      </properties>
-    </profile>
+    </properties>
+</profile>
 </profiles>
 <activeProfiles>
-    <activeProfile>dev</activeProfile>
+<activeProfile>dev</activeProfile>
 </activeProfiles>
 ```
 
 如果要发布自己的jar到私服，就需要修改工程的`pom.xml`，添加如下内容，否则什么都不用做：
 
 ```xml
+
 <distributionManagement>
     <repository>
         <id>releases</id>
@@ -273,6 +274,7 @@ mvn deploy:deploy-file \
 pom.xml里面配置多个profile，其中一个默认的：
 
 ```xml
+
 <build>
     <plugins>
         <plugin>
@@ -303,41 +305,41 @@ pom.xml里面配置多个profile，其中一个默认的：
 </build>
 
 <profiles>
-    <profile>
-        <id>default</id>
-        <activation>
-            <activeByDefault>true</activeByDefault>
-        </activation>
-        <properties>
-            <jar.source>1.8</jar.source>
-            <jar.target>1.8</jar.target>
-        </properties>
-    </profile>
-    <profile>
-        <id>jdk16</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                            <configuration>
-                                <classifier>jdk16</classifier>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
-        <properties>
-            <jar.source>1.6</jar.source>
-            <jar.target>1.6</jar.target>
-        </properties>
-    </profile>
+<profile>
+    <id>default</id>
+    <activation>
+        <activeByDefault>true</activeByDefault>
+    </activation>
+    <properties>
+        <jar.source>1.8</jar.source>
+        <jar.target>1.8</jar.target>
+    </properties>
+</profile>
+<profile>
+    <id>jdk16</id>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>jdk16</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <properties>
+        <jar.source>1.6</jar.source>
+        <jar.target>1.6</jar.target>
+    </properties>
+</profile>
 </profiles>
 ```
 
@@ -356,6 +358,7 @@ mvn clean && mvn deploy -P jdk16
 项目中引用的时候可通过指定classifier：
 
 ```xml
+
 <dependency>
     <groupId>com.enzhico</groupId>
     <artifactId>adm-traffic-common-model</artifactId>
@@ -369,6 +372,7 @@ mvn clean && mvn deploy -P jdk16
 如果你还想发布源码和javadoc，那么需要使用maven插件，我把插件配置列出来：
 
 ```xml
+
 <build>
     <plugins>
         <plugin>

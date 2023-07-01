@@ -4,9 +4,7 @@ date: '2018-06-03 15:12:09 +0800'
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - idea
-  - maven
+tags: [ idea, maven ]
 ---
 
 有时候在IDEA里面直接点击查看源码，报：cannot download sources

@@ -4,8 +4,7 @@ date: 2020-04-12 23:06:23 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - micrometer
+tags: [ micrometer ]
 ---
 
 通常我们需要在生产环境中监控机器的性能指标和业务数据指标，一般我们叫这样的操作为"埋点"。

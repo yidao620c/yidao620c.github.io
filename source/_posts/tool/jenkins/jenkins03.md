@@ -4,8 +4,7 @@ title: Jenkins持续集成 - 使用案例
 date: 2017-03-25 09:32:16 +0800
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - jenkins
+tags: [ jenkins ]
 ---
 
 这一篇我通过两个实际的真实例子来演示Jenkins常见使用案例。

@@ -4,8 +4,7 @@ date: '2020-03-12 20:20:05 +0800'
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - screw
+tags: [ screw ]
 ---
 
 在企业级开发中、我们经常会有编写数据库表结构文档的时间付出，如果数据库表结构更新了还得手动更新维护到文档中，很是繁琐。
@@ -30,6 +29,7 @@ tags:
 ### 引入依赖
 
 ```xml
+
 <dependencies>
     <!-- screw核心 -->
     <dependency>
@@ -130,6 +130,7 @@ public class BuildDatabaseDoc {
 ### maven插件方式
 
 ```xml
+
 <build>
     <plugins>
         <plugin>

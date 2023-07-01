@@ -4,8 +4,7 @@ date: '2018-09-17 20:22:10 +0800'
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - maven
+tags: [ maven ]
 ---
 
 本地生成预览，修改父模块的pom.xml:
@@ -75,9 +74,9 @@ mvn clean && mvn site:site && mvn site:stage
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    id="WebApp_ID" version="3.0">
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID" version="3.0">
     <display-name>security sdk</display-name>
     <servlet>
         <servlet-name>webdav</servlet-name>
@@ -278,113 +277,113 @@ mvn clean && mvn site:site && mvn site:stage
                     <dependencies>
                         <!--
                         <dependency><!-- add support for ssh/scp -->
-                            <groupId>org.apache.maven.wagon</groupId>
-                            <artifactId>wagon-ssh</artifactId>
-                            <version>3.3.2</version>
-                        </dependency>
-                        -->
-                        <dependency>
-                            <groupId>org.apache.maven.wagon</groupId>
-                            <artifactId>wagon-webdav-jackrabbit</artifactId>
-                            <version>3.2.0</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.0.0</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <failOnError>false</failOnError>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <id>default</id>
-                        <reports>
-                            <!--<report>javadoc</report>-->
-                        </reports>
-                        <configuration>
-                            <aggregate>true</aggregate>
-                        </configuration>
-                    </reportSet>
-                    <reportSet><!-- aggregate reportSet, to define in poms having modules -->
-                        <id>aggregate</id>
-                        <inherited>false</inherited><!-- don't run aggregate in child modules -->
-                        <reports>
-                            <report>aggregate</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
+                        <groupId>org.apache.maven.wagon</groupId>
+                        <artifactId>wagon-ssh</artifactId>
+                        <version>3.3.2</version>
+                    </dependency>
+                    -->
+                    <dependency>
+                        <groupId>org.apache.maven.wagon</groupId>
+                        <artifactId>wagon-webdav-jackrabbit</artifactId>
+                        <version>3.2.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <configuration>
-                    <customBundle>${project.basedir}/src/site/custom/project-info-reports.properties</customBundle>
-                </configuration>
-                <reportSets>
-                    <reportSet>
-                        <reports><!-- select reports -->
-                            <report>index</report>
-                            <report>summary</report>
-                            <report>dependency-info</report>
-                            <report>dependency-management</report>
-                            <report>modules</report>
-                            <report>plugin-management</report>
-                            <report>team</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
+                <version>3.0.0</version>
             </plugin>
         </plugins>
-    </reporting>
+    </pluginManagement>
+</build>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshot</id>
-            <name>Snapshot</name>
-            <url>http://xxxxxxx
-            </url>
-        </snapshotRepository>
+<reporting>
+<plugins>
+    <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+            <failOnError>false</failOnError>
+        </configuration>
+        <reportSets>
+            <reportSet>
+                <id>default</id>
+                <reports>
+                    <!--<report>javadoc</report>-->
+                </reports>
+                <configuration>
+                    <aggregate>true</aggregate>
+                </configuration>
+            </reportSet>
+            <reportSet><!-- aggregate reportSet, to define in poms having modules -->
+                <id>aggregate</id>
+                <inherited>false</inherited><!-- don't run aggregate in child modules -->
+                <reports>
+                    <report>aggregate</report>
+                </reports>
+            </reportSet>
+        </reportSets>
+    </plugin>
+    <plugin>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <configuration>
+            <customBundle>${project.basedir}/src/site/custom/project-info-reports.properties</customBundle>
+        </configuration>
+        <reportSets>
+            <reportSet>
+                <reports><!-- select reports -->
+                    <report>index</report>
+                    <report>summary</report>
+                    <report>dependency-info</report>
+                    <report>dependency-management</report>
+                    <report>modules</report>
+                    <report>plugin-management</report>
+                    <report>team</report>
+                </reports>
+            </reportSet>
+        </reportSets>
+    </plugin>
+</plugins>
+</reporting>
 
-        <!--<site>-->
-        <!--<id>${project.artifactId}-site</id>-->
-        <!--<url>file://./</url>-->
-        <!--</site>-->
-        <!--
-        <site>
-            <id>xx.xncoding.com</id>
-            <url>scp://xx.xncoding.com/data/tomcat/webapps/xx/</url>
-        </site>
-        -->
-        <site>
-            <id>xx.xncoding.com</id>
-            <url>dav:https://xx.xncoding.com/security/webdav/</url>
-        </site>
-    </distributionManagement>
+<distributionManagement>
+<snapshotRepository>
+    <id>snapshot</id>
+    <name>Snapshot</name>
+    <url>http://xxxxxxx
+    </url>
+</snapshotRepository>
 
-    <developers>
-        <developer>
-            <id>xn</id>
-            <name>XN</name>
-            <email>xx</email>
-            <url>http://www.xncoding.com</url>
-            <organization>XX</organization>
-            <organizationUrl>http://xx.com</organizationUrl>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
-</project>
+<!--<site>-->
+<!--<id>${project.artifactId}-site</id>-->
+<!--<url>file://./</url>-->
+<!--</site>-->
+<!--
+<site>
+    <id>xx.xncoding.com</id>
+    <url>scp://xx.xncoding.com/data/tomcat/webapps/xx/</url>
+</site>
+-->
+<site>
+    <id>xx.xncoding.com</id>
+    <url>dav:https://xx.xncoding.com/security/webdav/</url>
+</site>
+</distributionManagement>
+
+<developers>
+<developer>
+    <id>xn</id>
+    <name>XN</name>
+    <email>xx</email>
+    <url>http://www.xncoding.com</url>
+    <organization>XX</organization>
+    <organizationUrl>http://xx.com</organizationUrl>
+    <roles>
+        <role>architect</role>
+        <role>developer</role>
+    </roles>
+</developer>
+</developers>
+        </project>
 ```
 
 然后就是site.xml

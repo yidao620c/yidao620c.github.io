@@ -4,9 +4,7 @@ title: GitHub的一些好玩的技巧
 date: 2017-02-09 09:18:01 +0800
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - git
-  - github
+tags: [ git, github ]
 ---
 
 GitHub用了这么久才发现其实上面也可以做很多好玩的东西，让我可以更加喜欢它了。

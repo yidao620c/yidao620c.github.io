@@ -4,8 +4,7 @@ title: Jenkins持续集成 - 安装配置
 date: 2017-03-20 12:55:12 +0800
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - jenkins
+tags: [ jenkins ]
 ---
 
 Jenkins是一个用Java编写的开源的持续集成工具，前身是Hudson项目。

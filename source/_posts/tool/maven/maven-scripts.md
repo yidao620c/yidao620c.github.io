@@ -4,8 +4,7 @@ date: 2020-03-16 21:30:22 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - maven
+tags: [ maven ]
 ---
 
 本地开发联调的时候需要将代码快速更新至开发环境验证效果，无需走冗长的流水线发布流程，直接通过maven插件快速部署。
@@ -30,6 +29,7 @@ paas ALL=(root) NOPASSWD: ALL
 下面的配置演示1个数据节点配置，如果是3节点，则可以复制多个`<execution>`节点，在每个节点中替换一下主机IP即可。
 
 ```xml
+
 <plugin>
     <inherited>false</inherited>
     <groupId>org.apache.maven.plugin</groupId>
@@ -44,16 +44,16 @@ paas ALL=(root) NOPASSWD: ALL
             </goals>
             <configuration>
                 <target name="scp-ssh" description="copy to server">
-                    <echo message="Remember to fill empty fields..." />
+                    <echo message="Remember to fill empty fields..."/>
                     <!-- file to be transferred-->
                     <scp trust="true" failonerror="true" verbose="off" sftp="true"
-                        file="${project.build.directory}/${project.build.finalName}.jar"
-                        todir="paas:Image0@Lalla123@10.10.10.10:/tmp/scripts/" />
+                         file="${project.build.directory}/${project.build.finalName}.jar"
+                         todir="paas:Image0@Lalla123@10.10.10.10:/tmp/scripts/"/>
                     <sshexec trust="true" failonerror="true"
-                        host="10.10.10.10" username="paas" password="Image0@Lalla123"
-                        command="/tmp/scripts/${project.build.finalName}.sh" timeout="120000" />
+                             host="10.10.10.10" username="paas" password="Image0@Lalla123"
+                             command="/tmp/scripts/${project.build.finalName}.sh" timeout="120000"/>
                     <taskdef name="scp" classname="org.apache.tools.ant.taskdefs.optional.ssh.Scp">
-                        <classpath refid="maven.plugin.classpath" />
+                        <classpath refid="maven.plugin.classpath"/>
                     </taskdef>
                 </target>
             </configuration>

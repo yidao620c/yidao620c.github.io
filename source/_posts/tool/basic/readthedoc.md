@@ -4,9 +4,7 @@ date: 2017-01-22 20:16:09 +0800
 comments: true
 toc: true
 categories: [ 开发工具 ]
-tags:
-  - sphinx
-  - readthedocs
+tags: [ sphinx, readthedocs ]
 ---
 
 [Read the Docs](https://readthedocs.org/)是一个在线文档托管服务，
@@ -139,8 +137,9 @@ pip install recommonmark
 
 ```python
 from recommonmark.parser import CommonMarkParser
+
 source_parsers = {
-    '.md': CommonMarkParser,
+   '.md': CommonMarkParser,
 }
 source_suffix = ['.rst', '.md']
 ```
@@ -154,13 +153,14 @@ source_suffix = ['.rst', '.md']
 import recommonmark
 from recommonmark.transform import AutoStructify
 
+
 # At the bottom of conf.py
 def setup(app):
-    app.add_config_value('recommonmark_config', {
-            'url_resolver': lambda url: github_doc_root + url,
-            'auto_toc_tree_section': 'Contents',
-            }, True)
-    app.add_transform(AutoStructify)
+   app.add_config_value('recommonmark_config', {
+      'url_resolver': lambda url: github_doc_root + url,
+      'auto_toc_tree_section': 'Contents',
+   }, True)
+   app.add_transform(AutoStructify)
 ```
 
 网上有个详细配置: <https://github.com/rtfd/recommonmark/blob/master/docs/conf.py>
@@ -321,13 +321,13 @@ done
 解决办法，在`conf.py`中添加:
 
 ```python
-latex_elements={# The paper size ('letterpaper' or 'a4paper').
-'papersize':'a4paper',# The font size ('10pt', '11pt' or '12pt').
-'pointsize':'12pt','classoptions':',oneside','babel':'',#必須
-'inputenc':'',#必須
-'utf8extra':'',#必須
-# Additional stuff for the LaTeX preamble.
-'preamble': r"""
+latex_elements = {  # The paper size ('letterpaper' or 'a4paper').
+   'papersize': 'a4paper',  # The font size ('10pt', '11pt' or '12pt').
+   'pointsize': '12pt', 'classoptions': ',oneside', 'babel': '',  # 必須
+   'inputenc': '',  # 必須
+   'utf8extra': '',  # 必須
+   # Additional stuff for the LaTeX preamble.
+   'preamble': r"""
 \usepackage{xeCJK}
 \usepackage{indentfirst}
 \setlength{\parindent}{2em}
@@ -356,9 +356,11 @@ latex_elements={# The paper size ('letterpaper' or 'a4paper').
 import sphinx.environment
 from docutils.utils import get_source_line
 
+
 def _warn_node(self, msg, node, **kwargs):
-    if not msg.startswith('nonlocal image URI found:'):
-        self._warnfunc(msg, '%s:%s' % get_source_line(node), **kwargs)
+   if not msg.startswith('nonlocal image URI found:'):
+      self._warnfunc(msg, '%s:%s' % get_source_line(node), **kwargs)
+
 
 sphinx.environment.BuildEnvironment.warn_node = _warn_node
 ```
