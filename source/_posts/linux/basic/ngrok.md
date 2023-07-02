@@ -3,7 +3,7 @@ title: CentOS7搭建ngrok服务器
 date: 2017-12-29 09:48:19 +0800
 comments: true
 toc: true
-categories: [ web ]
+categories: [ linux ]
 tags:
   - ngrok
 ---
