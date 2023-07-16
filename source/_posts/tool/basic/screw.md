@@ -1,5 +1,5 @@
 ---
-title: 数据库文档生成工具
+title: 数据库文档生成工具screw
 date: '2020-03-12 20:20:05 +0800'
 comments: true
 toc: true
@@ -11,6 +11,7 @@ tags: [ screw ]
 无意之间发现了github上面有个人写了一个小工具专门来做这个事情，名字叫screw（螺丝刀），用了下很不错。这里特意记录一下。
 
 工具的github地址：<https://github.com/pingfangushi/screw>
+
 <!--more-->
 
 ## 特点
