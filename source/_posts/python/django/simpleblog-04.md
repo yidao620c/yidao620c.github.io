@@ -229,21 +229,22 @@ HTML页面只识别HTML标签，那么怎样让生成动态的内容呢？答案
 包括了判断、循环、管道等语法。我们已经获取了文章的列表了，那么可以使用for循环来生成相应的HTML页面：
 
 ```html
+
 <html>
 <head>
     <title>Django Girls Blog</title>
 </head>
 <body>
-    <div>
-        <h1><a href="/">Django Girls Blog</a></h1>
-    </div>
-    @% for post in posts %@
-    <div>
-        <p>published: @@ post.published_date @@</p>
-            <h1><a href="">@@ post.title @@</a></h1>
-            <p>@@ post.text|linebreaks @@</p>
-    </div>
-    @% endfor %@
+<div>
+    <h1><a href="/">Django Girls Blog</a></h1>
+</div>
+@% for post in posts %@
+<div>
+    <p>published: @@ post.published_date @@</p>
+    <h1><a href="">@@ post.title @@</a></h1>
+    <p>@@ post.text|linebreaks @@</p>
+</div>
+@% endfor %@
 </body>
 </html>
 ```

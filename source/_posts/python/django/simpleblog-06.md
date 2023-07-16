@@ -28,30 +28,30 @@ tags: [ django ]
 @% load staticfiles %@
 <html>
 <head>
-<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<link href="http://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="@% static 'css/blog.css' %@">
-<title>Django Girls Blog</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <link href="http://fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="@% static 'css/blog.css' %@">
+    <title>Django Girls Blog</title>
 </head>
 <body>
-    <div class="page-header">
-        <h1><a href="/">Django Girls Blog</a></h1>
-    </div>
-    <div class="content">
-        <div class="row">
-            <div class="col-md-8">
-                @% for post in posts %@
-                    <div class="post">
-                        <h1><a href="">@@ post.title @@</a></h1>
-                        <p>published: @@ post.published_date @@</p>
-                        <p>@@ post.text|linebreaks @@</p>
-                    </div>
-                @% endfor %@
+<div class="page-header">
+    <h1><a href="/">Django Girls Blog</a></h1>
+</div>
+<div class="content">
+    <div class="row">
+        <div class="col-md-8">
+            @% for post in posts %@
+            <div class="post">
+                <h1><a href="">@@ post.title @@</a></h1>
+                <p>published: @@ post.published_date @@</p>
+                <p>@@ post.text|linebreaks @@</p>
             </div>
+            @% endfor %@
         </div>
     </div>
+</div>
 </body>
 </html>
 ```

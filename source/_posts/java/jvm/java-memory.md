@@ -5,7 +5,7 @@ date: 2015-05-05 00:42:11 +0800
 comments: true
 toc: true
 categories: [ java ]
-tags: [ java ]
+tags: [ java, jvm ]
 ---
 
 Java与C++之间有一堵由内存动态分配和垃圾收集技术所围成的高墙，墙外面的人想进去，墙里面的人却想出来。
