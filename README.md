@@ -10,6 +10,7 @@
 
 ### 图片地址
 
+https://xnstatic-1253397658.file.myqcloud.com/xxx.png
 
 ### 发布
 ```
