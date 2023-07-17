@@ -8,13 +8,16 @@
 
 使用gitalk省事多了
 
+### 图片地址
+
+
 ### 发布
 ```
 hexo clean && hexo g && hexo d
 ```
 
 ### 更新索引
-先登录algolia网站，找到blogindex，在manage里面clear所有的索引数据库。然后更新：
+先使用google账号单点登录algolia网站，DataSource->Indices->blogindex，在manage里面clear所有的索引数据库。然后更新：
 ```
 hexo algolia
 ```
