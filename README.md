@@ -17,12 +17,6 @@ https://xnstatic-1253397658.file.myqcloud.com/xxx.png
 hexo clean && hexo g && hexo d
 ```
 
-### 更新索引
-先使用google账号单点登录algolia网站，DataSource->Indices->blogindex，在manage里面clear所有的索引数据库。然后更新：
-```
-hexo algolia
-```
-
 ## 🔖 愿景
 
 计划在2023年开源两套自己的快速开发平台框架：柠檬树（LemonTree）、北极星（NorthStar）。敬请期待...
