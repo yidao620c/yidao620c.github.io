@@ -800,41 +800,6 @@ return '<pre><code class="line-numbers language-'
 Gitalk是一个基于 Github Issue 和 Preact 开发的评论插件，详情Demo可见：https://gitalk.github.io/。
 使用方法超级简单，按照官网文档配置一下就OK。<https://theme-next.org/docs/third-party-services/comments>
 
-## FAQ
-
-* 遇到有大括号的代码块，如果多行的不用管，如果单行的就单个反引号，并且在里面加raw标签，比如@% raw %@ `@@test@@` @% endraw %@
-* 关闭hexo的将回车当换行做法是用正常的markdown两个回车当换行，在全局_config.yml中添加配置
-
-```yaml
-marked:
-  gfm: true
-  breaks: false #这里表示不要自动添加换行，按照markdown语法来
-  pedantic: false
-  smartLists: true
-  smartypants: true
-  modifyAnchors: 0
-  autolink: true
-  sanitizeUrl: false
-  headerIds: true
-  prependRoot: false
-  external_link:
-    enable: false
-    exclude: [ ]
-    nofollow: false
-```
-
-* 对于行内代码引用使用单个反引号的时候，如果代码长度过长的时候，代码会自动换行，导致上面文字撑开很难看。
-  解决办法是修改css文件`/themes/next/source/css/_common/scaffolding/highlight/highlight.styl`
-
-```css
-code {
-    word-break: break-all;
-/ / 这一行是增加的，为了防止inline代码引用过长换行后样式变差
-}
-```
-
-* `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
-
 ## 不蒜子阅读统计
 
 ```yaml
@@ -849,6 +814,20 @@ busuanzi_count:
   post_views: true
   post_views_icon: eye
 ```
+
+## 腾讯云CND加速
+首先把GitHub上面Pages配置的自定义域名给删了，域名只能由腾讯云的CDN来配置。然后进入腾讯云控制台，在CDN加速中，添加自定义域名，
+配置源站地址中的回源地址为yidao620c.github.io，同时还要将回源HOST也填写为一样的yidao620c.github.io。
+然后再点击到域名设置中，配置CNAME的域名，对自定义域名配置两个（对于@和www都配置一下），一个是`境外`还是指向yidao620c.github.io，
+另一个是`境内`指向CND加速域名`www.xncoding.com.cdn.dnsv1.com.cn`，这个地址在前面一步配置CND的时候复制过来即可。
+
+另外，还可以设置顶级域名自动跳转www二级域名，比如我的xncoding.com自动跳转至www.xncoding.com，
+设置方法为域名解析中配置显性URL。
+
+![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
+
+在CDN配置中找到缓存配置 >> 访问url重写添加如下配置
+![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-02.png)
 
 ## 升级指南
 
@@ -895,6 +874,41 @@ registerSidebarTOC: function () {
         return target;
     });
 ```
+
+## FAQ
+
+* 遇到有大括号的代码块，如果多行的不用管，如果单行的就单个反引号，并且在里面加raw标签，比如@% raw %@ `@@test@@` @% endraw %@
+* 关闭hexo的将回车当换行做法是用正常的markdown两个回车当换行，在全局_config.yml中添加配置
+
+```yaml
+marked:
+  gfm: true
+  breaks: false #这里表示不要自动添加换行，按照markdown语法来
+  pedantic: false
+  smartLists: true
+  smartypants: true
+  modifyAnchors: 0
+  autolink: true
+  sanitizeUrl: false
+  headerIds: true
+  prependRoot: false
+  external_link:
+    enable: false
+    exclude: [ ]
+    nofollow: false
+```
+
+* 对于行内代码引用使用单个反引号的时候，如果代码长度过长的时候，代码会自动换行，导致上面文字撑开很难看。
+  解决办法是修改css文件`/themes/next/source/css/_common/scaffolding/highlight/highlight.styl`
+
+```css
+code {
+    word-break: break-all;
+/ / 这一行是增加的，为了防止inline代码引用过长换行后样式变差
+}
+```
+
+* `<!--more-->`不能直接放到table后面，所有table后面都应该空一行。
 
 ## 参考
 
