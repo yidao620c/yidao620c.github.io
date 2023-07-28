@@ -17,7 +17,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="电子邮件系统是我们在日常工作、生活中最常用的一个网络服务。本章将首先介绍电子邮件系统的起源， 然后介绍SMTP、POP3、IMAP4等常见的电子邮件协议， 然后介绍如何在CentOS7中使用Postfix和Dovecot服务程序配置电子邮件系统服务的方法。 并结合BIND服务程序提供的DNS域名解析服务来验证客户端主机与服务器之间的邮件收发功能。">
@@ -162,18 +162,21 @@
   <span class="search-icon">
     <i class="fa fa-search"></i>
   </span>
-  <div class="search-input-container"></div>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
   <span class="popup-btn-close">
     <i class="fa fa-times-circle"></i>
   </span>
 </div>
-<div class="algolia-results">
-  <div id="algolia-stats"></div>
-  <div id="algolia-hits"></div>
-  <div id="algolia-pagination" class="algolia-pagination"></div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
 </div>
 
-      
     </div>
   </div>
 
@@ -280,7 +283,7 @@
 并使用基于POP3协议的Dovecot服务程序提供收件服务功能。这样一来，
 用户就可以使用Outlook Express或Foxmail等客户端服务程序正常收发邮件了。电子邮件系统的工作流程如图所示。</p>
 <p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix02.png"></p>
-<h2 id="配置DNS服务"><a href="#配置DNS服务" class="headerlink" title="配置DNS服务"></a>配置DNS服务</h2><p>一般而言，我们的信箱地址类似于“<a href="mailto:&#x72;&#111;&#111;&#x74;&#64;&#120;&#110;&#x63;&#111;&#100;&#105;&#110;&#x67;&#x2e;&#99;&#111;&#109;">&#x72;&#111;&#111;&#x74;&#64;&#120;&#110;&#x63;&#111;&#100;&#105;&#110;&#x67;&#x2e;&#99;&#111;&#109;</a>”这样，也就是按照“用户名@主机地址（域名）”格式来规范的。
+<h2 id="配置DNS服务"><a href="#配置DNS服务" class="headerlink" title="配置DNS服务"></a>配置DNS服务</h2><p>一般而言，我们的信箱地址类似于“<a href="mailto:&#x72;&#111;&#x6f;&#116;&#x40;&#x78;&#110;&#x63;&#111;&#x64;&#105;&#x6e;&#103;&#x2e;&#99;&#x6f;&#x6d;">&#x72;&#111;&#x6f;&#116;&#x40;&#x78;&#110;&#x63;&#111;&#x64;&#105;&#x6e;&#103;&#x2e;&#99;&#x6f;&#x6d;</a>”这样，也就是按照“用户名@主机地址（域名）”格式来规范的。
 要想更好地检验电子邮件系统的配置效果，需要先部署bind服务程序，为电子邮件服务器和客户端提供DNS域名解析服务。</p>
 <p>第1步：配置服务器主机名称，需要保证服务器主机名称与发信域名保持一致：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/hostname</span><br><span class="line">mail.xncoding.com</span><br><span class="line">hostnamectl set-hostname mail.xncoding.com</span><br></pre></td></tr></table></figure>
@@ -534,7 +537,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">288</span>
+          <span class="site-state-item-count">287</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -633,10 +636,7 @@
 
 
   
-<script src="//cdn.jsdelivr.net/npm/algoliasearch@4/dist/algoliasearch-lite.umd.js"></script>
-<script src="//cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
-<script src="/js/algolia-search.js"></script>
-
+<script src="/js/local-search.js"></script>
 
 
 
