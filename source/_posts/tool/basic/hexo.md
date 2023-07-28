@@ -529,6 +529,7 @@ www，CNAME，cmback.github.io.
 安装 `hexo-generator-searchdb`，在站点的根目录下执行以下命令：
 
 ```bash
+cnpm install hexo-generator-search --save
 cnpm install hexo-generator-searchdb --save
 ```
 
@@ -539,21 +540,30 @@ search:
   path: search.xml
   field: post
   format: html
-  limit: 10000
+  limit: 7000
 ```
 
-在NexT的_config.yml配置中开启这个本地搜索：
+在NexT的`source/_data/next.yml`配置中开启这个本地搜索：
 
 ```yaml
-# Local search
+# Local Search
+# Dependencies: https://github.com/theme-next/hexo-generator-searchdb
 local_search:
   enable: true
+  # If auto, trigger search by changing input.
+  # If manual, trigger search by pressing enter key or search button.
+  trigger: auto
+  # Show top n results per article, show all results by setting to -1
+  top_n_per_article: 1
+  # Unescape html strings to the readable one.
+  unescape: false
+  # Preload the search data when the page loads.
+  preload: false
 ```
 
 ## algolia搜索
 
-使用一段时间的`Local Search`后发现还是不太好用，后来比较了一下Swiftype、 微搜索、Local Search 和 Algolia，
-发现`algolia`比较好。安装`NexT`文档配置步骤如下：
+algolia在国内访问经常很卡，所以用这个插件的时候请三思。
 
 第一步，先注册Algolia，创建Index
 
@@ -623,7 +633,7 @@ INFO  [Algolia] Indexing done.
 ```yaml
 # Algolia Search
 algolia_search:
-  enable: false
+  enable: true
   hits:
     per_page: 10
   labels:
