@@ -1,11 +1,10 @@
 ---
 title: 【安全贴士】PKCS12弱加密算法分析
 date: 2020-05-01 12:33:08 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
 tags:
-  - PKCS12
+  - 数字证书
   - 安全贴士
 ---
 

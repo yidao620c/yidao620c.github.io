@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点04 - Dockerfile
+date: 2019-03-05 15:17:09
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-05 15:17:09
 ---
 
 是时候系统学习 Dockerfile 了，下面介绍 Dockerfile 中最常用的指令，完整列表和说明可参看官方文档。

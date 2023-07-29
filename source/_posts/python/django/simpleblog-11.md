@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Django1.9开发博客11- 富文本与代码高亮
 date: 2015-08-22 15:27:29 +0800
 toc: true

@@ -1,11 +1,9 @@
 ---
 title: Jetty9简易教程
 date: 2017-06-12 20:12:08 +0800
-comments: true
 toc: true
 categories: [ web ]
-tags:
-  - jetty9
+tags: [ web ]
 ---
 
 Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。

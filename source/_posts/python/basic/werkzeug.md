@@ -1,9 +1,9 @@
 ---
 title: Werkzeug简易教程
+date: 2016-12-02 19:52:21
 toc: true
 categories: [ python ]
-tags: [ werkzeug ]
-date: 2016-12-02 19:52:21
+tags: [ python ]
 ---
 
 Werkzeug是一个专门用来处理HTTP和WSGI的工具库，可以方便的在Python程序中处理HTTP协议相关内容。

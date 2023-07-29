@@ -1,7 +1,6 @@
 ---
 title: 【安全贴士】一键生成证书脚本
 date: 2020-05-17 09:10:19 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
 tags:

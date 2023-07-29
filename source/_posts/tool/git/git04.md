@@ -1,7 +1,6 @@
 ---
 title: git简明教程 - 撤销篇
 date: 2017-02-08 23:58:12 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ git ]

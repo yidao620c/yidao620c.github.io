@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（21） - 类和实例
 date: '2019-06-21 10:23:54 +0800'
 toc: true

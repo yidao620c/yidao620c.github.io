@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点09 - 多主机管理
+date: 2019-03-12 19:15:36
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-12 19:15:36
 ---
 
 前面的实验都是在一个host中，而真实环境中肯定会有多个主机。

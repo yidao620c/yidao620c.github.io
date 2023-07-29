@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Django1.9开发博客07- 实现功能
 date: 2015-08-16 12:02:56 +0800
 toc: true

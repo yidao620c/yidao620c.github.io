@@ -1,5 +1,4 @@
 ---
-layout: post
 title: CentOS7上使用mod_wsgi部署Django
 date: 2016-04-30 16:02:42 +0800
 toc: true

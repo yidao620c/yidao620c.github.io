@@ -1,10 +1,9 @@
 ---
-layout: post
 title: SQLAlchemy入门
 date: 2016-03-07 10:12:42 +0800
 toc: true
 categories: [ python ]
-tags: [ SQLAlchemy ]
+tags: [ python ]
 ---
 
 SQLAlchemy是Python世界中最广泛使用的ORM工具之一，它采用了类似于Java里Hibernate的数据映射模型，

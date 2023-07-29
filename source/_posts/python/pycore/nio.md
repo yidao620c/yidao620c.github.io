@@ -1,5 +1,4 @@
 ---
-layout: post
 title: python核心 - 异步IO
 date: 2015-12-21 22:22:22 +0800
 toc: true

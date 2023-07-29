@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（09） - 切片
 date: '2019-06-09 09:56:22 +0800'
 toc: true

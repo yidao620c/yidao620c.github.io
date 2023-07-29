@@ -1,5 +1,4 @@
 ---
-layout: post
 title: java中的回调函数
 date: 2015-06-18 18:15:42 +0800
 toc: false

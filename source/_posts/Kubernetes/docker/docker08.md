@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点08 - 存储卷
+date: 2019-03-11 10:37:55
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-11 10:37:55
 ---
 
 Docker 为容器提供了两种存放数据的资源：

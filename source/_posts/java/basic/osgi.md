@@ -1,10 +1,9 @@
 ---
-layout: post
 title: OSGi简易教程
 date: 2016-04-16 01:02:42 +0800
 toc: true
 categories: [ java ]
-tags: [ osgi ]
+tags: [ java ]
 ---
 
 开篇我先解释一下两个容易搞混的术语：

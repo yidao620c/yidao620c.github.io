@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（06） - 基本数据类型（中）
 date: '2019-06-06 17:22:35 +0800'
 toc: true

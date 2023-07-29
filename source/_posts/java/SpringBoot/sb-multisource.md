@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 多数据源配置
 date: 2017-07-10 17:32:56 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 项目中经常会出现需要同时连接两个数据源的情况，这里还是演示基于MyBatis来配置两个数据源，并演示如何切换不同的数据源。

@@ -1,10 +1,9 @@
 ---
 title: 常见互联网高可用架构
 date: 2017-06-30 12:36:25 +0800
-comments: true
 toc: true
 categories: [ 架构设计 ]
-tags: [ 高可用 ]
+tags: [ 架构设计 ]
 ---
 
 高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，

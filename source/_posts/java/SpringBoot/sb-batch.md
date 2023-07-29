@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 批处理
 date: 2017-08-01 19:10:22 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 Spring Batch是一个轻量级的框架,完全面向Spring的批处理框架,用于企业级大量的数据读写处理系统。以POJO和Spring 框架为基础，

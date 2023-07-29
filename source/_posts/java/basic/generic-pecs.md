@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Java泛型的PECS原则
 date: '2018-05-30 12:22:11 +0800'
 toc: false

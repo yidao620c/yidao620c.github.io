@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（13） - 函数式编程之map/reduce
 date: '2019-06-13 10:28:33 +0800'
 toc: true

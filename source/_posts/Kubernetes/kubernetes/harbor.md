@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 安装Docker私有仓库Harbor
 date: '2020-12-31 12:21:15 +0800'
 toc: true
 categories: [ kubernetes ]
-tags: [ harbor ]
+tags: [ kubernetes, harbor ]
 ---
 
 Harbor是VMware公司开源的企业级公司开源的企业级DockerRegistry项目， 项目地址为<https://github.com/vmware/harbor>。

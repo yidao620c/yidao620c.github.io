@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Django1.9开发博客13- redis缓存
 date: 2015-08-25 20:27:55 +0800
 toc: true

@@ -1,10 +1,9 @@
 ---
-layout: post
 title: Vagrant创建虚拟化开发环境
 date: 2021-01-22 09:12:33 +0800
 toc: true
 categories: [ linux ]
-tags: [ vagrant,linux ]
+tags: [ linux ]
 ---
 
 作为一名开发者，是否经常抱怨环境问题，某个bug只出现在你的环境下面，找了很久才找到原来是一个很小的环境差异导致。 

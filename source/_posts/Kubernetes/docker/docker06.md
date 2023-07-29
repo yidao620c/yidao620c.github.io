@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点06 - 运行容器
+date: 2019-03-09 09:16:33
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-09 09:16:33
 ---
 
 这一篇学习容器的各种操作，容器的状态之间如何转换，以及实现容器的底层技术。

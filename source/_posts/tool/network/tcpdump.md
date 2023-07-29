@@ -1,10 +1,9 @@
 ---
-layout: post
 title: tcpdump抓包
 date: 2020-06-05 06:15:15 +0800
 toc: true
-categories: [ linux ]
-tags: [ tcpdump ]
+categories: [ 开发工具 ]
+tags: [ 网络工具 ]
 ---
 
 比较常见的抓包方法是使用tcpdump在linux机器上运行，生成pcap文件。 然后拖到windows机器，下载wireshark来可视化分析。

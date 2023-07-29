@@ -1,10 +1,9 @@
 ---
 title: 使用smart-doc生成API文档
 date: 2021-03-07 09:17:12 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ smart-doc ]
+tags: [ 开发工具 ]
 ---
 
 smart-doc是一款同时支持JAVA REST API和Apache Dubbo RPC接口文档生成的工具，smart-doc在业内率先提出基于JAVA泛型定义推导的理念，

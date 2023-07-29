@@ -1,9 +1,9 @@
 ---
 title: Docker Compose教程
+date: 2020-12-01 09:35:12
 toc: true
 categories: [ kubernetes ]
-tags: [ compose ]
-date: 2020-12-01 09:35:12
+tags: [ docker ]
 ---
 
 Docker Compose 是 Docker 官方编排（Orchestration）项目之一，负责快速的部署分布式应用， 它是由 python 编写。 Compose 定位是定义和运行多个 Docker 容器的应用。

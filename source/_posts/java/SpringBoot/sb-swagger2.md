@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 集成Swagger2
 date: 2017-07-08 15:26:19 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 Swagger是一个简单但功能强大的API表达工具。它具有地球上最大的API工具生态系统，数以千计的开发人员，

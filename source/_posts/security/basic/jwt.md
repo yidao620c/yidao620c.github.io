@@ -1,12 +1,9 @@
 ---
 title: 【安全贴士】JWT介绍和安全防范
 date: 2017-06-22 19:12:35 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
-tags:
-  - jwt
-  - 安全贴士
+tags: [ 安全贴士 ]
 ---
 
 Json web token (JWT), 是为了在网络应用环境间传递声明而执行的一种基于JSON的开放标准（(RFC 7519).该token被设计为紧凑且安全的，
@@ -130,9 +127,9 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4
 
 ```js
 fetch('api/user/1', {
-  headers: {
-    'Authorization': 'Bearer ' + token
-  }
+    headers: {
+        'Authorization': 'Bearer ' + token
+    }
 })
 ```
 

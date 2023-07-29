@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用pyenv创建多版本python环境
 date: 2016-05-09 12:28:39 +0800
 toc: true
 categories: [ python ]
-tags: [ pyenv ]
+tags: [ python ]
 ---
 
 以前一直使用`virtualenv`来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。

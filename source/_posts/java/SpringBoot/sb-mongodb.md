@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 集成MongoDB
 date: 2017-07-04 12:25:38 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 MongoDB是一个高性能、开源、无模式的文档型数据库，是当前NoSql数据库中比较热门的一种。

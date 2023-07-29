@@ -1,8 +1,6 @@
 ---
-layout: post
 title: Prometheus监控SpringBoot
 date: 2021-02-27 19:15:22 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ prometheus ]

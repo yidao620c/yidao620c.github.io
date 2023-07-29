@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点05 - Registry
+date: 2019-03-07 12:07:09
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-07 12:07:09
 ---
 
 前面已经学会怎样构建镜像了，这一章介绍怎样分发镜像给多个Docker Host使用，

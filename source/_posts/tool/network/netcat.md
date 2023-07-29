@@ -1,10 +1,9 @@
 ---
-layout: post
 title: netcat网络工具简介
 date: 2020-06-01 03:15:15 +0800
 toc: true
-categories: [ linux ]
-tags: [ netcat ]
+categories: [ 开发工具 ]
+tags: [ 网络工具 ]
 ---
 
 netcat 是 Linux 系统中的网络工具，其通过 TCP 和 UDP 协议在网络中读写数据。如果与其他工具结合，

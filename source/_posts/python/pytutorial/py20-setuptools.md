@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（20） - 打包与发布
 date: '2019-06-20 12:35:22 +0800'
 toc: true

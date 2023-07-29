@@ -1,11 +1,9 @@
 ---
-layout: post
 title: JVM工具-基础监控工具
 date: 2021-04-27 20:15:23 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags: [ java, jvm ]
+tags: [ jvm ]
 ---
 
 JDK本身提供了很多方便的JVM性能调优监控工具，除了集成式的VisualVM和JConsole外，还有jps、jstack、jmap、jhat、jstat、hprof等小巧的工具，

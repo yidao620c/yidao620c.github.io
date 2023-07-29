@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 腾讯云COS上传图片
 date: 2023-05-09 11:23:15 +0800
 toc: true

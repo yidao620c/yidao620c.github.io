@@ -1,9 +1,9 @@
 ---
 title: EC2虚拟主机搭建SS
+date: 2017-09-30 17:29:33
 toc: true
 categories: [ linux ]
-tags: [EC2]
-date: 2017-09-30 17:29:33
+tags: [ linux ]
 ---
 
 作为一个离开 Google 生活就无法自理的人类，我曾经发帖、提问、翻遍各种网站，四处寻找靠谱的科学上网利器。

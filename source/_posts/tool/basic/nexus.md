@@ -1,10 +1,9 @@
 ---
 title: maven私服nexus3.x环境配置
 date: 2017-09-02 22:10:25 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ nexus ]
+tags: [ 开发工具 ]
 ---
 
 私服是指私有服务器，是架设在局域网的一种特殊的远程仓库，目的是代理远程仓库及部署第三方构建。
@@ -163,8 +162,7 @@ Nexus提供了一系列可配置的调度任务来方便用户管理系统。用
 
 安装和配置好之后，在开发中如何使用呢。可在maven的默认配置`settings.xml`中修改如下：
 
-```xml
-
+``` xml
 <servers>
     <server>
         <id>releases</id>
@@ -240,8 +238,7 @@ Nexus提供了一系列可配置的调度任务来方便用户管理系统。用
 
 上传到Nexus上，使用 `mvn deploy` 即可，开发的时候请使用snapshot版本，也就是version的后缀必须是`-SNAPSHOT`。
 
-```xml
-
+``` xml
 <groupId>com.enzhico</groupId>
 <artifactId>micro-pay-sdk</artifactId>
 <version>1.2-SNAPSHOT</version>
@@ -273,8 +270,7 @@ mvn deploy:deploy-file \
 
 pom.xml里面配置多个profile，其中一个默认的：
 
-```xml
-
+``` xml
 <build>
     <plugins>
         <plugin>

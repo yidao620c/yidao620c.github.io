@@ -1,10 +1,9 @@
 ---
 title: 使用ReadtheDocs托管文档
 date: 2017-01-22 20:16:09 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ sphinx, readthedocs ]
+tags: [ 开发工具 ]
 ---
 
 [Read the Docs](https://readthedocs.org/)是一个在线文档托管服务，

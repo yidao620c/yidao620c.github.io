@@ -1,11 +1,9 @@
 ---
-layout: post
 title: RabbitMQ简易教程 - 任务队列
 date: 2017-05-08 09:15:22 +0800
-comments: true
 toc: true
-categories: [中间件]
-tags: [rabbitmq]
+categories: [ 中间件 ]
+tags: [ rabbitmq ]
 ---
 
 这里演示的官网通过python使用消息队列的教程：<https://www.rabbitmq.com/getstarted.html>

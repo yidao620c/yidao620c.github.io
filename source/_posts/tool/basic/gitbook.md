@@ -1,9 +1,9 @@
 ---
 title: 使用GitBook编写项目文档
+date: 2017-11-30 12:16:53
 toc: true
 categories: [ 开发工具 ]
-tags: [ gitbook ]
-date: 2017-11-30 12:16:53
+tags: [ 开发工具 ]
 ---
 
 我之前写了一篇如何在readthedoc上面发布文档的文章，现在又多了一个选择，就是使用GitBook来编写文档。

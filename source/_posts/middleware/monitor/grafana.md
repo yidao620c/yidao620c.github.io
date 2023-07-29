@@ -1,8 +1,6 @@
 ---
-layout: post
 title: Grafana快速入门
 date: 2021-02-05 09:12:33 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ grafana ]

@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点03 - 镜像
+date: 2019-03-03 08:26:12
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-03 08:26:12
 ---
 
 镜像是 Docker 容器的基石，容器是镜像的运行实例，有了镜像才能启动容器。

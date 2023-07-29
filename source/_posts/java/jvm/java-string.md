@@ -1,11 +1,9 @@
 ---
-layout: post
 title: JDK8中字符串常量池详解
 date: 2021-04-01 19:33:21 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags: [ java, jvm ]
+tags: [ jvm ]
 ---
 
 在JDK1.8 Hotspot移除了永久代用元空间(Metaspace)取而代之, 这时候字符串常量池还在堆, 运行时常量池还在方法区, 

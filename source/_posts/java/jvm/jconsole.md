@@ -1,11 +1,9 @@
 ---
-layout: post
 title: JVM工具-可视化工具JConsole
 date: 2021-04-09 20:15:16 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags: [ java, jvm ]
+tags: [ jvm ]
 ---
 
 JConsole是一款基于JMX的可视化监控和管理工具，它主要功能是通过JMX的MBean对系统进行信息收集和参数动态调整。

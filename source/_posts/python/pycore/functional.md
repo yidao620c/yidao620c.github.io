@@ -1,7 +1,6 @@
 ---
 title: python核心 - 函数式编程
 date: 2015-10-22 10:06:22 +0800
-comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]

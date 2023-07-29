@@ -1,7 +1,6 @@
 ---
 title: Maven site发布多模块的项目站点
 date: '2018-09-17 20:22:10 +0800'
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ maven ]

@@ -1,7 +1,6 @@
 ---
 title: nginx笔记 - 进阶篇
 date: 2017-01-09 12:25:16 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ nginx ]

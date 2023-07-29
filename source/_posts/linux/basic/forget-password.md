@@ -1,10 +1,9 @@
 ---
-layout: post
 title: CentOS7忘记root密码解决办法
 date: '2018-02-03 09:06:17 +0800'
 toc: true
 categories: [ linux ]
-tags: [linux]
+tags: [ linux ]
 ---
 
 平日里让运维人员头疼的事情已经很多了，因此偶尔把Linux系统的密码忘记了并不用慌，

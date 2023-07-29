@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 基于keepalived实现mysql双主
 date: 2016-09-21 12:17:29 +0800
 toc: true
 categories: [中间件]
-tags: [mysql, 数字证书]
+tags: [ mysql ]
 ---
 
 MySQL服务端开启SSL保证连接通道的安全性，同时可支持开启证书双向认证，进一步提升安全。

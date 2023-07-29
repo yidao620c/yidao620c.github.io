@@ -1,10 +1,9 @@
 ---
-layout: post
 title: centos7配置mysql主从复制
 date: 2016-09-16 22:22:22 +0800
 toc: true
 categories: [中间件]
-tags: [mysql]
+tags: [ mysql ]
 ---
 
 常见的高可用MySQL解决方案有主从复制，主主复制，Heartbeat/SAN高可用，MySQL Cluster高可用等等。

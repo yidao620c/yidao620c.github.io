@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 使用AOP
 date: 2017-07-24 22:26:19 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 AOP（面向切面编程）是Spring的两大核心功能之一，功能非常强大，为解耦提供了非常优秀的解决方案。

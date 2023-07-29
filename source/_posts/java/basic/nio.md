@@ -1,5 +1,4 @@
 ---
-layout: post
 title: NIO笔记-缓存器细节
 date: 2015-06-20 18:15:42 +0800
 toc: false

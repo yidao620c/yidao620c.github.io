@@ -1,11 +1,9 @@
 ---
 title: CAS教程 - 实现单点登录
 date: 2019-01-09 18:16:55 +0800
-comments: true
 toc: true
 categories: [网络安全]
-tags:
-  - CAS
+tags: [ CAS ]
 ---
 
 通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。

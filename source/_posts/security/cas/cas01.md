@@ -1,11 +1,9 @@
 ---
 title: CAS教程 - 原理篇
 date: 2019-01-02 09:12:33 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
-tags:
-  - CAS
+tags: [ CAS ]
 ---
 
 所谓单点登录(SSO)，就是同平台的诸多应用登陆一次，下一次就免登陆的功能。就像你在知乎首页登录一次，

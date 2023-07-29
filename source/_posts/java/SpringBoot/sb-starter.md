@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 自己写starter
 date: 2017-07-22 16:22:19 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 Spring Boot由众多Starter组成，随着版本的推移Starter家族成员也与日俱增。在传统Maven项目中通常将一些层、组件拆分为模块来管理，

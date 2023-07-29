@@ -1,7 +1,6 @@
 ---
 title: git简明教程 - 分支篇
 date: 2017-02-07 22:08:25 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ git ]

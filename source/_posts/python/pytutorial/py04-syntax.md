@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（04） - 基本语法
 date: '2019-06-04 09:37:12 +0800'
 toc: true

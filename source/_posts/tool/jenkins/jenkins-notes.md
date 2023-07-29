@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Jenkins控制台日志出现中文乱码解决方法
 date: 2017-04-05 23:12:33 +0800
 toc: true

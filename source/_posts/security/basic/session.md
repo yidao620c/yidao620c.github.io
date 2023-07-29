@@ -1,15 +1,9 @@
 ---
 title: 【安全贴士】聊聊Web会话管理
 date: 2017-06-20 09:55:19 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
-tags:
-  - session
-  - cookie
-  - jwt
-  - token
-  - 安全贴士
+tags: [ 安全贴士 ]
 ---
 
 Web刚刚兴起的时候，服务器只提供一些简单的HTML页面和链接，用户打开网址去浏览。

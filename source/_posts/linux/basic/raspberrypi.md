@@ -1,19 +1,18 @@
 ---
-layout: post
 title: 树莓派4B安装Ubuntu Server 22.0.4
 date: 2023-06-01 12:23:33 +0800
 toc: true
 categories: [ linux ]
-tags: [ raspberrypi ]
+tags: [ linux ]
 ---
 
 介绍下树莓派没办法连接显示器和键盘的情况下怎样安装Ubuntu Server 22, 以及如何确定树莓派的 IP 地址并登陆进去等一些实用小技巧. 聪明的你还可以用这些学到的新技巧去扫描你的网络。
 
 准备软件：
 
-* SDFormatter 5.0.2 - 链接：https://pan.baidu.com/s/1fpKnVL8Kcpd4OidMMUhkKw?pwd=3zh5 提取码：3zh5
-* Raspberry Pi Imager - https://downloads.raspberrypi.org/imager/imager_latest.exe 用来烧录镜像
-* [Ubuntu Server 22.0.4](https://old-releases.ubuntu.com/releases/22.04/ubuntu-22.04.1-preinstalled-server-arm64+raspi.img.xz)
+* [SDFormatter 5.0.2](https://pan.baidu.com/s/1fpKnVL8Kcpd4OidMMUhkKw?pwd=3zh5) 用来格式化闪存卡
+* [Raspberry Pi Imager](https://downloads.raspberrypi.org/imager/imager_latest.exe) 用来烧录镜像
+* [Ubuntu Server 22.0.4](https://old-releases.ubuntu.com/releases/22.04/ubuntu-22.04.1-preinstalled-server-arm64+raspi.img.xz) 操作系统镜像文件
 
 <!-- more -->
 

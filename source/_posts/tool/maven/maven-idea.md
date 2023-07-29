@@ -1,7 +1,6 @@
 ---
 title: IDEA不能下载maven依赖包的源码
 date: '2018-06-03 15:12:09 +0800'
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ idea, maven ]

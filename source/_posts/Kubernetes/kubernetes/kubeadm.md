@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用kubeadm安装Kubernetes集群
 date: '2020-12-21 20:20:11 +0800'
 toc: true
 categories: [ kubernetes ]
-tags: [ kubeadm ]
+tags: [ kubernetes ]
 ---
 
 在生产环境中都是使用集群方式来搭建K8S，这里记录一下如何通过kubeadm来部署K8S集群。

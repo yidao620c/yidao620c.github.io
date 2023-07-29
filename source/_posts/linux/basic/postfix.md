@@ -1,10 +1,9 @@
 ---
-layout: post
 title: CentOS7搭建postfix邮件服务器
 date: '2018-02-25 16:43:32 +0800'
 toc: true
 categories: [ linux ]
-tags: [ postfix ]
+tags: [ linux ]
 ---
 
 电子邮件系统是我们在日常工作、生活中最常用的一个网络服务。本章将首先介绍电子邮件系统的起源，

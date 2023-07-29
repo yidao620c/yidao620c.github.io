@@ -1,7 +1,6 @@
 ---
 title: nginx笔记 - 配置和使用
 date: 2017-01-08 12:22:15 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ nginx ]

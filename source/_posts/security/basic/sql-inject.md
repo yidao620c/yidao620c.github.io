@@ -1,12 +1,9 @@
 ---
 title: 【安全贴士】SQL注入攻击与防范
 date: 2016-07-26 20:07:19 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
-tags:
-  - SQL注入
-  - 安全贴士
+tags: [ 安全贴士 ]
 ---
 
 SQL注入攻击（SQL Injection），简称注入攻击，是Web开发中最常见的一种安全漏洞。

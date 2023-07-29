@@ -1,10 +1,9 @@
 ---
 title: centos7上systemd详解
 date: 2016-06-07 12:22:15 +0800
-comments: true
 toc: true
 categories: [ linux ]
-tags: [ systemd ]
+tags: [ linux ]
 ---
 
 CentOS 7继承了RHEL 7的新的特性，例如强大的systemd，

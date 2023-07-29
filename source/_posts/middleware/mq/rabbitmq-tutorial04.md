@@ -1,8 +1,6 @@
 ---
-layout: post
 title: RabbitMQ简易教程 - 路由
 date: 2017-05-13 19:17:55 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

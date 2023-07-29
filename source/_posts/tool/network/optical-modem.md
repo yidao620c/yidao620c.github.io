@@ -1,10 +1,9 @@
 ---
 title: 光猫桥接模式连接路由器
 date: 2020-06-09 11:15:15 +0800
-comments: true
 toc: true
-categories: [ linux ]
-tags: [ 光猫 ]
+categories: [ 开发工具 ]
+tags: [ 网络工具 ]
 ---
 
 一般家庭宽带使用拨号连接，上门安装时会给安装一个光猫。自带了Wifi功能，但是信号差很不稳定。追求高质量的Wifi信号的人还是会选择增加一个路由器。

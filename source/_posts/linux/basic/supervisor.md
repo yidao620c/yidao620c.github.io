@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用supervisor管理进程
 date: 2016-10-12 08:22:22 +0800
 toc: true
 categories: [ linux ]
-tags: [ supervisor ]
+tags: [ linux ]
 ---
 
 Supervisor (http://supervisord.org) 是一个用 Python 写的进程管理工具，

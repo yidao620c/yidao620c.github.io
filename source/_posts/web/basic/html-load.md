@@ -1,11 +1,9 @@
 ---
 title: HTML页面性能指标
 date: '2018-08-23 08:54:28 +0800'
-comments: true
 toc: true
 categories: [ web ]
-tags:
-  - html
+tags: [ web ]
 ---
 
 前端页面的性能一直都是一个热议的话题，从老早雅虎提出的35条"军规"开始我们就一直在关注页面的性能问题。

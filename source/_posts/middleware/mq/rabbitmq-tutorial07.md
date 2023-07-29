@@ -1,11 +1,9 @@
 ---
-layout: post
 title: RabbitMQ简易教程 - WebSocket
 date: 2017-05-17 08:24:25 +0800
-comments: true
 toc: true
-categories: [中间件]
-tags: [rabbitmq]
+categories: [ 中间件 ]
+tags: [ rabbitmq ]
 ---
 
 之前写过一篇 [使用Ajax实现异步任务](https://www.xncoding.com/2017/05/02/web/async.html) 的文章，

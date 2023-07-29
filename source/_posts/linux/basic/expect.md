@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用expect实现自动交互脚本
 date: 2021-01-27 12:21:33 +0800
 toc: true
 categories: [ linux ]
-tags: [ expect,linux ]
+tags: [ linux ]
 ---
 
 Expect 是一个可以通过脚本和其它交互程序通信的程序，也可以直接被用于C或C++。

@@ -1,5 +1,4 @@
 ---
-layout: post
 title: python核心 - 元类
 date: 2015-12-09 22:22:22 +0800
 toc: true

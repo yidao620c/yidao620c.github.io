@@ -1,7 +1,6 @@
 ---
 title: git简明教程 - 基础篇
 date: 2017-02-06 21:32:30 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ git ]

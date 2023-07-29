@@ -1,9 +1,9 @@
 ---
 title: Docker安装MySQL8
+date: 2020-12-05 09:35:12
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2020-12-05 09:35:12
 ---
 
 这里总结常用软件的容器化安装步骤，环境为CentOS7。

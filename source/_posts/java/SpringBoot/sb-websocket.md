@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 集成WebSocket实时通信
 date: 2017-07-15 12:28:16 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 WebSocket是 HTML5 开始提供的一种浏览器与服务器间进行全双工通讯的网络技术。

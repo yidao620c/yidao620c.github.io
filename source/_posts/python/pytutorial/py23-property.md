@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（23） - 对象属性
 date: '2019-06-23 16:46:22 +0800'
 toc: true

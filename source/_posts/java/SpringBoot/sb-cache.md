@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 缓存
 date: 2017-07-28 20:12:33 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 内存的速度远远大于硬盘的速度，当我们需要重复获取相同的数据的时候，一次又一次的请求数据库或远程服务，

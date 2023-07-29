@@ -1,10 +1,9 @@
 ---
-layout: post
 title: CentOS7搭建NFS网络文件系统
 date: 2018-02-19 22:46:01 +0800
 toc: true
 categories: [ linux ]
-tags: [ nfs ]
+tags: [ linux ]
 ---
 
 如果需要共享文件的主机都是Linux系统，强烈推荐大家在客户端部署NFS服务来共享文件。

@@ -1,7 +1,6 @@
 ---
 title: Git常用操作命令
 date: 2017-02-25 13:50:23 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ git ]

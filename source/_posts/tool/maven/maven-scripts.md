@@ -1,7 +1,6 @@
 ---
 title: maven自动上传包和执行脚本
 date: 2020-03-16 21:30:22 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ maven ]

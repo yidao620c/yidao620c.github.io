@@ -1,11 +1,9 @@
 ---
-layout: post
 title: yaml入门笔记
 date: 2015-05-22 13:53:45 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ yaml ]
+tags: [ 开发工具 ]
 ---
 
 YAML是一个可读性高，用来表达资料序列的格式。YAML参考了其他多种语言，包括：XML、C语言、Python、Perl以及电子邮件格式RFC2822。

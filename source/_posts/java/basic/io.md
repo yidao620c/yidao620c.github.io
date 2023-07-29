@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 聊聊Java中的几种I/O模型
 date: 2018-04-02 12:07:42 +0800
 toc: true

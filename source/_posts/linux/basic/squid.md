@@ -1,10 +1,9 @@
 ---
-layout: post
 title: CentOS7.2搭建代理服务器
 date: 2016-07-07 21:15:16 +0800
 toc: true
 categories: [ linux ]
-tags: [ squid, proxy ]
+tags: [ linux ]
 ---
 
 有时候内网很多机器都不能上外网，只能开放几个特定ip访问外网，

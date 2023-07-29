@@ -1,7 +1,6 @@
 ---
 title: 【安全贴士】Java实现证书双向认证
 date: 2020-05-26 19:25:22 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
 tags:

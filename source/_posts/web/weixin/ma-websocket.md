@@ -1,9 +1,9 @@
 ---
 title: 小程序开发 - websocket
+date: 2017-12-15 12:47:12
 toc: true
 categories: [ web ]
 tags: [ 小程序 ]
-date: 2017-12-15 12:47:12
 ---
 
 小程序已经添加了对WebSocket的支持，如果需要长连接和推送的场景来讲可以使用。

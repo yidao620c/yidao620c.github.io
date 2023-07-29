@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 基于keepalived实现mysql双主
 date: 2016-09-19 21:17:24 +0800
 toc: true
 categories: [中间件]
-tags: [mysql, keepalived]
+tags: [ mysql ]
 ---
 
 MySQL的高可用方案一般有如下几种：

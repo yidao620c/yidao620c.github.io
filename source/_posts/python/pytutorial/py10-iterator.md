@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 每天5分钟玩转Python（10） - 迭代器
 date: '2019-06-10 10:36:12 +0800'
 toc: true

@@ -1,9 +1,9 @@
 ---
 title: Docker安装常用软件
+date: 2019-03-30 12:35:12
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-30 12:35:12
 ---
 
 这里总结常用软件的容器化安装步骤，环境为CentOS7。

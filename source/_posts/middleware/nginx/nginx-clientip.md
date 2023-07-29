@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Nginx重新编译添加模块
 date: 2018-03-20 15:11:03 +0800
 toc: true

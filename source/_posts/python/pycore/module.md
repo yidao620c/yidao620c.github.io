@@ -1,7 +1,6 @@
 ---
 title: python核心 - 模块和包
 date: 2015-10-30 22:22:22 +0800
-comments: true
 toc: true
 categories: [ python ]
 tags: [ python核心 ]

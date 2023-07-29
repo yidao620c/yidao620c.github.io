@@ -1,11 +1,9 @@
 ---
-layout: post
 title: JVM工具-可视化工具JHSDB
 date: 2021-04-17 21:23:14 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags: [ java, jvm ]
+tags: [ jvm ]
 ---
 
 JHSDB是一款基于服务性代理实现的进程外调试工具。可以在一个独立的JVM进程里分析其他HotSpot虚拟机内部数据。

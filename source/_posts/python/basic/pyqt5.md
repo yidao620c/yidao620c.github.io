@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用PyQt5开发桌面应用
 date: 2021-05-01 19:32:56 +0800
 toc: true
 categories: [ python ]
-tags: [ pyqt5 ]
+tags: [ python, pyqt5 ]
 ---
 
 PyQt5工具可以快速实现简单的界面开发，包括界面设计、布局管理以及业务逻辑实现（信号与槽）。

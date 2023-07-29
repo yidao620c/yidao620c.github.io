@@ -1,10 +1,9 @@
 ---
-layout: post
 title: CentOS7搭建NTP服务器
 date: 2018-02-16 12:55:13 +0800
 toc: true
 categories: [ linux ]
-tags: [ntpd]
+tags: [ linux ]
 ---
 
 NTP是网络时间协议(Network Time Protocol)，它是用来同步网络中各个计算机的时间的协议。把计算机的时钟同步到世界协调时UTC，

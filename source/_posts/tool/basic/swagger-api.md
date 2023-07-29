@@ -1,10 +1,9 @@
 ---
 title: 使用Swagger生成RESTful文档
 date: 2021-03-21 12:11:23 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ swagger ]
+tags: [ 开发工具 ]
 ---
 
 REST API都是要对外提供服务的，那么文档是必须的。Swagger是一个简单但功能强大的API表达工具。 

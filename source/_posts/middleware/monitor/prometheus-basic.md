@@ -1,8 +1,6 @@
 ---
-layout: post
 title: Prometheus快速入门
 date: 2021-02-09 07:15:55 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ prometheus ]

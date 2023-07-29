@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Jenkins持续集成 - 管道详解
 date: 2017-03-22 09:32:16 +0800
 toc: true

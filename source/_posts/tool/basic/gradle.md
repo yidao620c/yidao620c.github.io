@@ -1,10 +1,9 @@
 ---
 title: Gradle构建入门
 date: 2017-12-10 10:22:29 +0800
-comments: true
 toc: true
 categories: [ 开发工具 ]
-tags: [ gradle ]
+tags: [ 开发工具 ]
 ---
 
 在开发Spring Boot应用的时候，除了Maven以外，Gradle也是一个不错的构建选择。

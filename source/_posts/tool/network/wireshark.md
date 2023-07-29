@@ -1,10 +1,9 @@
 ---
 title: WireShark基本使用
 date: 2017-01-05 16:33:19 +0800
-comments: true
 toc: true
-categories: [ linux ]
-tags: [ wireshark ]
+categories: [ 开发工具 ]
+tags: [ 网络工具 ]
 ---
 
 wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。

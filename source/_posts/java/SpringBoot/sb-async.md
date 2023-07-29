@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 异步线程池
 date: 2017-07-20 12:56:22 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 在项目中，当访问其他人的接口较慢或者做耗时任务时，不想程序一直卡在耗时任务上，想程序能够并行执行，

@@ -1,7 +1,6 @@
 ---
 title: Maven传递依赖无法引入解决办法
 date: '2018-11-02 12:09:17 +0800'
-comments: true
 toc: true
 categories: [ 开发工具 ]
 tags: [ maven ]

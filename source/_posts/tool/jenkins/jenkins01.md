@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Jenkins持续集成 - 安装配置
 date: 2017-03-20 12:55:12 +0800
 toc: true

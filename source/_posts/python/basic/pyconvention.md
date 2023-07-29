@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Python命名规约
 date: '2018-08-05 10:02:33 +0800'
 toc: true

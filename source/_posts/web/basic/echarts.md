@@ -1,11 +1,9 @@
 ---
 title: JavaScript图表库ECharts使用
 date: 2016-06-22 12:09:08 +0800
-comments: true
 toc: true
 categories: [ web ]
-tags:
-  - echarts
+tags: [ web ]
 ---
 
 ECharts是一款由百度前端技术部开发的，基于Javascript的数据可视化图表库，提供直观，生动，

@@ -1,10 +1,9 @@
 ---
 title: 利用httpd对Tomcat进行负载均衡
 date: 2015-10-13 10:59:15 +0800
-comments: true
 toc: true
-categories: [ linux ]
-tags: [tomcat, httpd]
+categories: [ 中间件 ]
+tags: [ tomcat ]
 ---
 
 操作系统：CentOS 6.5_x86_64

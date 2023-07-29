@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 集成Shiro权限管理
 date: 2017-07-07 09:56:08 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 `Apache Shiro`是Java的一个安全框架。目前，使用`Apache Shiro`的人越来越多，相比`Spring Security`而言相当简单，

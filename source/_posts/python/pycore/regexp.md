@@ -1,5 +1,4 @@
 ---
-layout: post
 title: python核心 - 正则表达式
 date: 2015-12-12 22:22:22 +0800
 toc: true

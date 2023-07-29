@@ -1,5 +1,4 @@
 ---
-layout: post
 title: python核心 - IO编程
 date: 2015-12-20 22:22:22 +0800
 toc: true

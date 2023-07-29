@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 定时任务
 date: 2017-07-12 10:59:25 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 很多时候，我们需要在每天的某个固定时间或者每隔一段时间让应用去执行某一个任务。

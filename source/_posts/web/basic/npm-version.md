@@ -1,11 +1,9 @@
 ---
 title: NPM版本号规则以及更新策略
 date: '2018-05-07 00:21:18 +0800'
-comments: true
 toc: true
 categories: [ web ]
-tags:
-  - npm
+tags: [ web ]
 ---
 
 初次使用NodeJS的时候，被package.json中的版本规则搞晕，现在记录一下。

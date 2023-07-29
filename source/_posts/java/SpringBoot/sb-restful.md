@@ -1,11 +1,9 @@
 ---
 title: SpringBoot系列 - 实现RESTful接口
 date: 2017-07-05 12:10:37 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags:
-  - springboot
+tags: [ spring ]
 ---
 
 REST，即Representational State Transfer的缩写，对这个词组的翻译是`表现层状态转化`。

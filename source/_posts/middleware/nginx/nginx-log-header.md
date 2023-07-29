@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Nginx打印请求头和响应头
 date: 2018-03-23 09:21:07 +0800
 toc: true

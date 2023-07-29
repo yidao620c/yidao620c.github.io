@@ -1,11 +1,9 @@
 ---
 title: CAS教程 - 服务安装
 date: 2019-01-03 10:22:12 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
-tags:
-  - CAS
+tags: [ CAS ]
 ---
 
 这篇开始写一个系列，讲解如何使用配置和使用CAS实现单点登录。

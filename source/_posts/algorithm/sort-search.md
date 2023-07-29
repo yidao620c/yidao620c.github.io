@@ -1,5 +1,4 @@
 ---
-layout: post
 title: 快速排序和二分查找
 date: 2015-04-18 12:48:25 +0800
 toc: true

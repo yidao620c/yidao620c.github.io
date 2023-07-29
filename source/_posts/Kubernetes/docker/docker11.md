@@ -1,9 +1,9 @@
 ---
 title: Docker每天学一点11 - 容器网络macvlan
+date: 2019-03-16 15:22:38
 toc: true
 categories: [ kubernetes ]
 tags: [ docker ]
-date: 2019-03-16 15:22:38
 ---
 
 除了 overlay，docker 还开发了另一个支持跨主机容器网络的 driver：macvlan。

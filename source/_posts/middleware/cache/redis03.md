@@ -1,10 +1,9 @@
 ---
-layout: post
 title: redis笔记03 - 进阶篇
 date: 2015-07-12 16:15:42 +0800
 toc: true
 categories: [中间件]
-tags: [redis]
+tags: [ redis ]
 ---
 
 redis中的事务transaction是一组命令集合，要么都执行，要么都不执行。

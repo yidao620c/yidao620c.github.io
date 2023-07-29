@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Docker容器安装Redis集群
 date: '2018-09-02 10:24:40 +0800'
 toc: true

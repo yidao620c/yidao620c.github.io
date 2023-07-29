@@ -1,8 +1,6 @@
 ---
-layout: post
 title: Prometheus核心概念
 date: 2021-02-17 09:16:59 +0800
-comments: true
 toc: true
 categories: [ 中间件 ]
 tags: [ prometheus ]

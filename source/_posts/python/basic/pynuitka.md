@@ -1,10 +1,9 @@
 ---
-layout: post
 title: 使用Nuitka打包Python程序
 date: 2020-05-12 22:22:26 +0800
 toc: true
 categories: [ python ]
-tags: [ Nuitka ]
+tags: [ python, nuitka ]
 ---
 首先通过PyQt5来创建一个GUI程序，比如我写的一个简单的计算器程序目录如下：
 ![img.png](https://xnstatic-1253397658.file.myqcloud.com/20200512-01.png)

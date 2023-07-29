@@ -1,11 +1,9 @@
 ---
-layout: post
 title: JVM工具-可视化工具VisualVM
 date: 2021-04-25 14:12:55 +0800
-comments: true
 toc: true
 categories: [ java ]
-tags: [ java, jvm ]
+tags: [ jvm ]
 ---
 
 VisualVM是功能最强大的运行监控和故障处理工具之一，曾经很长一段时间是Oracle官方主力发展的虚拟机故障处理工具。

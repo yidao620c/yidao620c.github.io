@@ -1,5 +1,4 @@
 ---
-layout: post
 title: Django1.9开发博客03- 部署
 date: 2015-08-06 19:03:57 +0800
 toc: true

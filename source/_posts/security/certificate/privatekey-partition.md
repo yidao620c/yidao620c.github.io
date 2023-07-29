@@ -1,7 +1,6 @@
 ---
 title: 【安全贴士】私钥分片和管道口令读取
 date: 2020-05-28 11:15:17 +0800
-comments: true
 toc: true
 categories: [ 网络安全 ]
 tags:
