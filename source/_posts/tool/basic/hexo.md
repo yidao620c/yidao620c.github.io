@@ -821,6 +821,8 @@ busuanzi_count:
 然后再点击到域名设置中，配置CNAME的域名，对自定义域名配置两个（对于@和www都配置一下），一个是`境外`还是指向yidao620c.github.io，
 另一个是`境内`指向CND加速域名`www.xncoding.com.cdn.dnsv1.com.cn`，这个地址在前面一步配置CND的时候复制过来即可。
 
+特别注意，如果hexo有个CNAME文件记得删除。不然会自动让github pages重定向到自定义域名，导致不停地循环301跳转。
+
 ## 升级指南
 
 直接先升级hexo-cli，然后再升级next主题。
