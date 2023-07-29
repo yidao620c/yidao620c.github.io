@@ -501,26 +501,7 @@ category_generator:
 ```
 
 ## 绑定自己的域名
-
-Github Page绑定自己域名，在source/目录下面新建`CNAME`文件，里面写入你自己的域名比如
-
-```
-www.pycoding.com
-```
-
-去自己的域名运营商处添加CNAME类型的DNS记录:
-
-```
-CNAME: @        =>  yidao620c.github.io
-CNAME: www      =>  yidao620c.github.io
-```
-
-如果是DNSPod，那么后面多加个点
-
-```
-@，CNAME，cmback.github.io.
-www，CNAME，cmback.github.io.
-```
+推荐使用CDN的域名解析，不用在GitHub Page绑定。
 
 ## 站内搜索
 
