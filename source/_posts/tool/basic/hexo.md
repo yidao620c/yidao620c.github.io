@@ -808,9 +808,6 @@ busuanzi_count:
 设置方法为域名解析中配置显性URL。
 ![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
 
-在CDN配置中，把xncoding.com也在cdn做域名接入。同时还要找到`缓存配置` >> `访问url重写配置`，将开关打开后，添加如下配置
-![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-03.png)
-
 ## 升级指南
 直接先升级hexo-cli，然后再升级next主题。
 
