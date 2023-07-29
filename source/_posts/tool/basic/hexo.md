@@ -821,14 +821,6 @@ busuanzi_count:
 然后再点击到域名设置中，配置CNAME的域名，对自定义域名配置两个（对于@和www都配置一下），一个是`境外`还是指向yidao620c.github.io，
 另一个是`境内`指向CND加速域名`www.xncoding.com.cdn.dnsv1.com.cn`，这个地址在前面一步配置CND的时候复制过来即可。
 
-另外，还可以设置顶级域名自动跳转www二级域名，比如我的xncoding.com自动跳转至www.xncoding.com，
-设置方法为域名解析中配置显性URL。
-
-![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
-
-在CDN配置中找到缓存配置 >> 访问url重写添加如下配置
-![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-02.png)
-
 ## 升级指南
 
 直接先升级hexo-cli，然后再升级next主题。
