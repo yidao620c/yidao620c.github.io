@@ -2,7 +2,7 @@
 title: Docker每天学一点02 - 架构详解
 date: 2019-03-02 09:21:56
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

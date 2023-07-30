@@ -2,7 +2,7 @@
 title: Docker Compose教程
 date: 2020-12-01 09:35:12
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

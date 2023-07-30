@@ -2,7 +2,7 @@
 title: Docker每天学一点06 - 运行容器
 date: 2019-03-09 09:16:33
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

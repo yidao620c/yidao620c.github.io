@@ -2,7 +2,7 @@
 title: Docker每天学一点08 - 存储卷
 date: 2019-03-11 10:37:55
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

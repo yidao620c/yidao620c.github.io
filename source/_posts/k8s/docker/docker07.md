@@ -2,7 +2,7 @@
 title: Docker每天学一点07 - 单主机网络
 date: 2019-03-10 12:17:22
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

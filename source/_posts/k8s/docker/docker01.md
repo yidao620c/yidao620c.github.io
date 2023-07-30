@@ -2,7 +2,7 @@
 title: Docker每天学一点01 - 入门
 date: 2019-03-01 16:11:23
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

@@ -2,7 +2,7 @@
 title: Docker每天学一点09 - 多主机管理
 date: 2019-03-12 19:15:36
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

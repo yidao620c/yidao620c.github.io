@@ -2,8 +2,8 @@
 title: Kubernetes安装和配置
 date: '2020-02-02 10:20:11 +0800'
 toc: true
-categories: [ kubernetes ]
-tags: [ kubernetes ]
+categories: [ k8s ]
+tags: [ k8s ]
 ---
 
 Kubernetes是一个全新的基于容器技术的分布式架构解决方案，是一个可移植的、可扩展的开源平台，

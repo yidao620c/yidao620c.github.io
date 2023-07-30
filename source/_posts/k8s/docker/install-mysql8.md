@@ -2,7 +2,7 @@
 title: Docker安装MySQL8
 date: 2020-12-05 09:35:12
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 

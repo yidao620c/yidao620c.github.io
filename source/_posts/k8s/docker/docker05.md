@@ -2,7 +2,7 @@
 title: Docker每天学一点05 - Registry
 date: 2019-03-07 12:07:09
 toc: true
-categories: [ kubernetes ]
+categories: [ k8s ]
 tags: [ docker ]
 ---
 
