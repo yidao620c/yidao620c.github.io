@@ -804,9 +804,10 @@ busuanzi_count:
 
 特别注意，如果hexo有个CNAME文件记得删除。不然会自动让github pages重定向到自定义域名，导致不停地循环301跳转。
 
-另外，还可以设置顶级域名自动跳转www二级域名，比如我的xncoding.com自动跳转至www.xncoding.com，
-设置方法为域名解析中配置显性URL。
-![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
+另外，如果还想对顶级域名也能跟www域名一样访问，则域名解析和CDN配置域名两个地方跟www域名配置类似，多加一条解析记录即可。
+![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230730-01.png)
+
+![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230730-02.png)
 
 ## 升级指南
 直接先升级hexo-cli，然后再升级next主题。
