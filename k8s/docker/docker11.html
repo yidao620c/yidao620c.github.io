@@ -20,22 +20,20 @@
     var CONFIG = {"hostname":"www.xncoding.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"appID":"IQUD4IM8MM","apiKey":"5b89dec2bf05dd488435bcdb942cf385","indexName":"blogindex","hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="容器是一种轻量级、可移植、自包含的软件打包技术，使应用程序可以在几乎任何地方以相同的方式运行。 开发人员在自己笔记本上创建并测试好的容器，无需任何修改就能够在生产系统的虚拟机、物理服务器或公有云主机上运行。 可以将容器想象成运输行业中的集装箱，Docker 将集装箱思想运用到软件打包上，为代码提供了一个基于容器的标准化运输系统。 Docker 可以将任何应用及其依赖打包成一个轻量级、可移植、自包含">
+  <meta name="description" content="除了 overlay，docker 还开发了另一个支持跨主机容器网络的 driver：macvlan。 macvlan 本身是 linxu kernel 模块，其功能是允许在同一个物理网卡上配置多个 MAC 地址， 即多个 interface，每个 interface 可以配置自己的 IP。macvlan 本质上是一种网卡虚拟化技术，Docker 用 macvlan 实现容器网络就不奇怪了。 ma">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Docker每天学一点01 - 入门">
-<meta property="og:url" content="https://www.xncoding.com/kubernetes/docker/docker01.html">
+<meta property="og:title" content="Docker每天学一点11 - 容器网络macvlan">
+<meta property="og:url" content="https://www.xncoding.com/k8s/docker/docker11.html">
 <meta property="og:site_name" content="飞污熊博客">
-<meta property="og:description" content="容器是一种轻量级、可移植、自包含的软件打包技术，使应用程序可以在几乎任何地方以相同的方式运行。 开发人员在自己笔记本上创建并测试好的容器，无需任何修改就能够在生产系统的虚拟机、物理服务器或公有云主机上运行。 可以将容器想象成运输行业中的集装箱，Docker 将集装箱思想运用到软件打包上，为代码提供了一个基于容器的标准化运输系统。 Docker 可以将任何应用及其依赖打包成一个轻量级、可移植、自包含">
+<meta property="og:description" content="除了 overlay，docker 还开发了另一个支持跨主机容器网络的 driver：macvlan。 macvlan 本身是 linxu kernel 模块，其功能是允许在同一个物理网卡上配置多个 MAC 地址， 即多个 interface，每个 interface 可以配置自己的 IP。macvlan 本质上是一种网卡虚拟化技术，Docker 用 macvlan 实现容器网络就不奇怪了。 ma">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker01.png">
-<meta property="article:published_time" content="2019-03-01T08:11:23.000Z">
-<meta property="article:modified_time" content="2023-07-29T22:39:56.616Z">
+<meta property="article:published_time" content="2019-03-16T07:22:38.000Z">
+<meta property="article:modified_time" content="2023-07-30T00:53:52.159Z">
 <meta property="article:author" content="Xiong Neng">
 <meta property="article:tag" content="docker">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker01.png">
 
-<link rel="canonical" href="https://www.xncoding.com/kubernetes/docker/docker01.html">
+<link rel="canonical" href="https://www.xncoding.com/k8s/docker/docker11.html">
 
 
 <script id="page-configurations">
@@ -48,7 +46,7 @@
   };
 </script>
 
-  <title>Docker每天学一点01 - 入门 | 飞污熊博客</title>
+  <title>Docker每天学一点11 - 容器网络macvlan | 飞污熊博客</title>
   
 
 
@@ -195,7 +193,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/kubernetes/docker/docker01.html">
+    <link itemprop="mainEntityOfPage" href="https://www.xncoding.com/k8s/docker/docker11.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/my.png">
@@ -208,7 +206,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Docker每天学一点01 - 入门
+          Docker每天学一点11 - 容器网络macvlan
         </h1>
 
         <div class="post-meta">
@@ -218,7 +216,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2019-03-01 16:11:23" itemprop="dateCreated datePublished" datetime="2019-03-01T16:11:23+08:00">2019-03-01</time>
+              <time title="创建时间：2019-03-16 15:22:38" itemprop="dateCreated datePublished" datetime="2019-03-16T15:22:38+08:00">2019-03-16</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -226,7 +224,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/kubernetes/" itemprop="url" rel="index"><span itemprop="name">kubernetes</span></a>
+                  <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
                 </span>
             </span>
 
@@ -241,55 +239,43 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>容器是一种轻量级、可移植、自包含的软件打包技术，使应用程序可以在几乎任何地方以相同的方式运行。
-开发人员在自己笔记本上创建并测试好的容器，无需任何修改就能够在生产系统的虚拟机、物理服务器或公有云主机上运行。</p>
-<p>可以将容器想象成运输行业中的集装箱，Docker 将集装箱思想运用到软件打包上，为代码提供了一个基于容器的标准化运输系统。
-Docker 可以将任何应用及其依赖打包成一个轻量级、可移植、自包含的容器。容器可以运行在几乎所有的操作系统上。</p>
-<p>其实，”集装箱” 和 “容器” 对应的英文单词都是 “Container”。”容器” 是国内约定俗成的叫法，
-可能是因为容器比集装箱更抽象，更适合软件领域的原故吧。Docker 的 Logo 不就是一条鲸鱼上面一堆集装箱吗？</p>
-<p>第一篇我先搭建实验环境，尽快让一个容器运行起来，我使用的操作系统是CentOS7.2，安装的是免费的社区版CE。</p>
+        <p>除了 overlay，docker 还开发了另一个支持跨主机容器网络的 driver：macvlan。</p>
+<p>macvlan 本身是 linxu kernel 模块，其功能是允许在同一个物理网卡上配置多个 MAC 地址，
+即多个 interface，每个 interface 可以配置自己的 IP。macvlan 本质上是一种网卡虚拟化技术，Docker 用 macvlan 实现容器网络就不奇怪了。</p>
+<p>macvlan 的最大优点是性能极好，相比其他实现，macvlan 不需要创建 Linux bridge，
+而是直接通过以太 interface 连接到物理网络。下面我们就来创建一个 macvlan 网络。</p>
 <span id="more"></span>
 
-<h2 id="安装Docker"><a href="#安装Docker" class="headerlink" title="安装Docker"></a>安装Docker</h2><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># step 1: 安装必要的一些系统工具</span></span><br><span class="line">sudo yum install -y yum-utils device-mapper-persistent-data lvm2</span><br><span class="line"><span class="comment"># Step 2: 添加软件源信息</span></span><br><span class="line">sudo yum-config-manager --add-repo http:<span class="regexp">//mi</span>rrors.aliyun.com<span class="regexp">/docker-ce/</span>linux<span class="regexp">/centos/</span>docker-ce.repo</span><br><span class="line"><span class="comment"># Step 3: 更新并安装 Docker-CE</span></span><br><span class="line">sudo yum makecache fast</span><br><span class="line">sudo yum -y install docker-ce</span><br></pre></td></tr></table></figure>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>我们会使用 host1 和 host2 上单独的网卡 enp0s3 创建 macvlan。为保证多个 MAC 地址的网络包都可以从 enp0s3 通过，我们需要打开网卡的混杂模式。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip <span class="keyword">link</span> <span class="built_in">set</span> enp0s3 promisc <span class="keyword">on</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>默认没有这些配置文件，手动创建即可</p>
-<ul>
-<li>&#x2F;etc&#x2F;default&#x2F;docker &#x3D;&#x3D;&gt; service启动配置文件</li>
-<li>&#x2F;etc&#x2F;docker&#x2F;daemon.json &#x3D;&#x3D;&gt; 1.12版本后万能配置文件</li>
-</ul>
-<p>编辑<code>/etc/docker/daemon.json</code>，如果没有就创建一个：</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir <span class="regexp">/etc/</span>docker</span><br><span class="line">vim <span class="regexp">/etc/</span>docker/daemon.json</span><br></pre></td></tr></table></figure>
+<p>因为我的环境上面 host1 和 host2 是 VirtualBox 虚拟机，还需要在网卡配置选项页中设置混杂模式。这个在前面overlay网络互通时候已经设置过。</p>
+<h2 id="创建-macvlan-网络"><a href="#创建-macvlan-网络" class="headerlink" title="创建 macvlan 网络"></a>创建 macvlan 网络</h2><p>先看网卡配置：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">2</span>: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu <span class="number">1500</span> qdisc pfifo_fast state UP group default qlen <span class="number">1000</span></span><br><span class="line">    <span class="attribute">link</span>/ether <span class="number">08</span>:<span class="number">00</span>:<span class="number">27</span>:<span class="number">78</span>:b4:<span class="number">16</span> brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    <span class="attribute">inet</span> <span class="number">192.168.1.21</span>/<span class="number">24</span> brd <span class="number">192.168.1.255</span> scope global noprefixroute enp0s3</span><br><span class="line">       <span class="attribute">valid_lft</span> forever preferred_lft forever</span><br><span class="line">    <span class="attribute">inet6</span> fe80::a00:<span class="number">27</span>ff:fe78:b416/<span class="number">64</span> scope link </span><br><span class="line">       <span class="attribute">valid_lft</span> forever preferred_lft forever</span><br></pre></td></tr></table></figure>
 
-<p>写入如下内容：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;storage-driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;devicemapper&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>ip地址为192.168.1.21，为了不和这个IP冲突，我们需要在创建macvlan的时候，排除此IP，使用docker network命令创建：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker<span class="built_in"> network </span>create -d macvlan \</span><br><span class="line"> <span class="attribute">--subnet</span>=192.168.1.0/24 \</span><br><span class="line"> <span class="attribute">--gateway</span>=192.168.1.1 \</span><br><span class="line"> <span class="attribute">--aux-address</span>=<span class="string">&quot;exclude_host=192.168.1.21&quot;</span> \</span><br><span class="line"> -o <span class="attribute">parent</span>=enp0s3 mac_net1</span><br></pre></td></tr></table></figure>
 
-<h2 id="启动docker"><a href="#启动docker" class="headerlink" title="启动docker"></a>启动docker</h2><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="literal">start</span> docker</span><br></pre></td></tr></table></figure>
+<ol>
+<li><code>-d macvlan</code> 指定 driver 为 macvlan。</li>
+<li>macvlan 网络是 local 网络，为了保证跨主机能够通信，用户需要自己管理 IP subnet。</li>
+<li>与其他网络不同，docker 不会为 macvlan 创建网关，这里的网关应该是真实存在的，否则容器无法路由。</li>
+<li>-o parent 指定使用的网络 interface。</li>
+</ol>
+<p>在 host2 中也要执行相同的命令创建macvlan网络。</p>
+<p>在 host1 中运行容器 bbox1 并连接到 mac_net1，指定ip地址为192.168.1.10</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">run</span> -itd --name bbox1 <span class="attribute">--ip</span>=192.168.1.10 --network mac_net1 busybox</span><br></pre></td></tr></table></figure>
 
-<p>查看启动状态：</p>
-<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">sudo systemctl status docker</span></span><br></pre></td></tr></table></figure>
+<p>在 host2 中运行容器 bbox2 并连接到 mac_net1，指定ip地址为192.168.1.11</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">run</span> -itd --name bbox2 <span class="attribute">--ip</span>=192.168.1.11 --network mac_net1 busybox</span><br></pre></td></tr></table></figure>
 
-<h2 id="镜像下载加速"><a href="#镜像下载加速" class="headerlink" title="镜像下载加速"></a>镜像下载加速</h2><p>由于 Docker Hub 的服务器在国外，下载镜像会比较慢。幸好 DaoCloud 为我们提供了免费的国内镜像服务。</p>
-<p>下面介绍如果使用镜像服务。</p>
-<p>在 daocloud.io 免费注册一个用户，可直接用GitHub用户注册。进入加速器页面: <a target="_blank" rel="noopener" href="https://www.daocloud.io/mirror">https://www.daocloud.io/mirror</a></p>
-<p>对于linux平台，下面有一行脚本：</p>
-<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -sSL https:<span class="regexp">//g</span>et.daocloud.io<span class="regexp">/daotools/</span>set_mirror.sh | sh -s http:<span class="regexp">//</span>f1361db2.m.daocloud.io</span><br></pre></td></tr></table></figure>
+<p>验证 bbox1 和 bbox1 的连通性</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# docker exec bbox2<span class="built_in"> ping </span>192.168.1.10<span class="built_in"></span></span><br><span class="line"><span class="built_in">PING </span>192.168.1.10 (192.168.1.10): 56 data bytes</span><br><span class="line">64 bytes <span class="keyword">from</span> 192.168.1.10: <span class="attribute">seq</span>=0 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=4.775 ms</span><br><span class="line">64 bytes <span class="keyword">from</span> 192.168.1.10: <span class="attribute">seq</span>=1 <span class="attribute">ttl</span>=64 <span class="attribute">time</span>=0.616 ms</span><br></pre></td></tr></table></figure>
 
-<p>我测试的时候，这个脚本会在&#x2F;etc&#x2F;docker&#x2F;daemon.json中写入：</p>
-<figure class="highlight prolog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="string">&quot;registry-mirrors&quot;</span>: [<span class="string">&quot;http://f1361db2.m.daocloud.io&quot;</span>],&#125;</span><br></pre></td></tr></table></figure>
+<p>ping主机名：</p>
+<figure class="highlight autoit"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root<span class="symbol">@host2</span> ~]<span class="meta"># docker exec bbox2 ping -c 2 bbox1</span></span><br><span class="line"><span class="built_in">ping</span>: bad address <span class="string">&#x27;bbox1&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p>请把里面的逗号去掉，然后重启docker，体验飞一般的感觉：</p>
-<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">restart</span> docker.service</span><br></pre></td></tr></table></figure>
-
-<h2 id="测试docker"><a href="#测试docker" class="headerlink" title="测试docker"></a>测试docker</h2><p>通过运行<code>hello world</code>镜像来测试容器是否已经被成功安装：</p>
-<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="built_in">run</span> hello-world</span><br></pre></td></tr></table></figure>
-
-<p>这条命令会现在一个test镜像并在容器里运行它，当容器运行后会打印一条信息并退出来。</p>
-<p>或者运行一个httpd镜像：</p>
-<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">docker</span> run -d -p <span class="number">8020</span>:<span class="number">80</span> httpd</span><br></pre></td></tr></table></figure>
-
-<p>从 Docker Hub 下载 httpd 镜像。镜像中已经安装好了 Apache HTTP Server，并将容器的 80 端口映射到 host 的 8020 端口</p>
-<p>然后访问：<code>http://[hostIP]</code>就可以看到效果了：</p>
-<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker01.png"></p>
+<p>可见 docker 没有为 macvlan 提供 DNS 服务，这点与 overlay 网络是不同的。</p>
 
     </div>
 
@@ -308,12 +294,12 @@ Docker 可以将任何应用及其依赖打包成一个轻量级、可移植、�
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/security/cas/cas07.html" rel="prev" title="CAS教程 - Restful API方式实现SSO">
-      <i class="fa fa-chevron-left"></i> CAS教程 - Restful API方式实现SSO
+    <a href="/k8s/docker/docker10.html" rel="prev" title="Docker每天学一点10 - 容器网络overlay">
+      <i class="fa fa-chevron-left"></i> Docker每天学一点10 - 容器网络overlay
     </a></div>
       <div class="post-nav-item">
-    <a href="/kubernetes/docker/docker02.html" rel="next" title="Docker每天学一点02 - 架构详解">
-      Docker每天学一点02 - 架构详解 <i class="fa fa-chevron-right"></i>
+    <a href="/k8s/docker/docker-softwares.html" rel="next" title="Docker安装常用软件">
+      Docker安装常用软件 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -373,7 +359,7 @@ Docker 可以将任何应用及其依赖打包成一个轻量级、可移植、�
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Docker"><span class="nav-number">1.</span> <span class="nav-text">安装Docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8docker"><span class="nav-number">3.</span> <span class="nav-text">启动docker</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E4%B8%8B%E8%BD%BD%E5%8A%A0%E9%80%9F"><span class="nav-number">4.</span> <span class="nav-text">镜像下载加速</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95docker"><span class="nav-number">5.</span> <span class="nav-text">测试docker</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-macvlan-%E7%BD%91%E7%BB%9C"><span class="nav-number">2.</span> <span class="nav-text">创建 macvlan 网络</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
