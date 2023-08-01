@@ -23,7 +23,8 @@ tags: [ linux ]
 打开Raspberry Pi Imager，选择自定义的镜像并选中上面已经下载好的Ubuntu镜像，然后再选择存储卡，点击烧录即可。
 
 ## 配置网络
-烧录完了先不要急着拔掉闪存卡，这里可以先配置下网络，后面可以SSH连接上，这样就不需要键盘鼠标和显示器了。在闪存卡的根目录找到network-config文件，用记事本打开。将下面的这段前面注释解开：
+烧录完了先不要急着拔掉闪存卡，这里可以先配置下网络，后面可以SSH连接上，这样就不需要键盘鼠标和显示器了。在闪存卡的根目录找到network-config文件，
+用记事本打开。将下面的这段前面注释解开：
 ```yaml
 wifis:
   wlan0:
@@ -65,25 +66,13 @@ arp -a
 
 默认的用户名和密码都是 "ubuntu", 第一次登陆后系统会要求你修改密码. 安全起见, 一定要修改密码.
 
-## 无线配置 Debug
-如果错过了在第一次启动前配置 WiFi, 或者配置的无线有问题, 那么可以按照如下方法 Debug:
-
-首先看一下无线网卡的名称:
+## 配置静态IP
+用户SSH连接上Ubuntu Server 22.0.4之后，第一件事就是将动态DHCP分配IP修改成静态IP地址。
 ```
-root@ubuntu:/home/ubuntu# ls /sys/class/net
-eth0  lo  wlan0
+sudo vim /etc/netplan/50-cloud-init.yaml
 ```
-
-一般情况有线网卡都叫 "eth", 无线网卡都叫 "wlan" (不过也有很多特例...)
-
-我们可以看到 无线网卡叫 "wlan0"。然后编辑 /etc/netplan/50-cloud-init.yaml 文件
-然后将之前的 WiFi 配置添加到配置文件最后:
+修改文件内容如下：
 ```yaml
-# This file is generated from information provided by the datasource. Changes
-# to it will not persist across an instance reboot. To disable cloud-init's
-# network configuration capabilities, write a file
-# /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
-# network: {config: disabled}
 network:
     ethernets:
         eth0:
@@ -92,18 +81,21 @@ network:
     version: 2
     wifis:
         wlan0:
-            dhcp4: true
+            dhcp4: no
             optional: true
+            addresses: [192.168.1.7/24]
+            routes:
+                - to: default
+                  via: 192.168.1.1
+            nameservers:
+                addresses: [192.168.1.1]
             access-points:
-                "你的无线SSID":
-                    password: "你的无线密码"
+                1209-5G:
+                    password: '12091209'
 ```
-然后运行:
-```bash
-sudo netplan generate
-sudo netplan apply
+然后执行
 ```
-
-按道理这样就应该能让WiFi正常连接了. 仍然可以用 ip a 命令查看 wlan0 是不是自动获得了 IP 地址. 
-获得了 IP 地址即代表连接到了目标网络并且 DHCP 服务器工作正常, 给你自动分配了地址.
+sudo netplan generate # 没有报错则ok
+sudo netplan apply # 此时应用静态ip修改，IP地址发生改变
+```
 
