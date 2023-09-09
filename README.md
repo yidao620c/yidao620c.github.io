@@ -4,10 +4,6 @@
 
 <http://highlightjs.readthedocs.io/en/latest/css-classes-reference.html>
 
-### 评论系统
-
-使用gitalk省事多了，不搞评论了，就一个干干净净的博客还挺清爽的。
-
 ### 图片地址
 
 ![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
