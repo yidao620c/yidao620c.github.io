@@ -98,3 +98,9 @@ sudo netplan generate # 没有报错则ok
 sudo netplan apply # 此时应用静态ip修改，IP地址发生改变
 ```
 
+## 树莓派备份
+
+* https://github.com/mghcool/Raspberry-backup
+* https://github.com/nanhantianyi/rpi-backup
+
+优选第一个方案。
