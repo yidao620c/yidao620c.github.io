@@ -104,3 +104,19 @@ sudo netplan apply # 此时应用静态ip修改，IP地址发生改变
 * https://github.com/nanhantianyi/rpi-backup
 
 优选第一个方案。
+
+## Ubuntu系统关闭unattended upgrades
+在使用ubuntu虚拟机的过程中，遇到关机或重启很慢的问题，提示有一个UU（unattended upgrades）进程在工作，需要等待30min。
+
+经过一番了解，发现这个UU（unattended upgrades）进程就是ubuntu搞的一个类似于windows系统的自动更新程序，
+目的是让普通用户的系统能随时保持最新，但对于开发来说实属麻烦。这个进程会在后台自动下载和安装系统更新文件，会阻止关机，有时候还会阻止你安装其他软件
+
+```
+sudo apt remove unattended-upgrades
+```
+从此再也不受这个问题困扰了，搞定！重启系统试试吧！
+这个方法完全关闭自动更新了，但如果还想手动更新怎么办？完全不用担心，因为还有如下两条指令，在需要的时候手动输入更新就好了
+```
+sudo apt update
+sudo apt upgrade
+```
