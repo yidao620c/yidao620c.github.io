@@ -17,24 +17,9 @@ tags: [ 开发工具 ]
 
 **安装依赖软件**
 
-[Node.js](https://nodejs.org/en)
+**安装Nodejs**
 
-```bash
-yum install curl sudo
-sudo yum install epel-release
-curl --silent --location https://rpm.nodesource.com/setup_6.x | sudo bash -
-sudo yum install nodejs
-sudo yum install gcc-c++ make
-node -v
-```
-
-**换淘宝源**
-
-```
-npm install -g cnpm --registry=https://registry.npm.taobao.org
-```
-
-之后使用cnpm命令代替npm命令
+首先安装Nodejs环境，参考我的博客《Nodejs的安装和配置》即可。
 
 **安装gitbook-cli**
 

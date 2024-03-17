@@ -8,9 +8,12 @@ tags: [ web, vue ]
 笔记来自于Vue3应用开发和核心源码解析，最关键的一些东西记录下来。
 <!--more-->
 
+## 安装Nodejs
+
+首先安装Nodejs环境，参考我的博客《Nodejs的安装和配置》即可。
+
 ## 通过Vite脚本初始化
 ```
-npm install -g cnpm --registry=https://registry.npm.taobao.org
 cnpm init vite@latest
 cnpm install vuex@next
 cnpm install vue-router@4

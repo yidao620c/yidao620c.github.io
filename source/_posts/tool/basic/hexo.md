@@ -19,42 +19,9 @@ hexo是一个台湾人做的基于Node.js的静态博客程序，优势是生成
 
 ### 安装依赖软件
 
-[Node.js](https://nodejs.org/en): node.js用来创建hexo博客框架的
+首先安装Nodejs环境，参考我的博客《Nodejs的安装和配置》即可。
 
-如果是windows系统，可以直接下载安装文件安装。如果是linux系统，可以使用下面的命令行：
-
-```bash
-wget https://nodejs.org/dist/v6.10.0/node-v6.10.0.tar.gz
-tar xzvf node-v* && cd node-v*
-yum install gcc gcc-c++
-./configure --prefix=/usr/local/nodejs
-make && make install  #这步时间很久20分钟
-node --version  # 如果命令找不到就将/usr/local/nodejs/bin加入PATH中
-```
-
-最新的node.js已经集成了npm，不过需要经常更新：
-
-```bash
-npm install npm@latest -g
-npm --version
-```
-
-### 换淘宝源
-
-```bash
-npm install -g cnpm --registry=https://registry.npm.taobao.org
-```
-
-之后使用cnpm命令代替npm命令，或者你直接通过添加 npm 参数 alias 一个新命令:
-
-```bash
-alias cnpm="npm --registry=https://registry.npm.taobao.org \
---cache=$HOME/.npm/.cache/cnpm \
---disturl=https://npm.taobao.org/dist \
---userconfig=$HOME/.cnpmrc"
-```
-
-[Git客户端](http://git-scm.com/download/win): 把本地的hexo内容提交到github上去
+安装[Git客户端](http://git-scm.com/download/win)，用于把本地的hexo内容提交到github上去
 
 ### 安装hexo
 
