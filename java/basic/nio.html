@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&amp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NIO笔记-缓存器细节">
+<meta property="og:url" content="http://yidao620c.github.io/java/basic/nio.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。 下表是用于设置和复位索引以及查询它们的方法：    方法 说明    capacity() 返回缓存区容量   clear() 清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区   flip() limit&amp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-06-20T10:15:42.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.595Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/basic/nio.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/basic/nio.html","path":"java/basic/nio.html","title":"NIO笔记-缓存器细节"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NIO笔记-缓存器细节 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/basic/nio.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NIO笔记-缓存器细节 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NIO笔记-缓存器细节
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-06-20 18:15:42" itemprop="dateCreated datePublished" datetime="2015-06-20T18:15:42+08:00">2015-06-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Buffer由数据和可以高效访问以及操纵这些数据的四个索引组成，这四个索引是：mark、position、limit、capacity。
+下表是用于设置和复位索引以及查询它们的方法：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>capacity()</td>
+<td>返回缓存区容量</td>
+</tr>
+<tr>
+<td>clear()</td>
+<td>清空缓存区，position&#x3D;0，limit&#x3D;capacity，此方法可覆写缓存区</td>
+</tr>
+<tr>
+<td>flip()</td>
+<td>limit&#x3D;position，position&#x3D;0，用于准备从缓存区读取已经写入的数据</td>
+</tr>
+<tr>
+<td>limit()</td>
+<td>返回limit的值</td>
+</tr>
+<tr>
+<td>limit(int lim)</td>
+<td>设置limit的值</td>
+</tr>
+<tr>
+<td>mark()</td>
+<td>将mark设置为position</td>
+</tr>
+<tr>
+<td>position()</td>
+<td>返回position的值</td>
+</tr>
+<tr>
+<td>position(int pos)</td>
+<td>设置position的值</td>
+</tr>
+<tr>
+<td>remaining()</td>
+<td>返回(limit - position)</td>
+</tr>
+<tr>
+<td>hasRemaining()</td>
+<td>若有介于position和limit之间的元素，返回true</td>
+</tr>
+<tr>
+<td>reset()</td>
+<td>将position设置为mark</td>
+</tr>
+<tr>
+<td>rewind()</td>
+<td>将position设置为0，也就是缓存区的开始位置</td>
+</tr>
+</tbody></table>
+<p>在缓存区中插入和提取数据的方法会更新这些索引，用于反映所发生的变化。</p>
+<span id="more"></span>
+
+<p>下面的示例用到一个很简单的算法 - 交换相邻字符，以对CharBuffer中的字符进行编码和译码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UsingBuffers</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">symmetricScramble</span><span class="params">(CharBuffer buffer)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (buffer.hasRemaining()) &#123;</span><br><span class="line">            buffer.mark();</span><br><span class="line">            <span class="type">char</span> <span class="variable">c1</span> <span class="operator">=</span> buffer.get();</span><br><span class="line">            <span class="type">char</span> <span class="variable">c2</span> <span class="operator">=</span> buffer.get();</span><br><span class="line">            buffer.reset();</span><br><span class="line">            buffer.put(c2).put(c1);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">char</span>[] data = <span class="string">&quot;UsingBuffers&quot;</span>.toCharArray();</span><br><span class="line">        <span class="type">ByteBuffer</span> <span class="variable">bb</span> <span class="operator">=</span> ByteBuffer.allocate(data.length * <span class="number">2</span>);</span><br><span class="line">        <span class="type">CharBuffer</span> <span class="variable">cb</span> <span class="operator">=</span> bb.asCharBuffer();</span><br><span class="line">        cb.put(data);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">        symmetricScramble(cb);</span><br><span class="line">        print(cb.rewind());</span><br><span class="line">    &#125;</span><br><span class="line">&#125; <span class="comment">/*</span></span><br><span class="line"><span class="comment">  * Output: UsingBuffers sUniBgfuefsr UsingBuffers</span></span><br><span class="line"><span class="comment">  */</span><span class="comment">// :~</span></span><br></pre></td></tr></table></figure>
+
+<p>尽管可以通过对某个char数组调用wrap方法直接产生一个CharBuffer，但是在本例中取而代之的是分配一个底层的ByteBuffer，产生的CharBuffer只是ByteBuffer上的一个视图而已。这里强调的是，我们总是以操纵ByteBuffer为目标，因为只有它才可以和通道进行交互。</p>
+<p>刚开始的时候，position指向缓存区第一个元素，capacity和limit指向最后一个元素。</p>
+<p>调用get方法和put方法的时候，position指针向前移动1个单位，具体移动几个字节byte，要看数据占用位数大小。
+有个重载的get和put方法，带索引参数，不过，这些方法不改变position指针。</p>
+<p>mark()方法会在当前位置打个标记，为了以后reset的时候position可以返回这个remark处。</p>
+<p>可以直接用带参的put方法去设置相应位置的值，也可以先reset到remark处后，put值。</p>
+<p>while循环最后，position指向缓存区的末尾了。如果要打印缓存区，只能打印出position和limit之间的字符，也就是啥都没了。因此这时候要显示缓存区的内容，必须使用rewind()
+把position设置到缓存区开始位置，这时候mark值变得不明确了。</p>
+<p><strong>内存映射文件 - 创建和修改大文件</strong></p>
+<p>先看一个瞬间创建一个128M的大文件的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LargeMappedFiles</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="type">int</span> <span class="variable">length</span> <span class="operator">=</span> <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">MappedByteBuffer</span> <span class="variable">out</span> <span class="operator">=</span></span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">RandomAccessFile</span>(<span class="string">&quot;test.dat&quot;</span>, <span class="string">&quot;rw&quot;</span>).getChannel()</span><br><span class="line">      .map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, length);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; length; i++)</span><br><span class="line">      out.put((<span class="type">byte</span>)<span class="string">&#x27;x&#x27;</span>);</span><br><span class="line">    print(<span class="string">&quot;Finished writing&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> length/<span class="number">2</span>; i &lt; length/<span class="number">2</span> + <span class="number">6</span>; i++)</span><br><span class="line">      printnb((<span class="type">char</span>)out.get(i));</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">///:~</span></span><br></pre></td></tr></table></figure>
+
+<p>为了既能读又能写，我们先由RandomAccessFile开始，获得该文件上的通道，然后调用map()
+产生MappedByteBuffer，这是一种特殊类型的直接缓存器。我们必须指定映射文件的初始位置和映射区域的长度，这意味着我们可以映射某个大文件的较小的部分。</p>
+<p>用这种方式，很大的文件可达2GB也可以很容易的修改。</p>
+<p>相比较旧的IO流而言，映射文件访问方式可以大大的提高性能。映射写必须要用RandomAccessFile。</p>
+<p><strong>文件加锁</strong></p>
+<p>Java的文件加锁直接映射到了本地操作系统的加锁工具上，因此文件锁对于其他操作系统进程是可见的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FileLocking</span> &#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    FileOutputStream fos= <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;file.txt&quot;</span>);</span><br><span class="line">    <span class="type">FileLock</span> <span class="variable">fl</span> <span class="operator">=</span> fos.getChannel().tryLock();</span><br><span class="line">    <span class="keyword">if</span>(fl != <span class="literal">null</span>) &#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;Locked File&quot;</span>);</span><br><span class="line">      TimeUnit.MILLISECONDS.sleep(<span class="number">100</span>);</span><br><span class="line">      fl.release();</span><br><span class="line">      System.out.println(<span class="string">&quot;Released Lock&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    fos.close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="comment">/* Output:</span></span><br><span class="line"><span class="comment">Locked File</span></span><br><span class="line"><span class="comment">Released Lock</span></span><br><span class="line"><span class="comment">*/</span><span class="comment">//:~</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>对映射文件的部分加锁</strong></p>
+<p>文件映射通常应用于极大文件，我们可能需要对这种巨大文件进行部分加锁，其他进程可以修改文件中未被加锁的部分。例如数据库文件就是这样。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LockingMappedFiles</span> &#123;</span><br><span class="line">  <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">LENGTH</span> <span class="operator">=</span> <span class="number">0x8FFFFFF</span>; <span class="comment">// 128 MB</span></span><br><span class="line">  <span class="keyword">static</span> FileChannel fc;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    fc =</span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">RandomAccessFile</span>(<span class="string">&quot;test.dat&quot;</span>, <span class="string">&quot;rw&quot;</span>).getChannel();</span><br><span class="line">    <span class="type">MappedByteBuffer</span> <span class="variable">out</span> <span class="operator">=</span></span><br><span class="line">      fc.map(FileChannel.MapMode.READ_WRITE, <span class="number">0</span>, LENGTH);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; LENGTH; i++)</span><br><span class="line">      out.put((<span class="type">byte</span>)<span class="string">&#x27;x&#x27;</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">LockAndModify</span>(out, <span class="number">0</span>, <span class="number">0</span> + LENGTH/<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">LockAndModify</span>(out, LENGTH/<span class="number">2</span>, LENGTH/<span class="number">2</span> + LENGTH/<span class="number">4</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LockAndModify</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> ByteBuffer buff;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> start, end;</span><br><span class="line">    LockAndModify(ByteBuffer mbb, <span class="type">int</span> start, <span class="type">int</span> end) &#123;</span><br><span class="line">      <span class="built_in">this</span>.start = start;</span><br><span class="line">      <span class="built_in">this</span>.end = end;</span><br><span class="line">      mbb.limit(end);</span><br><span class="line">      mbb.position(start);</span><br><span class="line">      buff = mbb.slice();</span><br><span class="line">      start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// Exclusive lock with no overlap:</span></span><br><span class="line">        <span class="type">FileLock</span> <span class="variable">fl</span> <span class="operator">=</span> fc.lock(start, end, <span class="literal">false</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;Locked: &quot;</span>+ start +<span class="string">&quot; to &quot;</span>+ end);</span><br><span class="line">        <span class="comment">// Perform modification:</span></span><br><span class="line">        <span class="keyword">while</span>(buff.position() &lt; buff.limit() - <span class="number">1</span>)</span><br><span class="line">          buff.put((<span class="type">byte</span>)(buff.get() + <span class="number">1</span>));</span><br><span class="line">        fl.release();</span><br><span class="line">        System.out.println(<span class="string">&quot;Released: &quot;</span>+start+<span class="string">&quot; to &quot;</span>+ end);</span><br><span class="line">      &#125; <span class="keyword">catch</span>(IOException e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/basic/callback.html" rel="prev" title="java中的回调函数">
+                  <i class="fa fa-angle-left"></i> java中的回调函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/cache/redis01.html" rel="next" title="redis笔记01 - 入门与安装">
+                  redis笔记01 - 入门与安装 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

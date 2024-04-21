@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一， 它通常是指，通过设计减少系统不能提供服务的时间。 单点往往是系统高可用最大的风险和敌人，应该尽量在系统设计的过程中避免单点。 高可用保证的原则是”集群化”，或者叫”冗余”：只有一个单点，挂了服务会受影响。 如果有冗余备份，挂了还有其他backup能够顶上。 有了冗余之后，还不够，每次出现故障需要人工介入恢复">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见互联网高可用架构">
+<meta property="og:url" content="http://yidao620c.github.io/design/basic/ha.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一， 它通常是指，通过设计减少系统不能提供服务的时间。 单点往往是系统高可用最大的风险和敌人，应该尽量在系统设计的过程中避免单点。 高可用保证的原则是”集群化”，或者叫”冗余”：只有一个单点，挂了服务会受影响。 如果有冗余备份，挂了还有其他backup能够顶上。 有了冗余之后，还不够，每次出现故障需要人工介入恢复">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch001.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch002.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch003.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch004.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch005.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch006.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch007.png">
+<meta property="article:published_time" content="2017-06-30T04:36:25.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:52:13.874Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/arch001.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/design/basic/ha.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/design/basic/ha.html","path":"design/basic/ha.html","title":"常见互联网高可用架构"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>常见互联网高可用架构 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E4%BA%92%E8%81%94%E7%BD%91%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">常见的互联网分层架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%B1%82%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">2.</span> <span class="nav-text">反向代理层高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AB%99%E7%82%B9%E5%B1%82%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">站点层高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%B1%82%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">服务层高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">5.</span> <span class="nav-text">缓存高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B1%82%E7%9A%84%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">数据库层的高可用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AF%BB%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">6.1.</span> <span class="nav-text">数据库读高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%86%99%E9%AB%98%E5%8F%AF%E7%94%A8"><span class="nav-number">6.2.</span> <span class="nav-text">数据库写高可用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/design/basic/ha.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="常见互联网高可用架构 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          常见互联网高可用架构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-30 12:36:25" itemprop="dateCreated datePublished" datetime="2017-06-30T12:36:25+08:00">2017-06-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index"><span itemprop="name">架构设计</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，
+它通常是指，通过设计减少系统不能提供服务的时间。</p>
+<p>单点往往是系统高可用最大的风险和敌人，应该尽量在系统设计的过程中避免单点。
+高可用保证的原则是”集群化”，或者叫”冗余”：只有一个单点，挂了服务会受影响。
+如果有冗余备份，挂了还有其他backup能够顶上。</p>
+<p>有了冗余之后，还不够，每次出现故障需要人工介入恢复势必会增加系统的不可服务实践。
+所以，又往往是通过”自动故障转移”来实现系统的高可用。</p>
+<p>接下来我们看下典型互联网架构中，如何通过”冗余+自动故障转移”来保证系统的高可用特性。</p>
+<span id="more"></span>
+
+<h2 id="常见的互联网分层架构"><a href="#常见的互联网分层架构" class="headerlink" title="常见的互联网分层架构"></a>常见的互联网分层架构</h2><p>先用一个图简单说明一下这个分层架构：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch001.png"></p>
+<p>从上至下分别为：</p>
+<ol>
+<li>客户端层：典型调用方是浏览器browser或者手机应用APP</li>
+<li>反向代理层：系统入口，反向代理</li>
+<li>站点应用层：实现核心应用逻辑，返回html或者json</li>
+<li>服务层：如果实现了服务化，就有这一层</li>
+<li>数据-缓存层：缓存加速访问存储</li>
+<li>数据-数据库层：数据库固化数据存储</li>
+</ol>
+<p>整个系统的高可用，又是通过每一层的”冗余+自动故障转移”来综合实现的。</p>
+<p>下面从反向代理层开始，分别介绍每一层的高可用实现</p>
+<h2 id="反向代理层高可用"><a href="#反向代理层高可用" class="headerlink" title="反向代理层高可用"></a>反向代理层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch002.png"></p>
+<p>【客户端层】到【反向代理层】的高可用，是通过反向代理层的冗余来实现的。以nginx为例：有两台nginx，
+一台对线上提供服务，另一台冗余以保证高可用，常见的实践是keepalived存活探测，相同virtual IP提供服务。</p>
+<p>自动故障转移：当nginx挂了的时候，keepalived能够探测到，会自动的进行故障转移，
+将流量自动迁移到备份nginx，由于使用的是相同的virtual IP，这个切换过程对调用方是透明的。</p>
+<h2 id="站点层高可用"><a href="#站点层高可用" class="headerlink" title="站点层高可用"></a>站点层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch003.png"></p>
+<p>【反向代理层】到【站点层】的高可用，是通过站点层的冗余来实现的。
+假设反向代理层是nginx，<code>nginx.conf</code>里能够配置多个web后端，并且nginx能够探测到多个后端的存活性。</p>
+<p>自动故障转移：当web-server挂了的时候，nginx能够探测到，会自动的进行故障转移，
+将流量自动迁移到其他的web-server，整个过程由nginx自动完成，对调用方是透明的。</p>
+<h2 id="服务层高可用"><a href="#服务层高可用" class="headerlink" title="服务层高可用"></a>服务层高可用</h2><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch004.png"></p>
+<p>【站点层】到【服务层】的高可用，是通过服务层的冗余来实现的。”服务连接池”会建立与下游服务多个连接，每次请求会”随机”选取连接来访问下游服务。</p>
+<p>自动故障转移：当service挂了的时候，service-connection-pool能够探测到，会自动的进行故障转移，将流量自动迁移到其他的service，
+整个过程由连接池自动完成，对调用方是透明的（所以说RPC-client中的服务连接池是很重要的基础组件）。</p>
+<p>一般这个会使用到分布式服务框架。</p>
+<h2 id="缓存高可用"><a href="#缓存高可用" class="headerlink" title="缓存高可用"></a>缓存高可用</h2><p>业务对缓存并不一定有”高可用”要求，更多的对缓存的使用场景，是用来”加速数据访问”：把一部分数据放到缓存里，
+如果缓存挂了或者缓存没有命中，是可以去后端的数据库中再取数据的。这类允许”cache miss”的业务场景，缓存架构的建议是：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch005.png"></p>
+<p>缓存实例挂了屏蔽：当有水平切分的实例挂掉时，代理层直接返回cache miss，此时缓存挂掉对调用方也是透明的。
+key水平切分实例减少，不建议做re-hash，这样容易引发缓存数据的不一致。</p>
+<h2 id="数据库层的高可用"><a href="#数据库层的高可用" class="headerlink" title="数据库层的高可用"></a>数据库层的高可用</h2><p>大部分互联网技术，数据库层都用了”主从同步，读写分离”架构，所以数据库层的高可用，又分为”读库高可用”与”写库高可用”两类。</p>
+<h3 id="数据库读高可用"><a href="#数据库读高可用" class="headerlink" title="数据库读高可用"></a>数据库读高可用</h3><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch006.png"></p>
+<p>【数据库读】的高可用，是通过读库的冗余来实现的。
+既然冗余了读库，一般来说就至少有2个从库，”数据库连接池”会建立与读库多个连接，每次请求会路由到这些读库。</p>
+<p>自动故障转移：当读库挂了的时候，db-connection-pool能够探测到，会自动的进行故障转移，将流量自动迁移到其他的读库，
+整个过程由连接池自动完成，对调用方是透明的（所以说DAO中的数据库连接池是很重要的基础组件）。</p>
+<h3 id="数据库写高可用"><a href="#数据库写高可用" class="headerlink" title="数据库写高可用"></a>数据库写高可用</h3><p><img src="https://xnstatic-1253397658.file.myqcloud.com/arch007.png"></p>
+<p>【数据库写】的高可用，是通过写库的冗余来实现的。
+以mysql为例，可以设置两个mysql双主同步，一台对线上提供服务，另一台冗余以保证高可用，常见的实践是keepalived存活探测，相同virtual
+IP提供服务。</p>
+<p>自动故障转移：当写库挂了的时候，keepalived能够探测到，会自动的进行故障转移，将流量自动迁移到shadow-db-master，
+由于使用的是相同的virtual IP，这个切换过程对调用方是透明的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计减少系统不能提供服务的时间。
+方法论上，高可用是通过冗余+自动故障转移来实现的。</p>
+<p>整个互联网分层系统架构的高可用，又是通过每一层的冗余+自动故障转移来综合实现的，具体的：</p>
+<ol>
+<li>【客户端层】到【反向代理层】的高可用，是通过反向代理层的冗余实现的，常见实践是keepalived + virtual IP自动故障转移</li>
+<li>【反向代理层】到【站点层】的高可用，是通过站点层的冗余实现的，常见实践是nginx与web-server之间的存活性探测与自动故障转移</li>
+<li>【站点层】到【服务层】的高可用，是通过服务层的冗余实现的，常见实践是通过service-connection-pool来保证自动故障转移</li>
+<li>【服务层】到【缓存层】的高可用，是通过缓存数据的冗余实现的，常见实践是缓存客户端双读双写，或者利用缓存集群的主从数据同步与sentinel保活与自动故障转移；更多的业务场景，对缓存没有高可用要求，可以使用缓存服务化来对调用方屏蔽底层复杂性</li>
+<li>【服务层】到【数据库”读”】的高可用，是通过读库的冗余实现的，常见实践是通过db-connection-pool来保证自动故障转移</li>
+<li>【服务层】到【数据库”写”】的高可用，是通过写库的冗余实现的，常见实践是keepalived + virtual IP自动故障转移</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/" rel="tag"># 架构设计</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/basic/jwt.html" rel="prev" title="【安全贴士】JWT介绍和安全防范">
+                  <i class="fa fa-angle-left"></i> 【安全贴士】JWT介绍和安全防范
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java/springboot/sb-thymeleaf.html" rel="next" title="SpringBoot系列 - 集成Thymeleaf构建Web应用">
+                  SpringBoot系列 - 集成Thymeleaf构建Web应用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

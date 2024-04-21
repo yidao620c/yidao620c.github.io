@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Harbor是VMware公司开源的企业级公司开源的企业级DockerRegistry项目， 项目地址为https:&#x2F;&#x2F;github.com&#x2F;vmware&#x2F;harbor。 其目标是帮助用户迅速搭建一个企业级的Docker镜像服务。它以Docker公司开源的registry为基础，提供了管理UI， 基于角色的访问控制(Role Based Access Control) ，LDAP集成、审计日志、管">
+<meta property="og:type" content="article">
+<meta property="og:title" content="安装Docker私有仓库Harbor">
+<meta property="og:url" content="http://yidao620c.github.io/k8s/core/harbor.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Harbor是VMware公司开源的企业级公司开源的企业级DockerRegistry项目， 项目地址为https:&#x2F;&#x2F;github.com&#x2F;vmware&#x2F;harbor。 其目标是帮助用户迅速搭建一个企业级的Docker镜像服务。它以Docker公司开源的registry为基础，提供了管理UI， 基于角色的访问控制(Role Based Access Control) ，LDAP集成、审计日志、管">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/20201231-01.png">
+<meta property="article:published_time" content="2020-12-31T04:21:15.000Z">
+<meta property="article:modified_time" content="2023-07-30T00:54:12.797Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="k8s">
+<meta property="article:tag" content="harbor">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/20201231-01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/k8s/core/harbor.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/k8s/core/harbor.html","path":"k8s/core/harbor.html","title":"安装Docker私有仓库Harbor"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>安装Docker私有仓库Harbor | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDHarbor"><span class="nav-number">1.</span> <span class="nav-text">下载Harbor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%AF%81%E4%B9%A6"><span class="nav-number">2.</span> <span class="nav-text">配置证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6harbor-yml"><span class="nav-number">3.</span> <span class="nav-text">修改配置文件harbor.yml</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%AE%89%E8%A3%85"><span class="nav-number">4.</span> <span class="nav-text">执行安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">5.</span> <span class="nav-text">验证</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/k8s/core/harbor.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="安装Docker私有仓库Harbor | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          安装Docker私有仓库Harbor
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-31 12:21:15" itemprop="dateCreated datePublished" datetime="2020-12-31T12:21:15+08:00">2020-12-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Harbor是VMware公司开源的企业级公司开源的企业级DockerRegistry项目， 项目地址为<a target="_blank" rel="noopener" href="https://github.com/vmware/harbor">https://github.com/vmware/harbor</a>。
+其目标是帮助用户迅速搭建一个企业级的Docker镜像服务。它以Docker公司开源的registry为基础，提供了管理UI， 基于角色的访问控制(Role Based Access Control)
+，LDAP集成、审计日志、管理界面、自我注册、 镜像复制等企业用户需求的功能，同时还原生支持中文。Harbor的每个组件都是以Docker容器的形式构建， 使用Docker
+Compose来对它进行部署。用于部署Harbor的Compose模板位于<code>/Deployer/docker-compose.yml</code>， 由5个容器组成，这几个容器通过Docker link的形式连接在一起，在容器之间通过容器名字互相访问。
+对终端用户而言，只需要暴露 Proxy（即Nginx）的服务端口。</p>
+<ul>
+<li>Proxy：由Nginx 服务器构成的反向代理。</li>
+<li>Registry：由Docker官方的开源 registry镜像构成的容器实例。</li>
+<li>UI：即架构中的 core services，构成此容器的代码是 Harbor 项目的主体。</li>
+<li>MySQL：由官方 MySQL 镜像构成的数据库容器。</li>
+<li>Log：运行着 rsyslogd 的容器，通过 log-driver 的形式收集其他容器的日志。</li>
+</ul>
+<p>Harbor官方地址：<a target="_blank" rel="noopener" href="https://goharbor.io/">https://goharbor.io/</a></p>
+<span id="more"></span>
+
+<h2 id="下载Harbor"><a href="#下载Harbor" class="headerlink" title="下载Harbor"></a>下载Harbor</h2><p>前提是已安装Python、Docker和Docker Compose。安装官方最新版本即可。</p>
+<p>从官网上面下载最新的离线安装包，目前最新的是<code>harbor-offline-installer-v2.1.3.tgz</code>。从github上面下载下来。 如果还想校验文件完整性，可以下载<code>*.asc</code>文件。然后执行如下校验命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 644FF454C0B4115C</span><br><span class="line">gpg -v --verify harbor-offline-installer-v2.1.3.tgz.asc</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置证书"><a href="#配置证书" class="headerlink" title="配置证书"></a>配置证书</h2><p>生产环境最好使用HTTPS协议访问Harbor，因此需要有证书。这里说明通过openssl命令生成自签名证书。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义变量</span></span><br><span class="line">domain=<span class="string">&quot;xnharbor.com&quot;</span></span><br><span class="line"><span class="comment"># 创建证书目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p /data/cert/ &amp;&amp; <span class="built_in">cd</span> /data/cert/</span><br><span class="line"><span class="comment"># 1、生成CA私钥</span></span><br><span class="line">openssl genrsa -out ca.key 4096</span><br><span class="line"><span class="comment"># 2、生成CA根证书</span></span><br><span class="line">openssl req -x509 -new -nodes -sha512 -days 3650 \</span><br><span class="line">    -subj <span class="string">&quot;/C=CN/ST=Beijing/L=Beijing/O=example/OU=Personal/CN=<span class="variable">$&#123;domain&#125;</span>&quot;</span> \</span><br><span class="line">    -key ca.key -out ca.crt</span><br><span class="line"><span class="comment"># 3、生成服务私钥</span></span><br><span class="line">openssl genrsa -out <span class="variable">$&#123;domain&#125;</span>.key 4096</span><br><span class="line"><span class="comment"># 4、生成证书请求文件</span></span><br><span class="line">openssl req -sha512 -new \</span><br><span class="line">    -subj <span class="string">&quot;/C=CN/ST=Beijing/L=Beijing/O=example/OU=Personal/CN=<span class="variable">$&#123;domain&#125;</span>&quot;</span> \</span><br><span class="line">    -key <span class="variable">$&#123;domain&#125;</span>.key -out <span class="variable">$&#123;domain&#125;</span>.csr</span><br><span class="line"><span class="comment"># 5、生成X509 V3证书的自定义配置文件，指定subjectAltName</span></span><br><span class="line"><span class="built_in">cat</span> &gt; v3.ext &lt;&lt;<span class="string">EOF</span></span><br><span class="line"><span class="string">authorityKeyIdentifier=keyid,issuer</span></span><br><span class="line"><span class="string">basicConstraints=CA:FALSE</span></span><br><span class="line"><span class="string">keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment</span></span><br><span class="line"><span class="string">extendedKeyUsage = serverAuth</span></span><br><span class="line"><span class="string">subjectAltName = @alt_names</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[alt_names]</span></span><br><span class="line"><span class="string">DNS.1=$&#123;domain&#125;</span></span><br><span class="line"><span class="string">DNS.2=xnharbor</span></span><br><span class="line"><span class="string">DNS.3=harbor</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"><span class="comment"># 6、签发自签名服务证书</span></span><br><span class="line">openssl x509 -req -sha512 -days 3650 \</span><br><span class="line">    -extfile v3.ext \</span><br><span class="line">    -CA ca.crt -CAkey ca.key -CAcreateserial \</span><br><span class="line">    -<span class="keyword">in</span> <span class="variable">$&#123;domain&#125;</span>.csr -out <span class="variable">$&#123;domain&#125;</span>.cert</span><br><span class="line"><span class="comment"># 7、将CA根证书、服务私钥和证书文件复制到docker的证书目录中</span></span><br><span class="line"><span class="built_in">mkdir</span> /etc/docker/certs.d/<span class="variable">$&#123;domain&#125;</span>/</span><br><span class="line">/bin/cp <span class="variable">$&#123;domain&#125;</span>.cert /etc/docker/certs.d/<span class="variable">$&#123;domain&#125;</span>/</span><br><span class="line">/bin/cp <span class="variable">$&#123;domain&#125;</span>.key /etc/docker/certs.d/<span class="variable">$&#123;domain&#125;</span>/</span><br><span class="line">/bin/cp ca.crt /etc/docker/certs.d/<span class="variable">$&#123;domain&#125;</span>/</span><br><span class="line"><span class="comment"># 8、重启docker引擎</span></span><br><span class="line">systemctl restart docker</span><br></pre></td></tr></table></figure>
+
+<h2 id="修改配置文件harbor-yml"><a href="#修改配置文件harbor-yml" class="headerlink" title="修改配置文件harbor.yml"></a>修改配置文件harbor.yml</h2><p>解压后的安装目录有个配置模板文件<code>harbor.yml.tmpl</code>，将其复制一份为<code>harbor.yml</code>，下面说明一下必须参数。</p>
+<blockquote>
+<p>hostname: 主机名或IP地址。这是访问Harbor的地址
+https.port: HTTPS端口号，默认为443
+https.certificate: HTTPS证书路径
+https.private_key: HTTPS证书私钥路径
+internal_tls.enabled: 是否在内部组件之间通信启用TLS安全通道
+internal_tls.dir: 内部证书和私钥的所在目录
+harbor_admin_passwor: 初始管理员密码。默认管理员admin&#x2F;Harbor12345
+database.password: 本地PostgreSQL数据库的root密码，最好修改这个值
+database.max_idle_conns: 连接池中最大空闲连接数
+database.max_open_conns: 连接池中最大连接数
+data_volume: 数据存储卷。默认为&#x2F;data&#x2F;</p>
+</blockquote>
+<h2 id="执行安装"><a href="#执行安装" class="headerlink" title="执行安装"></a>执行安装</h2><p>配置好了之后，直接执行<code>./install.sh</code>即可。看到下面的输出就是成功了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Successfully called func: create_root_cert</span><br><span class="line">Generated configuration file: /compose_location/docker-compose.yml</span><br><span class="line">Clean up the input dir</span><br><span class="line"></span><br><span class="line">[Step 5]: starting Harbor ...</span><br><span class="line">Building with native build. Learn about native build in Compose here: https://docs.docker.com/go/compose-native-build/</span><br><span class="line">Creating network &quot;harbor_harbor&quot; with the default driver</span><br><span class="line">Creating harbor-log ... done</span><br><span class="line">Creating registry      ... done</span><br><span class="line">Creating harbor-portal ... done</span><br><span class="line">Creating registryctl   ... done</span><br><span class="line">Creating redis         ... done</span><br><span class="line">Creating harbor-db     ... done</span><br><span class="line">Creating harbor-core   ... done</span><br><span class="line">Creating nginx             ... done</span><br><span class="line">Creating harbor-jobservice ... done</span><br><span class="line">✔ ----Harbor has been installed and started successfully.----</span><br></pre></td></tr></table></figure>
+
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>本地配置好hosts域名映射后，通过浏览器访问域名 <a target="_blank" rel="noopener" href="https://xnharbor.com/">https://xnharbor.com/</a> 即可。输入管理员账号口令登录。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/20201231-01.png" alt="img.png"></p>
+<p>还需要验证一下上传下载镜像的基本功能。首先创建一个test的项目。</p>
+<p>首先指定镜像仓库地址</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;registry-mirrors&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;https://30y4mr57.mirror.aliyuncs.com&quot;</span><span class="punctuation">,</span> <span class="string">&quot;https://xnharbor.com&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>拉取一个hello-world镜像，再推到私有仓库中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker pull hello-world</span><br><span class="line">docker tag hello-world xnharbor.com/test/hello-world:0.0.1</span><br><span class="line">docker login xnharbor.com</span><br><span class="line">docker push xnharbor.com/test/hello-world:0.0.1</span><br><span class="line"><span class="comment"># 先把已有的本地镜像删了</span></span><br><span class="line">docker rmi xnharbor.com/test/hello-world:0.0.1 hello-world</span><br><span class="line"><span class="comment"># 最后再次下载看看</span></span><br><span class="line">docker pull xnharbor.com/test/hello-world:0.0.1</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/k8s/" rel="tag"># k8s</a>
+              <a href="/tags/harbor/" rel="tag"># harbor</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/k8s/core/kubeadm.html" rel="prev" title="使用kubeadm安装Kubernetes集群">
+                  <i class="fa fa-angle-left"></i> 使用kubeadm安装Kubernetes集群
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/design/ddd/code-model.html" rel="next" title="微服务代码模型">
+                  微服务代码模型 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

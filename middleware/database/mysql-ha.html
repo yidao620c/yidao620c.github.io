@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="常见的高可用MySQL解决方案有主从复制，主主复制，Heartbeat&#x2F;SAN高可用，MySQL Cluster高可用等等。 这里我使用最简单的主从复制高可用方案，也是Mysql内置的功能。 mysql主从复制原理：  master将数据改变记录到二进制日志(binary log)中,也即是配置文件log-bin指定的文件(这些记录叫做二进制日志事件) slave将master的bina">
+<meta property="og:type" content="article">
+<meta property="og:title" content="centos7配置mysql主从复制">
+<meta property="og:url" content="http://yidao620c.github.io/middleware/database/mysql-ha.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="常见的高可用MySQL解决方案有主从复制，主主复制，Heartbeat&#x2F;SAN高可用，MySQL Cluster高可用等等。 这里我使用最简单的主从复制高可用方案，也是Mysql内置的功能。 mysql主从复制原理：  master将数据改变记录到二进制日志(binary log)中,也即是配置文件log-bin指定的文件(这些记录叫做二进制日志事件) slave将master的bina">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-09-16T14:22:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.510Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/middleware/database/mysql-ha.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/middleware/database/mysql-ha.html","path":"middleware/database/mysql-ha.html","title":"centos7配置mysql主从复制"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>centos7配置mysql主从复制 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%AF%E6%8C%81%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">支持类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">前置条件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E6%AD%A5%E9%AA%A4"><span class="nav-number">3.</span> <span class="nav-text">详细步骤</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/middleware/database/mysql-ha.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="centos7配置mysql主从复制 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          centos7配置mysql主从复制
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-09-16 22:22:22" itemprop="dateCreated datePublished" datetime="2016-09-16T22:22:22+08:00">2016-09-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>常见的高可用MySQL解决方案有主从复制，主主复制，Heartbeat&#x2F;SAN高可用，MySQL Cluster高可用等等。
+这里我使用最简单的主从复制高可用方案，也是Mysql内置的功能。</p>
+<p>mysql主从复制原理：</p>
+<ol>
+<li>master将数据改变记录到二进制日志(binary log)中,也即是配置文件log-bin指定的文件(这些记录叫做二进制日志事件)</li>
+<li>slave将master的binary log events拷贝到它的中继日志(relay log)</li>
+<li>slave重做中继日志中的事件,将改变反映它自己的数据(数据重演)</li>
+</ol>
+<p>其实就是根据主数据库的日志文件来进行同步。</p>
+<span id="more"></span>
+
+<h2 id="支持类型"><a href="#支持类型" class="headerlink" title="支持类型"></a>支持类型</h2><ol>
+<li>基于语句的复制:在主服务器上执行的SQL语句,在从服务器上执行同样的语句.MySQL默认采用基于语句的复制,效率比较高</li>
+<li>基于行的复制:把改变的内容直接复制过去,而不关心到底改变该内容是由哪条语句引发的 . 从mysql5.0开始支持</li>
+<li>混合类型的复制: 默认采用基于语句的复制,一旦发现基于语句的无法精确的复制时,就会采用基于行的复制.</li>
+</ol>
+<h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><ol>
+<li>主DB server和从DB server数据库的版本一致</li>
+<li>主DB server和从DB server数据库数据一致[可以把主的备份在从上还原]</li>
+<li>主DB server开启二进制日志,主DB server和从DB server的server_id都必须唯一</li>
+</ol>
+<h2 id="详细步骤"><a href="#详细步骤" class="headerlink" title="详细步骤"></a>详细步骤</h2><p>主服务器node200：192.168.212.200</p>
+<p>从服务器node201：192.168.212.201（可以设置多个从服务器）</p>
+<p>1. 两台机器的的selinux都是disable</p>
+<p>2. 修改主DB server的配置文件(&#x2F;etc&#x2F;my.cnf)，开启日志功能,设置server_id值,保证唯一[node200为主DB server]</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@node200 ~]<span class="comment"># vi /etc/my.cnf</span></span><br><span class="line"><span class="comment"># 修改配置文件里,下面两个参数：</span></span><br><span class="line"><span class="comment"># 设置server_id,一般建议设置为IP,或者再加一些数字</span></span><br><span class="line">server_id = 200</span><br><span class="line"><span class="comment"># 开启二进制日志功能,可以随便取,最好有含义</span></span><br><span class="line">log-bin=mysql3306-bin</span><br></pre></td></tr></table></figure>
+
+<p>3. 启动数据库服务器,并登陆数据库,授予相应的用户用于同步</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql -uroot -p</span><br><span class="line">mysql&gt; GRANT REPLICATION SLAVE,RELOAD,SUPER ON *.* TO <span class="string">&#x27;slave1&#x27;</span>@<span class="string">&#x27;192.168.212.201&#x27;</span> IDENTIFIED BY <span class="string">&#x27;winstore&#x27;</span>;</span><br><span class="line"><span class="comment"># 刷新授权表信息</span></span><br><span class="line">mysql&gt; FLUSH PRIVILEGES;</span><br><span class="line"><span class="comment"># 查看记下position 号和日志文件名(很重要)</span></span><br><span class="line">mysql&gt; show master status;</span><br><span class="line">+----------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| File                 | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+----------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| mysql3306-bin.000002 |      399 |              |                  |                   |</span><br><span class="line">+----------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p>4. 为保证主DB server和从DB server的数据一致,这里采用主备份,从还原来实现初始数据一致</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 主DB上面登录</span></span><br><span class="line"><span class="comment"># 临时锁表</span></span><br><span class="line">mysql&gt; flush tables with <span class="built_in">read</span> lock;</span><br><span class="line"><span class="comment"># 我这里实行的全库备份,在实际中,我们可能只同步某一个库,可以只备份一个库</span></span><br><span class="line"><span class="comment"># 新开一个终端,执行如下操作</span></span><br><span class="line">[root@node200 ~]<span class="comment"># mysqldump -uroot -p --all-databases &gt; /tmp/mysql.sql</span></span><br><span class="line"><span class="comment"># 解锁</span></span><br><span class="line">mysql&gt; unlock tables;</span><br><span class="line"><span class="comment"># 将备份的数据传送到从机上,用于恢复</span></span><br><span class="line">[root@node200 ~]<span class="comment"># scp /tmp/mysql.sql root@192.168.212.201:/tmp</span></span><br></pre></td></tr></table></figure>
+
+<p>5. 从数据库配置文件只需修改一项,其余用命令行做</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@node201 ~]<span class="comment"># vi /etc/my.cnf</span></span><br><span class="line"><span class="comment"># 设置server_id,一般建议设置为IP</span></span><br><span class="line">server_id = 201</span><br></pre></td></tr></table></figure>
+
+<p>6.启动从数据库,还原备份数据</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动数据库</span></span><br><span class="line">[root@node201 ~]<span class="comment"># systemctl restart mysqld.service</span></span><br><span class="line"><span class="comment"># 还原主DB server备份的数据</span></span><br><span class="line">[root@node201 ~]<span class="comment"># mysql -uroot -p &lt; /tmp/mysql.sql</span></span><br></pre></td></tr></table></figure>
+
+<p>7. 登陆从数据库,添加相关参数(主DBserver的ip&#x2F;端口&#x2F;同步用户&#x2F;密码&#x2F;position号&#x2F;读取哪个日志文件)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@node201 ~]<span class="comment"># mysql -uroot -p</span></span><br><span class="line">mysql&gt; change master to</span><br><span class="line">    -&gt; master_host=<span class="string">&#x27;192.168.212.200&#x27;</span>,</span><br><span class="line">    -&gt; master_user=<span class="string">&#x27;slave1&#x27;</span>,</span><br><span class="line">    -&gt; master_password=<span class="string">&#x27;winstore&#x27;</span>,</span><br><span class="line">    -&gt; master_port=3306,</span><br><span class="line">    -&gt; master_log_file=<span class="string">&#x27;mysql3306-bin.000002&#x27;</span>,</span><br><span class="line">    -&gt; master_log_pos=399;</span><br><span class="line"><span class="comment"># 开启主从同步</span></span><br><span class="line">mysql&gt; start slave;</span><br><span class="line"><span class="comment"># 查看主从同步状态</span></span><br><span class="line">mysql&gt; show slave status\G;</span><br><span class="line"><span class="comment"># 主要看以下两个参数：[这两个参数如果是yes就表示主从同步正常]</span></span><br><span class="line">Slave_IO_Running: Yes</span><br><span class="line">Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure>
+
+<p>8. 下面大家就可以在主DB server上新建一个表,看是否能同步到从DB server上,我这里就不测试了</p>
+<p>查看server_id：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like <span class="string">&#x27;%server_id%&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/tool/git/gitlab.html" rel="prev" title="centos7安装gitlab8.8">
+                  <i class="fa fa-angle-left"></i> centos7安装gitlab8.8
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/database/mysql-basic.html" rel="next" title="MySQL核心知识整理">
+                  MySQL核心知识整理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

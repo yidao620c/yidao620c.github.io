@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。 Jetty 可以用来作为一个传统的 Web 服务器，也可以作为一个动态的内容服务器，并且 Jetty 可以非常容易的嵌入到 Java 应用程序当中。 jetty是轻量级的web服务器和servlet引擎。它的最大特点是：可以很方便的作为嵌入式服务器。 就是只要引入jetty的jar包，可以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jetty9简易教程">
+<meta property="og:url" content="http://yidao620c.github.io/web/basic/jetty9.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。 Jetty 可以用来作为一个传统的 Web 服务器，也可以作为一个动态的内容服务器，并且 Jetty 可以非常容易的嵌入到 Java 应用程序当中。 jetty是轻量级的web服务器和servlet引擎。它的最大特点是：可以很方便的作为嵌入式服务器。 就是只要引入jetty的jar包，可以">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/jetty01.jpg">
+<meta property="article:published_time" content="2017-06-12T12:12:08.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.901Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/jetty01.jpg">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/web/basic/jetty9.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/web/basic/jetty9.html","path":"web/basic/jetty9.html","title":"Jetty9简易教程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Jetty9简易教程 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Jetty%E7%9A%84%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">Jetty的体系结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="nav-number">3.</span> <span class="nav-text">启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%91%E5%B8%83"><span class="nav-number">5.</span> <span class="nav-text">发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8EIDEA%E7%9A%84%E9%9B%86%E6%88%90"><span class="nav-number">6.</span> <span class="nav-text">与IDEA的集成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E5%AE%B9%E5%99%A8"><span class="nav-number">7.</span> <span class="nav-text">嵌入式容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#API%E6%96%B9%E5%BC%8F"><span class="nav-number">7.1.</span> <span class="nav-text">API方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#maven%E6%8F%92%E4%BB%B6%E6%96%B9%E5%BC%8F"><span class="nav-number">7.2.</span> <span class="nav-text">maven插件方式</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/web/basic/jetty9.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Jetty9简易教程 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Jetty9简易教程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-06-12 20:12:08" itemprop="dateCreated datePublished" datetime="2017-06-12T20:12:08+08:00">2017-06-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Jetty是一个用 Java 实现、开源、基于标准的，并且具有丰富功能的 Http 服务器和 Web 容器。
+Jetty 可以用来作为一个传统的 Web 服务器，也可以作为一个动态的内容服务器，并且 Jetty 可以非常容易的嵌入到 Java 应用程序当中。</p>
+<p>jetty是轻量级的web服务器和servlet引擎。它的最大特点是：可以很方便的作为嵌入式服务器。
+就是只要引入jetty的jar包，可以通过直接调用其API的方式来启动web服务。</p>
+<span id="more"></span>
+
+<p>Jetty的广泛应用得益于其诸多优秀的特性：</p>
+<ol>
+<li>轻量级：Jetty体积小巧，占用系统资源较少。</li>
+<li>易嵌入性：Jetty既可以像tomcat一样独立运行，也可以很方便的嵌入到工具、框架或其他应用服务器中运行。
+Jetty在设计之初就是作为一个可以嵌入到其他的Java代码中的servlet容器而设计的，因此开发小组将Jetty作为一组Jar文件提供出来，
+可以非常方便的在自己的容器中将Jetty实例化成一个对象并操纵该容器对象。</li>
+<li>灵活性：Jetty的体系架构及其面向接口的设计实现了功能模块高度可插拔和可扩展的特性，可以非常方便的根据需要来配置Jetty启用的功能。</li>
+<li>稳定性：Jetty运行速度较快，即使有大量服务请求并发的情况下，系统性能也能保持在一个可以接受的状态。</li>
+</ol>
+<p>本篇简单介绍下如何使用Jetty9以及跟maven、idea等的集成。</p>
+<h2 id="Jetty的体系结构"><a href="#Jetty的体系结构" class="headerlink" title="Jetty的体系结构"></a>Jetty的体系结构</h2><p>先介绍Jetty的大致架构：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/jetty01.jpg"></p>
+<p>下面分别对上图中的几个部分作简要介绍：</p>
+<ul>
+<li>Connector负责解析服务器请求并产生应答，不同的Connector用于处理不同协议的请求。</li>
+<li>Handler用于处理经过Connector解析的请求并产生应答内容，同样可以通过配置不同的Handler来负责处理不同的请求。</li>
+<li>TheadPool：管理和调度多个线程，用于服务于多个连接请求。</li>
+<li>Server代表一个Jetty服务器对象，主要作用是协同Connector、Handler和TheadPool的工作。</li>
+</ul>
+<p>其中，TheadPool可以根据配置选择是否使用，Connector和Handler也可以通过配置非常方便的实现替换。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>去<a target="_blank" rel="noopener" href="http://www.eclipse.org/jetty/download.html">jetty 官网</a>下载最新的zip压缩包，我下的是9.4.6.v20170531版本。
+然后解压缩到某个目录，配置下系统环境变量JETTY_HOME，并将bin目录加入到系统PATH中去即可。</p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>jetty的启动跟Tomcat不同，cd到JETTY_HOME目录，执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar start.jar</span><br></pre></td></tr></table></figure>
+
+<p>打开浏览器，访问<a href="http://127.0.0.1:8080，此时可以看到Jetty的欢迎页面了。">http://127.0.0.1:8080，此时可以看到Jetty的欢迎页面了。</a></p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>介绍一下jetty的目录，跟tomcat容器一样，我们也需要了解各个目录是做什么的</p>
+<table>
+<thead>
+<tr>
+<th>Dir</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bin&#x2F;</td>
+<td>存放在Unix系统下运行的shell脚本</td>
+</tr>
+<tr>
+<td>ect&#x2F;</td>
+<td>配置文件</td>
+</tr>
+<tr>
+<td>lib&#x2F;</td>
+<td>运行所依赖的jar文件</td>
+</tr>
+<tr>
+<td>logs&#x2F;</td>
+<td>运行时的日志文件</td>
+</tr>
+<tr>
+<td>modules&#x2F;</td>
+<td>各个模块</td>
+</tr>
+<tr>
+<td>resources&#x2F;</td>
+<td>包含新增到classpath配置文件夹，如log4j.properties</td>
+</tr>
+<tr>
+<td>webapps&#x2F;</td>
+<td>存放Web应用，Jetty会自动加载这个目录下的所有Web应用</td>
+</tr>
+<tr>
+<td>start.jar</td>
+<td>运行Jetty的jar。在命令行环境下以 java -jar start.jar 来启动Jetty</td>
+</tr>
+<tr>
+<td>start.ini</td>
+<td>存放启动信息</td>
+</tr>
+<tr>
+<td>notice.html</td>
+<td>许可信息等</td>
+</tr>
+<tr>
+<td>README.txt</td>
+<td>一些有用的说明</td>
+</tr>
+<tr>
+<td>VERSION.txt</td>
+<td>版本信息</td>
+</tr>
+</tbody></table>
+<p>修改端口号现在jetty9是修改<code>start.ini</code>文件中的<code>jetty.port=8001</code></p>
+<h2 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h2><p>默认的webapps目录下面没有ROOT目录，最好先创建一个。
+自己写的web项目，直接解压到webapps目录下面的ROOT目录，或者另外一个名字叫myapp的目录，通过命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar start.jar jetty.port=8002</span><br></pre></td></tr></table></figure>
+
+<p>来启动项目</p>
+<p>对于发布到ROOT目录的访问URL：localhost:8002</p>
+<p>对于发布到myapp目录的访问URL：localhost:8002&#x2F;myapp</p>
+<h2 id="与IDEA的集成"><a href="#与IDEA的集成" class="headerlink" title="与IDEA的集成"></a>与IDEA的集成</h2><p>最好的方式就是使用maven的插件<code>jetty-maven-plugin</code>来集成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;jetty.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scanIntervalSeconds</span>&gt;</span>10<span class="tag">&lt;/<span class="name">scanIntervalSeconds</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">webApp</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">contextPath</span>&gt;</span>/<span class="tag">&lt;/<span class="name">contextPath</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">webInfIncludeJarPattern</span>&gt;</span>.*/^(asm-all-repackaged)[^/]*\.jar$<span class="tag">&lt;/<span class="name">webInfIncludeJarPattern</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">webApp</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">httpConnector</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">port</span>&gt;</span>8080<span class="tag">&lt;/<span class="name">port</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">httpConnector</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--Close jetty Automatic deployment and spring-loaded conflict --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">reload</span>&gt;</span>manual<span class="tag">&lt;/<span class="name">reload</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这时候展开右端的maven菜单，在Plugins下面有jetty，点击里面的<code>jetty:run</code>或<code>jetty:run-exploded</code>即可启动开发环境了。</p>
+<h2 id="嵌入式容器"><a href="#嵌入式容器" class="headerlink" title="嵌入式容器"></a>嵌入式容器</h2><p>Jetty还能通过嵌入式的方式使用，有API方式和maven插件方式。</p>
+<h3 id="API方式"><a href="#API方式" class="headerlink" title="API方式"></a>API方式</h3><p>添加maven依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-webapp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.3.2.v20150730<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jetty-annotations<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.3.2.v20150730<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>apache-jsp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.3.2.v20150730<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.eclipse.jetty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>apache-jstl<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.3.2.v20150730<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>官方的启动代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SplitFileServer</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">( String[] args )</span> <span class="keyword">throws</span> Exception</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 创建Server对象，并绑定端口</span></span><br><span class="line">        <span class="type">Server</span> <span class="variable">server</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Server</span>();</span><br><span class="line">        <span class="type">ServerConnector</span> <span class="variable">connector</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerConnector</span>(server);</span><br><span class="line">        connector.setPort(<span class="number">8090</span>);</span><br><span class="line">        server.setConnectors(<span class="keyword">new</span> <span class="title class_">Connector</span>[] &#123; connector &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建上下文句柄，绑定上下文路径。这样启动后的url就会是:http://host:port/context</span></span><br><span class="line">        <span class="type">ResourceHandler</span> <span class="variable">rh0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ResourceHandler</span>();</span><br><span class="line">        <span class="type">ContextHandler</span> <span class="variable">context0</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ContextHandler</span>();</span><br><span class="line">        context0.setContextPath(<span class="string">&quot;/&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 绑定测试资源目录（在本例的配置目录dir0的路径是src/test/resources/dir0）</span></span><br><span class="line">        <span class="type">File</span> <span class="variable">dir0</span> <span class="operator">=</span> MavenTestingUtils.getTestResourceDir(<span class="string">&quot;dir0&quot;</span>);</span><br><span class="line">        context0.setBaseResource(Resource.newResource(dir0));</span><br><span class="line">        context0.setHandler(rh0);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 和上面的例子一样</span></span><br><span class="line">        <span class="type">ResourceHandler</span> <span class="variable">rh1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ResourceHandler</span>();</span><br><span class="line">        <span class="type">ContextHandler</span> <span class="variable">context1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ContextHandler</span>();</span><br><span class="line">        context1.setContextPath(<span class="string">&quot;/&quot;</span>);</span><br><span class="line">        <span class="type">File</span> <span class="variable">dir1</span> <span class="operator">=</span> MavenTestingUtils.getTestResourceDir(<span class="string">&quot;dir1&quot;</span>);</span><br><span class="line">        context1.setBaseResource(Resource.newResource(dir1));</span><br><span class="line">        context1.setHandler(rh1);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 绑定两个资源句柄</span></span><br><span class="line">        <span class="type">ContextHandlerCollection</span> <span class="variable">contexts</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ContextHandlerCollection</span>();</span><br><span class="line">        contexts.setHandlers(<span class="keyword">new</span> <span class="title class_">Handler</span>[] &#123; context0, context1 &#125;);</span><br><span class="line">        server.setHandler(contexts);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 启动</span></span><br><span class="line">        server.start();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 打印dump时的信息</span></span><br><span class="line">        System.out.println(server.dump());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// join当前线程</span></span><br><span class="line">        server.join();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="maven插件方式"><a href="#maven插件方式" class="headerlink" title="maven插件方式"></a>maven插件方式</h3><p>推荐这种方式，实在太方便了，这种方式就是我上面通过<code>jetty-maven-plugin</code>和IDEA集成的方式，不再多说。</p>
+<p>命令行的maven启动方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn jetty:run</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/web/basic/swagger.html" rel="prev" title="使用Swagger生成RESTful API文档">
+                  <i class="fa fa-angle-left"></i> 使用Swagger生成RESTful API文档
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/basic/session.html" rel="next" title="【安全贴士】聊聊Web会话管理">
+                  【安全贴士】聊聊Web会话管理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

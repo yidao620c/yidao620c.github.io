@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在泛型编程时，使用部分限定的形参时，&lt;? super T&gt;和&lt;? extends T&gt;的使用场景容易混淆， PECS原则可以帮助我们很好记住它们：提供者（Provider）使用extends，消费者（Consumer）使用super。  [!NOTE] Provider指的就是该容器从自己的容器里提供T类型或T的子类型的对象供别人使用； Consumer指的就是该容器把从别">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java泛型的PECS原则">
+<meta property="og:url" content="http://yidao620c.github.io/java/basic/generic-pecs.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="在泛型编程时，使用部分限定的形参时，&lt;? super T&gt;和&lt;? extends T&gt;的使用场景容易混淆， PECS原则可以帮助我们很好记住它们：提供者（Provider）使用extends，消费者（Consumer）使用super。  [!NOTE] Provider指的就是该容器从自己的容器里提供T类型或T的子类型的对象供别人使用； Consumer指的就是该容器把从别">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-05-30T04:22:11.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.876Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/basic/generic-pecs.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/basic/generic-pecs.html","path":"java/basic/generic-pecs.html","title":"Java泛型的PECS原则"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Java泛型的PECS原则 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%9B%E5%9E%8B%E6%93%A6%E9%99%A4"><span class="nav-number">1.</span> <span class="nav-text">泛型擦除</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8A%E7%95%8CPE%E5%8E%9F%E5%88%99"><span class="nav-number">2.</span> <span class="nav-text">上界PE原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8B%E7%95%8CCS%E5%8E%9F%E5%88%99"><span class="nav-number">3.</span> <span class="nav-text">下界CS原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PECS%E7%9A%84%E5%85%B8%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">PECS的典型使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MappingFunction%E4%BE%8B%E5%AD%90"><span class="nav-number">5.</span> <span class="nav-text">MappingFunction例子</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/basic/generic-pecs.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Java泛型的PECS原则 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java泛型的PECS原则
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-05-30 12:22:11" itemprop="dateCreated datePublished" datetime="2018-05-30T12:22:11+08:00">2018-05-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在泛型编程时，使用部分限定的形参时，<code>&lt;? super T&gt;</code>和<code>&lt;? extends T&gt;</code>的使用场景容易混淆，
+PECS原则可以帮助我们很好记住它们：提供者（Provider）使用extends，消费者（Consumer）使用super。</p>
+<blockquote>
+<p>[!NOTE]
+Provider指的就是该容器从自己的容器里提供T类型或T的子类型的对象供别人使用；</p>
+<p>Consumer指的就是该容器把从别处拿到的T类型或T的子类型的对象放到自己的容器。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="泛型擦除"><a href="#泛型擦除" class="headerlink" title="泛型擦除"></a>泛型擦除</h2><p>要理解 <code>super</code> 和 <code>extends</code> 的边界问题，首先要理解泛型擦除。</p>
+<p>这里我们先定义一组继承关系的类，以水果家族为例，定义下面的水果、苹果、红苹果、橘子。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Fruit</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Apple</span> <span class="keyword">extends</span> <span class="title class_">Fruit</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RedApple</span> <span class="keyword">extends</span> <span class="title class_">Apple</span> &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Orange</span> <span class="keyword">extends</span> <span class="title class_">Fruit</span> &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后测试一下泛型在运行时的类型</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testClassInfo</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">Class</span> <span class="variable">a</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Apple&gt;().getClass();</span><br><span class="line">    <span class="type">Class</span> <span class="variable">b</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Orange&gt;().getClass();</span><br><span class="line">    System.out.println(a == b);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    testClassInfo();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果为true。</p>
+<p>因为在泛型代码内部，无法获取任何有关泛型参数类型的任何信息！Java的泛型就是使用擦除来实现的，
+当你在使用泛型的时候，任何信息都被擦除，你所知道的就是你在使用一个对象。
+所以 <code>List&lt;Apple&gt;</code> 和 <code>List&lt;Orange&gt;</code> 在运行时，会被擦除成他们的原生类型List。</p>
+<p>泛型不能用于显性地引用运行时类型的操作之中，例如 转型，<code>instanceof</code> 和 <code>new</code> 操作（包括 new一个对象，new一个数组），
+因为所有关于参数的类型信息都在运行时丢失了，所以任何在运行时需要获取类型信息的操作都无法进行工作。</p>
+<h2 id="上界PE原则"><a href="#上界PE原则" class="headerlink" title="上界PE原则"></a>上界PE原则</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Apple&gt; apples = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">List&lt;Fruit&gt; fruits = apples;  <span class="comment">// 编译不过。</span></span><br></pre></td></tr></table></figure>
+
+<p>上边的代码定义编译是通不过的，因为虽然<code>Fruit</code>是<code>Apple</code>的父类，但是<code>List&lt;Fruit&gt;</code>并不是<code>List&lt;Apple&gt;</code>的父类，
+如果想实现类似的效果，可以用如下方式定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Apple&gt; apples = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">List&lt;? <span class="keyword">extends</span> <span class="title class_">Fruit</span>&gt; fruits = apples; <span class="comment">// √ 编译通过。</span></span><br></pre></td></tr></table></figure>
+
+<p>说明，<code>List&lt;Fruit&gt;</code>不是<code>List&lt;Apple&gt;</code>的父类，<code>List&lt;? extends Fruit&gt;</code>才是！</p>
+<p>实际上，<code>List&lt;? extends Fruit&gt;</code>是<code>List&lt;T&gt;</code>的父类！T代表<code>Fruit</code>或<code>Fruit</code>的任一子类。</p>
+<p>上述代码的fruits容器是不能继续执行add方法的，即<code>&lt;? extends T&gt;</code> 只能作为provider，执行get方法。
+因为如果能够执行add方法，就会造成fruits中的对象不能确定类型，如果放进去的是<code>Apple</code>还好，因为类型相同；
+但是如果放入的是<code>Orange</code>，其实就是相当于执行了<code>apples.add(Orange orange)</code>，肯定是不行的。所以禁止add。</p>
+<h2 id="下界CS原则"><a href="#下界CS原则" class="headerlink" title="下界CS原则"></a>下界CS原则</h2><p>按照上边的说法类比：<code>List&lt;? super Apple&gt;</code>是<code>List&lt;T&gt;</code>的父类！T为<code>Apple</code>类或其任一父类(注意此处为父类，PE中是子类)。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testSuper</span><span class="params">()</span> &#123;</span><br><span class="line">    List&lt;? <span class="built_in">super</span> Apple&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">    list.add(<span class="keyword">new</span> <span class="title class_">Apple</span>());</span><br><span class="line">    list.add(<span class="keyword">new</span> <span class="title class_">RedApple</span>());</span><br><span class="line">    list.add(<span class="keyword">new</span> <span class="title class_">Fruit</span>()); <span class="comment">// 编译不通过</span></span><br><span class="line"></span><br><span class="line">    <span class="type">Object</span> <span class="variable">obj</span> <span class="operator">=</span> list.get(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到，<code>list.add(new Fruit())</code> 这句不能编译成功，这是因为 <code>List&lt;? super Apple&gt;</code> 
+表示<code>具有Apple的父类的列表</code>。但是编译器不知道你要添加哪种<code>Apple</code>的父类，因此不能安全地添加。
+而为啥能添加Apple或者它的子类呢？因为容器能接受的是Apple或者它的父类，那咋样都能安全向上转换成它的父类的。</p>
+<p><code>List&lt;? super T&gt;</code>类型的集合是不允许get的，但是你找不到一个合适的类型来声明其引用，因为T类型的父类型可能不只一个，
+到底是哪一个不能确定。如果实在是要get，则只能返回Object类型。</p>
+<h2 id="PECS的典型使用场景"><a href="#PECS的典型使用场景" class="headerlink" title="PECS的典型使用场景"></a>PECS的典型使用场景</h2><p>下面是一个列表元素复制的例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Collections;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PecsTest</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        List&lt;String&gt; src = Arrays.asList(<span class="string">&quot;aaa&quot;</span>, <span class="string">&quot;bbb&quot;</span>, <span class="string">&quot;ccc&quot;</span>, <span class="string">&quot;ddd&quot;</span>);</span><br><span class="line">        List&lt;String&gt; dest = Arrays.asList(<span class="keyword">new</span> <span class="title class_">String</span>[src.size()]);</span><br><span class="line">        Collections.copy(dest, src);</span><br><span class="line">        System.out.println(dest);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面是<code>Collections.copy</code>方法的源码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="keyword">void</span> <span class="title function_">copy</span><span class="params">(List&lt;? <span class="built_in">super</span> T&gt; dest, List&lt;? extends T&gt; src)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">srcSize</span> <span class="operator">=</span> src.size();</span><br><span class="line">    <span class="keyword">if</span> (srcSize &gt; dest.size())</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IndexOutOfBoundsException</span>(<span class="string">&quot;Source does not fit in dest&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (srcSize &lt; COPY_THRESHOLD ||</span><br><span class="line">        (src <span class="keyword">instanceof</span> RandomAccess &amp;&amp; dest <span class="keyword">instanceof</span> RandomAccess)) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;srcSize; i++)</span><br><span class="line">            dest.set(i, src.get(i));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ListIterator&lt;? <span class="built_in">super</span> T&gt; di=dest.listIterator();</span><br><span class="line">        ListIterator&lt;? <span class="keyword">extends</span> <span class="title class_">T</span>&gt; si=src.listIterator();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;srcSize; i++) &#123;</span><br><span class="line">            di.next();</span><br><span class="line">            di.set(si.next());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样我们总结super和extends的使用，得到一个更广泛的原则。</p>
+<ul>
+<li><code>super</code>用来限制传入的参数</li>
+<li><code>extends</code>使用限制返回的参数</li>
+</ul>
+<h2 id="MappingFunction例子"><a href="#MappingFunction例子" class="headerlink" title="MappingFunction例子"></a>MappingFunction例子</h2><p>再来看一个典型的例子。在最新的ConcurrentHashMap中有这么一个方法声明</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line"><span class="keyword">public</span> V <span class="title function_">computeIfAbsent</span><span class="params">(K key, MappingFunction&lt;? <span class="built_in">super</span> K, ? extends V&gt; mappingFunction)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (key == <span class="literal">null</span> || mappingFunction == <span class="literal">null</span>)</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">    <span class="keyword">return</span> (V)internalComputeIfAbsent(key, mappingFunction);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>MappingFunction&lt;? super K, ? extends V&gt;</code> 的泛型声明吸引了我。</p>
+<p>MappingFunction接口定义如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">interface</span> <span class="title class_">MappingFunction</span>&lt;K, V&gt; &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Returns a non-null value for the given key.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key the (non-null) key</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> a non-null value</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    V <span class="title function_">map</span><span class="params">(K key)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上面的map中可见，<code>MappingFunction&lt;K,V&gt;</code>中的K在<code>computeIfAbsent</code>中声明ConcurrentHashMap&lt;K,V&gt;的K为其super边界，
+V声明ConcurrentHashMap&lt;K,V&gt;的V为其extends边界。即map方法可以接收ConcurrentHashMap key的父类(包括边界)，
+返回的value必须是ConcurrentHashMap value的子类(包括边界)。</p>
+<p>假如有<code>ConcurrentHashMap&lt;Apple, Fruit&gt;</code>, 那么方法<code>computeIfAbsent</code>可以接受<code>MappingFunction&lt;Object, Orange&gt;</code>。
+<code>Orange map(Object)</code> 的方法可以这样使用 <code>Fruit result =  map(Apple)</code></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/basic/jdk.html" rel="prev" title="JDK的两个版本解释">
+                  <i class="fa fa-angle-left"></i> JDK的两个版本解释
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/tool/maven/maven-idea.html" rel="next" title="IDEA不能下载maven依赖包的源码">
+                  IDEA不能下载maven依赖包的源码 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

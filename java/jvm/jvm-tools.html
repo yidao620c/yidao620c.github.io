@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="JDK本身提供了很多方便的JVM性能调优监控工具，除了集成式的VisualVM和JConsole外，还有jps、jstack、jmap、jhat、jstat、hprof等小巧的工具， 每一种工具都有其自身的特点， 用户可以根据你需要检测的应用或者程序片段的状况，适当的选择相应的工具进行检测， 先通过一个表格形式简要介绍下这几个命令的作用和使用方法。    命令 作用    jps JVM进程ID查">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM工具-基础监控工具">
+<meta property="og:url" content="http://yidao620c.github.io/java/jvm/jvm-tools.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="JDK本身提供了很多方便的JVM性能调优监控工具，除了集成式的VisualVM和JConsole外，还有jps、jstack、jmap、jhat、jstat、hprof等小巧的工具， 每一种工具都有其自身的特点， 用户可以根据你需要检测的应用或者程序片段的状况，适当的选择相应的工具进行检测， 先通过一个表格形式简要介绍下这几个命令的作用和使用方法。    命令 作用    jps JVM进程ID查">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-27T12:15:23.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.190Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/jvm/jvm-tools.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/jvm/jvm-tools.html","path":"java/jvm/jvm-tools.html","title":"JVM工具-基础监控工具"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JVM工具-基础监控工具 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#jps%EF%BC%9AJVM%E8%BF%9B%E7%A8%8BID%E6%9F%A5%E8%AF%A2%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">jps：JVM进程ID查询工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jstat%EF%BC%9AJVM%E7%BB%9F%E8%AE%A1%E4%BF%A1%E6%81%AF%E7%9B%91%E6%B5%8B%E5%B7%A5%E5%85%B7"><span class="nav-number">2.</span> <span class="nav-text">jstat：JVM统计信息监测工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jmap%EF%BC%9AJava%E5%86%85%E5%AD%98%E6%98%A0%E5%83%8F%E5%B7%A5%E5%85%B7"><span class="nav-number">3.</span> <span class="nav-text">jmap：Java内存映像工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#top%E4%BD%BF%E7%94%A8"><span class="nav-number">4.</span> <span class="nav-text">top使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#jstack%EF%BC%9A%E7%BA%BF%E7%A8%8B%E5%A0%86%E6%A0%88%E8%B7%9F%E8%B8%AA%E5%B7%A5%E5%85%B7"><span class="nav-number">5.</span> <span class="nav-text">jstack：线程堆栈跟踪工具</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/jvm/jvm-tools.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JVM工具-基础监控工具 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM工具-基础监控工具
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-27 20:15:23" itemprop="dateCreated datePublished" datetime="2021-04-27T20:15:23+08:00">2021-04-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>JDK本身提供了很多方便的JVM性能调优监控工具，除了集成式的VisualVM和JConsole外，还有jps、jstack、jmap、jhat、jstat、hprof等小巧的工具，
+每一种工具都有其自身的特点， 用户可以根据你需要检测的应用或者程序片段的状况，适当的选择相应的工具进行检测，
+先通过一个表格形式简要介绍下这几个命令的作用和使用方法。</p>
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>jps</td>
+<td>JVM进程ID查询工具</td>
+</tr>
+<tr>
+<td>jstat</td>
+<td>JVM统计信息监测工具</td>
+</tr>
+<tr>
+<td>jstack</td>
+<td>查看某个Java进程内的线程堆栈信息</td>
+</tr>
+<tr>
+<td>jmap</td>
+<td>jmap导出堆内存，然后使用jhat来进行分析</td>
+</tr>
+<tr>
+<td>jhat</td>
+<td>jmap导出堆内存，然后使用jhat来进行分析</td>
+</tr>
+<tr>
+<td>hprof</td>
+<td>hprof能够展现CPU使用率，统计堆内存使用情况</td>
+</tr>
+</tbody></table>
+<span id="more"></span>
+
+<h2 id="jps：JVM进程ID查询工具"><a href="#jps：JVM进程ID查询工具" class="headerlink" title="jps：JVM进程ID查询工具"></a>jps：JVM进程ID查询工具</h2><p>可以列出本机所有java进程的pid，很多工具的输入依赖这个pid。</p>
+<p>选项</p>
+<ul>
+<li>-q 仅输出VM标识符，不包括class name,jar name,arguments in main method</li>
+<li>-m 输出main method的参数</li>
+<li>-l 输出完全的包名，应用主类名，jar的完全路径名</li>
+<li>-v 输出jvm参数</li>
+<li>-V 输出通过flag文件传递到JVM中的参数(.hotspotrc文件或-XX:Flags&#x3D;所指定的文件</li>
+<li>-Joption 传递参数到vm,例如:-J-Xms48m</li>
+</ul>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@CZT-FS1 board-api]<span class="comment"># jps -lvm</span></span><br><span class="line">67136 board-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms1024m -Xmx1024m</span><br><span class="line">105268 wechat-api-1.0.0-SNAPSHOT.jar --spring.config.location=application.yml -Xms512m</span><br><span class="line">89172 sun.tools.jps.Jps -lvm -Denv.class.path=.:/usr/local/jdk/lib/dt.jar -Dapplication.home=/usr/local/jdk -Xms8m</span><br></pre></td></tr></table></figure>
+
+<p>我们选取PID&#x3D;67136的Java进程作为后续研究对象。</p>
+<h2 id="jstat：JVM统计信息监测工具"><a href="#jstat：JVM统计信息监测工具" class="headerlink" title="jstat：JVM统计信息监测工具"></a>jstat：JVM统计信息监测工具</h2><p>jstat用于监视JVM各种运行状态信息，可显示本地或远程（需要开启RMI支持）虚拟机进程中的类加载、内存、垃圾收集、JIT等运行时数据。
+在控制台环境下，它是运行期定位虚拟机性能问题的常用工具。</p>
+<p>jstat命令格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat [option vmid [interval] [count]]</span><br></pre></td></tr></table></figure>
+
+<p>参数interval和count代表查询间隔和次数，如果省略则只查询一次。比如如果要每隔200ms查询一次进程1223垃圾收集状态，一共查询10次。则</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc 1223 200 10</span><br></pre></td></tr></table></figure>
+
+<p>jstat主要选项如下</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-class</td>
+<td>监视类加载、卸载数量、总空间以及类装载耗费时间</td>
+</tr>
+<tr>
+<td>-gc</td>
+<td>监视Java堆状况，包括Eden区、2个Suervivor区、老年代、永久代等容量，已用空间，GC合计时间等。</td>
+</tr>
+<tr>
+<td>-gccapacity</td>
+<td>监视内容跟gc基本相同，但主要关注Java堆各个区域使用到的最大、最小空间。</td>
+</tr>
+<tr>
+<td>-gcutil</td>
+<td>监视内容跟gc基本相同，但主要关注已使用空间占总空间百分比。</td>
+</tr>
+<tr>
+<td>-gccause</td>
+<td>监视内容跟gcutil基本相同，但会额外输出导致上一次GC原因。</td>
+</tr>
+<tr>
+<td>-gcnew</td>
+<td>监视新生代GC状态</td>
+</tr>
+<tr>
+<td>-gcnewcapacity</td>
+<td>监视内容跟gcnew基本相同，输出主要关注使用到的最大、最小空间。</td>
+</tr>
+<tr>
+<td>-gcold</td>
+<td>监视老年代GC状态</td>
+</tr>
+<tr>
+<td>-gcoldcapacity</td>
+<td>监视内容跟gcold基本相同，输出主要关注使用到的最大、最小空间。</td>
+</tr>
+<tr>
+<td>-gcpermcapacity</td>
+<td>监视永久代使用到的最大、最小空间。</td>
+</tr>
+<tr>
+<td>-compiler</td>
+<td>输出JIT编译过的方法、耗时信息</td>
+</tr>
+<tr>
+<td>-printcompilation</td>
+<td>输出已经被JIT编译的方法</td>
+</tr>
+</tbody></table>
+<p>jstat执行样例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil 12592</span><br><span class="line">S0     S1     E      O      M     CCS    YGC   YGCT    FGC    FGCT    CGC    CGCT     GCT</span><br><span class="line">0.00  92.02   0.00  17.37  97.60  94.52   5    0.027     0    0.000     2    0.007    0.033</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>缩写</th>
+<th>含义</th>
+<th>原文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S0</td>
+<td>新生代中Survivor space 0区已使用空间的百分比</td>
+<td>Survivor space 0 utilization as a percentage of the space’s current capacity.</td>
+</tr>
+<tr>
+<td>S1</td>
+<td>新生代中Survivor space 1区已使用空间的百分比</td>
+<td>Survivor space 1 utilization as a percentage of the space’s current capacity.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>新生代已使用空间百分比</td>
+<td>Eden space utilization as a percentage of the space’s current capacity</td>
+</tr>
+<tr>
+<td>O</td>
+<td>老年代已使用空间百分比</td>
+<td>Old space utilization as a percentage of the space’s current capacity.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>元空间</td>
+<td>Metaspace utilization as a percentage of the space’s current capacity</td>
+</tr>
+<tr>
+<td>CCS</td>
+<td>压缩类空间利用率百分比</td>
+<td>Compressed class space utilization as a percentage</td>
+</tr>
+<tr>
+<td>YGC</td>
+<td>YGC事件的数量</td>
+<td>Number of young generation GC events.</td>
+</tr>
+<tr>
+<td>YGCT</td>
+<td>年轻一代垃圾收集时间</td>
+<td>Young generation garbage collection time</td>
+</tr>
+<tr>
+<td>FGC</td>
+<td>FGC事件的数量</td>
+<td>Number of full GC events.</td>
+</tr>
+<tr>
+<td>FGCT</td>
+<td>完全垃圾收集时间</td>
+<td>Full garbage collection time</td>
+</tr>
+<tr>
+<td>CGC</td>
+<td>并发GC统计</td>
+<td>Concurrent GC Count</td>
+</tr>
+<tr>
+<td>CGCT</td>
+<td>并发GC收集时间</td>
+<td>Concurrent GC Collection Time</td>
+</tr>
+<tr>
+<td>GCT</td>
+<td>垃圾回收总时间</td>
+<td>Total garbage collection time.</td>
+</tr>
+</tbody></table>
+<p>CGC和CGCT是ZGC的标志，ZGC（The Z Garbage Collector）是JDK 11中推出的一款低延迟垃圾回收器，是一个并发垃圾回收器。</p>
+<h2 id="jmap：Java内存映像工具"><a href="#jmap：Java内存映像工具" class="headerlink" title="jmap：Java内存映像工具"></a>jmap：Java内存映像工具</h2><p>jmap命令用于生成堆转储快照，一般称为heapdump或dump文件，该工具在JDK9中集成到了JHSDB中。</p>
+<p>命令格式：<code>jmap [option] vmid</code></p>
+<p>option的几个主要选项如下</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-dump</td>
+<td>生成dump文件，格式为-dump:[live,]format&#x3D;b,file&#x3D;<filename>，其中live表示是否只dump存活对象</td>
+</tr>
+<tr>
+<td>-finalizerinfo</td>
+<td>显示在F-Queue中等待finalizer线程执行finalize方法的对象</td>
+</tr>
+<tr>
+<td>-heap</td>
+<td>显示堆详细信息，比如使用的回收器、参数配置、分代情况</td>
+</tr>
+<tr>
+<td>-histo</td>
+<td>显示堆中对象统计信息，包括类、实例数量、合计容量</td>
+</tr>
+<tr>
+<td>-pemstat</td>
+<td>以ClassLoader为统计口径显示永久代内存状态</td>
+</tr>
+<tr>
+<td>-F</td>
+<td>强制生成dump快照，这个在-dump选项没有响应时使用</td>
+</tr>
+</tbody></table>
+<p>使用jmap的样例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\xiongneng&gt;jmap -dump:format=b,file=test.dump 12592</span><br><span class="line">Dumping heap to C:\Users\xiongneng\test.dump ...</span><br><span class="line">Heap dump file created [29413292 bytes in 0.089 secs]</span><br></pre></td></tr></table></figure>
+
+<h2 id="top使用"><a href="#top使用" class="headerlink" title="top使用"></a>top使用</h2><p>除了常用的打印所有进程使用资源外，还可以对单独的进程，打印线程资源排行榜，按T键可对TIME倒序排列，也就是CPU运行时间。
+TIME列就是各个Java线程耗费的CPU时间，我们线程pid为67163的线程作为后续线程研究对象</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@CZT-FS1 board-api]<span class="comment"># top -Hp 67136</span></span><br><span class="line">top - 11:22:26 up 166 days, 17:06,  1 user,  load average: 0.07, 0.02, 0.00</span><br><span class="line">Tasks: 140 total,   0 running, 140 sleeping,   0 stopped,   0 zombie</span><br><span class="line">Cpu(s):  0.1%us,  0.0%sy,  0.0%ni, 99.9%<span class="built_in">id</span>,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st</span><br><span class="line">Mem:  16309360k total, 16120904k used,   188456k free,   174440k buffers</span><br><span class="line">Swap:  8175612k total,   461868k used,  7713744k free,  7831512k cached</span><br><span class="line"></span><br><span class="line">   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND</span><br><span class="line"> 67163 root      20   0 6825m 867m  14m S  2.0  5.4  16:22.87 java</span><br><span class="line"> 67136 root      20   0 6825m 867m  14m S  0.0  5.4   0:00.00 java</span><br><span class="line"> 67150 root      20   0 6825m 867m  14m S  0.0  5.4   0:25.08 java</span><br></pre></td></tr></table></figure>
+
+<h2 id="jstack：线程堆栈跟踪工具"><a href="#jstack：线程堆栈跟踪工具" class="headerlink" title="jstack：线程堆栈跟踪工具"></a>jstack：线程堆栈跟踪工具</h2><p>jstack主要用来查看某个Java进程内的线程堆栈信息，生成的文件一般称为threaddump或javacore文件。
+线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈集合，生成线程快照目的通常是定位线程出现停顿原因。
+比如线程死锁、死循环、请求外部资源导致长时间挂起等。</p>
+<p>该工具在JDK9中已集成到了JHSDB中。</p>
+<p>语法格式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack [option] vmid</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-F</td>
+<td>正常输出的请求不被响应时，强制输出线程堆栈</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>除了堆栈外，还会输出关于锁的附加信息</td>
+</tr>
+<tr>
+<td>-m</td>
+<td>如果调用本地方法，可显示C&#x2F;C++堆栈信息</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@CZT-FS1 board-api]<span class="comment"># jstack -l 67136 | more</span></span><br><span class="line">Full thread dump Java HotSpot(TM) 64-Bit Server VM (25.161-b12 mixed mode):</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;Thread-12126&quot;</span> <span class="comment">#12389 daemon prio=6 os_prio=0 tid=0x00007f3190075800 nid=0x15d08 runnable [0x00007f31f43c4000]</span></span><br><span class="line">   java.lang.Thread.State: RUNNABLE</span><br><span class="line">    at java.net.SocketInputStream.socketRead0(Native Method)</span><br><span class="line">    - locked &lt;0x00000000f49e3158&gt; (a java.io.BufferedInputStream)</span><br><span class="line">    at java.io.BufferedInputStream.fill(BufferedInputStream.java:246)</span><br><span class="line">    at java.io.BufferedInputStream.<span class="built_in">read</span>(BufferedInputStream.java:265)</span><br><span class="line">    - locked &lt;0x00000000f49e51a8&gt; (a org.apache.commons.net.telnet.TelnetInputStream)</span><br><span class="line">    at org.apache.commons.net.telnet.TelnetInputStream.__read(TelnetInputStream.java:132)</span><br><span class="line">    at org.apache.commons.net.telnet.TelnetInputStream.run(TelnetInputStream.java:603)</span><br><span class="line">    at java.lang.Thread.run(Thread.java:748)</span><br><span class="line"></span><br><span class="line">   Locked ownable synchronizers:</span><br><span class="line">    - None</span><br></pre></td></tr></table></figure>
+
+<p>如果想要查看某个线程的堆栈，先使用上面的top命令查看到线程ID号，然后使用<code>printf &quot;%x\n&quot;</code>，获得该线程ID的十六进制值。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@CZT-FS1 board-api]<span class="comment"># printf &quot;%x\n&quot; 67163</span></span><br><span class="line">1065b</span><br></pre></td></tr></table></figure>
+
+<p>查看该线程的堆栈：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@CZT-FS1 board-api]<span class="comment"># jstack -l 67136 | grep 1065b -A20</span></span><br><span class="line"><span class="string">&quot;System Clock&quot;</span> <span class="comment">#17 daemon prio=5 os_prio=0 tid=0x00007f322d089000 nid=0x1065b runnable [0x00007f320487c000]</span></span><br><span class="line">   java.lang.Thread.State: TIMED_WAITING (parking)</span><br><span class="line">    at sun.misc.Unsafe.park(Native Method)</span><br><span class="line">    - parking to <span class="built_in">wait</span> <span class="keyword">for</span>  &lt;0x00000000c19c8d18&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer<span class="variable">$ConditionObject</span>)</span><br><span class="line">    at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:215)</span><br><span class="line">    at java.lang.Thread.run(Thread.java:748)</span><br><span class="line"></span><br><span class="line">   Locked ownable synchronizers:</span><br><span class="line">    - None</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/jvm/visualvm.html" rel="prev" title="JVM工具-可视化工具VisualVM">
+                  <i class="fa fa-angle-left"></i> JVM工具-可视化工具VisualVM
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/basic/pyqt5.html" rel="next" title="使用PyQt5开发桌面应用">
+                  使用PyQt5开发桌面应用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

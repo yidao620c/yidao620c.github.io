@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Linux是一个多用户、多任务的操作系统，本章详细讲解如果增删改用户账号，以及文件所有者、 所属组以及其他人对文件&#x2F;目录的读（r）、写（w）、执行（x）的操作权限。另外我们还可以使用SUID、 SGID与SBIT特殊权限更加灵活地设置系统权限功能，来弥补对文件设置一般权限时所带来的不足。 而文件的访问控制表（Access Control List，ACL）则还可以进一步让单一用户、 用户">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux用户身份和文件权限">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/user-acl.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Linux是一个多用户、多任务的操作系统，本章详细讲解如果增删改用户账号，以及文件所有者、 所属组以及其他人对文件&#x2F;目录的读（r）、写（w）、执行（x）的操作权限。另外我们还可以使用SUID、 SGID与SBIT特殊权限更加灵活地设置系统权限功能，来弥补对文件设置一般权限时所带来的不足。 而文件的访问控制表（Access Control List，ACL）则还可以进一步让单一用户、 用户">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-02T07:41:32.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:16.687Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/user-acl.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/user-acl.html","path":"linux/basic/user-acl.html","title":"Linux用户身份和文件权限"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Linux用户身份和文件权限 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">用户管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#useradd%E5%91%BD%E4%BB%A4"><span class="nav-number">1.1.</span> <span class="nav-text">useradd命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#groupadd%E5%91%BD%E4%BB%A4"><span class="nav-number">1.2.</span> <span class="nav-text">groupadd命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#usermod%E5%91%BD%E4%BB%A4"><span class="nav-number">1.3.</span> <span class="nav-text">usermod命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#passwd%E5%91%BD%E4%BB%A4"><span class="nav-number">1.4.</span> <span class="nav-text">passwd命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#userdel%E5%91%BD%E4%BB%A4"><span class="nav-number">1.5.</span> <span class="nav-text">userdel命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">文件权限管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E8%88%AC%E6%9D%83%E9%99%90"><span class="nav-number">2.1.</span> <span class="nav-text">一般权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%AE%8A%E6%9D%83%E9%99%90"><span class="nav-number">2.2.</span> <span class="nav-text">特殊权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E9%9A%90%E8%97%8F%E5%B1%9E%E6%80%A7"><span class="nav-number">2.3.</span> <span class="nav-text">文件隐藏属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6%E5%88%97%E8%A1%A8ACL"><span class="nav-number">2.4.</span> <span class="nav-text">文件访问控制列表ACL</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/user-acl.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Linux用户身份和文件权限 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux用户身份和文件权限
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-02 15:41:32" itemprop="dateCreated datePublished" datetime="2018-02-02T15:41:32+08:00">2018-02-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Linux是一个多用户、多任务的操作系统，本章详细讲解如果增删改用户账号，以及文件所有者、
+所属组以及其他人对文件&#x2F;目录的读（r）、写（w）、执行（x）的操作权限。另外我们还可以使用SUID、
+SGID与SBIT特殊权限更加灵活地设置系统权限功能，来弥补对文件设置一般权限时所带来的不足。
+而文件的访问控制表（Access Control List，ACL）则还可以进一步让单一用户、
+用户组对单一文件或目录进行特殊的权限设置，让文件具有能满足工作需求的最小权限。</p>
+<span id="more"></span>
+
+<h2 id="用户管理"><a href="#用户管理" class="headerlink" title="用户管理"></a>用户管理</h2><p>在RHEL 7系统中，管理员UID为0，系统用户UID为1~999（用来运行系统服务的用户），普通用户UID从1000开始。</p>
+<h3 id="useradd命令"><a href="#useradd命令" class="headerlink" title="useradd命令"></a>useradd命令</h3><p>useradd命令用来创建新的用户，格式为 <code>useradd [选项] 用户名</code></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-d</td>
+<td>指定用户的家目录，默认为&#x2F;home&#x2F;username</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>账户的到期时间，格式为YYYY-MM-DD</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>指定用户的UID</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>指定用户的基本组，必须已存在这个组</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>指定一个或多个扩展用户组</td>
+</tr>
+<tr>
+<td>-N</td>
+<td>不创建与用户同名的基本用户组</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>指定该用户的默认Shell解释器，默认为&#x2F;bin&#x2F;bash</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd -d /home/xiongneng -u 1234 -s /sbin/nologin xiongneng</span><br></pre></td></tr></table></figure>
+
+<h3 id="groupadd命令"><a href="#groupadd命令" class="headerlink" title="groupadd命令"></a>groupadd命令</h3><p>groupadd命令用于创建用户组，格式为<code>groupadd [选项] 用户组名</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">groupadd xiongneng</span><br></pre></td></tr></table></figure>
+
+<h3 id="usermod命令"><a href="#usermod命令" class="headerlink" title="usermod命令"></a>usermod命令</h3><p>usermod命令用于修改用户的属性，格式为<code>usermod [选项] 用户名</code>。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-c</td>
+<td>用户账号的备注信息</td>
+</tr>
+<tr>
+<td>-d -m</td>
+<td>连起来用可重新指定用户家目录并自动把旧数据转移过去</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>账户的到期时间，格式为YYYY-MM-DD</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>修改用户的UID</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>修改用户的基本组，必须已存在这个组</td>
+</tr>
+<tr>
+<td>-G</td>
+<td>修改用户的扩展用户组</td>
+</tr>
+<tr>
+<td>-L</td>
+<td>锁定用户禁止其登录系统</td>
+</tr>
+<tr>
+<td>-U</td>
+<td>解锁用户允许其登录系统</td>
+</tr>
+<tr>
+<td>-s</td>
+<td>修改该用户的默认Shell解释器，默认为&#x2F;bin&#x2F;bash</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usermod -u 4321 -G root xiongneng</span><br></pre></td></tr></table></figure>
+
+<h3 id="passwd命令"><a href="#passwd命令" class="headerlink" title="passwd命令"></a>passwd命令</h3><p>passwd命令用于修改用户密码、过期时间、认证信息等。格式为<code>passwd [选项] [用户名]</code>。
+普通用户只能修改自己的密码，并且还需要输入旧密码。而管理员root可以修改其他用户的密码，并且不需要输入旧密码。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-l</td>
+<td>锁定用户密码禁止其登录系统</td>
+</tr>
+<tr>
+<td>-u</td>
+<td>解锁用户密码允许其登录系统</td>
+</tr>
+<tr>
+<td>-stdin</td>
+<td>允许通过标准输入修改用户密码</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>使该用户可以使用空密码登录系统</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>修改用户的基本组，必须已存在这个组</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>强制用户下次登录时修改密码</td>
+</tr>
+<tr>
+<td>-S</td>
+<td>显示用户的密码是否被锁定，以及密码采用的加密算法名称</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">passwd -l xiongneng</span><br></pre></td></tr></table></figure>
+
+<h3 id="userdel命令"><a href="#userdel命令" class="headerlink" title="userdel命令"></a>userdel命令</h3><p>userdel命令用户删除用户，格式为<code>userdel [选项] 用户名</code>。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-f</td>
+<td>强制删除用户</td>
+</tr>
+<tr>
+<td>-r</td>
+<td>同时删除用户的家目录</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">userdel -r xiongneng</span><br></pre></td></tr></table></figure>
+
+<h2 id="文件权限管理"><a href="#文件权限管理" class="headerlink" title="文件权限管理"></a>文件权限管理</h2><h3 id="一般权限"><a href="#一般权限" class="headerlink" title="一般权限"></a>一般权限</h3><p>Linux系统中一切皆文件，使用不同的字符来区分不同的文件类型。</p>
+<ul>
+<li>-: 普通文件</li>
+<li>d: 目录文件</li>
+<li>l: 链接文件</li>
+<li>b: 块设备文件</li>
+<li>c: 字符设备文件</li>
+<li>p: 管道文件</li>
+</ul>
+<p>每个文件都有所属的所有者和所属组，并且设置所有者、所属组以及其他人对文件的读（r）、写（w）、执行（x）权限。
+文件的读、写、执行权限可以简写为rwx，也可以用数字4、2、1来表述。</p>
+<p>chmod命令可修改文件的权限属性。比如查看如下的文件权限，所属组没有任何权限。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># ll anaconda-ks.cfg</span></span><br><span class="line">-rw-------. 1 root root 1391 1月  27 2019 anaconda-ks.cfg</span><br></pre></td></tr></table></figure>
+
+<p>然后修改该文件的权限，将所属组权限加上读写。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># chmod g+rw anaconda-ks.cfg</span></span><br><span class="line">[root@master ~]<span class="comment"># ll anaconda-ks.cfg </span></span><br><span class="line">-rw-rw----. 1 root root 1391 1月  27 2019 anaconda-ks.cfg</span><br></pre></td></tr></table></figure>
+
+<h3 id="特殊权限"><a href="#特殊权限" class="headerlink" title="特殊权限"></a>特殊权限</h3><p>在复杂的生产环境中，单纯设置rwx权限无法满足安全和灵活性需求，便有了SUID、SGID与SBIT的特殊权限位。
+这是对文件权限进行设置的特殊功能，可以与一般权限同时使用。</p>
+<p>SUID是一种对二进制程序进行设置的特殊权限，可以让二进制程序执行者临时拥有属主的权限。
+仅适用于拥有可执行权限的二进制程序有效。</p>
+<p>注意，如果在浏览文件时，发现用户权限第三位是一个大写的 S 则表明 SUID 权限无效，
+比如给一个不可执行的二进制文件设置 SGID 属性。</p>
+<p>SGID 与 SUID类似，使用小写字母 s 表示，出现在用户组可执行权限位，
+具有 SETGID 权限的文件会在其执行时，使调用者的有效用户组临时变为该文件属主的用户组，
+用于临时提升权限，使调用者暂时获得该文件所属用户组的权限。</p>
+<ul>
+<li>当 SGID 作用于可执行文件时，在执行该文件时，用户将获得该文件所属组的权限。</li>
+<li>当 SGID 作用于目录时，当用户对某一目录有写和执行权限时，该用户可以在该目录下建立文件，
+如果该目具有 SGID 权限，则该用户在该目录下建立的文件都属于这个目录所属的组。</li>
+</ul>
+<p>注意，如果在浏览文件时，发现用户组权限第三位是一个大写的 S 则表明 SGID 权限无效，
+比如给一个不可执行的文件设置 SGID 属性。</p>
+<p>SBIT（Sticky Bit）称为粘滞位，它出现在其他用户权限的执行位上，只能用来修饰一个目录，用于限制文件的删除。
+当某一个目录拥有 SBIT 权限时，则任何一个能够在这个目录下建立文件的用户，该用户在这个目录下所建立的文件，
+只有该用户自己和 root 可以删除，其他用户均不可以。</p>
+<p>可以通过数字方式来设置这三个特殊权限。三个权限对应的数字为：SUID:4，SGID:2，SBIT:1。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 4755 filename</span><br></pre></td></tr></table></figure>
+
+<p>此外，也可以通过符号法来设置三个特殊权限，其中 SUID 为 u+s，SGID 为 g+s，SBIT 则是 o+t。</p>
+<h3 id="文件隐藏属性"><a href="#文件隐藏属性" class="headerlink" title="文件隐藏属性"></a>文件隐藏属性</h3><p>Linux系统中的文件除了具备一般权限和特殊权限之外，还有一种隐藏权限。</p>
+<p>chattr命令用于设置文件的隐藏权限，格式为<code>chattr [参数] 文件名</code>。如果想把某个隐藏功能添加到文件上，
+则需要在命令后面追加<code>+参数</code>，如果想把某个隐藏功能移出文件，则需要追加<code>-参数</code>。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>i</td>
+<td>无法对文件进行修改。如果是目录则无法新建、删除、重命名目录中的文件</td>
+</tr>
+<tr>
+<td>a</td>
+<td>仅允许追加内容，无法覆盖、删除内容，也无法删除文件本身。</td>
+</tr>
+<tr>
+<td>S</td>
+<td>文件内容变更后立即同步到硬盘</td>
+</tr>
+<tr>
+<td>s</td>
+<td>彻底从硬盘中删除，不可恢复（用0填充原文件所在硬盘区域）</td>
+</tr>
+<tr>
+<td>A</td>
+<td>不再修改这个文件或目录的最后访问时间</td>
+</tr>
+<tr>
+<td>b</td>
+<td>不再修改文件或目录的存取时间</td>
+</tr>
+<tr>
+<td>u</td>
+<td>删除该文件后依然保留其在硬盘中的数据，方便日后恢复</td>
+</tr>
+</tbody></table>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chattr +a test.txt</span><br></pre></td></tr></table></figure>
+
+<p>lsattr命令用于显示文件的隐藏权限，格式为<code>lsattr [参数] 文件</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># lsattr test.txt </span></span><br><span class="line">-----a---------- test.txt</span><br></pre></td></tr></table></figure>
+
+<h3 id="文件访问控制列表ACL"><a href="#文件访问控制列表ACL" class="headerlink" title="文件访问控制列表ACL"></a>文件访问控制列表ACL</h3><p>如果希望文件或目录对某个指定的用户进行单独权限控制，则需要用到ACL了。</p>
+<p>setfacl命令用于管理文件的ACL规则，格式为<code>setfacl [参数] 文件名</code>。
+针对目录文件需要使用-R递归参数，针对普通文件则使用-m参数，如果想删除ACL，则使用-b参数。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@master ~]<span class="comment"># setfacl -Rm u:xiongneng:rwx /root</span></span><br><span class="line">[root@master ~]<span class="comment"># su - xiongneng</span></span><br><span class="line">[xiongneng@master ~]$ <span class="built_in">cd</span> /root</span><br><span class="line">[xiongneng@master root]$ <span class="built_in">ls</span> -l</span><br><span class="line">总用量 1036</span><br><span class="line">-rw-rwx---+ 1 root root    1391 1月  27 2019 anaconda-ks.cfg</span><br><span class="line">-rw-rwxr--+ 1 root root       5 8月  22 16:39 test.txt</span><br><span class="line">[xiongneng@master root]$ <span class="built_in">cat</span> anaconda-ks.cfg </span><br></pre></td></tr></table></figure>
+
+<p>getfacl命令用于显示文件上设置的ACL信息，格式为<code>getfacl 文件名</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[xiongneng@master root]$ getfacl /root</span><br><span class="line">getfacl: Removing leading <span class="string">&#x27;/&#x27;</span> from absolute path names</span><br><span class="line"><span class="comment"># file: root</span></span><br><span class="line"><span class="comment"># owner: root</span></span><br><span class="line"><span class="comment"># group: root</span></span><br><span class="line">user::r-x</span><br><span class="line">user:xiongneng:rwx</span><br><span class="line">group::r-x</span><br><span class="line">mask::rwx</span><br><span class="line">other::---</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/linux/basic/virtualbox.html" rel="prev" title="使用VirtualBox 6安装Centos7">
+                  <i class="fa fa-angle-left"></i> 使用VirtualBox 6安装Centos7
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/linux/basic/forget-password.html" rel="next" title="CentOS7忘记root密码解决办法">
+                  CentOS7忘记root密码解决办法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

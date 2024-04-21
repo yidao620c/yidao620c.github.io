@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。 这时候我们第一个想到的就是将这种同步请求方式转换成异步请求，然而对于不需要关心返回结果的请求这个非常简单， 大部分情况是我们还得知道异步任务返回结果，然后调用回调函数来更新页面结果。 目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。 这里我只讲">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Ajax实现异步任务">
+<meta property="og:url" content="http://yidao620c.github.io/web/basic/async.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。 这时候我们第一个想到的就是将这种同步请求方式转换成异步请求，然而对于不需要关心返回结果的请求这个非常简单， 大部分情况是我们还得知道异步任务返回结果，然后调用回调函数来更新页面结果。 目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。 这里我只讲">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ajax01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ajax02.png">
+<meta property="article:published_time" content="2017-05-02T01:07:13.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.875Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="web">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/ajax01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/web/basic/async.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/web/basic/async.html","path":"web/basic/async.html","title":"使用Ajax实现异步任务"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用Ajax实现异步任务 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.</span> <span class="nav-text">服务器实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AE%E8%AE%AD%E6%96%B9%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">轮训方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#setTimeout%E5%92%8CsetInterval"><span class="nav-number">2.1.</span> <span class="nav-text">setTimeout和setInterval</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8setInterval%E8%BD%AE%E8%AE%AD"><span class="nav-number">2.2.</span> <span class="nav-text">使用setInterval轮训</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%BF%E8%BF%9E%E6%8E%A5"><span class="nav-number">3.</span> <span class="nav-text">长连接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/web/basic/async.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用Ajax实现异步任务 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用Ajax实现异步任务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-05-02 09:07:13" itemprop="dateCreated datePublished" datetime="2017-05-02T09:07:13+08:00">2017-05-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>我们经常会遇见许多要运行很长时间的任务，如果还是按照常规的页面请求方式，就会产生卡顿，页面假死现象。
+这时候我们第一个想到的就是将这种同步请求方式转换成异步请求，然而对于不需要关心返回结果的请求这个非常简单，
+大部分情况是我们还得知道异步任务返回结果，然后调用回调函数来更新页面结果。</p>
+<p>目前常见的三种方式是Ajax轮训、Ajax长连接（long polling）、WebSocket方式。
+这里我只讲Ajax的两种方式，因为更好的WebSocket方式我已经单独写了一篇文章来介绍。</p>
+<span id="more"></span>
+
+<p>通过一个实际例子来演示下。</p>
+<h2 id="服务器实现"><a href="#服务器实现" class="headerlink" title="服务器实现"></a>服务器实现</h2><p>这里通过一个SpringMVC项目，实现服务器长时间任务部分：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestMapping(&quot;/longtime&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">ajax</span><span class="params">(HttpServletRequest request, HttpServletResponse response, <span class="type">long</span> timed)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> response.getWriter();</span><br><span class="line">        <span class="type">Random</span> <span class="variable">rand</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Random</span>();</span><br><span class="line">        <span class="comment">// 死循环 查询有无数据变化</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            Thread.sleep(<span class="number">300</span>); <span class="comment">// 休眠300毫秒，模拟处理业务等</span></span><br><span class="line">            <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> rand.nextInt(<span class="number">100</span>); <span class="comment">// 产生一个0-100之间的随机数</span></span><br><span class="line">            <span class="keyword">if</span> (i &gt; <span class="number">20</span> &amp;&amp; i &lt; <span class="number">56</span>) &#123; <span class="comment">// 如果随机数在20-56之间就视为有效数据，模拟数据发生变化</span></span><br><span class="line">                <span class="type">long</span> <span class="variable">responseTime</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">                <span class="comment">// 返回数据信息，请求时间、返回数据时间、耗时</span></span><br><span class="line">                writer.print(<span class="string">&quot;result: &quot;</span> + i + <span class="string">&quot;, response time: &quot;</span> + responseTime + <span class="string">&quot;, request time: &quot;</span></span><br><span class="line">                        + timed + <span class="string">&quot;, use time: &quot;</span> + (responseTime - timed));</span><br><span class="line">                <span class="keyword">break</span>; <span class="comment">// 跳出循环，返回数据</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123; <span class="comment">// 模拟没有数据变化，将休眠 hold住连接</span></span><br><span class="line">                Thread.sleep(<span class="number">1300</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>服务器端在进行长连接的程序设计时，要注意以下几点：</p>
+<ol>
+<li>服务器程序对轮询的可控性。由于轮询是用死循环的方式实现的，所以在算法上要保证程序对何时退出循环有完全的控制能力，
+避免进入死循环而耗尽服务器资源。</li>
+<li>合理选择”心跳”频率。长连接必须由客户端不停地进行请求来维持，所以在客户端和服务器间保持正常的”心跳”至为关键，
+参数POLLING_LIFE应小于WEB服务器的超时时间，一般建议在10～20秒左右。也就是ajax请求中timeout: 5000参数</li>
+<li>网络因素的影响。在实际应用时，从服务器做出应答，到下一次循环的建立，是有时间延迟的，延迟时间的长短受网络传输等多种因素影响，
+在这段时间内，长连接处于暂时断开的空档，如果恰好有数据在这段时间内发生变动，服务器是无法立即进行推送的，
+所以，在算法设计上要注意解决由于延迟可能造成的数据丢失问题。</li>
+<li>服务器的性能。在长连接应用中，服务器与每个客户端实例都保持一个持久的连接，这将消耗大量服务器资源，
+特别是在一些大型应用系统中更是如此，大量并发的长连接有可能导致新的请求被阻塞甚至系统崩溃，
+所以，在进行程序设计时应特别注意算法的优化和改进，必要时还需要考虑服务器的负载均衡和集群技术。</li>
+</ol>
+<h2 id="轮训方式"><a href="#轮训方式" class="headerlink" title="轮训方式"></a>轮训方式</h2><h3 id="setTimeout和setInterval"><a href="#setTimeout和setInterval" class="headerlink" title="setTimeout和setInterval"></a>setTimeout和setInterval</h3><p>它们的定义：</p>
+<ol>
+<li>setTimeout 指定延迟后调用函数</li>
+<li>setInterval 以指定周期调用函数</li>
+</ol>
+<p>对于<code>setInterval</code>而言，如果第一个函数的执行时间特别长，在执行的过程中本应触发了许多个func怎么办，
+那么所有这些应该触发的函数都会进入队列吗？</p>
+<p>不，只要发现队列中有一个被执行的函数存在，那么其他的统统忽略。如下图，在第300毫秒和400毫秒处的回调都被抛弃，
+一旦第一个函数执行完后，接着执行队列中的第二个，即使这个函数已经”过时”很久了。</p>
+<p>还有一点，虽然你在setInterval的里指定的周期是100毫秒，但它并不能保证两个函数之间调用的间隔一定是一百毫秒。
+在上面的情况中，如果队列中的第二个函数时在第450毫秒处结束的话，在第500毫秒时，它会继续执行下一轮func，
+也就是说这之间的间隔只有50毫秒，而非周期100毫秒</p>
+<p>那如果我想保证每次执行的间隔应该怎么办？用setTimeout，比如下面的代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> i = <span class="number">1</span></span><br><span class="line"><span class="keyword">var</span> timer = <span class="built_in">setTimeout</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">alert</span>(i++)</span><br><span class="line">    timer = <span class="built_in">setTimeout</span>(<span class="variable language_">arguments</span>.<span class="property">callee</span>, <span class="number">2000</span>)</span><br><span class="line">&#125;, <span class="number">2000</span>)</span><br></pre></td></tr></table></figure>
+
+<p>上面的函数每2秒钟递归调用自己一次，你可以在某一次alert的时候等待任意长的时间（不按”确定”按钮），
+接下来无论你什么时候点击”确定”， 下一次执行一定离这次确定相差2秒钟的</p>
+<p>两者的清除：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">t1 = <span class="built_in">setTimeout</span>(<span class="title function_">xx</span>(), <span class="number">1000</span>);</span><br><span class="line"><span class="built_in">clearTimeout</span>(t1);</span><br><span class="line"></span><br><span class="line">t2 = <span class="built_in">setInterval</span>(<span class="title function_">yy</span>(), <span class="number">1000</span>)</span><br><span class="line"><span class="title function_">clearInteval</span>(t2);</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用setInterval轮训"><a href="#使用setInterval轮训" class="headerlink" title="使用setInterval轮训"></a>使用setInterval轮训</h3><p>客户端实现的就是用一种普通轮询的结果，比较简单。利用<code>setInterval</code>不间断的刷新来获取服务器的资源，
+这种方式的优点就是简单、及时。</p>
+<p>缺点是链接多数是无效重复的；响应的结果没有顺序（因为是异步请求，当发送的请求没有返回结果的时候，后面的请求又被发送。
+而此时如果后面的请求比前面的请求要先返回结果，那么当前面的请求返回结果数据时已经是过时无效的数据了）；
+请求多，难于维护、浪费服务器和网络资源。</p>
+<p>看看实际的轮训例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> count1 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ask1</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> repeat = <span class="variable language_">window</span>.<span class="built_in">setInterval</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        $.<span class="title function_">get</span>(<span class="string">&quot;$&#123;ctx&#125;/longtime.html&quot;</span>,</span><br><span class="line">            &#123;<span class="string">&quot;timed&quot;</span>: <span class="keyword">new</span> <span class="title class_">Date</span>().<span class="title function_">getTime</span>()&#125;,</span><br><span class="line">            <span class="keyword">function</span> (<span class="params">data</span>) &#123;</span><br><span class="line">                $(<span class="string">&quot;#logs&quot;</span>).<span class="title function_">append</span>(<span class="string">&quot;[data: &quot;</span> + data + <span class="string">&quot; ]&lt;br/&gt;&quot;</span>);</span><br><span class="line">                count1++;</span><br><span class="line">                <span class="keyword">if</span> (count1 &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">                    $(<span class="string">&quot;#logs&quot;</span>).<span class="title function_">append</span>(<span class="string">&quot;Ajax 轮训方式 - finished!&quot;</span>);</span><br><span class="line">                    <span class="variable language_">window</span>.<span class="built_in">clearInterval</span>(repeat);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">    &#125;, <span class="number">3000</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行效果：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ajax01.png"></p>
+<p>可以发现，后面请求不会等待前面请求完，也就是也许会同时出现多个HTTP连接服务器，造成服务器资源大量浪费。</p>
+<h2 id="长连接"><a href="#长连接" class="headerlink" title="长连接"></a>长连接</h2><p>这种是Ajax最常见的请求方式，我们通常使用ajax异步提交请求时候就是用的这种方式：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Ajax long polling 方式</span></span><br><span class="line"><span class="keyword">var</span> count2 = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ask2</span>(<span class="params"></span>) &#123;</span><br><span class="line">    $.<span class="title function_">ajax</span>(&#123;</span><br><span class="line">        <span class="attr">url</span>: <span class="string">&quot;$&#123;ctx&#125;/longtime.html&quot;</span>,</span><br><span class="line">        <span class="attr">data</span>: &#123;<span class="string">&quot;timed&quot;</span>: <span class="keyword">new</span> <span class="title class_">Date</span>().<span class="title function_">getTime</span>()&#125;,</span><br><span class="line">        <span class="attr">dataType</span>: <span class="string">&quot;text&quot;</span>,</span><br><span class="line">        <span class="attr">timeout</span>: <span class="number">5000</span>,</span><br><span class="line">        <span class="attr">error</span>: <span class="keyword">function</span> (<span class="params">XMLHttpRequest, textStatus, errorThrown</span>) &#123;</span><br><span class="line">            $(<span class="string">&quot;#state&quot;</span>).<span class="title function_">append</span>(<span class="string">&quot;[state: &quot;</span> + textStatus + <span class="string">&quot;, error: &quot;</span> + errorThrown + <span class="string">&quot;]&lt;br/&gt;&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (textStatus == <span class="string">&quot;timeout&quot;</span>) &#123; <span class="comment">// 请求超时</span></span><br><span class="line">                <span class="title function_">ask2</span>(); <span class="comment">// 递归调用</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 其他错误，如网络错误等</span></span><br><span class="line">                <span class="title function_">ask2</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">data, textStatus</span>) &#123;</span><br><span class="line">            $(<span class="string">&quot;#state&quot;</span>).<span class="title function_">append</span>(<span class="string">&quot;[state: &quot;</span> + textStatus + <span class="string">&quot;, data:&#123;&quot;</span> + data + <span class="string">&quot;&#125;]&lt;br/&gt;&quot;</span>);</span><br><span class="line">            count2++;</span><br><span class="line">            <span class="keyword">if</span> (count2 &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">                $(<span class="string">&quot;#state&quot;</span>).<span class="title function_">append</span>(<span class="string">&quot;Ajax long polling 方式 - finished!&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (textStatus == <span class="string">&quot;success&quot;</span>) &#123; <span class="comment">// 请求成功</span></span><br><span class="line">                <span class="title function_">ask2</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要优点就是和服务器始终保持一个连接。如果当前连接请求成功后，将更新数据并且继续创建一个新的连接和服务器保持联系。
+如果连接超时或发生异常，这个时候程序也会创建一个新连接继续请求。这样就大大节省了服务器和网络资源，提高了程序的性能，
+从而也保证了程序的顺序。</p>
+<p>运行效果图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ajax02.png"></p>
+<p>可以发现，要么前面的运行成功，那么超时，每个时候最多有一个HTTP连接。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/web/" rel="tag"># web</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/tool/jenkins/jenkins-notes.html" rel="prev" title="Jenkins控制台日志出现中文乱码解决方法">
+                  <i class="fa fa-angle-left"></i> Jenkins控制台日志出现中文乱码解决方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/web/basic/websocket.html" rel="next" title="聊一聊WebSocket">
+                  聊一聊WebSocket <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

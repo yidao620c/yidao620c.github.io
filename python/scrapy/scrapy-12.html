@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。 但是如今的互联网大部分的web页面都是动态的，经常逛的网站例如京东、淘宝等，商品列表都是js，并有Ajax渲染， 下载某个链接得到的页面里面含有异步加载的内容，这样再使用之前的方式我们根本获取不到异步加载的这些网页内容。 使用Javascript渲染和处理网页是种非常常见的做法，如何处理一个大量使用Javas">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy笔记12- 抓取动态网站">
+<meta property="og:url" content="http://yidao620c.github.io/python/scrapy/scrapy-12.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。 但是如今的互联网大部分的web页面都是动态的，经常逛的网站例如京东、淘宝等，商品列表都是js，并有Ajax渲染， 下载某个链接得到的页面里面含有异步加载的内容，这样再使用之前的方式我们根本获取不到异步加载的这些网页内容。 使用Javascript渲染和处理网页是种非常常见的做法，如何处理一个大量使用Javas">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-14T16:38:12.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.436Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="scrapy">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/scrapy/scrapy-12.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/scrapy/scrapy-12.html","path":"python/scrapy/scrapy-12.html","title":"Scrapy笔记12- 抓取动态网站"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Scrapy笔记12- 抓取动态网站 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#scrapy-splash%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">scrapy-splash简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85docker"><span class="nav-number">2.</span> <span class="nav-text">安装docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Splash"><span class="nav-number">3.</span> <span class="nav-text">安装Splash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85scrapy-splash"><span class="nav-number">4.</span> <span class="nav-text">安装scrapy-splash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEscrapy-splash"><span class="nav-number">5.</span> <span class="nav-text">配置scrapy-splash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8scrapy-splash"><span class="nav-number">6.</span> <span class="nav-text">使用scrapy-splash</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SplashRequest"><span class="nav-number">6.1.</span> <span class="nav-text">SplashRequest</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Responses"><span class="nav-number">6.2.</span> <span class="nav-text">Responses</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Session%E7%9A%84%E5%A4%84%E7%90%86"><span class="nav-number">6.3.</span> <span class="nav-text">Session的处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">使用实例</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/scrapy/scrapy-12.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Scrapy笔记12- 抓取动态网站 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy笔记12- 抓取动态网站
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-04-15 00:38:12" itemprop="dateCreated datePublished" datetime="2016-04-15T00:38:12+08:00">2016-04-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>前面我们介绍的都是去抓取静态的网站页面，也就是说我们打开某个链接，它的内容全部呈现出来。
+但是如今的互联网大部分的web页面都是动态的，经常逛的网站例如京东、淘宝等，商品列表都是js，并有Ajax渲染，
+下载某个链接得到的页面里面含有异步加载的内容，这样再使用之前的方式我们根本获取不到异步加载的这些网页内容。</p>
+<p>使用Javascript渲染和处理网页是种非常常见的做法，如何处理一个大量使用Javascript的页面是Scrapy爬虫开发中一个常见的问题，
+这篇文章将说明如何在Scrapy爬虫中使用<a target="_blank" rel="noopener" href="https://github.com/scrapy-plugins/scrapy-splash">scrapy-splash</a>来处理页面中得Javascript。</p>
+<span id="more"></span>
+
+<h3 id="scrapy-splash简介"><a href="#scrapy-splash简介" class="headerlink" title="scrapy-splash简介"></a>scrapy-splash简介</h3><p>scrapy-splash利用<a target="_blank" rel="noopener" href="https://github.com/scrapy/scrapy">Splash</a>将javascript和Scrapy集成起来，使得Scrapy可以抓取动态网页。</p>
+<p>Splash是一个javascript渲染服务，是实现了HTTP API的轻量级浏览器，底层基于Twisted和QT框架，Python语言编写。所以首先你得安装Splash实例</p>
+<h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><p>官网建议使用docker容器安装方式Splash。那么首先你得先安装docker</p>
+<p>参考<a target="_blank" rel="noopener" href="https://docs.docker.com/engine/installation/linux/ubuntulinux/">官方安装文档</a>，这里我选择Ubuntu 12.04 LTS版本安装</p>
+<p>升级内核版本，docker需要3.13内核</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get install linux-image-generic-lts-trusty</span><br><span class="line">$ sudo reboot</span><br></pre></td></tr></table></figure>
+
+<p>安装<code>CA</code>认证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install apt-transport-https ca-certificates</span><br></pre></td></tr></table></figure>
+
+<p>增加新的<code>GPG</code>key</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D</span><br></pre></td></tr></table></figure>
+
+<p>打开<code>/etc/apt/sources.list.d/docker.list</code>，如果没有就创建一个，然后删除任何已存在的内容，再增加下面一句</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">deb https://apt.dockerproject.org/repo ubuntu-precise main</span><br></pre></td></tr></table></figure>
+
+<p>更新APT</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get update</span><br><span class="line">$ sudo apt-get purge lxc-docker</span><br><span class="line">$ apt-cache policy docker-engine</span><br></pre></td></tr></table></figure>
+
+<p>安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install docker-engine</span><br></pre></td></tr></table></figure>
+
+<p>启动docker服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service docker start</span><br></pre></td></tr></table></figure>
+
+<p>验证是否启动成功</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<p>上面这条命令会下载一个测试镜像并在容器中运行它，它会打印一个消息，然后退出。</p>
+<h3 id="安装Splash"><a href="#安装Splash" class="headerlink" title="安装Splash"></a>安装Splash</h3><p>拉取镜像下来</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker pull scrapinghub/splash</span><br></pre></td></tr></table></figure>
+
+<p>启动容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker run -p 5023:5023 -p 8050:8050 -p 8051:8051 scrapinghub/splash</span><br></pre></td></tr></table></figure>
+
+<p>现在可以通过0.0.0.0:8050(http),8051(https),5023 (telnet)来访问Splash了。</p>
+<h3 id="安装scrapy-splash"><a href="#安装scrapy-splash" class="headerlink" title="安装scrapy-splash"></a>安装scrapy-splash</h3><p>使用pip安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip install scrapy-splash</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置scrapy-splash"><a href="#配置scrapy-splash" class="headerlink" title="配置scrapy-splash"></a>配置scrapy-splash</h3><p>在你的scrapy工程的配置文件<code>settings.py</code>中添加</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SPLASH_URL = <span class="string">&#x27;http://192.168.203.92:8050&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>添加Splash中间件，还是在<code>settings.py</code>中通过<code>DOWNLOADER_MIDDLEWARES</code>指定，并且修改<code>HttpCompressionMiddleware</code>的优先级</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOADER_MIDDLEWARES = &#123;</span><br><span class="line">    <span class="string">&#x27;scrapy_splash.SplashCookiesMiddleware&#x27;</span>: <span class="number">723</span>,</span><br><span class="line">    <span class="string">&#x27;scrapy_splash.SplashMiddleware&#x27;</span>: <span class="number">725</span>,</span><br><span class="line">    <span class="string">&#x27;scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware&#x27;</span>: <span class="number">810</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，HttpProxyMiddleware的优先级是750，要把它放在Splash中间件后面</p>
+<p>设置Splash自己的去重过滤器</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DUPEFILTER_CLASS = <span class="string">&#x27;scrapy_splash.SplashAwareDupeFilter&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果你使用Splash的Http缓存，那么还要指定一个自定义的缓存后台存储介质，scrapy-splash提供了一个<code>scrapy.contrib.httpcache.FilesystemCacheStorage</code>
+的子类</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HTTPCACHE_STORAGE = <span class="string">&#x27;scrapy_splash.SplashAwareFSCacheStorage&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果你要使用其他的缓存存储，那么需要继承这个类并且将所有的<code>scrapy.util.request.request_fingerprint</code>
+调用替换成<code>scrapy_splash.splash_request_fingerprint</code></p>
+<h3 id="使用scrapy-splash"><a href="#使用scrapy-splash" class="headerlink" title="使用scrapy-splash"></a>使用scrapy-splash</h3><h4 id="SplashRequest"><a href="#SplashRequest" class="headerlink" title="SplashRequest"></a>SplashRequest</h4><p>最简单的渲染请求的方式是使用<code>scrapy_splash.SplashRequest</code>，通常你应该选择使用这个</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">yield</span> SplashRequest(url, self.parse_result,</span><br><span class="line">                    args=&#123;</span><br><span class="line">                        <span class="comment"># optional; parameters passed to Splash HTTP API</span></span><br><span class="line">                        <span class="string">&#x27;wait&#x27;</span>: <span class="number">0.5</span>,</span><br><span class="line"></span><br><span class="line">                        <span class="comment"># &#x27;url&#x27; is prefilled from request url</span></span><br><span class="line">                        <span class="comment"># &#x27;http_method&#x27; is set to &#x27;POST&#x27; for POST requests</span></span><br><span class="line">                        <span class="comment"># &#x27;body&#x27; is set to request body for POST requests</span></span><br><span class="line">                    &#125;,</span><br><span class="line">                    endpoint=<span class="string">&#x27;render.json&#x27;</span>,  <span class="comment"># optional; default is render.html</span></span><br><span class="line">                    splash_url=<span class="string">&#x27;&lt;url&gt;&#x27;</span>,  <span class="comment"># optional; overrides SPLASH_URL</span></span><br><span class="line">                    slot_policy=scrapy_splash.SlotPolicy.PER_DOMAIN,  <span class="comment"># optional</span></span><br><span class="line">                    )</span><br></pre></td></tr></table></figure>
+
+<p>另外，你还可以在普通的scrapy请求中传递<code>splash</code>请求meta关键字达到同样的效果</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">yield</span> scrapy.Request(url, self.parse_result, meta=&#123;</span><br><span class="line">    <span class="string">&#x27;splash&#x27;</span>: &#123;</span><br><span class="line">        <span class="string">&#x27;args&#x27;</span>: &#123;</span><br><span class="line">            <span class="comment"># set rendering arguments here</span></span><br><span class="line">            <span class="string">&#x27;html&#x27;</span>: <span class="number">1</span>,</span><br><span class="line">            <span class="string">&#x27;png&#x27;</span>: <span class="number">1</span>,</span><br><span class="line"></span><br><span class="line">            <span class="comment"># &#x27;url&#x27; is prefilled from request url</span></span><br><span class="line">            <span class="comment"># &#x27;http_method&#x27; is set to &#x27;POST&#x27; for POST requests</span></span><br><span class="line">            <span class="comment"># &#x27;body&#x27; is set to request body for POST requests</span></span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment"># optional parameters</span></span><br><span class="line">        <span class="string">&#x27;endpoint&#x27;</span>: <span class="string">&#x27;render.json&#x27;</span>,  <span class="comment"># optional; default is render.json</span></span><br><span class="line">        <span class="string">&#x27;splash_url&#x27;</span>: <span class="string">&#x27;&lt;url&gt;&#x27;</span>,  <span class="comment"># optional; overrides SPLASH_URL</span></span><br><span class="line">        <span class="string">&#x27;slot_policy&#x27;</span>: scrapy_splash.SlotPolicy.PER_DOMAIN,</span><br><span class="line">        <span class="string">&#x27;splash_headers&#x27;</span>: &#123;&#125;,  <span class="comment"># optional; a dict with headers sent to Splash</span></span><br><span class="line">        <span class="string">&#x27;dont_process_response&#x27;</span>: <span class="literal">True</span>,  <span class="comment"># optional, default is False</span></span><br><span class="line">        <span class="string">&#x27;dont_send_headers&#x27;</span>: <span class="literal">True</span>,  <span class="comment"># optional, default is False</span></span><br><span class="line">        <span class="string">&#x27;magic_response&#x27;</span>: <span class="literal">False</span>,  <span class="comment"># optional, default is True</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>Splash API说明，使用<code>SplashRequest</code>是一个非常便利的工具来填充<code>request.meta[&#39;splash&#39;]</code>里的数据</p>
+<ul>
+<li>meta[‘splash’][‘args’] 包含了发往Splash的参数。</li>
+<li>meta[‘splash’][‘endpoint’]
+指定了Splash所使用的endpoint，默认是<a target="_blank" rel="noopener" href="http://splash.readthedocs.org/en/latest/api.html#render-html">render.html</a></li>
+<li>meta[‘splash’][‘splash_url’] 覆盖了<code>settings.py</code>文件中配置的Splash URL</li>
+<li>meta[‘splash’][‘splash_headers’] 运行你增加或修改发往Splash服务器的HTTP头部信息，注意这个不是修改发往远程web站点的HTTP头部</li>
+<li>meta[‘splash’][‘dont_send_headers’] 如果你不想传递headers给Splash，将它设置成True</li>
+<li>meta[‘splash’][‘slot_policy’] 让你自定义Splash请求的同步设置</li>
+<li>meta[‘splash’][‘dont_process_response’] 当你设置成True后，<code>SplashMiddleware</code>不会修改默认的<code>scrapy.Response</code>
+请求。默认是会返回<code>SplashResponse</code>子类响应比如<code>SplashTextResponse</code></li>
+<li>meta[‘splash’][‘magic_response’] 默认为True，Splash会自动设置Response的一些属性，比如<code>response.headers</code>,<code>response.body</code>等</li>
+</ul>
+<p>如果你想通过Splash来提交Form请求，可以使用<code>scrapy_splash.SplashFormRequest</code>，它跟<code>SplashRequest</code>使用是一样的。</p>
+<h4 id="Responses"><a href="#Responses" class="headerlink" title="Responses"></a>Responses</h4><p>对于不同的Splash请求，scrapy-splash返回不同的Response子类</p>
+<ul>
+<li>SplashResponse 二进制响应，比如对&#x2F;render.png的响应</li>
+<li>SplashTextResponse 文本响应，比如对&#x2F;render.html的响应</li>
+<li>SplashJsonResponse JSON响应，比如对&#x2F;render.json或使用Lua脚本的&#x2F;execute的响应</li>
+</ul>
+<p>如果你只想使用标准的Response对象，就设置<code>meta[&#39;splash&#39;][&#39;dont_process_response&#39;]=True</code></p>
+<p>所有这些Response会把<code>response.url</code>设置成原始请求URL(也就是你要渲染的页面URL)，而不是Splash
+endpoint的URL地址。实际地址通过<code>response.real_url</code>得到</p>
+<h4 id="Session的处理"><a href="#Session的处理" class="headerlink" title="Session的处理"></a>Session的处理</h4><p>Splash本身是无状态的，那么为了支持scrapy-splash的session必须编写Lua脚本，使用<code>/execute</code></p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">main</span><span class="params">(splash)</span></span></span><br><span class="line">    splash:init_cookies(splash.args.cookies)</span><br><span class="line"></span><br><span class="line">    <span class="comment">-- ... your script</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        cookies = splash:get_cookies(),</span><br><span class="line">        <span class="comment">-- ... other results, e.g. html</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>而标准的scrapy session参数可以使用<code>SplashRequest</code>将cookie添加到当前Splash cookiejar中</p>
+<h3 id="使用实例"><a href="#使用实例" class="headerlink" title="使用实例"></a>使用实例</h3><p>接下来我通过一个实际的例子来演示怎样使用，我选择爬取<a target="_blank" rel="noopener" href="http://www.jd.com/">京东网</a>首页的异步加载内容。</p>
+<p>京东网打开首页的时候只会将导航菜单加载出来，其他具体首页内容都是异步加载的，下面有个”猜你喜欢”这个内容也是异步加载的，
+我现在就通过爬取这个”猜你喜欢”这四个字来说明下普通的Scrapy爬取和通过使用了Splash加载异步内容的区别。</p>
+<p>首先我们写个简单的测试Spider，不使用splash：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">TestSpider</span>(scrapy.Spider):</span><br><span class="line">    name = <span class="string">&quot;test&quot;</span></span><br><span class="line">    allowed_domains = [<span class="string">&quot;jd.com&quot;</span>]</span><br><span class="line">    start_urls = [</span><br><span class="line">        <span class="string">&quot;http://www.jd.com/&quot;</span></span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">parse</span>(<span class="params">self, response</span>):</span><br><span class="line">        logging.info(<span class="string">u&#x27;---------我这个是简单的直接获取京东网首页测试---------&#x27;</span>)</span><br><span class="line">        guessyou = response.xpath(<span class="string">&#x27;//div[@id=&quot;guessyou&quot;]/div[1]/h2/text()&#x27;</span>).extract_first()</span><br><span class="line">        logging.info(<span class="string">u&quot;find：%s&quot;</span> % guessyou)</span><br><span class="line">        logging.info(<span class="string">u&#x27;---------------success----------------&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>然后运行结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2016-04-18 14:42:44 test_spider.py[line:20] INFO ---------我这个是简单的直接获取京东网首页测试---------</span><br><span class="line">2016-04-18 14:42:44 test_spider.py[line:22] INFO find：None</span><br><span class="line">2016-04-18 14:42:44 test_spider.py[line:23] INFO ---------------success----------------</span><br></pre></td></tr></table></figure>
+
+<p>我找不到那个”猜你喜欢”这四个字</p>
+<p>接下来我使用splash来爬取</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> scrapy</span><br><span class="line"><span class="keyword">from</span> scrapy_splash <span class="keyword">import</span> SplashRequest</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">JsSpider</span>(scrapy.Spider):</span><br><span class="line">    name = <span class="string">&quot;jd&quot;</span></span><br><span class="line">    allowed_domains = [<span class="string">&quot;jd.com&quot;</span>]</span><br><span class="line">    start_urls = [</span><br><span class="line">        <span class="string">&quot;http://www.jd.com/&quot;</span></span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">start_requests</span>(<span class="params">self</span>):</span><br><span class="line">        splash_args = &#123;</span><br><span class="line">            <span class="string">&#x27;wait&#x27;</span>: <span class="number">0.5</span>,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> url <span class="keyword">in</span> self.start_urls:</span><br><span class="line">            <span class="keyword">yield</span> SplashRequest(url, self.parse_result, endpoint=<span class="string">&#x27;render.html&#x27;</span>,</span><br><span class="line">                                args=splash_args)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">parse_result</span>(<span class="params">self, response</span>):</span><br><span class="line">        logging.info(<span class="string">u&#x27;----------使用splash爬取京东网首页异步加载内容-----------&#x27;</span>)</span><br><span class="line">        guessyou = response.xpath(<span class="string">&#x27;//div[@id=&quot;guessyou&quot;]/div[1]/h2/text()&#x27;</span>).extract_first()</span><br><span class="line">        logging.info(<span class="string">u&quot;find：%s&quot;</span> % guessyou)</span><br><span class="line">        logging.info(<span class="string">u&#x27;---------------success----------------&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">2016-04-18 14:42:51 js_spider.py[line:36] INFO ----------使用splash爬取京东网首页异步加载内容-----------</span><br><span class="line">2016-04-18 14:42:51 js_spider.py[line:38] INFO find：猜你喜欢</span><br><span class="line">2016-04-18 14:42:51 js_spider.py[line:39] INFO ---------------success----------------</span><br></pre></td></tr></table></figure>
+
+<p>可以看出结果里面已经找到了这个”猜你喜欢”，说明异步加载内容爬取成功！</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/scrapy/" rel="tag"># scrapy</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/scrapy/scrapy-11.html" rel="prev" title="Scrapy笔记11- 模拟登录">
+                  <i class="fa fa-angle-left"></i> Scrapy笔记11- 模拟登录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java/basic/osgi.html" rel="next" title="OSGi简易教程">
+                  OSGi简易教程 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

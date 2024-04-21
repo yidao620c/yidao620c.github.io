@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="生成签名用的公私钥对 123456# 生成私钥(umask 077; openssl genrsa -aes256 -out sign.key 3072)# PKCS1私钥转换为PKCS8openssl pkcs8 -topk8 -inform PEM -in sign.key -outform pem -out sign.key# 从私钥导出公钥文件openssl rsa -in sign.ke">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【安全贴士】使用PSS填充的签名验签工具">
+<meta property="og:url" content="http://yidao620c.github.io/security/crypto/pss.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="生成签名用的公私钥对 123456# 生成私钥(umask 077; openssl genrsa -aes256 -out sign.key 3072)# PKCS1私钥转换为PKCS8openssl pkcs8 -topk8 -inform PEM -in sign.key -outform pem -out sign.key# 从私钥导出公钥文件openssl rsa -in sign.ke">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-29T01:12:09.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.712Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="安全贴士">
+<meta property="article:tag" content="加解密">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/crypto/pss.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/crypto/pss.html","path":"security/crypto/pss.html","title":"【安全贴士】使用PSS填充的签名验签工具"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【安全贴士】使用PSS填充的签名验签工具 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8openssl%E5%91%BD%E4%BB%A4%E8%A1%8C%E7%AD%BE%E5%90%8D%E5%92%8C%E9%AA%8C%E7%AD%BE"><span class="nav-number">1.</span> <span class="nav-text">使用openssl命令行签名和验签</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Java%E7%BC%96%E7%A8%8B%E8%BF%9B%E8%A1%8C%E7%AD%BE%E5%90%8D%E5%92%8C%E9%AA%8C%E7%AD%BE"><span class="nav-number">2.</span> <span class="nav-text">使用Java编程进行签名和验签</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E5%85%A5BC%E4%BE%9D%E8%B5%96"><span class="nav-number">2.1.</span> <span class="nav-text">引入BC依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%E9%AA%8C%E7%AD%BE%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">2.2.</span> <span class="nav-text">签名验签工具类</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/crypto/pss.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【安全贴士】使用PSS填充的签名验签工具 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【安全贴士】使用PSS填充的签名验签工具
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-29 09:12:09" itemprop="dateCreated datePublished" datetime="2020-05-29T09:12:09+08:00">2020-05-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>生成签名用的公私钥对</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成私钥</span></span><br><span class="line">(<span class="built_in">umask</span> 077; openssl genrsa -aes256 -out sign.key 3072)</span><br><span class="line"><span class="comment"># PKCS1私钥转换为PKCS8</span></span><br><span class="line">openssl pkcs8 -topk8 -inform PEM -<span class="keyword">in</span> sign.key -outform pem -out sign.key</span><br><span class="line"><span class="comment"># 从私钥导出公钥文件</span></span><br><span class="line">openssl rsa -<span class="keyword">in</span> sign.key -pubout -out sign.pub</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<h2 id="使用openssl命令行签名和验签"><a href="#使用openssl命令行签名和验签" class="headerlink" title="使用openssl命令行签名和验签"></a>使用openssl命令行签名和验签</h2><p>1）通过SHA256生成摘要</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl dgst -sha256 file.txt</span><br></pre></td></tr></table></figure>
+
+<p>2）私钥签名，首先将你的文件通过摘要算法比如SHA256生成一个摘要，并对这个摘要进行私钥签名，输出签名文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 对于OpenSSL算法库，签名时应该先调用RSA_padding_add_PKCS1_PSS进行PSS填充，</span></span><br><span class="line"><span class="comment"># 再对填充结果调用RSA_private_encrypt并指定RSA_NO_PADDING填充方式进行签名</span></span><br><span class="line"><span class="comment"># 验证签名时应该先调用RSA_public_decrypt进行公钥解密，再调用RSA_verify_PKCS1_PSS验证签名；</span></span><br><span class="line">openssl dgst -sign sign.key -sigopt rsa_padding_mode:pss -sha256 -out sign.sha256 file.txt</span><br><span class="line">openssl <span class="built_in">base64</span> -<span class="keyword">in</span> sign.sha256 -out sign.txt</span><br><span class="line"><span class="built_in">rm</span> -f sign.sha256</span><br></pre></td></tr></table></figure>
+
+<p>3）公钥验证</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">openssl <span class="built_in">base64</span> -d -<span class="keyword">in</span> sign.txt -out sign.sha256</span><br><span class="line">openssl dgst -verify sign.pub -sha256 -sigopt rsa_padding_mode:pss -signature sign.sha256 file.txt</span><br><span class="line"><span class="built_in">rm</span> -f sign.txt sign.sha256</span><br></pre></td></tr></table></figure>
+
+<p>4）证书验证。首先将证书中的公钥提取出来，后面就跟公钥验证步骤一致了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl x509 -pubkey -noout -<span class="keyword">in</span> sign.crt &gt; sign.pub</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用Java编程进行签名和验签"><a href="#使用Java编程进行签名和验签" class="headerlink" title="使用Java编程进行签名和验签"></a>使用Java编程进行签名和验签</h2><h3 id="引入BC依赖"><a href="#引入BC依赖" class="headerlink" title="引入BC依赖"></a>引入BC依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.bouncycastle<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>bcprov-jdk15on<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.62<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="签名验签工具类"><a href="#签名验签工具类" class="headerlink" title="签名验签工具类"></a>签名验签工具类</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.FileInputStream;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.security.KeyFactory;</span><br><span class="line"><span class="keyword">import</span> java.security.MessageDigest;</span><br><span class="line"><span class="keyword">import</span> java.security.PrivateKey;</span><br><span class="line"><span class="keyword">import</span> java.security.PublicKey;</span><br><span class="line"><span class="keyword">import</span> java.security.Security;</span><br><span class="line"><span class="keyword">import</span> java.security.cert.CertificateFactory;</span><br><span class="line"><span class="keyword">import</span> java.security.cert.X509Certificate;</span><br><span class="line"><span class="keyword">import</span> java.security.spec.MGF1ParameterSpec;</span><br><span class="line"><span class="keyword">import</span> java.security.spec.PKCS8EncodedKeySpec;</span><br><span class="line"><span class="keyword">import</span> java.security.spec.PSSParameterSpec;</span><br><span class="line"><span class="keyword">import</span> java.security.spec.X509EncodedKeySpec;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> javax.crypto.EncryptedPrivateKeyInfo;</span><br><span class="line"><span class="keyword">import</span> javax.crypto.SecretKeyFactory;</span><br><span class="line"><span class="keyword">import</span> javax.crypto.spec.PBEKeySpec;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.bouncycastle.jce.provider.BouncyCastleProvider;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> sun.misc.BASE64Encoder;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Description</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> xiongneng</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 2020-02-02</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RSASignature</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">Logger</span> <span class="operator">=</span> LoggerFactory.getLogger(RSASignature.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 签名算法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SIGN_ALGORITHMS</span> <span class="operator">=</span> <span class="string">&quot;SHA256withRSA&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">SIGN_ALGORITHMS_PSS</span> <span class="operator">=</span> <span class="string">&quot;SHA256withRSA/PSS&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">ENCODE_ALGORITHM</span> <span class="operator">=</span> <span class="string">&quot;SHA-256&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 生成文件摘要</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> content 文件内容</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> encode 字符集编码</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 文件摘要</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">digest</span><span class="params">(String content, String encode)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">MessageDigest</span> <span class="variable">messageDigest</span> <span class="operator">=</span> MessageDigest.getInstance(ENCODE_ALGORITHM);</span><br><span class="line">            messageDigest.update(content.getBytes(encode));</span><br><span class="line">            <span class="type">byte</span>[] digestBytes = messageDigest.digest();</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(Base64.getEncoder().encode(digestBytes), ICommon.GBK_ENCODEING);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            Logger.error(<span class="string">&quot;Summary calculation failed. &#123;&#125;&quot;</span>, e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * RSA签名，结果写入签名值文件中</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> file 待签名文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> signFile 签名值文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> signKeyFile 签名私钥文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> keyPassword 签名私钥口令</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">sign</span><span class="params">(File file, String signFile, String signKeyFile, String keyPassword)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 先解密私钥</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">encrypted</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(signKeyFile)));</span><br><span class="line">            encrypted = encrypted.replace(<span class="string">&quot;-----BEGIN ENCRYPTED PRIVATE KEY-----&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">            encrypted = encrypted.replace(<span class="string">&quot;-----END ENCRYPTED PRIVATE KEY-----&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">            encrypted = encrypted.replaceAll(<span class="string">&quot;\\n&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">            <span class="type">EncryptedPrivateKeyInfo</span> <span class="variable">pkInfo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EncryptedPrivateKeyInfo</span>(Base64.getDecoder().decode(encrypted));</span><br><span class="line">            <span class="type">PBEKeySpec</span> <span class="variable">keySpec</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PBEKeySpec</span>(keyPassword.toCharArray()); <span class="comment">// password</span></span><br><span class="line">            <span class="type">SecretKeyFactory</span> <span class="variable">pbeKeyFactory</span> <span class="operator">=</span> SecretKeyFactory.getInstance(pkInfo.getAlgName());</span><br><span class="line">            <span class="type">PKCS8EncodedKeySpec</span> <span class="variable">encodedKeySpec</span> <span class="operator">=</span> pkInfo.getKeySpec(pbeKeyFactory.generateSecret(keySpec));</span><br><span class="line">            <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(<span class="string">&quot;RSA&quot;</span>);</span><br><span class="line">            <span class="type">PrivateKey</span> <span class="variable">priKey</span> <span class="operator">=</span> keyFactory.generatePrivate(encodedKeySpec);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 开始签名</span></span><br><span class="line">            Security.addProvider(<span class="keyword">new</span> <span class="title class_">BouncyCastleProvider</span>());</span><br><span class="line">            java.security.<span class="type">Signature</span> <span class="variable">signature</span> <span class="operator">=</span> java.security.Signature.getInstance(SIGN_ALGORITHMS_PSS);</span><br><span class="line">            signature.setParameter(<span class="keyword">new</span> <span class="title class_">PSSParameterSpec</span>(MGF1ParameterSpec.SHA256.getDigestAlgorithm(), <span class="string">&quot;MGF1&quot;</span>,</span><br><span class="line">                    MGF1ParameterSpec.SHA256, <span class="number">32</span>, <span class="number">1</span>));</span><br><span class="line">            signature.initSign(priKey);</span><br><span class="line">            signature.update(Files.readAllBytes(file.toPath()));</span><br><span class="line">            <span class="type">byte</span>[] signed = signature.sign();</span><br><span class="line">            <span class="type">String</span> <span class="variable">signStr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Base64.getEncoder().encode(signed), StandardCharsets.UTF_8);</span><br><span class="line">            System.out.println(signStr);</span><br><span class="line">            Files.write(Paths.get(signFile), signStr.getBytes(StandardCharsets.UTF_8));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            Logger.error(<span class="string">&quot;digital signature failed&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * RSA验签名检查</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> originFile 待验证文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> signFile 签名值文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> signCertFile 签名证书文件</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 是否验签成功</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">verify</span><span class="params">(File originFile, String signFile, String signCertFile)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">CertificateFactory</span> <span class="variable">fact</span> <span class="operator">=</span> CertificateFactory.getInstance(<span class="string">&quot;X.509&quot;</span>);</span><br><span class="line">            <span class="type">X509Certificate</span> <span class="variable">certificate</span> <span class="operator">=</span> (X509Certificate) fact.generateCertificate(<span class="keyword">new</span> <span class="title class_">FileInputStream</span>(signCertFile));</span><br><span class="line">            <span class="type">PublicKey</span> <span class="variable">pk</span> <span class="operator">=</span> certificate.getPublicKey();</span><br><span class="line">            <span class="type">byte</span>[] keyBytes = pk.getEncoded();</span><br><span class="line">            <span class="type">String</span> <span class="variable">publicKey</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BASE64Encoder</span>().encode(keyBytes);</span><br><span class="line">            publicKey = publicKey.replaceAll(<span class="string">&quot;\\r?\\n&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">            <span class="type">byte</span>[] encodedKey = Base64.getDecoder().decode(publicKey);</span><br><span class="line">            <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(<span class="string">&quot;RSA&quot;</span>);</span><br><span class="line">            <span class="type">PublicKey</span> <span class="variable">pubKey</span> <span class="operator">=</span> keyFactory.generatePublic(<span class="keyword">new</span> <span class="title class_">X509EncodedKeySpec</span>(encodedKey));</span><br><span class="line">            Security.addProvider(<span class="keyword">new</span> <span class="title class_">BouncyCastleProvider</span>());</span><br><span class="line">            java.security.<span class="type">Signature</span> <span class="variable">signature</span> <span class="operator">=</span> java.security.Signature.getInstance(SIGN_ALGORITHMS_PSS);</span><br><span class="line">            signature.setParameter(<span class="keyword">new</span> <span class="title class_">PSSParameterSpec</span>(MGF1ParameterSpec.SHA256.getDigestAlgorithm(), <span class="string">&quot;MGF1&quot;</span>,</span><br><span class="line">                    MGF1ParameterSpec.SHA256, <span class="number">32</span>, <span class="number">1</span>));</span><br><span class="line">            signature.initVerify(pubKey);</span><br><span class="line">            signature.update(Files.readAllBytes(originFile.toPath()));</span><br><span class="line">            <span class="type">String</span> <span class="variable">signStr</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(Files.readAllBytes(Paths.get(signFile)), StandardCharsets.UTF_8);</span><br><span class="line">            <span class="keyword">return</span> signature.verify(Base64.getDecoder().decode(signStr.replaceAll(<span class="string">&quot;\\n&quot;</span>, <span class="string">&quot;&quot;</span>)));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            Logger.error(<span class="string">&quot;Digital signature verification failed. &#123;&#125;&quot;</span>, e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%89%E5%85%A8%E8%B4%B4%E5%A3%AB/" rel="tag"># 安全贴士</a>
+              <a href="/tags/%E5%8A%A0%E8%A7%A3%E5%AF%86/" rel="tag"># 加解密</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/certificate/privatekey-partition.html" rel="prev" title="【安全贴士】私钥分片和管道口令读取">
+                  <i class="fa fa-angle-left"></i> 【安全贴士】私钥分片和管道口令读取
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/tool/network/netcat.html" rel="next" title="netcat网络工具简介">
+                  netcat网络工具简介 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="介绍下树莓派没办法连接显示器和键盘的情况下怎样安装Ubuntu Server 22, 以及如何确定树莓派的 IP 地址并登陆进去等一些实用小技巧. 聪明的你还可以用这些学到的新技巧去扫描你的网络。 准备软件：  SDFormatter 5.0.2 用来格式化闪存卡 Raspberry Pi Imager 用来烧录镜像 Ubuntu Server 22.0.4 操作系统镜像文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="树莓派4B安装Ubuntu Server 22.0.4">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/raspberrypi.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="介绍下树莓派没办法连接显示器和键盘的情况下怎样安装Ubuntu Server 22, 以及如何确定树莓派的 IP 地址并登陆进去等一些实用小技巧. 聪明的你还可以用这些学到的新技巧去扫描你的网络。 准备软件：  SDFormatter 5.0.2 用来格式化闪存卡 Raspberry Pi Imager 用来烧录镜像 Ubuntu Server 22.0.4 操作系统镜像文件">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/20230729-05.png">
+<meta property="article:published_time" content="2023-06-01T04:23:33.000Z">
+<meta property="article:modified_time" content="2024-03-10T08:17:23.532Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/20230729-05.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/raspberrypi.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/raspberrypi.html","path":"linux/basic/raspberrypi.html","title":"树莓派4B安装Ubuntu Server 22.0.4"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>树莓派4B安装Ubuntu Server 22.0.4 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%BC%E5%BC%8F%E5%8C%96%E9%97%AA%E5%AD%98%E5%8D%A1"><span class="nav-number">1.</span> <span class="nav-text">格式化闪存卡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%A7%E5%BD%95%E9%95%9C%E5%83%8F"><span class="nav-number">2.</span> <span class="nav-text">烧录镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%BD%91%E7%BB%9C"><span class="nav-number">3.</span> <span class="nav-text">配置网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%9A%E7%94%B5"><span class="nav-number">4.</span> <span class="nav-text">树莓派通电</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E6%89%BEIP%E5%9C%B0%E5%9D%80"><span class="nav-number">5.</span> <span class="nav-text">查找IP地址</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSH%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.</span> <span class="nav-text">SSH连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP"><span class="nav-number">7.</span> <span class="nav-text">配置静态IP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%91%E8%8E%93%E6%B4%BE%E5%A4%87%E4%BB%BD"><span class="nav-number">8.</span> <span class="nav-text">树莓派备份</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ubuntu%E7%B3%BB%E7%BB%9F%E5%85%B3%E9%97%ADunattended-upgrades"><span class="nav-number">9.</span> <span class="nav-text">Ubuntu系统关闭unattended upgrades</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/raspberrypi.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="树莓派4B安装Ubuntu Server 22.0.4 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          树莓派4B安装Ubuntu Server 22.0.4
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-06-01 12:23:33" itemprop="dateCreated datePublished" datetime="2023-06-01T12:23:33+08:00">2023-06-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>介绍下树莓派没办法连接显示器和键盘的情况下怎样安装Ubuntu Server 22, 以及如何确定树莓派的 IP 地址并登陆进去等一些实用小技巧. 聪明的你还可以用这些学到的新技巧去扫描你的网络。</p>
+<p>准备软件：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1fpKnVL8Kcpd4OidMMUhkKw?pwd=3zh5">SDFormatter 5.0.2</a> 用来格式化闪存卡</li>
+<li><a target="_blank" rel="noopener" href="https://downloads.raspberrypi.org/imager/imager_latest.exe">Raspberry Pi Imager</a> 用来烧录镜像</li>
+<li><a target="_blank" rel="noopener" href="https://old-releases.ubuntu.com/releases/22.04/ubuntu-22.04.1-preinstalled-server-arm64+raspi.img.xz">Ubuntu Server 22.0.4</a> 操作系统镜像文件</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="格式化闪存卡"><a href="#格式化闪存卡" class="headerlink" title="格式化闪存卡"></a>格式化闪存卡</h2><p>把闪存卡插入到读卡器中，插入笔记本&#x2F;电脑的USB插口中，然后打开SDFormatter直接格式化即可。</p>
+<h2 id="烧录镜像"><a href="#烧录镜像" class="headerlink" title="烧录镜像"></a>烧录镜像</h2><p>打开Raspberry Pi Imager，选择自定义的镜像并选中上面已经下载好的Ubuntu镜像，然后再选择存储卡，点击烧录即可。</p>
+<h2 id="配置网络"><a href="#配置网络" class="headerlink" title="配置网络"></a>配置网络</h2><p>烧录完了先不要急着拔掉闪存卡，这里可以先配置下网络，后面可以SSH连接上，这样就不需要键盘鼠标和显示器了。在闪存卡的根目录找到network-config文件，
+用记事本打开。将下面的这段前面注释解开：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">wifis:</span></span><br><span class="line">  <span class="attr">wlan0:</span></span><br><span class="line">    <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">access-points:</span></span><br><span class="line">      <span class="string">&quot;你的无线SSID&quot;</span><span class="string">:</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">&quot;你的无线密码&quot;</span></span><br></pre></td></tr></table></figure>
+<p>注意无线网络名和密码都是英文双引号括起来，并且这是个yaml文件格式，缩进一定要看清楚。
+配置完毕后, 将 SD 卡插入树莓派, 第一次启动后配置还没有生效, 需要重启一遍, 第二次应该就能自动连接 WiFi 了</p>
+<h2 id="树莓派通电"><a href="#树莓派通电" class="headerlink" title="树莓派通电"></a>树莓派通电</h2><p>先安装上散热片，时候注意不要手抖，以免歪斜，贴纸双面，注意轻撕。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/20230729-05.png" alt="img.png"></p>
+<ol>
+<li>通电之前推荐先扫描一下局域网ip，这样好判断树莓派ip是哪一个。</li>
+<li>在电脑上使用“弹出”方式，弹出内存卡。直接将内存卡取出，有可能会损坏内存卡上的文件，推荐优雅取出。</li>
+<li>将烧录好的闪存卡插入树莓派，然后连接电源通电。</li>
+</ol>
+<p>把 SD 卡插入树莓派, 然后给树莓派插上USB-C供电, 确认红灯亮起 (供电正常), 
+然后绿灯开始闪烁 (机器运行)，树莓派就开始正常工作了。</p>
+<h2 id="查找IP地址"><a href="#查找IP地址" class="headerlink" title="查找IP地址"></a>查找IP地址</h2><p>下载安装nmap之后，只需要输入如下命令就可以扫描局域网内的在线主机。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sP 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+<p>或者如果不想下载nmap，也可以使用系统自带的工具。打开电脑的cmd命令行界面执行如下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">for /L %i IN (1,1,254) DO ping -w 1 -n 1 192.168.1.%i</span><br><span class="line">arp -a</span><br></pre></td></tr></table></figure>
+
+<h2 id="SSH连接"><a href="#SSH连接" class="headerlink" title="SSH连接"></a>SSH连接</h2><p>用你的 SSH 客户端去连接刚才确定的树莓派的 IP 地址, 就可以连接上树莓派了.</p>
+<p>默认的用户名和密码都是 “ubuntu”, 第一次登陆后系统会要求你修改密码. 安全起见, 一定要修改密码.</p>
+<h2 id="配置静态IP"><a href="#配置静态IP" class="headerlink" title="配置静态IP"></a>配置静态IP</h2><p>用户SSH连接上Ubuntu Server 22.0.4之后，第一件事就是将动态DHCP分配IP修改成静态IP地址。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/netplan/50-cloud-init.yaml</span><br></pre></td></tr></table></figure>
+<p>修改文件内容如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">network:</span></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">        <span class="attr">eth0:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">true</span></span><br><span class="line">            <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">    <span class="attr">wifis:</span></span><br><span class="line">        <span class="attr">wlan0:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">no</span></span><br><span class="line">            <span class="attr">optional:</span> <span class="literal">true</span></span><br><span class="line">            <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.1</span><span class="number">.7</span><span class="string">/24</span>]</span><br><span class="line">            <span class="attr">routes:</span></span><br><span class="line">                <span class="bullet">-</span> <span class="attr">to:</span> <span class="string">default</span></span><br><span class="line">                  <span class="attr">via:</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line">            <span class="attr">nameservers:</span></span><br><span class="line">                <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span>]</span><br><span class="line">            <span class="attr">access-points:</span></span><br><span class="line">                <span class="attr">1209-5G:</span></span><br><span class="line">                    <span class="attr">password:</span> <span class="string">&#x27;12091209&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>然后执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo netplan generate # 没有报错则ok</span><br><span class="line">sudo netplan apply # 此时应用静态ip修改，IP地址发生改变</span><br></pre></td></tr></table></figure>
+
+<h2 id="树莓派备份"><a href="#树莓派备份" class="headerlink" title="树莓派备份"></a>树莓派备份</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/mghcool/Raspberry-backup">https://github.com/mghcool/Raspberry-backup</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/nanhantianyi/rpi-backup">https://github.com/nanhantianyi/rpi-backup</a></li>
+</ul>
+<p>优选第一个方案。</p>
+<h2 id="Ubuntu系统关闭unattended-upgrades"><a href="#Ubuntu系统关闭unattended-upgrades" class="headerlink" title="Ubuntu系统关闭unattended upgrades"></a>Ubuntu系统关闭unattended upgrades</h2><p>在使用ubuntu虚拟机的过程中，遇到关机或重启很慢的问题，提示有一个UU（unattended upgrades）进程在工作，需要等待30min。</p>
+<p>经过一番了解，发现这个UU（unattended upgrades）进程就是ubuntu搞的一个类似于windows系统的自动更新程序，
+目的是让普通用户的系统能随时保持最新，但对于开发来说实属麻烦。这个进程会在后台自动下载和安装系统更新文件，会阻止关机，有时候还会阻止你安装其他软件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt remove unattended-upgrades</span><br></pre></td></tr></table></figure>
+<p>从此再也不受这个问题困扰了，搞定！重启系统试试吧！
+这个方法完全关闭自动更新了，但如果还想手动更新怎么办？完全不用担心，因为还有如下两条指令，在需要的时候手动输入更新就好了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt upgrade</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/scripts/cos-picture.html" rel="prev" title="腾讯云COS上传图片">
+                  <i class="fa fa-angle-left"></i> 腾讯云COS上传图片
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/web/nodejs/nodejs-install.html" rel="next" title="Nodejs的安装和配置">
+                  Nodejs的安装和配置 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

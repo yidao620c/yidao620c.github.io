@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。 也被称为 one click attack&#x2F;session riding，缩写为：CSRF&#x2F;XSRF。 你这可以这么理解CSRF攻击：从一个网站A中发起一个到网站B的请求，而这个请求是经过了伪装的， 伪装操作达到的目的就是让请求看起来像是从网站B中发起的， 也就是说，让B网站所在的服务器端误">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【安全贴士】CSRF攻击与防范">
+<meta property="og:url" content="http://yidao620c.github.io/security/basic/csrf.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。 也被称为 one click attack&#x2F;session riding，缩写为：CSRF&#x2F;XSRF。 你这可以这么理解CSRF攻击：从一个网站A中发起一个到网站B的请求，而这个请求是经过了伪装的， 伪装操作达到的目的就是让请求看起来像是从网站B中发起的， 也就是说，让B网站所在的服务器端误">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/csrf01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/csrf02.png">
+<meta property="article:published_time" content="2016-07-22T10:36:08.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.371Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="安全贴士">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/csrf01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/basic/csrf.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/basic/csrf.html","path":"security/basic/csrf.html","title":"【安全贴士】CSRF攻击与防范"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【安全贴士】CSRF攻击与防范 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cookie%E8%B7%A8%E5%9F%9F"><span class="nav-number">1.</span> <span class="nav-text">Cookie跨域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JavaScript%E8%B7%A8%E5%9F%9F"><span class="nav-number">2.</span> <span class="nav-text">JavaScript跨域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87jsonp%E8%B7%A8%E5%9F%9F"><span class="nav-number">2.1.</span> <span class="nav-text">通过jsonp跨域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87document-domain%E6%9D%A5%E8%B7%A8%E5%AD%90%E5%9F%9F"><span class="nav-number">2.2.</span> <span class="nav-text">通过document.domain来跨子域</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF%E6%94%BB%E5%87%BB%E8%AF%A6%E8%A7%A3"><span class="nav-number">3.</span> <span class="nav-text">CSRF攻击详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E4%BF%97%E7%82%B9%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">3.1.</span> <span class="nav-text">通俗点的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF%E7%9A%84%E9%98%B2%E5%BE%A1"><span class="nav-number">4.</span> <span class="nav-text">CSRF的防御</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cookie-Hashing"><span class="nav-number">4.1.</span> <span class="nav-text">Cookie Hashing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E7%A0%81"><span class="nav-number">4.2.</span> <span class="nav-text">验证码</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/basic/csrf.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【安全贴士】CSRF攻击与防范 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【安全贴士】CSRF攻击与防范
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-07-22 18:36:08" itemprop="dateCreated datePublished" datetime="2016-07-22T18:36:08+08:00">2016-07-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>CSRF是Cross Site Request Forgery的缩写，翻译过来就是跨站请求伪造。
+也被称为 <code>one click attack/session riding</code>，缩写为：CSRF&#x2F;XSRF。</p>
+<p>你这可以这么理解CSRF攻击：从一个网站A中发起一个到网站B的请求，而这个请求是经过了伪装的，
+伪装操作达到的目的就是让请求看起来像是从网站B中发起的，
+也就是说，让B网站所在的服务器端误以为该请求是从自己网站发起的，而不是从A网站发起的。当然，请求一般都是恶意的。</p>
+<p>要真正理解为什么有CSRF攻击存在，那先了解几个浏览器的跨域访问限制。</p>
+<span id="more"></span>
+
+<h2 id="Cookie跨域"><a href="#Cookie跨域" class="headerlink" title="Cookie跨域"></a>Cookie跨域</h2><p>cookie可以跨二级域名来访问，这个很好理解，例如你在<code>www.cmj.com</code>所在的web应用程序创建了一个cookie，
+在<code>cs.cmj.com</code>这样的二级域名对应的应用程序中可以访问，当然你在创建cookie的时候需要指出Domain属性为<code>cmj.com</code>。
+其他情况下的不同域名就无法访问这个cookie了。</p>
+<h2 id="JavaScript跨域"><a href="#JavaScript跨域" class="headerlink" title="JavaScript跨域"></a>JavaScript跨域</h2><p>js跨域是指通过js在不同的域之间进行数据传输或通信，比如用ajax向一个不同的域请求数据，
+或者通过js获取页面中不同域的框架中(iframe)的数据。只要协议、域名、端口有任何一个不同，都被当作是不同的域。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/csrf01.png"></p>
+<h3 id="通过jsonp跨域"><a href="#通过jsonp跨域" class="headerlink" title="通过jsonp跨域"></a>通过jsonp跨域</h3><p>在js中，我们直接用XMLHttpRequest请求不同域上的数据时，是不可以的。
+但是，在页面上引入不同域上的js脚本文件却是可以的，jsonp正是利用这个特性来实现的。</p>
+<p>如果你的页面使用jquery，那么通过它封装的方法就能很方便的来进行jsonp操作了。
+普通的jquery的ajax调用方法基本都采用这个方式，所以就可以调用不同域名实现的API了。</p>
+<p><code>$.getJSON</code>方法会自动判断是否跨域，不跨域的话，就调用普通的ajax方法；
+跨域的话，则会以异步加载js文件的形式来调用jsonp的回调函数。</p>
+<h3 id="通过document-domain来跨子域"><a href="#通过document-domain来跨子域" class="headerlink" title="通过document.domain来跨子域"></a>通过document.domain来跨子域</h3><p>浏览器的同源策略，不能通过ajax的方法去请求不同源中的文档。</p>
+<p>我们只要把<code>http://www.example.com/a.html</code> 和 <code>http://example.com/b.html</code>这两个页面的<code>document.domain</code>都设成相同的域名就可以了。</p>
+<h2 id="CSRF攻击详解"><a href="#CSRF攻击详解" class="headerlink" title="CSRF攻击详解"></a>CSRF攻击详解</h2><p>CSRF攻击是源于WEB的隐式身份验证机制！WEB的身份验证机制虽然可以保证一个请求是来自于某个用户的浏览器，但却无法保证该请求是用户批准发送的！</p>
+<p>A网站访问B网站服务器的一些需要认证的资源的时候，如果没有Cookie信息，服务器是拒绝访问的，那么A网站就无法进行恶意操作。
+而伪造成B网站的请求，就可以将B网站的Cookie一起发到B服务器，这个时候就服务器就认为该请求是合法的，就会给出正确的响应，
+这个时候，A网站就达到目的了。</p>
+<h3 id="通俗点的例子"><a href="#通俗点的例子" class="headerlink" title="通俗点的例子"></a>通俗点的例子</h3><p>假设有一个微博网站B，B有一个”加关注”的功能，即一个用户可以关注另一个用户，
+而这个功能是这样的实现的：用户每次点击”加关注”按钮的时候，就会向服务器发送一个GET请求，URL如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.bdomain.com/addfriends?uid=123</span><br></pre></td></tr></table></figure>
+
+<p>URL中的参数uid表示的是你要关注的用户的ID。</p>
+<p>在正常情况下，即你登录B网站后，点击”加关注”按钮，浏览器会将上面的URL连同B网站产生的Cookie一起发送到B网站的服务器，
+B服务器首先通过Cookie进行用户认证，如果Cookie中的信息正确，就会进行向数据库中写入记录，这样，你就成功关注了ID为123的用户。</p>
+<p>假如我是一个恶意用户，我想让更多的人关注我，而我又不想通过正常的渠道去实现，因为毕竟正常渠道比较浪费时间，
+于是我便开始想歪主意，碰巧，B网站的”加关注”的实现原理被我发现了。这个时候，我便进行了如下操作：</p>
+<p>首先我在我自己的网站A里发了篇文章，文章中全是妖娆的美女图片，大家都喜欢美女嘛，所以就会有很多人来看我的这些美女，
+我们知道，图片在网页中大都是通过<code>&lt;img scr=&quot;http://xxxx/xx.png&quot;/&gt;</code>这样的形式实现的，图片加载的时候就会请求src中指定的URL，
+而我就把众多美女图片的src写成了B博客里”加关注”的URL，不同的是将参数uid的值都写成了我在B网站中的ID（假设是456），即：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.bdomain.com/addfriends?uid=456</span><br></pre></td></tr></table></figure>
+
+<p>浏览器一看请求的域名是<code>bdomain.com</code>，便将存放在客户端的B网站的Cookie给顺带一起发了过去。</p>
+<p>借用别人的图文来说明一个整个CSRF的过程：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/csrf02.png"></p>
+<p>从上图可以看出，要完成一次CSRF攻击，受害者必须依次完成两个步骤：</p>
+<ol>
+<li>登录受信任网站A，并在本地生成Cookie。</li>
+<li>在不登出A的情况下，访问危险网站B。</li>
+</ol>
+<h2 id="CSRF的防御"><a href="#CSRF的防御" class="headerlink" title="CSRF的防御"></a>CSRF的防御</h2><p>防御效果是从服务端着手效果比较好，现在一般的CSRF防御也都在服务端进行。</p>
+<h3 id="Cookie-Hashing"><a href="#Cookie-Hashing" class="headerlink" title="Cookie Hashing"></a>Cookie Hashing</h3><p>所有表单都包含同一个伪随机值，这可能是最简单的解决方案了，
+因为攻击者不能获得第三方的Cookie(理论上)，所以表单中的数据也就构造失败了。</p>
+<p>这个方法个人觉得已经可以杜绝99%的CSRF攻击了，那还有1%呢….由于用户的Cookie很容易由于网站的XSS漏洞而被盗取，这就另外的1%。</p>
+<h3 id="验证码"><a href="#验证码" class="headerlink" title="验证码"></a>验证码</h3><p>每次的用户提交都需要用户在表单中填写一个图片上的随机字符串，这个方案可以完全解决CSRF，但个人觉得在易用性方面似乎不是太好。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%89%E5%85%A8%E8%B4%B4%E5%A3%AB/" rel="tag"># 安全贴士</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/web/basic/http-cache.html" rel="prev" title="HTTP缓存介绍">
+                  <i class="fa fa-angle-left"></i> HTTP缓存介绍
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/basic/xss.html" rel="next" title="【安全贴士】XSS攻击与防范">
+                  【安全贴士】XSS攻击与防范 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

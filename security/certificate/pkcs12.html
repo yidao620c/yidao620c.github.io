@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在CentOS7和JDK8中，默认使用的openssl或keytool命令生成的PKCS12证书库，  使用的加密算法为弱加密算法pbeWithSHA1And40BitRC2-CBC，需要升级为新的安全算法。 可通过如下命令查看PKCS12格式的证书库文件详细信息。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【安全贴士】PKCS12弱加密算法分析">
+<meta property="og:url" content="http://yidao620c.github.io/security/certificate/pkcs12.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="在CentOS7和JDK8中，默认使用的openssl或keytool命令生成的PKCS12证书库，  使用的加密算法为弱加密算法pbeWithSHA1And40BitRC2-CBC，需要升级为新的安全算法。 可通过如下命令查看PKCS12格式的证书库文件详细信息。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-01T04:33:08.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.444Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="安全贴士">
+<meta property="article:tag" content="数字证书">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/certificate/pkcs12.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/certificate/pkcs12.html","path":"security/certificate/pkcs12.html","title":"【安全贴士】PKCS12弱加密算法分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【安全贴士】PKCS12弱加密算法分析 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%87%E7%BA%A7%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">升级方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JDK%E7%89%88%E6%9C%AC%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">JDK版本问题</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/certificate/pkcs12.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【安全贴士】PKCS12弱加密算法分析 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【安全贴士】PKCS12弱加密算法分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-01 12:33:08" itemprop="dateCreated datePublished" datetime="2020-05-01T12:33:08+08:00">2020-05-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在CentOS7和JDK8中，默认使用的openssl或keytool命令生成的PKCS12证书库， 
+使用的加密算法为弱加密算法<code>pbeWithSHA1And40BitRC2-CBC</code>，需要升级为新的安全算法。</p>
+<p>可通过如下命令查看PKCS12格式的证书库文件详细信息。</p>
+<span id="more"></span>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@mail CA]<span class="comment"># openssl pkcs12 -info -in root78.p12 -nodes</span></span><br><span class="line">MAC Iteration 100000</span><br><span class="line">MAC verified OK</span><br><span class="line">PKCS7 Encrypted data: pbeWithSHA1And40BitRC2-CBC, Iteration 50000</span><br><span class="line">Certificate bag</span><br><span class="line">Bag Attributes</span><br><span class="line">    friendlyName: caroot</span><br><span class="line">    2.16.840.1.113894.746875.1.1: &lt;Unsupported tag 6&gt;</span><br><span class="line">subject=/C=CN/ST=SX/L=XA/O=xncoding/OU=GTS/CN=ca.xncoding.com/emailAddress=ca@xncoding.com</span><br><span class="line">issuer=/C=CN/ST=SX/L=XA/O=xncoding/OU=GTS/CN=ca.xncoding.com/emailAddress=ca@xncoding.com</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIFHTCCA4WgAwIBAgIJAPr+QX/LXhniMA0GCSqGSIb3DQEBCwUAMIGCMQswCQYD</span><br></pre></td></tr></table></figure>
+
+<h2 id="升级方案"><a href="#升级方案" class="headerlink" title="升级方案"></a>升级方案</h2><p>openssl命令可以通过参数来指定加密算法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导出包含CA链的PKCS12格式证书库</span></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -inkey private/server.key -passin pass:<span class="variable">$&#123;server_key_password&#125;</span> \</span><br><span class="line">-<span class="keyword">in</span> certs/server.crt -chain -CAfile root.crt -out certs/server.p12 -password pass:<span class="variable">$&#123;server_p12_password&#125;</span> \</span><br><span class="line">-keypbe aes-256-cbc -certpbe aes-256-cbc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出信任证书库</span></span><br><span class="line">openssl pkcs12 -<span class="built_in">export</span> -nokeys -<span class="keyword">in</span> root.crt -certfile root.crt -out root.p12 -certpbe AES-256-CBC</span><br></pre></td></tr></table></figure>
+
+<p>JDK8目前并不能解析这种加密方式的证书库，因此需要添加开源库<code>bouncycastle</code>，Java中加载证书库的时候指定provider为<code>BC</code>才能解析。
+方法是在代码中添加<code>Security.addProvider(new BouncyCastleProvider())</code>。</p>
+<p>或者更好的做法是在jre的<code>java.security</code>文件中添加</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">security.provider.10=org.bouncycastle.jce.provider.BouncyCastleProvider</span><br></pre></td></tr></table></figure>
+
+<p>另外如果在Tomcat配置HTTPS双向认证，则同样需要指定证书库和信任证书库的provider为<code>BC</code>。</p>
+<h2 id="JDK版本问题"><a href="#JDK版本问题" class="headerlink" title="JDK版本问题"></a>JDK版本问题</h2><p>按照上面做法做之后，仍然无法解决问题。使用这种方式导出来的<code>server.p12</code>证书库是没有问题的，但是如果使用这种方式导出信任证书<code>root.p12</code>，则无法使用。 经过反复测试后发现，由于<code>root.p12</code>
+缺少别名导致，而openssl无法对每个证书单独设置别名。事实上，openssl对于信任证书库的支持很有限。 因此无法通过openssl命令来生成、导入、导出、删除信任证书库等操作，只能通过keytool命令。</p>
+<p>对于keytool命令，需要使用高版本的JDK来导出信任证书库，具体参考：<a target="_blank" rel="noopener" href="https://bugs.openjdk.java.net/browse/JDK-8228481">https://bugs.openjdk.java.net/browse/JDK-8228481</a>。
+根据bug说明，对于JDK8、11、15、16、17都解决了，但是实测发现8和11都不行，只有OpenJDK 15支持。主要是这个补丁版还没发布吧。 等后续再看看是否已修复。</p>
+<p>方法就是下载OpenJDK 15之后，修改jre中的java.security</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">keystore.pkcs12.certProtectionAlgorithm=PBEWithHmacSHA256AndAES_256</span><br><span class="line">keystore.pkcs12.keyProtectionAlgorithm=PBEWithHmacSHA256AndAES_256</span><br><span class="line">keystore.pkcs12.macAlgorithm=HmacPBESHA256</span><br><span class="line">keystore.pkcs12.certPbeIterationCount=10000</span><br><span class="line">keystore.pkcs12.keyPbeIterationCount=10000</span><br><span class="line">keystore.pkcs12.macIterationCount=100000</span><br></pre></td></tr></table></figure>
+
+<p>然后使用OpenJDK 15的keytool工具生成信任证书库<code>root.p12</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool -import -noprompt -trustcacerts -<span class="built_in">alias</span> caroot -file root.crt -keystore root.p12 -storetype PKCS12</span><br></pre></td></tr></table></figure>
+
+<p>也就是说证书<code>server.p12</code>由<code>openssl</code>命令生成，而信任证书库<code>root.p12</code>由<code>keytool</code>工具生成。 生成之后对于证书的解析方法仍然是需要使用<code>BC</code>。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%89%E5%85%A8%E8%B4%B4%E5%A3%AB/" rel="tag"># 安全贴士</a>
+              <a href="/tags/%E6%95%B0%E5%AD%97%E8%AF%81%E4%B9%A6/" rel="tag"># 数字证书</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/tool/maven/maven-scripts.html" rel="prev" title="maven自动上传包和执行脚本">
+                  <i class="fa fa-angle-left"></i> maven自动上传包和执行脚本
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/basic/pynuitka.html" rel="next" title="使用Nuitka打包Python程序">
+                  使用Nuitka打包Python程序 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

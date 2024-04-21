@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="我们将谜题定义为：包含一个初始位置，一个目标位置，以及用于判断是否是有效移动的规则集。 规则集包含两部分：计算从指定位置开始的所有合法移动，以及每次移动的结果位置。 下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口， 我们可以写一个简单的串行求解程序，该程序将在谜题空间Puzzle Space中查找， 直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用递归算法并行化解决谜题框架">
+<meta property="og:url" content="http://yidao620c.github.io/algorithm/concurrent-recursive.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="我们将谜题定义为：包含一个初始位置，一个目标位置，以及用于判断是否是有效移动的规则集。 规则集包含两部分：计算从指定位置开始的所有合法移动，以及每次移动的结果位置。 下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口， 我们可以写一个简单的串行求解程序，该程序将在谜题空间Puzzle Space中查找， 直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-04-14T07:41:16.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.240Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/algorithm/concurrent-recursive.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/algorithm/concurrent-recursive.html","path":"algorithm/concurrent-recursive.html","title":"利用递归算法并行化解决谜题框架"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>利用递归算法并行化解决谜题框架 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">并行方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">算法原理</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/algorithm/concurrent-recursive.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="利用递归算法并行化解决谜题框架 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用递归算法并行化解决谜题框架
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-04-14 15:41:16" itemprop="dateCreated datePublished" datetime="2015-04-14T15:41:16+08:00">2015-04-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AE%97%E6%B3%95%E4%B9%8B%E7%BE%8E/" itemprop="url" rel="index"><span itemprop="name">算法之美</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>我们将谜题定义为：包含一个初始位置，一个目标位置，以及用于判断是否是有效移动的规则集。</p>
+<p>规则集包含两部分：计算从指定位置开始的所有合法移动，以及每次移动的结果位置。</p>
+<p>下面先给出表示谜题的抽象类，其中的类型参数P和M表示位置类和移动类。根据这个接口，
+我们可以写一个简单的串行求解程序，该程序将在谜题空间Puzzle Space中查找，
+直到找到一个解答或者找遍了整个空间都没有发现答案。注：一个移动M代表一步。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 表示 搬箱子 之类谜题的抽象类*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">Puzzle</span>&lt;P, M&gt; &#123;</span><br><span class="line">    P <span class="title function_">initialPosition</span><span class="params">()</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">isGoal</span><span class="params">(P position)</span>;</span><br><span class="line"> </span><br><span class="line">    Set&lt;M&gt; <span class="title function_">legalMoves</span><span class="params">(P position)</span>;</span><br><span class="line"> </span><br><span class="line">    P <span class="title function_">move</span><span class="params">(P position, M move)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<p>下面的PuzzleNode代表通过一系列的移动到达的一个位置，其中保存了到达该位置的移动以及前一个Node。
+只要沿着PuzzleNode链接逐步回溯，就可以重新构建出达到当前位置的移动序列。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 用于谜题解决框架的链接节点 */</span></span><br><span class="line"><span class="meta">@Immutable</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PuzzleNode</span>&lt;P, M&gt; &#123;</span><br><span class="line">    <span class="keyword">final</span> P pos;</span><br><span class="line">    <span class="keyword">final</span> M move;</span><br><span class="line">    <span class="keyword">final</span> PuzzleNode&lt;P, M&gt; prev;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PuzzleNode</span><span class="params">(P pos, M move, PuzzleNode&lt;P, M&gt; prev)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.pos = pos;</span><br><span class="line">        <span class="built_in">this</span>.move = move;</span><br><span class="line">        <span class="built_in">this</span>.prev = prev;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    List&lt;M&gt; <span class="title function_">asMoveList</span><span class="params">()</span> &#123;</span><br><span class="line">        List&lt;M&gt; solution = <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;M&gt;();</span><br><span class="line">        <span class="keyword">for</span> (PuzzleNode&lt;P, M&gt; n = <span class="built_in">this</span>; n.move != <span class="literal">null</span>; n = n.prev)</span><br><span class="line">            solution.add(<span class="number">0</span>, n.move);</span><br><span class="line">        <span class="keyword">return</span> solution;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面的SequentialPuzzleSolver给出了谜题框架的串行解决方案，它在谜题空间中执行深度优先搜索，
+当找到解答方案，不一定是最短的解决方案，结束搜索。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 串行的谜题解答器*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SequentialPuzzleSolver</span>&lt;P, M&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Puzzle&lt;P, M&gt; puzzle;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Set&lt;P&gt; seen = <span class="keyword">new</span> <span class="title class_">HashSet</span>&lt;P&gt;();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">SequentialPuzzleSolver</span><span class="params">(Puzzle&lt;P, M&gt; puzzle)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.puzzle = puzzle;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> List&lt;M&gt; <span class="title function_">solve</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">P</span> <span class="variable">pos</span> <span class="operator">=</span> puzzle.initialPosition();</span><br><span class="line">        <span class="keyword">return</span> search(<span class="keyword">new</span> <span class="title class_">PuzzleNode</span>&lt;P, M&gt;(pos, <span class="literal">null</span>, <span class="literal">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> List&lt;M&gt; <span class="title function_">search</span><span class="params">(PuzzleNode&lt;P, M&gt; node)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!seen.contains(node.pos)) &#123;</span><br><span class="line">            seen.add(node.pos);</span><br><span class="line">            <span class="keyword">if</span> (puzzle.isGoal(node.pos))</span><br><span class="line">                <span class="keyword">return</span> node.asMoveList();</span><br><span class="line">            <span class="keyword">for</span> (M move : puzzle.legalMoves(node.pos)) &#123;</span><br><span class="line">                <span class="type">P</span> <span class="variable">pos</span> <span class="operator">=</span> puzzle.move(node.pos, move);</span><br><span class="line">                PuzzleNode&lt;P, M&gt; child = <span class="keyword">new</span> <span class="title class_">PuzzleNode</span>&lt;P, M&gt;(pos, move, node);</span><br><span class="line">                List&lt;M&gt; result = search(child);</span><br><span class="line">                <span class="keyword">if</span> (result != <span class="literal">null</span>)</span><br><span class="line">                    <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="并行方案"><a href="#并行方案" class="headerlink" title="并行方案"></a>并行方案</h2><p>接下来我们给出并行解决方案，ConcurrentPuzzleSolver中使用了一个内部类SolverTask，
+这个类扩展了PuzzleNode并实现了Runnable。大多数工作都是在run中完成的：首先计算下一步肯能到达的所有位置，
+并去掉已经到达的位置，然后判断（这个任务或者其他某个任务）是否已经成功完成，最后将尚未搜索过的位置提交给Executor。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ConcurrentPuzzleSolver</span>&lt;P, M&gt; &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Puzzle&lt;P, M&gt; puzzle;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ExecutorService exec;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ConcurrentMap&lt;P, Boolean&gt; seen;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">final</span> ValueLatch&lt;PuzzleNode&lt;P, M&gt;&gt; solution = <span class="keyword">new</span> <span class="title class_">ValueLatch</span>&lt;PuzzleNode&lt;P, M&gt;&gt;();</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ConcurrentPuzzleSolver</span><span class="params">(Puzzle&lt;P, M&gt; puzzle)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.puzzle = puzzle;</span><br><span class="line">        <span class="built_in">this</span>.exec = initThreadPool();</span><br><span class="line">        <span class="built_in">this</span>.seen = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;P, Boolean&gt;();</span><br><span class="line">        <span class="keyword">if</span> (exec <span class="keyword">instanceof</span> ThreadPoolExecutor) &#123;</span><br><span class="line">            <span class="type">ThreadPoolExecutor</span> <span class="variable">tpe</span> <span class="operator">=</span> (ThreadPoolExecutor) exec;</span><br><span class="line">            tpe.setRejectedExecutionHandler(<span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>.DiscardPolicy());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> ExecutorService <span class="title function_">initThreadPool</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> Executors.newCachedThreadPool();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> List&lt;M&gt; <span class="title function_">solve</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">P</span> <span class="variable">p</span> <span class="operator">=</span> puzzle.initialPosition();</span><br><span class="line">            exec.execute(newTask(p, <span class="literal">null</span>, <span class="literal">null</span>));</span><br><span class="line">            <span class="comment">// block until solution found</span></span><br><span class="line">            PuzzleNode&lt;P, M&gt; solnPuzzleNode = solution.getValue();</span><br><span class="line">            <span class="keyword">return</span> (solnPuzzleNode == <span class="literal">null</span>) ? <span class="literal">null</span> : solnPuzzleNode.asMoveList();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            exec.shutdown();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> Runnable <span class="title function_">newTask</span><span class="params">(P p, M m, PuzzleNode&lt;P, M&gt; n)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SolverTask</span>(p, m, n);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">class</span> <span class="title class_">SolverTask</span> <span class="keyword">extends</span> <span class="title class_">PuzzleNode</span>&lt;P, M&gt; <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line">        SolverTask(P pos, M move, PuzzleNode&lt;P, M&gt; prev) &#123;</span><br><span class="line">            <span class="built_in">super</span>(pos, move, prev);</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (solution.isSet() || seen.putIfAbsent(pos, <span class="literal">true</span>) != <span class="literal">null</span>)</span><br><span class="line">                <span class="keyword">return</span>; <span class="comment">// already solved or seen this position</span></span><br><span class="line">            <span class="keyword">if</span> (puzzle.isGoal(pos))</span><br><span class="line">                solution.setValue(<span class="built_in">this</span>);</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">for</span> (M m : puzzle.legalMoves(pos))</span><br><span class="line">                    exec.execute(newTask(puzzle.move(pos, m), m, <span class="built_in">this</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@ThreadSafe</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ValueLatch</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="meta">@GuardedBy(&quot;this&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">T</span> <span class="variable">value</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">CountDownLatch</span> <span class="variable">done</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CountDownLatch</span>(<span class="number">1</span>);</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isSet</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (done.getCount() == <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">setValue</span><span class="params">(T newValue)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!isSet()) &#123;</span><br><span class="line">            value = newValue;</span><br><span class="line">            done.countDown();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">public</span> T <span class="title function_">getValue</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        done.await();</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> value;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="算法原理"><a href="#算法原理" class="headerlink" title="算法原理"></a>算法原理</h2><p>比较串行和并行算法可知：并发方法引入了一种新形式的限制并去掉了一种原有的限制，新的限制在这个问题域中更合适。
+串行版本的程序执行深度优先搜索，因此搜索过程将受限于栈的大小。并发版本程序执行广度优先搜索，因此不会受到栈大小的限制。</p>
+<p>第一个找到解答的线程还会关闭Executor，从而阻止接受显得任务。
+要避免处理RejectedExecutionException（等待队列满员或者是Executor关闭后提交的任务），
+需要将拒绝执行处理器设置为DiscardPolicy 。</p>
+<p>如果不存在解答，那么ConcurrentPuzzleSolver就会永远的等待下去，getSolution一直阻塞下去。
+通过记录活动任务数量，当该值为零时将解答设置为null，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PuzzleSolver</span>&lt;P, M&gt; <span class="keyword">extends</span> <span class="title class_">ConcurrentPuzzleSolver</span>&lt;P, M&gt; &#123;</span><br><span class="line">    PuzzleSolver(Puzzle&lt;P, M&gt; puzzle) &#123;</span><br><span class="line">        <span class="built_in">super</span>(puzzle);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">AtomicInteger</span> <span class="variable">taskCount</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AtomicInteger</span>(<span class="number">0</span>);</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">protected</span> Runnable <span class="title function_">newTask</span><span class="params">(P p, M m, PuzzleNode&lt;P, M&gt; n)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">CountingSolverTask</span>(p, m, n);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">class</span> <span class="title class_">CountingSolverTask</span> <span class="keyword">extends</span> <span class="title class_">SolverTask</span> &#123;</span><br><span class="line">        CountingSolverTask(P pos, M move, PuzzleNode&lt;P, M&gt; prev) &#123;</span><br><span class="line">            <span class="built_in">super</span>(pos, move, prev);</span><br><span class="line">            taskCount.incrementAndGet();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="built_in">super</span>.run();</span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (taskCount.decrementAndGet() == <span class="number">0</span>)</span><br><span class="line">                    solution.setValue(<span class="literal">null</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>另外，还可以将ValueLatch设置为限时的，将getValue使用await的限时版实现，
+那么就可以指定多少时间内搜索结果，搜不到就超时中断。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/linux/basic/centos-yum.html" rel="prev" title="centos6更新yum源">
+                  <i class="fa fa-angle-left"></i> centos6更新yum源
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/algorithm/eight-queens.html" rel="next" title="回溯法解决八皇后问题">
+                  回溯法解决八皇后问题 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

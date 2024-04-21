@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="电子邮件系统是我们在日常工作、生活中最常用的一个网络服务。本章将首先介绍电子邮件系统的起源， 然后介绍SMTP、POP3、IMAP4等常见的电子邮件协议， 然后介绍如何在CentOS7中使用Postfix和Dovecot服务程序配置电子邮件系统服务的方法。 并结合BIND服务程序提供的DNS域名解析服务来验证客户端主机与服务器之间的邮件收发功能。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS7搭建postfix邮件服务器">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/postfix.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="电子邮件系统是我们在日常工作、生活中最常用的一个网络服务。本章将首先介绍电子邮件系统的起源， 然后介绍SMTP、POP3、IMAP4等常见的电子邮件协议， 然后介绍如何在CentOS7中使用Postfix和Dovecot服务程序配置电子邮件系统服务的方法。 并结合BIND服务程序提供的DNS域名解析服务来验证客户端主机与服务器之间的邮件收发功能。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix02.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix03.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix04.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix05.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix06.png">
+<meta property="article:published_time" content="2018-02-25T08:43:32.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.231Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/postfix01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/postfix.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/postfix.html","path":"linux/basic/postfix.html","title":"CentOS7搭建postfix邮件服务器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS7搭建postfix邮件服务器 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">电子邮件协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEDNS%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">配置DNS服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEPostfix%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F"><span class="nav-number">3.</span> <span class="nav-text">配置Postfix服务程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEDovecot%E6%9C%8D%E5%8A%A1%E7%A8%8B%E5%BA%8F"><span class="nav-number">4.</span> <span class="nav-text">配置Dovecot服务程序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BD%BF%E7%94%A8%E7%94%B5%E5%AD%90%E9%82%AE%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">客户端使用电子邮件系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E7%94%A8%E6%88%B7%E5%88%AB%E5%90%8D%E9%82%AE%E7%AE%B1"><span class="nav-number">6.</span> <span class="nav-text">设置用户别名邮箱</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/postfix.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS7搭建postfix邮件服务器 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS7搭建postfix邮件服务器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-25 16:43:32" itemprop="dateCreated datePublished" datetime="2018-02-25T16:43:32+08:00">2018-02-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>电子邮件系统是我们在日常工作、生活中最常用的一个网络服务。本章将首先介绍电子邮件系统的起源，
+然后介绍SMTP、POP3、IMAP4等常见的电子邮件协议，
+然后介绍如何在CentOS7中使用Postfix和Dovecot服务程序配置电子邮件系统服务的方法。
+并结合BIND服务程序提供的DNS域名解析服务来验证客户端主机与服务器之间的邮件收发功能。</p>
+<span id="more"></span>
+
+<h2 id="电子邮件协议"><a href="#电子邮件协议" class="headerlink" title="电子邮件协议"></a>电子邮件协议</h2><p>电子邮件系统基于邮件协议来完成电子邮件的传输，常见的邮件协议有下面这些。</p>
+<ol>
+<li>简单邮件传输协议（Simple Mail Transfer Protocol，SMTP）：用于发送和中转发出的电子邮件，占用服务器的25&#x2F;TCP端口。</li>
+<li>邮局协议版本3（Post Office Protocol 3，POP3）：用于将电子邮件存储到本地主机，占用服务器的110&#x2F;TCP端口。</li>
+<li>Internet消息访问协议版本4（Internet Message Access Protocol 4，IMAP4）：用于在本地主机上访问邮件，占用服务器的143&#x2F;TCP端口。</li>
+</ol>
+<p>在电子邮件系统中，为用户收发邮件的服务器名为邮件用户代理（Mail User Agent，MUA）。
+另外，既然电子邮件系统能够让用户在离线的情况下依然可以完成数据的接收，肯定得有一个用于保存用户邮件的“信箱”服务器，
+这个服务器的名字为邮件投递代理（Mail Delivery Agent，MDA），
+其工作职责是把来自于邮件传输代理（Mail Transfer Agent，MTA）的邮件保存到本地的收件箱中。
+其中，这个MTA的工作职责是转发处理不同电子邮件服务供应商之间的邮件，把来自于MUA的邮件转发到合适的MTA服务器。</p>
+<p>例如，我们从新浪信箱向谷歌信箱发送一封电子邮件，这封电子邮件的传输过程如图所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix01.png"></p>
+<p>在生产环境中部署企业级的电子邮件系统时，有4个注意事项请留意：</p>
+<ol>
+<li>添加反垃圾与反病毒模块：它能够很有效地阻止垃圾邮件或病毒邮件对企业信箱的干扰。</li>
+<li>对邮件加密：可有效保护邮件内容不被黑客盗取和篡改。</li>
+<li>添加邮件监控审核模块：可有效地监控企业全体员工的邮件中是否有敏感词、是否有透露企业资料等违规行为。</li>
+<li>保障稳定性：电子邮件系统的稳定性至关重要，运维人员应做到保证电子邮件系统的稳定运行，并及时做好防范分布式拒绝服务（DDoS）攻击的准备。</li>
+</ol>
+<p>一个最基础的电子邮件系统肯定要能提供发件服务和收件服务，为此需要使用基于SMTP协议的Postfix服务程序提供发件服务功能，
+并使用基于POP3协议的Dovecot服务程序提供收件服务功能。这样一来，
+用户就可以使用Outlook Express或Foxmail等客户端服务程序正常收发邮件了。电子邮件系统的工作流程如图所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix02.png"></p>
+<h2 id="配置DNS服务"><a href="#配置DNS服务" class="headerlink" title="配置DNS服务"></a>配置DNS服务</h2><p>一般而言，我们的信箱地址类似于“<a href="mailto:&#x72;&#111;&#111;&#x74;&#x40;&#x78;&#x6e;&#x63;&#111;&#100;&#x69;&#x6e;&#103;&#46;&#x63;&#111;&#x6d;">&#x72;&#111;&#111;&#x74;&#x40;&#x78;&#x6e;&#x63;&#111;&#100;&#x69;&#x6e;&#103;&#46;&#x63;&#111;&#x6d;</a>”这样，也就是按照“用户名@主机地址（域名）”格式来规范的。
+要想更好地检验电子邮件系统的配置效果，需要先部署bind服务程序，为电子邮件服务器和客户端提供DNS域名解析服务。</p>
+<p>第1步：配置服务器主机名称，需要保证服务器主机名称与发信域名保持一致：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/hostname</span><br><span class="line">mail.xncoding.com</span><br><span class="line">hostnamectl set-hostname mail.xncoding.com</span><br></pre></td></tr></table></figure>
+
+<p>第2步：清空iptables防火墙默认策略，并保存策略状态，避免因防火墙中默认存在的策略阻止了客户端DNS解析域名及收发邮件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -F</span><br><span class="line">service iptables save</span><br></pre></td></tr></table></figure>
+
+<p>第3步：为电子邮件系统提供域名解析。</p>
+<p>主配置文件<code>/etc/named.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">options &#123;</span><br><span class="line">        listen-on port 53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6 port 53 &#123; ::1; &#125;;</span><br><span class="line">        directory       &quot;/var/named&quot;;</span><br><span class="line">        dump-file       &quot;/var/named/data/cache_dump.db&quot;;</span><br><span class="line">        statistics-file &quot;/var/named/data/named_stats.txt&quot;;</span><br><span class="line">        memstatistics-file &quot;/var/named/data/named_mem_stats.txt&quot;;</span><br><span class="line">        recursing-file  &quot;/var/named/data/named.recursing&quot;;</span><br><span class="line">        secroots-file   &quot;/var/named/data/named.secroots&quot;;</span><br><span class="line">        allow-query     &#123; any; &#125;;</span><br><span class="line">        allow-transfer &#123; key master-slave; &#125;;</span><br><span class="line">...省略</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>区域配置文件<code>/etc/named.rfc1912.zones</code>如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;xncoding.com&quot; IN &#123;</span><br><span class="line">  type master;</span><br><span class="line">  file &quot;xncoding.com.zone&quot;;</span><br><span class="line">  allow-update &#123;none;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>域名配置文件<code>/var/named/xncoding.com.zone</code>如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$TTL 1D</span><br><span class="line">@       IN SOA      xncoding.com. root.xncoding.com. (</span><br><span class="line">                                        0       ; serial</span><br><span class="line">                                        1D      ; refresh</span><br><span class="line">                                        1H      ; retry</span><br><span class="line">                                        1W      ; expire</span><br><span class="line">                                        3H )    ; minimum</span><br><span class="line">        NS          ns.xncoding.com.</span><br><span class="line">ns      IN A        192.168.1.20</span><br><span class="line">        IN MX 10    mail.xncoding.com.</span><br><span class="line">mail    IN A        192.168.1.20</span><br></pre></td></tr></table></figure>
+
+<p>然后重启DNS服务：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@mail ~]<span class="comment"># systemctl restart named</span></span><br><span class="line">[root@mail ~]<span class="comment"># systemctl enable named</span></span><br></pre></td></tr></table></figure>
+
+<p>这样电子邮件系统所对应的服务器主机名即为<code>mail.xncoding.com</code>，而邮件域为<code>@xncoding.com</code>。
+把服务器的DNS地址修改成本地IP地址。编辑文件<code>/etc/sysconfig/network-scripts/ifcfg-eth0</code>，修改如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DNS1=192.168.1.20</span><br></pre></td></tr></table></figure>
+
+<p>然后重启网络：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart network</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置Postfix服务程序"><a href="#配置Postfix服务程序" class="headerlink" title="配置Postfix服务程序"></a>配置Postfix服务程序</h2><p>Postfix是一款由IBM资助研发的免费开源电子邮件服务程序，由许多小模块组成，每个小模块都可以完成特定的功能，
+因此可在生产工作环境中根据需求灵活搭配它们。</p>
+<p><strong><em>第1步：安装Postfix服务程序。</em></strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y postfix</span><br></pre></td></tr></table></figure>
+
+<p><strong><em>第2步：配置Postfix服务程序。</em></strong></p>
+<p>配置文件<code>/etc/ postfix/main.cf</code>，大部分都是注释。几个重要的配置参数如下：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>myhostname</td>
+<td>邮局系统的主机名</td>
+</tr>
+<tr>
+<td>mydomain</td>
+<td>邮局系统的域名</td>
+</tr>
+<tr>
+<td>myorigin</td>
+<td>从本机发出邮件的域名名称</td>
+</tr>
+<tr>
+<td>inet_interfaces</td>
+<td>监听的网卡接口</td>
+</tr>
+<tr>
+<td>mydestination</td>
+<td>可接收邮件的主机名或域名</td>
+</tr>
+<tr>
+<td>mynetworks</td>
+<td>设置可转发哪些主机的邮件</td>
+</tr>
+<tr>
+<td>relay_domains</td>
+<td>设置可转发哪些网域的邮件</td>
+</tr>
+</tbody></table>
+<p>在Postfix服务程序的主配置文件中，总计需要修改5处。首先是在第76行定义一个名为myhostname的变量，用来保存服务器的主机名称。
+请大家记住这个变量的名称，下边的参数需要调用它：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myhostname = mail.xncoding.com</span><br></pre></td></tr></table></figure>
+
+<p>然后在第83行定义一个名为mydomain的变量，用来保存邮件域的名称。大家也要记住这个变量名称，下面将调用它：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydomain = xncoding.com</span><br></pre></td></tr></table></figure>
+
+<p>在第99行调用前面的mydomain变量，用来定义发出邮件的域。调用变量的好处是避免重复写入信息，以及便于日后统一修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myorigin = $mydomain</span><br></pre></td></tr></table></figure>
+
+<p>第4处修改是在第116行定义网卡监听地址。可以指定要使用服务器的哪些IP地址对外提供电子邮件服务；
+也可以干脆写成all，代表所有IP地址都能提供电子邮件服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inet_interfaces = all</span><br></pre></td></tr></table></figure>
+
+<p>最后一处修改是在第164行定义可接收邮件的主机名或域名列表。这里可以直接调用前面定义好的myhostname和mydomain变量。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mydestination = $myhostname, $mydomain</span><br></pre></td></tr></table></figure>
+
+<p><strong><em>第3步：创建电子邮件系统的登录账户。</em></strong></p>
+<p>Postfix与vsftpd服务程序一样，都可以调用本地系统的账户和密码，因此在本地系统创建常规账户即可。
+最后重启配置妥当的postfix服务程序，并将其添加到开机启动项中。大功告成！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@mail ~]<span class="comment"># useradd xiong</span></span><br><span class="line">[root@mail ~]<span class="comment"># echo &quot;xiong&quot; | passwd --stdin xiong</span></span><br><span class="line">更改用户 xiong 的密码 。</span><br><span class="line">passwd：所有的身份验证令牌已经成功更新。</span><br><span class="line">[root@mail ~]<span class="comment"># systemctl restart postfix</span></span><br><span class="line">[root@mail ~]<span class="comment"># systemctl enable postfix</span></span><br></pre></td></tr></table></figure>
+
+<p>_备注_：实际生产环境邮件用户应该设置成不可登录。</p>
+<h2 id="配置Dovecot服务程序"><a href="#配置Dovecot服务程序" class="headerlink" title="配置Dovecot服务程序"></a>配置Dovecot服务程序</h2><p>Dovecot是一款能够为Linux系统提供IMAP和POP3电子邮件服务的开源服务程序，安全性极高，配置简单，
+执行速度快，而且占用的服务器硬件资源也较少，因此是一款值得推荐的收件服务程序。</p>
+<p><strong><em>第1步：安装Dovecot服务程序软件包。</em></strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y dovecot</span><br></pre></td></tr></table></figure>
+
+<p><strong><em>第2步：配置部署Dovecot服务程序。</em></strong></p>
+<p>修改主配置文件<code>/etc/dovecot/dovecot.conf</code>，首先是第24行，把Dovecot服务支持的电子邮件协议修改为imap、pop3和lmtp。
+然后在这一行下面添加一行参数，允许用户使用明文进行密码验证。之所以这样操作，
+是因为Dovecot服务程序为了保证电子邮件系统的安全而默认强制用户使用加密方式进行登录，而由于当前还没有加密系统，
+因此需要添加该参数来允许用户的明文登录。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">24 protocols = imap pop3 lmtp</span><br><span class="line">25 disable_plaintext_auth = no</span><br></pre></td></tr></table></figure>
+
+<p>在主配置文件中的第48行，设置允许登录的网段地址，也就是说我们可以在这里限制只有来自于某个网段的用户才能使用电子邮件系统。
+如果想允许所有人都能使用，则不用修改本参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">login_trusted_networks = 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p><strong><em>第3步：配置邮件格式与存储路径。</em></strong></p>
+<p>在Dovecot服务程序单独的子配置文件中，定义一个路径，用于指定要将收到的邮件存放到服务器本地的哪个位置。
+这个路径默认已经定义好了，我们只需要将该配置文件<code>/etc/dovecot/conf.d/10-mail.conf</code>中第25行前面的井号删除即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">24 #   mail_location = maildir:~/Maildir</span><br><span class="line">25 mail_location = mbox:~/mail:INBOX=/var/mail/%u</span><br><span class="line">26 #   mail_location = mbox:/var/mail/%d/%1n/%n:INDEX=/var</span><br></pre></td></tr></table></figure>
+
+<p>然后切换到配置Postfix服务程序时创建的账户，并在家目录中建立用于保存邮件的目录。
+记得要重启Dovecot服务并将其添加到开机启动项中。至此，对Dovecot服务程序的配置部署步骤全部结束。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@mail ~]<span class="comment"># su - xiong</span></span><br><span class="line">[xiong@mail ~]$ <span class="built_in">mkdir</span> -p mail/.imap/INBOX</span><br><span class="line">[xiong@mail ~]$ <span class="built_in">exit</span></span><br><span class="line">[root@mail ~]<span class="comment"># systemctl restart dovecot</span></span><br><span class="line">[root@mail ~]<span class="comment"># systemctl enable dovecot</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="客户端使用电子邮件系统"><a href="#客户端使用电子邮件系统" class="headerlink" title="客户端使用电子邮件系统"></a>客户端使用电子邮件系统</h2><p>如何得知电子邮件系统已经能够正常收发邮件了呢？可以使用Foxmail来进行测试。
+请按照下表来设置电子邮件系统及DNS服务器和客户端主机的IP地址，以便能正常解析邮件域名。设置后的结果如图所示。</p>
+<table>
+<thead>
+<tr>
+<th>主机</th>
+<th>操作系统</th>
+<th>IP地址</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>电子邮件系统及DNS服务器</td>
+<td>RHEL 7</td>
+<td>192.168.1.20</td>
+</tr>
+<tr>
+<td>客户端主机</td>
+<td>Win 10</td>
+<td>192.168.1.3</td>
+</tr>
+</tbody></table>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix03.png"></p>
+<p>下载安装最新版Foxmail后，打开手动设置账号信息如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix04.png"></p>
+<p>点击创建后验证成功，进入Foxmail主页面
+<img src="https://xnstatic-1253397658.file.myqcloud.com/postfix05.png"></p>
+<p>然后给<code>root@xncoding.com</code>这个账号发个邮件试试。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/postfix06.png"></p>
+<p>成功发送邮件后，便可以在电子邮件服务器上使用mail命令查看到新邮件提醒了。如果想查看邮件的完整内容，
+只需输入收件人姓名前面的编号即可。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@mail ~]# mail</span><br><span class="line">Heirloom Mail version 12.5 7/5/10.  Type ? for help.</span><br><span class="line">&quot;/var/spool/mail/root&quot;: 1 message 1 new</span><br><span class="line">&gt;N  1 xiong@xncoding.com    Tue Oct  6 23:27  44/1707  &quot;测试一封邮件&quot;</span><br><span class="line">&amp; 1</span><br><span class="line">Message  1:</span><br><span class="line">From xiong@xncoding.com  Tue Oct  6 23:27:56 2020</span><br><span class="line">Return-Path: &lt;xiong@xncoding.com&gt;</span><br><span class="line">X-Original-To: root@xncoding.com</span><br><span class="line">Delivered-To: root@xncoding.com</span><br><span class="line">Date: Tue, 6 Oct 2020 23:27:56 +0800</span><br><span class="line">From: &quot;xiong@xncoding.com&quot; &lt;xiong@xncoding.com&gt;</span><br><span class="line">To: root &lt;root@xncoding.com&gt;</span><br><span class="line">Subject: 测试一封邮件</span><br><span class="line">X-Priority: 3</span><br><span class="line">X-Has-Attach: no</span><br><span class="line">X-Mailer: Foxmail 7.2.18.111[cn]</span><br><span class="line">Content-Type: multipart/alternative;</span><br><span class="line">    boundary=&quot;----=_001_NextPart063248331812_=----&quot;</span><br><span class="line">Status: R</span><br><span class="line"></span><br><span class="line">Content-Type: text/plain;</span><br><span class="line">    charset=&quot;GB2312&quot;</span><br><span class="line"></span><br><span class="line">我是巴拉巴拉小魔仙。</span><br><span class="line">xiong@xncoding.com</span><br><span class="line">&amp; </span><br></pre></td></tr></table></figure>
+
+<h2 id="设置用户别名邮箱"><a href="#设置用户别名邮箱" class="headerlink" title="设置用户别名邮箱"></a>设置用户别名邮箱</h2><p>用户别名功能是一项简单实用的邮件账户伪装技术，可以用来设置多个虚拟信箱的账户以接受发送的邮件，
+从而保证自身的邮件地址不被泄露，还可以用来接收自己的多个信箱中的邮件。编辑<code>/etc/aliases</code>增加别名配置。
+由于过于简单，这里不展开说明了。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/linux/basic/samba.html" rel="prev" title="CentOS7通过samba共享文件夹">
+                  <i class="fa fa-angle-left"></i> CentOS7通过samba共享文件夹
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/nginx/nginx-websocket.html" rel="next" title="nginx反向代理WebSocket">
+                  nginx反向代理WebSocket <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

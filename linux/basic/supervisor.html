@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Supervisor (http:&#x2F;&#x2F;supervisord.org) 是一个用 Python 写的进程管理工具， 可以很方便的用来启动、重启、关闭进程（不仅仅是Python进程）。除了对单个进程的控制，还可以同时启动、关闭多个进程， 有时候服务器出问题导致所有应用程序都被杀死，此时可以用supervisor同时启动所有应用程序。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用supervisor管理进程">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/supervisor.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Supervisor (http:&#x2F;&#x2F;supervisord.org) 是一个用 Python 写的进程管理工具， 可以很方便的用来启动、重启、关闭进程（不仅仅是Python进程）。除了对单个进程的控制，还可以同时启动、关闭多个进程， 有时候服务器出问题导致所有应用程序都被杀死，此时可以用supervisor同时启动所有应用程序。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-10-12T00:22:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.327Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/supervisor.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/supervisor.html","path":"linux/basic/supervisor.html","title":"使用supervisor管理进程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用supervisor管理进程 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="nav-number">1.</span> <span class="nav-text">组成部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#supervisor%E8%87%AA%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.</span> <span class="nav-text">supervisor自启动服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3"><span class="nav-number">4.</span> <span class="nav-text">配置详解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-supervisorctl"><span class="nav-number">5.</span> <span class="nav-text">使用 supervisorctl</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3"><span class="nav-number">6.</span> <span class="nav-text">命令详解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-number">7.</span> <span class="nav-text">其他</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FAQ"><span class="nav-number">8.</span> <span class="nav-text">FAQ</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/supervisor.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用supervisor管理进程 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用supervisor管理进程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-10-12 08:22:22" itemprop="dateCreated datePublished" datetime="2016-10-12T08:22:22+08:00">2016-10-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Supervisor (<a target="_blank" rel="noopener" href="http://supervisord.org/">http://supervisord.org</a>) 是一个用 Python 写的进程管理工具，
+可以很方便的用来启动、重启、关闭进程（不仅仅是Python进程）。除了对单个进程的控制，还可以同时启动、关闭多个进程，
+有时候服务器出问题导致所有应用程序都被杀死，此时可以用supervisor同时启动所有应用程序。</p>
+<span id="more"></span>
+
+<h2 id="组成部分"><a href="#组成部分" class="headerlink" title="组成部分"></a>组成部分</h2><p>supervisor 主要由两部分组成：</p>
+<ol>
+<li>supervisord(server 部分)：主要负责管理子进程，响应客户端命令以及日志的输出等；</li>
+<li>supervisorctl(client 部分)：命令行客户端，用户可以通过它与不同的 supervisord 进程联系，获取子进程的状态等。</li>
+</ol>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>可以直接使用 pip 安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo pip install supervisor</span><br></pre></td></tr></table></figure>
+
+<p>如果是 Ubuntu 系统，也可以使用 apt-get 来安装</p>
+<p>安装完成之后，可以运行 echo_supervisord_conf 生成默认的配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo_supervisord_conf &gt; /etc/supervisord.conf</span><br></pre></td></tr></table></figure>
+
+<h2 id="supervisor自启动服务"><a href="#supervisor自启动服务" class="headerlink" title="supervisor自启动服务"></a>supervisor自启动服务</h2><p>这里只介绍在CentOS7上面添加supervisord服务为自启动，其他平台请自行google</p>
+<p>修改 &#96;&#96;&#x2F;lib&#x2F;systemd&#x2F;system&#x2F;supervisord.service&#96;，添加如下内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># supervisord service for systemd (CentOS 7.0+)</span><br><span class="line">[Unit]</span><br><span class="line">Description=Supervisor daemon</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=forking</span><br><span class="line">ExecStart=/usr/bin/supervisord -c /etc/supervisord.conf</span><br><span class="line">ExecStop=/usr/bin/supervisorctl $OPTIONS shutdown</span><br><span class="line">ExecReload=/usr/bin/supervisorctl $OPTIONS reload</span><br><span class="line">KillMode=process</span><br><span class="line">Restart=on-failure</span><br><span class="line">RestartSec=60s</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>无需修改&#x2F;etc&#x2F;supervisord.conf配置文件，该启动脚本都能够添加到systemctl自启动服务:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> supervisord.service</span><br><span class="line">systemctl start/restart/stop supervisord.service</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置详解"><a href="#配置详解" class="headerlink" title="配置详解"></a>配置详解</h2><p>Supervisor 相当强大，提供了很丰富的功能，不过我们可能只需要用到其中一小部分。安装完成之后，可以编写配置文件，来满足自己的需求。
+为了方便，我们把配置分成两部分：</p>
+<ol>
+<li>supervisord（这是 server 端，对应的有 client 端：supervisorctl）</li>
+<li>应用程序（即我们要管理的程序）。</li>
+</ol>
+<p>首先来看 supervisord 的配置文件。去除里面大部分注释和”不相关”的部分，我们可以先看这些配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[unix_http_server]</span><br><span class="line">file=/tmp/supervisor.sock   ; UNIX socket 文件，supervisorctl 会使用</span><br><span class="line">;chmod=0700                 ; socket 文件的 mode，默认是 0700</span><br><span class="line">;chown=nobody:nogroup       ; socket 文件的 owner，格式： uid:gid</span><br><span class="line"></span><br><span class="line">;[inet_http_server]         ; HTTP 服务器，提供 web 管理界面</span><br><span class="line">;port=127.0.0.1:9001        ; Web 管理后台运行的 IP 和端口，如果开放到公网，需要注意安全性</span><br><span class="line">;username=user              ; 登录管理后台的用户名</span><br><span class="line">;password=123               ; 登录管理后台的密码</span><br><span class="line"></span><br><span class="line">[supervisord]</span><br><span class="line">logfile=/tmp/supervisord.log ; 日志文件，默认是 $CWD/supervisord.log</span><br><span class="line">logfile_maxbytes=50MB        ; 日志文件大小，超出会 rotate，默认 50MB</span><br><span class="line">logfile_backups=10           ; 日志文件保留备份数量默认 10</span><br><span class="line">loglevel=info                ; 日志级别，默认 info，其它: debug,warn,trace</span><br><span class="line">pidfile=/tmp/supervisord.pid ; pid 文件</span><br><span class="line">nodaemon=false               ; 是否在前台启动，默认是 false，即以 daemon 的方式启动</span><br><span class="line">minfds=1024                  ; 可以打开的文件描述符的最小值，默认 1024</span><br><span class="line">minprocs=200                 ; 可以打开的进程数的最小值，默认 200</span><br><span class="line"></span><br><span class="line">; the below section must remain in the config file for RPC</span><br><span class="line">; (supervisorctl/web interface) to work, additional interfaces may be</span><br><span class="line">; added by defining them in separate rpcinterface: sections</span><br><span class="line">[rpcinterface:supervisor]</span><br><span class="line">supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface</span><br><span class="line"></span><br><span class="line">[supervisorctl]</span><br><span class="line">serverurl=unix:///tmp/supervisor.sock ; 通过 UNIX socket 连接 supervisord，路径与 unix_http_server 部分的 file 一致</span><br><span class="line">;serverurl=http://127.0.0.1:9001 ; 通过 HTTP 的方式连接 supervisord</span><br><span class="line"></span><br><span class="line">; 包含其他的配置文件</span><br><span class="line">[include]</span><br><span class="line">files = relative/directory/*.ini    ; 可以是 *.conf 或 *.ini</span><br></pre></td></tr></table></figure>
+
+<p>然后可以通过 supervisord 命令启动 supervisord:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">supervisord -c /etc/supervisord.conf</span><br></pre></td></tr></table></figure>
+
+<p>查看 supervisord 是否在运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps aux | grep supervisord</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到 supervisord 已经被启动了， 然后进入 supervisorctl 的 shell 界面:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ supervisorctl</span><br><span class="line">supervisor&gt; status</span><br><span class="line">supervisor&gt;</span><br></pre></td></tr></table></figure>
+
+<p>由于目前没有添加任何需要管理的进程，所以 status 没有输出人和结果，
+接下来我们添加一个需要管理的进程 (以启动一个 celery 的 worker 为例)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[program:celeryd]</span><br><span class="line">user=tomcat                                          ; 用哪个用户启动</span><br><span class="line">command=celery worker --app=task -l info             ; 启动命令</span><br><span class="line">stdout_logfile=/var/log/supervisor/celeryd_out.log   ; stdout 日志输出位置</span><br><span class="line">stderr_logfile=/var/log/supervisor/celeryd_err.log   ; stderr 日志输出位置</span><br><span class="line">stdout_logfile_maxbytes=20MB                         ; stdout 日志文件大小，默认 50MB</span><br><span class="line">stdout_logfile_backups=20                            ; stdout 日志文件备份数</span><br><span class="line">autostart=true                                       ; 在 supervisord 启动的时候自动启动</span><br><span class="line">autorestart=true                                     ; 程序异常退出后自动重启</span><br><span class="line">startsecs=10                                         ; 启动 10 秒后没有异常退出，就当作已经正常启动</span><br></pre></td></tr></table></figure>
+
+<p>一份配置文件至少需要一个 [program:x] 部分的配置，来告诉 supervisord 需要管理那个进程。
+[program:x] 语法中的 x 表示 program name，会在客户端（supervisorctl 或 web 界面）显示，
+在 supervisorctl 中通过这个值来对程序进行 start、restart、stop 等操作。</p>
+<h2 id="使用-supervisorctl"><a href="#使用-supervisorctl" class="headerlink" title="使用 supervisorctl"></a>使用 supervisorctl</h2><p>然后运行以下命令更新配置并启动进程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ supervisorctl reread (只更新配置文件)</span><br><span class="line">celeryd: available</span><br><span class="line"></span><br><span class="line">$ supervisorctl update (只启动有改动的进程)</span><br><span class="line">celeryd: added process group</span><br><span class="line"></span><br><span class="line">$ supervisorctl status</span><br><span class="line">celeryd                          RUNNING    pid 1919, <span class="built_in">uptime</span> 0:00:18</span><br></pre></td></tr></table></figure>
+
+<p>我们看到 celery worker 已经被成功启动了。你可以使用不同的命令来控制进程的启动和关闭:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ supervisorctl stop celeryd</span><br><span class="line">celeryd: stopped</span><br><span class="line">$ supervisorctl start celeryd</span><br><span class="line">celeryd: started</span><br><span class="line">$ supervisorctl restart celeryd</span><br><span class="line">celeryd: stopped</span><br><span class="line">celeryd: started</span><br></pre></td></tr></table></figure>
+
+<p>把所有的配置文件都放在 supervisord.conf 并不是个好主意，一旦管理的进程过多，就很麻烦。
+所以一般都会 新建一个目录来专门放置进程的配置文件，然后通过 include 的方式来获取这些配置信息:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[include]</span><br><span class="line">files = /etc/supervisor/conf.d/*.conf</span><br></pre></td></tr></table></figure>
+
+<p>然后在目录 &#x2F;etc&#x2F;supervisor&#x2F;conf.d 下新建一个配置文件 celery.conf, 配置信息与上面的一致，效果是一样的。</p>
+<h2 id="命令详解"><a href="#命令详解" class="headerlink" title="命令详解"></a>命令详解</h2><ol>
+<li>supervisord: 初始启动Supervisord，启动、管理配置中设置的进程;</li>
+<li>supervisorctl stop(start, restart) xxx&#x2F;all，停止（启动，重启）某一个进程(xxx)&#x2F;全部;</li>
+<li>supervisorctl reread: 只载入最新的配置文件, 并不重启任何进程;</li>
+<li>supervisorctl reload: 载入最新的配置文件，停止原来的所有进程并按新的配置启动管理所有进程;</li>
+<li>supervisorctl update: 根据最新的配置文件，启动新配置或有改动的进程，配置没有改动的进程不会受影响而重启;</li>
+</ol>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>除了 supervisorctl 之外，还可以配置 supervisrod 启动 web 管理界面，这个 web 后台使用 Basic Auth 的方式进行身份认证。</p>
+<p>除了单个进程的控制，还可以配置 group，进行分组管理。</p>
+<p>经常查看日志文件，包括 supervisord 的日志和各个 pragram 的日志文件，
+程序 crash 或抛出异常的信息一半会输出到 stderr，可以查看相应的日志文件来查找问题。</p>
+<p>Supervisor有很丰富的功能，还有其他很多配置，可以在官方文档获取更多信息：<a target="_blank" rel="noopener" href="http://supervisord.org/index.html">http://supervisord.org/index.html</a></p>
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p>最后记录一下问题和解决办法:</p>
+<p>reload的时候报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No such file or directory: file: /usr/lib64/python2.7/socket.py</span><br></pre></td></tr></table></figure>
+
+<p>原因是没有指定program的执行用户，指定即可<code>user=root</code></p>
+<p>status命令的时候报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unix:///tmp/supervisor.sock no such file</span><br></pre></td></tr></table></figure>
+
+<p>原因是supervisord进程根本就没启动，请重新执行启动命令。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">supervisord -c /etc/supervisord.conf</span><br></pre></td></tr></table></figure>
+
+<p>这时候启动又报错</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/var/log/supervisor/xxx_out.log does not exist</span><br></pre></td></tr></table></figure>
+
+<p>原因是<code>/var/log/supervisor</code>目录不存在，去mkdir一个就可以了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /var/log/supervisor</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/linux/basic/awk.html" rel="prev" title="awk命令笔记">
+                  <i class="fa fa-angle-left"></i> awk命令笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/tool/idea/idea-server.html" rel="next" title="5分钟搭建一个IDEA服务">
+                  5分钟搭建一个IDEA服务 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

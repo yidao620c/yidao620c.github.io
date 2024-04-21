@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量(或者说不能给变量重新赋值)， 因此，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。而允许使用变量的程序设计语言， 由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。 函数式编程（请注意多了一个”式”字）——Functional Programm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python核心 - 函数式编程">
+<meta property="og:url" content="http://yidao620c.github.io/python/pycore/functional.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量(或者说不能给变量重新赋值)， 因此，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。而允许使用变量的程序设计语言， 由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。 函数式编程（请注意多了一个”式”字）——Functional Programm">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/py04f01.png">
+<meta property="article:published_time" content="2015-10-22T02:06:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.839Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="python核心">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/py04f01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/pycore/functional.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/pycore/functional.html","path":"python/pycore/functional.html","title":"python核心 - 函数式编程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>python核心 - 函数式编程 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#python%E4%B8%AD%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">python中的函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%8F%82%E6%95%B0"><span class="nav-number">1.1.</span> <span class="nav-text">默认参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%AF%E5%8F%98%E5%8F%82%E6%95%B0"><span class="nav-number">1.2.</span> <span class="nav-text">可变参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0"><span class="nav-number">1.3.</span> <span class="nav-text">关键字参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%91%BD%E5%90%8D%E5%85%B3%E9%94%AE%E5%AD%97%E5%8F%82%E6%95%B0"><span class="nav-number">1.4.</span> <span class="nav-text">命名关键字参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E7%BB%84%E5%90%88"><span class="nav-number">1.5.</span> <span class="nav-text">参数组合</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E9%98%B6%E5%87%BD%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">高阶函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%BB%BAmap-%E5%87%BD%E6%95%B0"><span class="nav-number">2.1.</span> <span class="nav-text">内建map()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#reduce-%E5%87%BD%E6%95%B0"><span class="nav-number">2.2.</span> <span class="nav-text">reduce()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%BB%BA%E7%9A%84filter-%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">内建的filter()函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%83%E6%B0%8F%E7%AD%9B%E6%B3%95%E6%B1%82%E7%B4%A0%E6%95%B0"><span class="nav-number">2.4.</span> <span class="nav-text">埃氏筛法求素数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%BB%BA%E7%9A%84%E6%8E%92%E5%BA%8F%E5%87%BD%E6%95%B0sorted"><span class="nav-number">2.5.</span> <span class="nav-text">内建的排序函数sorted()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%8F%E5%87%BD%E6%95%B0"><span class="nav-number">3.</span> <span class="nav-text">偏函数</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/pycore/functional.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="python核心 - 函数式编程 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          python核心 - 函数式编程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-10-22 10:06:22" itemprop="dateCreated datePublished" datetime="2015-10-22T10:06:22+08:00">2015-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量(或者说不能给变量重新赋值)，
+因此，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。而允许使用变量的程序设计语言，
+由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。</p>
+<p>函数式编程（请注意多了一个”式”字）——Functional Programming，虽然也可以归结到面向过程的程序设计，但其思想更接近数学计算。
+它的一个特点就是，允许把函数本身作为参数传入另一个函数，还允许返回一个函数！</p>
+<p>Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。</p>
+<span id="more"></span>
+
+<h3 id="python中的函数"><a href="#python中的函数" class="headerlink" title="python中的函数"></a>python中的函数</h3><p>先讲解一下python中函数的基础</p>
+<h4 id="默认参数"><a href="#默认参数" class="headerlink" title="默认参数"></a>默认参数</h4><p>默认参数很有用，但使用不当，也会掉坑里。默认参数有个最大的坑，演示如下：</p>
+<p>先定义一个函数，传入一个list，添加一个END再返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add_end</span>(<span class="params">L=[]</span>):</span><br><span class="line">    L.append(<span class="string">&#x27;END&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> L</span><br></pre></td></tr></table></figure>
+
+<p>Python函数在定义的时候，默认参数L的值就被计算出来了，即[]，因为默认参数L也是一个变量，它指向对象[]
+，每次调用该函数，如果改变了L的内容，则下次调用时，默认参数的内容就变了，不再是函数定义时的[]了。</p>
+<p>所以，定义默认参数要牢记一点：默认参数必须指向不变对象！</p>
+<p>要修改上面的例子，我们可以用None这个不变对象来实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add_end</span>(<span class="params">L=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="keyword">if</span> L <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        L = []</span><br><span class="line">    L.append(<span class="string">&#x27;END&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> L</span><br></pre></td></tr></table></figure>
+
+<h4 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h4><p>在参数前面加一个*号即可变成可变参数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">calc</span>(<span class="params">*numbers</span>):</span><br><span class="line">    <span class="built_in">sum</span> = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> n <span class="keyword">in</span> numbers:</span><br><span class="line">        <span class="built_in">sum</span> = <span class="built_in">sum</span> + n * n</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">sum</span></span><br></pre></td></tr></table></figure>
+
+<p>如果已经有一个list或者tuple，要调用一个可变参数怎么办？Python允许你在list或tuple前面加一个*号，把list或tuple的元素变成可变参数传进去：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; nums = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]</span><br><span class="line">&gt;&gt; &gt; calc(*nums)</span><br><span class="line"><span class="number">14</span></span><br></pre></td></tr></table></figure>
+
+<p>*nums表示把nums这个list的所有元素作为可变参数传进去。这种写法相当有用，而且很常见。在函数内部，如意又要调用其他的有可变参数的函数，可以这样做。</p>
+<h4 id="关键字参数"><a href="#关键字参数" class="headerlink" title="关键字参数"></a>关键字参数</h4><p>可变参数允许你传入0个或任意个参数，这些可变参数在函数调用时自动组装为一个tuple。而关键字参数允许你传入0个或任意个含参数名的参数，这些关键字参数在函数内部自动组装为一个dict。请看示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">person</span>(<span class="params">name, age, **kw</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;name:&#x27;</span>, name, <span class="string">&#x27;age:&#x27;</span>, age, <span class="string">&#x27;other:&#x27;</span>, kw)</span><br><span class="line"></span><br><span class="line">&gt;&gt; &gt; person(<span class="string">&#x27;Bob&#x27;</span>, <span class="number">35</span>, city=<span class="string">&#x27;Beijing&#x27;</span>)</span><br><span class="line">name: Bob</span><br><span class="line">age: <span class="number">35</span></span><br><span class="line">other: &#123;<span class="string">&#x27;city&#x27;</span>: <span class="string">&#x27;Beijing&#x27;</span>&#125;</span><br><span class="line">&gt;&gt; &gt; person(<span class="string">&#x27;Adam&#x27;</span>, <span class="number">45</span>, gender=<span class="string">&#x27;M&#x27;</span>, job=<span class="string">&#x27;Engineer&#x27;</span>)</span><br><span class="line">name: Adam</span><br><span class="line">age: <span class="number">45</span></span><br><span class="line">other: &#123;<span class="string">&#x27;gender&#x27;</span>: <span class="string">&#x27;M&#x27;</span>, <span class="string">&#x27;job&#x27;</span>: <span class="string">&#x27;Engineer&#x27;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>和可变参数类似，也可以先组装出一个dict，然后，把该dict转换为关键字参数传进去，在参数前面加**</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; extra = &#123;<span class="string">&#x27;city&#x27;</span>: <span class="string">&#x27;Beijing&#x27;</span>, <span class="string">&#x27;job&#x27;</span>: <span class="string">&#x27;Engineer&#x27;</span>&#125;</span><br><span class="line">&gt;&gt; &gt; person(<span class="string">&#x27;Jack&#x27;</span>, <span class="number">24</span>, **extra)</span><br><span class="line">name: Jack</span><br><span class="line">age: <span class="number">24</span></span><br><span class="line">other: &#123;<span class="string">&#x27;city&#x27;</span>: <span class="string">&#x27;Beijing&#x27;</span>, <span class="string">&#x27;job&#x27;</span>: <span class="string">&#x27;Engineer&#x27;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：kw获得的dict是extra的一份拷贝，对kw的改动不会影响到函数外的extra。</p>
+<h4 id="命名关键字参数"><a href="#命名关键字参数" class="headerlink" title="命名关键字参数"></a>命名关键字参数</h4><p>如果要限制关键字参数的名字，就可以用命名关键字参数，例如，只接收city和job作为关键字参数。这种方式定义的函数如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">person</span>(<span class="params">name, age, *, city, job</span>):</span><br><span class="line">    <span class="built_in">print</span>(name, age, city, job)</span><br></pre></td></tr></table></figure>
+
+<p>和关键字参数*<em>kw不同，命名关键字参数需要一个特殊分隔符</em>，*后面的参数被视为命名关键字参数。</p>
+<p>调用方式如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; person(<span class="string">&#x27;Jack&#x27;</span>, <span class="number">24</span>, city=<span class="string">&#x27;Beijing&#x27;</span>, job=<span class="string">&#x27;Engineer&#x27;</span>)</span><br><span class="line">Jack</span><br><span class="line"><span class="number">24</span></span><br><span class="line">Beijing</span><br><span class="line">Engineer</span><br></pre></td></tr></table></figure>
+
+<p>如果函数定义中已经有了一个可变参数，后面跟着的命名关键字参数就不再需要一个特殊分隔符*了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">person</span>(<span class="params">name, age, *args, city, job</span>):</span><br><span class="line">    <span class="built_in">print</span>(name, age, args, city, job)</span><br></pre></td></tr></table></figure>
+
+<p>命名关键字参数必须传入参数名，这和位置参数不同。如果没有传入参数名，调用将报错</p>
+<h4 id="参数组合"><a href="#参数组合" class="headerlink" title="参数组合"></a>参数组合</h4><p>在Python中定义函数，可以用必选参数、默认参数、可变参数、关键字参数和命名关键字参数，这5种参数都可以组合使用。
+但是请注意，参数定义的顺序必须是：必选参数、默认参数、可变参数、命名关键字参数和关键字参数。</p>
+<p>对于任意函数，都可以通过类似func(*args, **kw)的形式调用它，无论它的参数是如何定义的。</p>
+<h3 id="高阶函数"><a href="#高阶函数" class="headerlink" title="高阶函数"></a>高阶函数</h3><p>把函数作为参数传入，这样的函数称为高阶函数，函数式编程就是指这种高度抽象的编程范式。</p>
+<h4 id="内建map-函数"><a href="#内建map-函数" class="headerlink" title="内建map()函数"></a>内建map()函数</h4><p>map()函数接收两个参数，一个是函数，一个是Iterable，map将传入的函数依次作用到序列的每个元素，并把结果作为新的Iterator返回。</p>
+<p>举例说明，比如我们有一个函数f(x)&#x3D;x2，要把这个函数作用在一个list [1, 2, 3, 4, 5, 6, 7, 8, 9]上，就可以用map()实现如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/py04f01.png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">f</span>(<span class="params">x</span>):</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> x * x</span><br><span class="line">...</span><br><span class="line">&gt;&gt; &gt; r = <span class="built_in">map</span>(f, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>])</span><br><span class="line">&gt;&gt; &gt; <span class="built_in">list</span>(r)</span><br><span class="line">[<span class="number">1</span>, <span class="number">4</span>, <span class="number">9</span>, <span class="number">16</span>, <span class="number">25</span>, <span class="number">36</span>, <span class="number">49</span>, <span class="number">64</span>, <span class="number">81</span>]</span><br></pre></td></tr></table></figure>
+
+<p>map()传入的第一个参数是f，即函数对象本身。由于结果r是一个Iterator，Iterator是惰性序列，因此通过list()
+函数让它把整个序列都计算出来并返回一个list。</p>
+<p>所以，map()作为高阶函数，事实上它把运算规则抽象了</p>
+<h4 id="reduce-函数"><a href="#reduce-函数" class="headerlink" title="reduce()函数"></a>reduce()函数</h4><p>再看reduce的用法。reduce把一个函数作用在一个序列[x1, x2, x3, …]上，这个函数必须接收两个参数，reduce把结果继续和序列的下一个元素做累积计算，其效果就是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)</span><br></pre></td></tr></table></figure>
+
+<p>比方说对一个序列求和，就可以用reduce实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line">&gt;&gt; &gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">x, y</span>):</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> x + y</span><br><span class="line">...</span><br><span class="line">&gt;&gt; &gt; reduce(add, [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">9</span>])</span><br><span class="line"><span class="number">25</span></span><br></pre></td></tr></table></figure>
+
+<p>把序列[1, 3, 5, 7, 9]变换成整数13579，reduce就可以派上用场：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line">&gt;&gt; &gt;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">fn</span>(<span class="params">x, y</span>):</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> x * <span class="number">10</span> + y</span><br><span class="line">...</span><br><span class="line">&gt;&gt; &gt; reduce(fn, [<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">7</span>, <span class="number">9</span>])</span><br><span class="line"><span class="number">13579</span></span><br></pre></td></tr></table></figure>
+
+<p>配合map，将str转换成int</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">str2int</span>(<span class="params">s</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">fn</span>(<span class="params">x, y</span>):</span><br><span class="line">        <span class="keyword">return</span> x * <span class="number">10</span> + y</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">char2num</span>(<span class="params">s</span>):</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&#x27;0&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;1&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;2&#x27;</span>: <span class="number">2</span>, <span class="string">&#x27;3&#x27;</span>: <span class="number">3</span>, <span class="string">&#x27;4&#x27;</span>: <span class="number">4</span>, <span class="string">&#x27;5&#x27;</span>: <span class="number">5</span>, <span class="string">&#x27;6&#x27;</span>: <span class="number">6</span>, <span class="string">&#x27;7&#x27;</span>: <span class="number">7</span>, <span class="string">&#x27;8&#x27;</span>: <span class="number">8</span>, <span class="string">&#x27;9&#x27;</span>: <span class="number">9</span>&#125;[s]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> reduce(fn, <span class="built_in">map</span>(char2num, s))</span><br></pre></td></tr></table></figure>
+
+<p>用lambda函数进一步简化成：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">str2int</span>(<span class="params">s</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">char2num</span>(<span class="params">s</span>):</span><br><span class="line">        <span class="keyword">return</span> &#123;<span class="string">&#x27;0&#x27;</span>: <span class="number">0</span>, <span class="string">&#x27;1&#x27;</span>: <span class="number">1</span>, <span class="string">&#x27;2&#x27;</span>: <span class="number">2</span>, <span class="string">&#x27;3&#x27;</span>: <span class="number">3</span>, <span class="string">&#x27;4&#x27;</span>: <span class="number">4</span>, <span class="string">&#x27;5&#x27;</span>: <span class="number">5</span>, <span class="string">&#x27;6&#x27;</span>: <span class="number">6</span>, <span class="string">&#x27;7&#x27;</span>: <span class="number">7</span>, <span class="string">&#x27;8&#x27;</span>: <span class="number">8</span>, <span class="string">&#x27;9&#x27;</span>: <span class="number">9</span>&#125;[s]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> reduce(<span class="keyword">lambda</span> x, y: x * <span class="number">10</span> + y, <span class="built_in">map</span>(char2num, s))</span><br></pre></td></tr></table></figure>
+
+<h4 id="内建的filter-函数"><a href="#内建的filter-函数" class="headerlink" title="内建的filter()函数"></a>内建的filter()函数</h4><p>和map()类似，filter()也接收一个函数和一个序列。和map()不同的是，filter()把传入的函数依次作用于每个元素，然后根据返回值是True还是False决定保留还是丢弃该元素。</p>
+<p>例如，在一个list中，删掉偶数，只保留奇数，可以这么写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">list</span>(<span class="built_in">filter</span>(<span class="keyword">lambda</span> n: n % <span class="number">2</span> == <span class="number">1</span>, [<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">15</span>]))</span><br></pre></td></tr></table></figure>
+
+<p>注意到filter()函数返回的是一个Iterator，也就是一个惰性序列，所以要强迫filter()完成计算结果，需要用list()函数获得所有结果并返回list。</p>
+<h4 id="埃氏筛法求素数"><a href="#埃氏筛法求素数" class="headerlink" title="埃氏筛法求素数"></a>埃氏筛法求素数</h4><p>计算素数的一个方法是埃氏筛法，它的算法理解起来非常简单：</p>
+<p>首先，列出从2开始的所有自然数，构造一个序列：</p>
+<p>2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, …</p>
+<p>取序列的第一个数2，它一定是素数，然后用2把序列的2的倍数筛掉：</p>
+<p>3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, …</p>
+<p>取新序列的第一个数3，它一定是素数，然后用3把序列的3的倍数筛掉：</p>
+<p>5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, …</p>
+<p>取新序列的第一个数5，然后用5把序列的5的倍数筛掉：</p>
+<p>7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, …</p>
+<p>不断筛下去，就可以得到所有的素数。</p>
+<p>用Python来实现这个算法，可以先构造一个从3开始的奇数序列：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_odd_iter</span>():</span><br><span class="line">    n = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        n += <span class="number">2</span></span><br><span class="line">        <span class="keyword">yield</span> n</span><br></pre></td></tr></table></figure>
+
+<p>注意这是一个生成器，并且是一个无限序列。</p>
+<p>然后定义一个筛选函数（返回一个闭包）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">_not_divisible</span>(<span class="params">n</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">lambda</span> x: x % n &gt; <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>最后，定义一个生成器，不断返回下一个素数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">primes</span>():</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">2</span></span><br><span class="line">    it = _odd_iter()  <span class="comment"># 初始序列</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        n = <span class="built_in">next</span>(it)  <span class="comment"># 返回序列第一个值</span></span><br><span class="line">        <span class="keyword">yield</span> n</span><br><span class="line">        it = <span class="built_in">filter</span>(_not_divisible(n), it)  <span class="comment"># 构造新序列</span></span><br></pre></td></tr></table></figure>
+
+<p>注意到Iterator是惰性计算的序列，所以我们可以用Python表示”全体自然数”，”全体素数”这样的序列，而代码非常简洁。</p>
+<h4 id="内建的排序函数sorted"><a href="#内建的排序函数sorted" class="headerlink" title="内建的排序函数sorted()"></a>内建的排序函数sorted()</h4><p>sorted()函数也是一个高阶函数，它还可以接收一个key函数来实现自定义的排序，例如按绝对值大小排序：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sorted</span>([<span class="number">36</span>, <span class="number">5</span>, -<span class="number">12</span>, <span class="number">9</span>, -<span class="number">21</span>], key=<span class="built_in">abs</span>)</span><br><span class="line"><span class="built_in">sorted</span>([<span class="string">&#x27;bob&#x27;</span>, <span class="string">&#x27;about&#x27;</span>, <span class="string">&#x27;Zoo&#x27;</span>, <span class="string">&#x27;Credit&#x27;</span>], key=<span class="built_in">str</span>.lower)</span><br><span class="line"><span class="built_in">sorted</span>([<span class="string">&#x27;bob&#x27;</span>, <span class="string">&#x27;about&#x27;</span>, <span class="string">&#x27;Zoo&#x27;</span>, <span class="string">&#x27;Credit&#x27;</span>], key=<span class="built_in">str</span>.lower, reverse=<span class="literal">True</span>)  <span class="comment"># 反向排序</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="偏函数"><a href="#偏函数" class="headerlink" title="偏函数"></a>偏函数</h3><p>functools模块提供了一个工具让我们创建偏函数，简单来讲，偏函数就是把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数，调用这个新函数会更简单。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="keyword">import</span> functools</span><br><span class="line">&gt;&gt; &gt; int2 = functools.partial(<span class="built_in">int</span>, base=<span class="number">2</span>)</span><br><span class="line">&gt;&gt; &gt; int2(<span class="string">&#x27;1000000&#x27;</span>)</span><br><span class="line"><span class="number">64</span></span><br><span class="line">&gt;&gt; &gt; int2(<span class="string">&#x27;1010101&#x27;</span>)</span><br><span class="line"><span class="number">85</span></span><br></pre></td></tr></table></figure>
+
+<p>创建偏函数时，实际上可以接收函数对象、*args和**kw这3个参数，当传入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">int2 = functools.partial(<span class="built_in">int</span>, base=<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>实际上固定了int()函数的关键字参数base</p>
+<p>当传入：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max2 = functools.partial(<span class="built_in">max</span>, <span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+
+<p>实际上会把10作为*args的一部分自动加到左边，也就是：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">max2(<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>)</span><br></pre></td></tr></table></figure>
+
+<p>相当于：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">args = (<span class="number">10</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>)</span><br><span class="line"><span class="built_in">max</span>(*args)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python%E6%A0%B8%E5%BF%83/" rel="tag"># python核心</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/middleware/tomcat/httpd-tomcat.html" rel="prev" title="利用httpd对Tomcat进行负载均衡">
+                  <i class="fa fa-angle-left"></i> 利用httpd对Tomcat进行负载均衡
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/pycore/unicode.html" rel="next" title="python核心 - 字符串编码">
+                  python核心 - 字符串编码 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

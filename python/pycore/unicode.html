@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="字符串也是一种数据类型，但是，字符串比较特殊的是还有一个编码问题。 Unicode把所有语言都统一到一套编码里，这样就不会再有乱码问题了。Unicode标准也在不断发展， 但最常用的是用两个字节表示一个字符（如果要用到非常偏僻的字符，就需要4个字节）。现代操作系统和大多数编程语言都直接支持Unicode。 现在，捋一捋ASCII编码和Unicode编码的区别：ASCII编码是1个字节，而Unico">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python核心 - 字符串编码">
+<meta property="og:url" content="http://yidao620c.github.io/python/pycore/unicode.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="字符串也是一种数据类型，但是，字符串比较特殊的是还有一个编码问题。 Unicode把所有语言都统一到一套编码里，这样就不会再有乱码问题了。Unicode标准也在不断发展， 但最常用的是用两个字节表示一个字符（如果要用到非常偏僻的字符，就需要4个字节）。现代操作系统和大多数编程语言都直接支持Unicode。 现在，捋一捋ASCII编码和Unicode编码的区别：ASCII编码是1个字节，而Unico">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/pystr001.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/pystr002.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/pystr003.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/unicode005.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/unicode006.png">
+<meta property="article:published_time" content="2015-10-24T02:06:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.730Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="python核心">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/pystr001.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/pycore/unicode.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/pycore/unicode.html","path":"python/pycore/unicode.html","title":"python核心 - 字符串编码"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>python核心 - 字符串编码 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python%E7%9A%84%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-number">1.</span> <span class="nav-text">Python的字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python2%E5%92%8C3%E7%9A%84%E5%B7%AE%E5%BC%82"><span class="nav-number">2.</span> <span class="nav-text">Python2和3的差异</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">常见乱码问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/pycore/unicode.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="python核心 - 字符串编码 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          python核心 - 字符串编码
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-10-24 10:06:22" itemprop="dateCreated datePublished" datetime="2015-10-24T10:06:22+08:00">2015-10-24</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>字符串也是一种数据类型，但是，字符串比较特殊的是还有一个编码问题。</p>
+<p>Unicode把所有语言都统一到一套编码里，这样就不会再有乱码问题了。Unicode标准也在不断发展，
+但最常用的是用两个字节表示一个字符（如果要用到非常偏僻的字符，就需要4个字节）。现代操作系统和大多数编程语言都直接支持Unicode。</p>
+<p>现在，捋一捋ASCII编码和Unicode编码的区别：ASCII编码是1个字节，而Unicode编码通常是2个字节。</p>
+<p>但是，如果你写的文本基本上全部是英文的话，用Unicode编码比ASCII编码需要多一倍的存储空间，在存储和传输上就十分不划算。</p>
+<span id="more"></span>
+
+<p>所以，本着节约的精神，又出现了把Unicode编码转化为”可变长编码”的UTF-8编码。
+UTF-8编码把一个Unicode字符根据不同的数字大小编码成1-6个字节，
+常用的英文字母被编码成1个字节，汉字通常是3个字节，只有很生僻的字符才会被编码成4-6个字节。
+如果你要传输的文本包含大量英文字符，用UTF-8编码就能节省空间：</p>
+<p>在计算机内存中，统一使用Unicode编码，当需要保存到硬盘或者需要传输的时候，就转换为UTF-8编码。</p>
+<p>用记事本编辑的时候，从文件读取的UTF-8字符被转换为Unicode字符到内存里，
+编辑完成后，保存的时候再把Unicode转换为UTF-8保存到文件：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/pystr001.png"></p>
+<p>浏览网页的时候，服务器会把动态生成的Unicode内容转换为UTF-8再传输到浏览器：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/pystr002.png"></p>
+<p>所以你看到很多网页的源码上会有类似<meta charset="UTF-8" />的信息，表示该网页正是用的UTF-8编码</p>
+<h3 id="Python的字符串"><a href="#Python的字符串" class="headerlink" title="Python的字符串"></a>Python的字符串</h3><p>搞清楚了令人头疼的字符编码问题后，我们再来研究Python的字符串。</p>
+<p>Python 2.x版本虽然支持Unicode，但在语法上需要’xxx’和u’xxx’两种字符串表示方式。
+在Python 3.x版本中，把’xxx’和u’xxx’统一成Unicode编码，即写不写前缀u都是一样的，
+而以字节形式表示的字符串则必须加上b前缀：b’xxx’</p>
+<p>在最新的Python 3版本中，字符串是以Unicode编码的，也就是说，Python的字符串支持多语言，例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="built_in">print</span>(<span class="string">&#x27;包含中文的str&#x27;</span>)</span><br><span class="line">包含中文的<span class="built_in">str</span></span><br></pre></td></tr></table></figure>
+
+<p>由于Python的字符串类型是str，在内存中以Unicode表示，一个字符对应若干个字节。如果要在网络上传输，
+或者保存到磁盘上，就需要把str变为以字节为单位的bytes。</p>
+<p>Python对bytes类型的数据用带b前缀的单引号或双引号表示：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="string">b&#x27;ABC&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>要注意区分’ABC’和b’ABC’，前者是str，后者虽然内容显示得和前者一样，但bytes的每个字符都只占用一个字节。</p>
+<p>以Unicode表示的str通过encode()方法可以编码为指定的bytes，例如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="string">&#x27;ABC&#x27;</span>.encode(<span class="string">&#x27;ascii&#x27;</span>)</span><br><span class="line"><span class="string">b&#x27;ABC&#x27;</span></span><br><span class="line">&gt;&gt; &gt; <span class="string">&#x27;中文&#x27;</span>.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"><span class="string">b&#x27;\xe4\xb8\xad\xe6\x96\x87&#x27;</span></span><br><span class="line">&gt;&gt; &gt; <span class="string">&#x27;中文&#x27;</span>.encode(<span class="string">&#x27;ascii&#x27;</span>)</span><br><span class="line">Traceback(most</span><br><span class="line">recent</span><br><span class="line">call</span><br><span class="line">last):</span><br><span class="line">File</span><br><span class="line"><span class="string">&quot;&lt;stdin&gt;&quot;</span>, line</span><br><span class="line"><span class="number">1</span>, <span class="keyword">in</span> &lt; module &gt;</span><br><span class="line">UnicodeEncodeError: <span class="string">&#x27;ascii&#x27;</span></span><br><span class="line">codec</span><br><span class="line">can</span><br><span class="line"><span class="string">&#x27;t encode characters in position 0-1: ordinal not in range(128)</span></span><br></pre></td></tr></table></figure>
+
+<p>纯英文的str可以用ASCII编码为bytes，内容是一样的，含有中文的str可以用UTF-8编码为bytes。
+含有中文的str无法用ASCII编码，因为中文编码的范围超过了ASCII编码的范围，Python会报错。</p>
+<p>反过来，如果我们从网络或磁盘上读取了字节流，那么读到的数据就是bytes。要把bytes变为str，就需要用decode()方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; &gt; <span class="string">b&#x27;ABC&#x27;</span>.decode(<span class="string">&#x27;ascii&#x27;</span>)</span><br><span class="line"><span class="string">&#x27;ABC&#x27;</span></span><br><span class="line">&gt;&gt; &gt; <span class="string">b&#x27;\xe4\xb8\xad\xe6\x96\x87&#x27;</span>.decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"><span class="string">&#x27;中文&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>在操作字符串时，我们经常遇到str和bytes的互相转换。为了避免乱码问题，应当始终坚持使用UTF-8编码对str和bytes进行转换。</p>
+<p>由于Python源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，在保存源代码时，
+就需要务必指定保存为UTF-8编码。当Python解释器读取源代码时，为了让它按UTF-8编码读取，我们通常在文件开头写上这两行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br></pre></td></tr></table></figure>
+
+<p>第一行注释是为了告诉Linux&#x2F;OS X系统，这是一个Python可执行程序，Windows系统会忽略这个注释；</p>
+<p>第二行注释是为了告诉Python解释器，按照UTF-8编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。</p>
+<p>申明了UTF-8编码并不意味着你的.py文件就是UTF-8编码的，必须并且要确保文本编辑器正在使用UTF-8 without BOM编码：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/pystr003.png"></p>
+<p>如果.py文件本身使用UTF-8编码，并且也申明了# -<em>- coding: utf-8 -</em>-，打开命令提示符测试就可以正常显示中文</p>
+<h3 id="Python2和3的差异"><a href="#Python2和3的差异" class="headerlink" title="Python2和3的差异"></a>Python2和3的差异</h3><p>先准备两张图片</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/unicode005.png"></p>
+<p>第一张图片是几个特殊字符的unicode代码点（CODE POINT），
+用\uXXXX或者\xXX来表示，其中X都是十六进制字符，而\x表示前面一个字节为00就变成简写了。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/unicode006.png"></p>
+<p>第二张图片是UTF-8怎样来通过可变字节来编码相应字符的代码点</p>
+<p>在python2中</p>
+<ul>
+<li>str: a sequence of bytes</li>
+<li>unicode: a sequence of code points</li>
+</ul>
+<p>在 Python2 中，有两种字符串数据类型。一种纯旧式的文字: “str” 对象,存储 bytes 。
+如果你使用一个 “u” 前缀，那么你会有一个 “unicode” 对象，存储的是 code points 。
+在一个 unicode 字符串中，你可以使用\u或\x来插入任何的 unicode 代码点(\x后面接2位的十六进制表示\u00XX这样的简写)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">my_string = <span class="string">&quot;Hello World.&quot;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(my_string))</span><br><span class="line"></span><br><span class="line">my_unicdoe = <span class="string">u&quot;Hi \u2119\u01b4\u2602\u210c\xf8\u1f24&quot;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(my_unicode))  <span class="comment"># 9个字符</span></span><br><span class="line"></span><br><span class="line">my_utf8 = my_unicode.encode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(my_utf8))  <span class="comment"># 19个字节</span></span><br><span class="line"></span><br><span class="line">my_unicode2 = my_utf8.decode(<span class="string">&#x27;utf-8&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">len</span>(my_unicode2))  <span class="comment"># 9个字符，恢复原来的</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># my_unicode2.encode(&#x27;ascii&#x27;)  # 报错，因为ascii只能表示0-127个字符</span></span><br><span class="line"></span><br><span class="line">my_unicode2.encode(<span class="string">&#x27;ascii&#x27;</span>, <span class="string">&#x27;replace&#x27;</span>)  <span class="comment"># 用?代替不能编码的字符</span></span><br><span class="line">my_unicode2.encode(<span class="string">&#x27;ascii&#x27;</span>, <span class="string">&#x27;xmlcharrefreplace&#x27;</span>)  <span class="comment"># 对于不能编码的产生一个完全替代的 HTML/XML 字符，保护所有的原始数据</span></span><br><span class="line">my_unicode2.encode(<span class="string">&#x27;ascii&#x27;</span>, <span class="string">&#x27;ignore&#x27;</span>)  <span class="comment"># 忽略不能编码的字符，留下的都是ascii字符</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>在python3中</p>
+<ul>
+<li>str: a sequence of code points</li>
+<li>bytes: a sequence of bytes</li>
+</ul>
+<ol>
+<li>只有一个文本类型是<code>str</code>(默认就是unicode编码字符)</li>
+<li>有两个字节类型是<code>bytes</code>和<code>bytearray</code></li>
+</ol>
+<p>在 Python 2 中的 “str” 现在叫做 “bytes”，而 Python 2 中的 “unicode” 现在叫做 “str”。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">my_string = <span class="string">&quot;Hi \u2119\u01b4\u2602\u210c\xf8\u1f24&quot;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(my_string))  <span class="comment"># &lt;class &#x27;str&#x27;&gt;</span></span><br><span class="line"></span><br><span class="line">my_bytes = <span class="string">b&quot;Hello world&quot;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">type</span>(my_bytes))  <span class="comment"># &lt;class &#x27;bytes&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>避免bytes和unicode混合使用报错的原则是：制造一个 Unicode 三明治， bytes 在外， Unicode 在内。</p>
+<p>我们有五个不可忽视的事实:</p>
+<ul>
+<li>程序中所有的输入和输出均为 byte</li>
+<li>世界上的文本需要比 256 更多的符号来表现</li>
+<li>你的程序必须处理 byte 和 unicode</li>
+<li>byte 流中不会包含编码信息</li>
+<li>指明的编码有可能是错误的</li>
+</ul>
+<h3 id="常见乱码问题"><a href="#常见乱码问题" class="headerlink" title="常见乱码问题"></a>常见乱码问题</h3><ol>
+<li>SyntaxError: Non-ASCII character</li>
+<li>UnicodeDecodeError: ‘ascii’ codec can’t decode byte 0xe5 in position 108</li>
+<li>UnicodeEncodeError: ‘gb2312’ codec can’t encode character u’\u2014’ in position 72366:</li>
+</ol>
+<p>字符串在Python内部的表示是unicode 编码，因此，在做编码转换时，通常需要以unicode作为中间编码，
+即先将其他编码的字符串解码（decode）成unicode，再从unicode编码（encode）成另一种编码。</p>
+<p>decode的作用是将其他编码的字符串转换成unicode编码，如str1.decode(‘gb2312’)，表示将gb2312编码的字符串str1转换成unicode编码。
+encode的作用是将unicode编码转换成其他编码的字符串，如str2.encode(‘gb2312’)，表示将unicode编码的字符串str2转换成gb2312编码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line">s = <span class="string">&quot;中文&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="built_in">isinstance</span>(s, unicode):</span><br><span class="line">    <span class="comment"># s=u&quot;中文&quot;</span></span><br><span class="line">    <span class="built_in">print</span></span><br><span class="line">    s.encode(<span class="string">&#x27;gb2312&#x27;</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="comment"># s=&quot;中文&quot;</span></span><br><span class="line">    <span class="built_in">print</span></span><br><span class="line">    s.decode(<span class="string">&#x27;utf-8&#x27;</span>).encode(<span class="string">&#x27;gb2312&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这是你在编程中保持 Unicode 清洁的三个建议:</p>
+<ol>
+<li>Unicode 三明治：尽可能的让你程序处理的文本都为 Unicode 。</li>
+<li>了解你的字符串。你应该知道你的程序中，哪些是 unicode, 哪些是 byte, 对于这些 byte 串，你应该知道，他们的编码是什么。</li>
+<li>测试 Unicode 支持。使用一些奇怪的符号来测试你是否已经做到了以上几点。</li>
+</ol>
+<p>如果你遵循以上建议的话，你将会写出对 Unicode 支持很好的代码。不管 Unicode 中有多么不规整的编码你的程序也不会挂掉。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="http://lucumr.pocoo.org/2014/1/5/unicode-in-2-and-3/">http://lucumr.pocoo.org/2014/1/5/unicode-in-2-and-3/</a></li>
+<li><a target="_blank" rel="noopener" href="http://pycoders-weekly-chinese.readthedocs.io/en/latest/issue5/unipain.html">http://pycoders-weekly-chinese.readthedocs.io/en/latest/issue5/unipain.html</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python%E6%A0%B8%E5%BF%83/" rel="tag"># python核心</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/pycore/functional.html" rel="prev" title="python核心 - 函数式编程">
+                  <i class="fa fa-angle-left"></i> python核心 - 函数式编程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/pycore/setuptools.html" rel="next" title="python核心 - 打包与发布">
+                  python核心 - 打包与发布 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

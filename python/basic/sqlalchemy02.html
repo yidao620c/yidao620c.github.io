@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前面一篇介绍了SQLAlchemy的入门，这里我讲讲它的进阶用法，其实主要是通过它来轻松实现一些复杂查询。 SQLAlchemy中的映射关系有四种,分别是一对多、多对一、一对一、多对多。接下来我将详细说明怎样去定义这四种关系， 然后再演示怎样通过这四种关系完成复杂的查询和更新。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQLAlchemy进阶">
+<meta property="og:url" content="http://yidao620c.github.io/python/basic/sqlalchemy02.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="前面一篇介绍了SQLAlchemy的入门，这里我讲讲它的进阶用法，其实主要是通过它来轻松实现一些复杂查询。 SQLAlchemy中的映射关系有四种,分别是一对多、多对一、一对一、多对多。接下来我将详细说明怎样去定义这四种关系， 然后再演示怎样通过这四种关系完成复杂的查询和更新。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-03-07T15:50:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:51:38.984Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/basic/sqlalchemy02.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/basic/sqlalchemy02.html","path":"python/basic/sqlalchemy02.html","title":"SQLAlchemy进阶"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SQLAlchemy进阶 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%AF%B9%E5%A4%9A"><span class="nav-number">1.</span> <span class="nav-text">一对多</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%AF%B9%E4%B8%80"><span class="nav-number">2.</span> <span class="nav-text">多对一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E5%AF%B9%E4%B8%80"><span class="nav-number">3.</span> <span class="nav-text">一对一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E5%AF%B9%E5%A4%9A"><span class="nav-number">4.</span> <span class="nav-text">多对多</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E9%87%8D%E8%A6%81%E5%8F%82%E6%95%B0"><span class="nav-number">5.</span> <span class="nav-text">一些重要参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%9B%9B%E7%A7%8D%E7%8A%B6%E6%80%81"><span class="nav-number">6.</span> <span class="nav-text">对象的四种状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2"><span class="nav-number">7.</span> <span class="nav-text">关联查询</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/basic/sqlalchemy02.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SQLAlchemy进阶 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SQLAlchemy进阶
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-03-07 23:50:22" itemprop="dateCreated datePublished" datetime="2016-03-07T23:50:22+08:00">2016-03-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>前面一篇介绍了SQLAlchemy的入门，这里我讲讲它的进阶用法，其实主要是通过它来轻松实现一些复杂查询。</p>
+<p>SQLAlchemy中的映射关系有四种,分别是一对多、多对一、一对一、多对多。接下来我将详细说明怎样去定义这四种关系，
+然后再演示怎样通过这四种关系完成复杂的查询和更新。</p>
+<span id="more"></span>
+
+<h2 id="一对多"><a href="#一对多" class="headerlink" title="一对多"></a>一对多</h2><p>表示一对多的关系时，在子表类中通过 foreign key (外键)引用父表类。</p>
+<p>然后，在父表类中通过 relationship() 方法来引用子表的类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    children = relationship(<span class="string">&quot;Child&quot;</span>)</span><br><span class="line">    <span class="comment"># 在父表类中通过 relationship() 方法来引用子表的类集合</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;child&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    parent_id = Column(Integer, ForeignKey(<span class="string">&#x27;parent.id&#x27;</span>))</span><br><span class="line">    <span class="comment"># 在子表类中通过 foreign key (外键)引用父表的参考字段</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="多对一"><a href="#多对一" class="headerlink" title="多对一"></a>多对一</h2><p>在一对多的关系中建立双向的关系，这样的话在对方看来这就是一个多对一的关系，
+在子表类中附加一个<code>relationship()</code>方法，并且在双方的<code>relationship()</code>方法中使用<code>relationship.back_populates</code>方法参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    children = relationship(<span class="string">&quot;Child&quot;</span>, back_populates=<span class="string">&quot;parent&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;child&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    parent_id = Column(Integer, ForeignKey(<span class="string">&#x27;parent.id&#x27;</span>))</span><br><span class="line">    parent = relationship(<span class="string">&quot;Parent&quot;</span>, back_populates=<span class="string">&quot;children&quot;</span>)</span><br><span class="line">    <span class="comment"># 子表类中附加一个 relationship() 方法</span></span><br><span class="line">    <span class="comment"># 并且在(父)子表类的 relationship() 方法中使用 relationship.back_populates 参数</span></span><br></pre></td></tr></table></figure>
+
+<p>这样的话子表将会在多对一的关系中获得父表的属性</p>
+<p>或者，可以在单一的<code>relationship()</code>方法中使用<code>backref</code>参数来代替<code>back_populates</code>参数，
+推荐使用这种方式，可以少些几句话。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    children = relationship(<span class="string">&quot;Child&quot;</span>, backref=<span class="string">&quot;parent&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;child&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    parent_id = Column(Integer, ForeignKey(<span class="string">&#x27;parent.id&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<h2 id="一对一"><a href="#一对一" class="headerlink" title="一对一"></a>一对一</h2><p>一对一就是多对一和一对多的一个特例,只需在relationship加上一个参数uselist&#x3D;False替换多的一端就是一对一</p>
+<p>从一对多转换到一对一:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    child = relationship(<span class="string">&quot;Child&quot;</span>, uselist=<span class="literal">False</span>, backref=<span class="string">&quot;parent&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;child&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    parent_id = Column(Integer, ForeignKey(<span class="string">&#x27;parent.id&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p>从多对一转换到一对一:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    child_id = Column(Integer, ForeignKey(<span class="string">&#x27;child.id&#x27;</span>))</span><br><span class="line">    child = relationship(<span class="string">&quot;Child&quot;</span>, backref=backref(<span class="string">&quot;parent&quot;</span>, uselist=<span class="literal">False</span>))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;child&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="多对多"><a href="#多对多" class="headerlink" title="多对多"></a>多对多</h2><p>多对多关系需要一个中间关联表,通过参数<code>secondary</code>来指定。<code>backref</code>会自动的为子表类加载同样的<code>secondary</code>参数,
+所以为了简洁起见仍然推荐这种写法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Table, Text</span><br><span class="line"></span><br><span class="line">post_keywords = Table(<span class="string">&#x27;post_keywords&#x27;</span>, Base.metadata,</span><br><span class="line">                      Column(<span class="string">&#x27;post_id&#x27;</span>, Integer, ForeignKey(<span class="string">&#x27;posts.id&#x27;</span>)),</span><br><span class="line">                      Column(<span class="string">&#x27;keyword_id&#x27;</span>, Integer, ForeignKey(<span class="string">&#x27;keywords.id&#x27;</span>))</span><br><span class="line">                      )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BlogPost</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;posts&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    body = Column(Text)</span><br><span class="line">    keywords = relationship(<span class="string">&#x27;Keyword&#x27;</span>, secondary=post_keywords, backref=<span class="string">&#x27;posts&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Keyword</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;keywords&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    keyword = Column(String(<span class="number">50</span>), nullable=<span class="literal">False</span>, unique=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果使用<code>back_populates</code>，那么两个都要定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> Table, Text</span><br><span class="line"></span><br><span class="line">post_keywords = Table(<span class="string">&#x27;post_keywords&#x27;</span>, Base.metadata,</span><br><span class="line">                      Column(<span class="string">&#x27;post_id&#x27;</span>, Integer, ForeignKey(<span class="string">&#x27;posts.id&#x27;</span>)),</span><br><span class="line">                      Column(<span class="string">&#x27;keyword_id&#x27;</span>, Integer, ForeignKey(<span class="string">&#x27;keywords.id&#x27;</span>))</span><br><span class="line">                      )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">BlogPost</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;posts&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    body = Column(Text)</span><br><span class="line">    keywords = relationship(<span class="string">&#x27;Keyword&#x27;</span>, secondary=post_keywords, back_populates=<span class="string">&quot;parents&quot;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Keyword</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;keywords&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    keyword = Column(String(<span class="number">50</span>), nullable=<span class="literal">False</span>, unique=<span class="literal">True</span>)</span><br><span class="line">    parents = relationship(<span class="string">&#x27;BlogPost&#x27;</span>, secondary=post_keywords, back_populates=<span class="string">&quot;keywords&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="一些重要参数"><a href="#一些重要参数" class="headerlink" title="一些重要参数"></a>一些重要参数</h2><p><code>relationship()</code>函数接收的参数非常多，比如：<code>backref</code>，<code>secondary</code>，<code>primaryjoin</code>等等。
+下面列举一下我用到的参数</p>
+<ul>
+<li>backref 在一对多或多对一之间建立双向关系,比如</li>
+<li>lazy:默认值是True, 懒加载</li>
+<li>remote_side: 表中的外键引用的是自身时, 如Node类,如果想表示多对一的树形关系, 那么就可以使用remote_side</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Node</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">  __tablename__ = <span class="string">&#x27;node&#x27;</span></span><br><span class="line">  <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">  parent_id = Column(Integer, ForeignKey(<span class="string">&#x27;node.id&#x27;</span>))</span><br><span class="line">  data = Column(String(<span class="number">50</span>))</span><br><span class="line">  parent = relationship(<span class="string">&quot;Node&quot;</span>, remote_side=[<span class="built_in">id</span>])</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>secondary: 多对多指定中间表关键字</li>
+<li>order_by: 在一对多的关系中,如下代码:</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">User</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    <span class="comment"># ...</span></span><br><span class="line">    addresses = relationship(<span class="keyword">lambda</span>: Address,</span><br><span class="line">                             order_by=<span class="keyword">lambda</span>: desc(Address.email),</span><br><span class="line">                             primaryjoin=<span class="keyword">lambda</span>: Address.user_id == User.<span class="built_in">id</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>cascade: 级联删除</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span>(<span class="title class_ inherited__">Base</span>):</span><br><span class="line">    __tablename__ = <span class="string">&#x27;parent&#x27;</span></span><br><span class="line">    <span class="built_in">id</span> = Column(Integer, primary_key=<span class="literal">True</span>)</span><br><span class="line">    children = relationship(<span class="string">&quot;Child&quot;</span>, cascade=<span class="string">&#x27;all&#x27;</span>, backref=<span class="string">&#x27;parent&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">delete_parent</span>():</span><br><span class="line">    session = Session()</span><br><span class="line">    parent = session.query(Parent).get(<span class="number">2</span>)</span><br><span class="line">    session.delete(parent)</span><br><span class="line">    session.commit()</span><br></pre></td></tr></table></figure>
+
+<p>不过不设置<code>cascade</code>，删除<code>parent</code>时，其关联的<code>chilren</code>不会删除，只会把<code>chilren</code>关联的<code>parent.id</code>置为空，
+设置<code>cascade</code>后就可以级联删除<code>children</code></p>
+<h2 id="对象的四种状态"><a href="#对象的四种状态" class="headerlink" title="对象的四种状态"></a>对象的四种状态</h2><p>对象在session中可能存在的四种状态包括：</p>
+<ul>
+<li>Transient：实例还不在session中，还没有保存到数据库中去，没有数据库身份，想刚创建出来的对象比如User()，仅仅只有mapper()与之关联</li>
+<li>Pending：用add()一个transient对象后，就变成了一个pending对象，这时候仍然没有flushed到数据库中去，直到flush发生。</li>
+<li>Persistent：实例出现在session中而且在数据库中也有记录了，通常是通过flush一个pending实例变成Persistent或者从数据库中querying一个已经存在的实例。</li>
+<li>Detached：一个对象它有记录在数据库中，但是不在任何session中，</li>
+</ul>
+<h2 id="关联查询"><a href="#关联查询" class="headerlink" title="关联查询"></a>关联查询</h2><p>查询：<a target="_blank" rel="noopener" href="http://docs.sqlalchemy.org/en/rel_1_1/orm/query.html">http://docs.sqlalchemy.org/en/rel_1_1/orm/query.html</a></p>
+<p>关联查询：<a target="_blank" rel="noopener" href="http://docs.sqlalchemy.org/en/rel_1_1/orm/query.html#sqlalchemy.orm.query.Query.join">http://docs.sqlalchemy.org/en/rel_1_1/orm/query.html#sqlalchemy.orm.query.Query.join</a></p>
+<p>非常简单的关联查询，外键就一个，系统知道如何去关联：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session.query(User).join(Address).<span class="built_in">filter</span>(Address.email == <span class="string">&quot;lzjun@qq.com&quot;</span>).<span class="built_in">all</span>()</span><br></pre></td></tr></table></figure>
+
+<p>指定ON字段：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">q = session.query(User).join(Address, User.<span class="built_in">id</span> == Address.user_id)</span><br></pre></td></tr></table></figure>
+
+<p>多个join</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">q = session.query(User).join(<span class="string">&quot;orders&quot;</span>, <span class="string">&quot;items&quot;</span>, <span class="string">&quot;keywords&quot;</span>)</span><br><span class="line">q = session.query(User).join(User.orders).join(Order.items).join(Item.keywords)</span><br></pre></td></tr></table></figure>
+
+<p>子查询JOIN：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">address_subq = session.query(Address).</span><br><span class="line"><span class="built_in">filter</span>(Address.email_address == <span class="string">&#x27;ed@foo.com&#x27;</span>).</span><br><span class="line">subquery()</span><br><span class="line"></span><br><span class="line">q = session.query(User).join(address_subq, User.addresses)</span><br></pre></td></tr></table></figure>
+
+<p>join from:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">q = session.query(Address).select_from(User).</span><br><span class="line">join(User.addresses).</span><br><span class="line"><span class="built_in">filter</span>(User.name == <span class="string">&#x27;ed&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>和下面的SQL等价：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> address.<span class="operator">*</span></span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">user</span></span><br><span class="line">         <span class="keyword">JOIN</span> address <span class="keyword">ON</span> user.id <span class="operator">=</span> address.user_id</span><br><span class="line"><span class="keyword">WHERE</span> user.name <span class="operator">=</span> :name_1</span><br></pre></td></tr></table></figure>
+
+<p>左外连接，指定<code>isouter=True</code>，等价于<code> Query.outerjoin()</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">q = session.query(Node).</span><br><span class="line">join(<span class="string">&quot;children&quot;</span>, <span class="string">&quot;children&quot;</span>, aliased=<span class="literal">True</span>, isouter=<span class="literal">True</span>).</span><br><span class="line"><span class="built_in">filter</span>(Node.name == <span class="string">&#x27;grandchild 1&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/basic/sqlalchemy01.html" rel="prev" title="SQLAlchemy入门">
+                  <i class="fa fa-angle-left"></i> SQLAlchemy入门
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/scrapy/scrapy-01.html" rel="next" title="Scrapy笔记01- 入门篇">
+                  Scrapy笔记01- 入门篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

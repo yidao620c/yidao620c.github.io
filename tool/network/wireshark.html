@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。 使用wireshark的人必须了解网络协议，否则就看不懂wireshark了。 为了安全考虑，wireshark只能查看封包，而不能修改封包的内容，或者发送封包。 wireshark能获取HTTP，也能获取HTTPS，但是不能解密HTTPS，所以wireshark看不懂HTTPS中的内容。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WireShark基本使用">
+<meta property="og:url" content="http://yidao620c.github.io/tool/network/wireshark.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。 使用wireshark的人必须了解网络协议，否则就看不懂wireshark了。 为了安全考虑，wireshark只能查看封包，而不能修改封包的内容，或者发送封包。 wireshark能获取HTTP，也能获取HTTPS，但是不能解密HTTPS，所以wireshark看不懂HTTPS中的内容。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/wireshark01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/wireshark02.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/tcp01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/tcp02.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/wireshark03.png">
+<meta property="article:published_time" content="2017-01-05T08:33:19.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.953Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="网络工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/wireshark01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/tool/network/wireshark.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/tool/network/wireshark.html","path":"tool/network/wireshark.html","title":"WireShark基本使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>WireShark基本使用 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%95%8C%E9%9D%A2"><span class="nav-number">1.</span> <span class="nav-text">界面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E5%8C%85%E5%88%97%E8%A1%A8"><span class="nav-number">2.</span> <span class="nav-text">封包列表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%81%E5%8C%85%E8%AF%A6%E7%BB%86%E4%BF%A1%E6%81%AF"><span class="nav-number">3.</span> <span class="nav-text">封包详细信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">过滤器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8D%95%E6%8D%89%E8%BF%87%E6%BB%A4%E5%99%A8%EF%BC%88Capture-Filter%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">捕捉过滤器（Capture Filter）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E8%BF%87%E6%BB%A4%E5%99%A8%EF%BC%88Display-Filter%EF%BC%89"><span class="nav-number">4.2.</span> <span class="nav-text">显示过滤器（Display Filter）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">5.</span> <span class="nav-text">TCP三次握手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B7%9F%E8%B8%AA%E4%B8%80%E4%B8%AA%E8%AF%B7%E6%B1%82"><span class="nav-number">6.</span> <span class="nav-text">跟踪一个请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Wireshark%E8%A7%A3%E5%AF%86TLS1-2%E6%95%B0%E6%8D%AE%E5%8C%85"><span class="nav-number">7.</span> <span class="nav-text">Wireshark解密TLS1.2数据包</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/tool/network/wireshark.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="WireShark基本使用 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          WireShark基本使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-01-05 16:33:19" itemprop="dateCreated datePublished" datetime="2017-01-05T16:33:19+08:00">2017-01-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>wireshark是非常流行的网络封包分析软件，功能十分强大。可以截取各种网络封包，显示网络封包的详细信息。
+使用wireshark的人必须了解网络协议，否则就看不懂wireshark了。
+为了安全考虑，wireshark只能查看封包，而不能修改封包的内容，或者发送封包。</p>
+<p>wireshark能获取HTTP，也能获取HTTPS，但是不能解密HTTPS，所以wireshark看不懂HTTPS中的内容。
+如果是处理HTTP,HTTPS 还是用<a target="_blank" rel="noopener" href="http://www.telerik.com/fiddler">Fiddler</a>,
+其他协议比如TCP,UDP就用wireshark。</p>
+<span id="more"></span>
+
+<h2 id="界面"><a href="#界面" class="headerlink" title="界面"></a>界面</h2><p>直接去<a target="_blank" rel="noopener" href="https://www.wireshark.org/download.html">https://www.wireshark.org/download.html</a>下载相应平台版本然后安装即可。</p>
+<p>wireshark是捕获机器上的某一块网卡的网络包，当你的机器上有多块网卡的时候，你需要选择一个网卡。
+点击Caputre-&gt;Options.. 选择正确的网卡，配置Capture Filter，然后点击”Start”按钮</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/wireshark01.png"></p>
+<p>开始抓包，最新的2.2.5抓包界面如下:</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/wireshark02.png"></p>
+<p>WireShark 主要分为这几个界面</p>
+<ol>
+<li>Display Filter(显示过滤器)，用于过滤</li>
+<li>Packet List Pane(封包列表)，显示捕获到的封包，有源地址和目标地址，端口号。颜色不同</li>
+<li>Packet Details Pane(封包详细信息), 显示封包中的字段</li>
+<li>Dissector Pane(16进制数据)</li>
+<li>Miscellanous(地址栏，杂项)</li>
+</ol>
+<h2 id="封包列表"><a href="#封包列表" class="headerlink" title="封包列表"></a>封包列表</h2><p>No列编号，Time列是开启监控后到接受包的时间，Source是源IP，Destination是目标IP，
+Protocal是协议，Length是包长度，Info是包信息。</p>
+<h2 id="封包详细信息"><a href="#封包详细信息" class="headerlink" title="封包详细信息"></a>封包详细信息</h2><p>这个面板是我们最重要的，用来查看协议中的每一个字段。各行信息分别为:</p>
+<ul>
+<li>Frame: 物理层的数据帧概况</li>
+<li>Ethernet II: 数据链路层以太网帧头部信息</li>
+<li>Internet Protocol Version 4: 互联网层IP包头部信息</li>
+<li>Transmission Control Protocol: 传输层的数据段头部信息，此处是TCP</li>
+<li>Hypertext Transfer Protocol: 应用层的信息，此处是HTTP协议</li>
+</ul>
+<h2 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h2><p>WireShark使用过程中最方便的就是它的过滤器了。分为两种:</p>
+<ul>
+<li>捕捉过滤器：用于决定将什么样的信息记录在捕捉结果中，需要在开始捕捉前设置。</li>
+<li>显示过滤器：在捕捉结果中进行详细查找，他们可以在得到捕捉结果后随意修改。</li>
+</ul>
+<h3 id="捕捉过滤器（Capture-Filter）"><a href="#捕捉过滤器（Capture-Filter）" class="headerlink" title="捕捉过滤器（Capture Filter）"></a>捕捉过滤器（Capture Filter）</h3><p>参考：<a target="_blank" rel="noopener" href="https://wiki.wireshark.org/CaptureFilters">https://wiki.wireshark.org/CaptureFilters</a></p>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Direction</th>
+<th>Host(s)</th>
+<th>Value</th>
+<th>Logical Operations</th>
+<th>Other expression</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tcp</td>
+<td>dst</td>
+<td>10.10.202.254</td>
+<td>80</td>
+<td>and</td>
+<td>tcp dst 10.2.2.2 3128</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><em><strong>Protocol（协议）</strong></em><br/>
+可能的值: ether, fddi, ip, arp, rarp, decnet, lat, sca, moprc, mopdl, tcp and udp
+如果没有特别指明是什么协议，则默认使用所有支持的协议。<br/>
+<em><strong>Direction（方向）</strong></em><br/>
+可能的值: src, dst, src and dst, src or dst
+如果没有特别指明来源或目的地，则默认使用 “src or dst” 作为关键字。
+例如，”host 10.2.2.2”与”src or dst host 10.2.2.2”是一样的。<br/>
+<em><strong>Host(s)</strong></em><br/>
+可能的值： net, port, host, portrange
+如果没有指定此值，则默认使用”host”关键字。
+例如，”src 10.1.1.1”与”src host 10.1.1.1”相同。<br/>
+<em><strong>Logical Operations（逻辑运算）</strong></em><br/>
+可能的值：not, and, or
+否(“not”)具有最高的优先级。或(“or”)和与(“and”)具有相同的优先级，运算时从左至右进行。</p>
+</blockquote>
+<p>例如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&quot;not tcp port 3128 and tcp port 23&quot;与&quot;(not tcp port 3128) and tcp port 23&quot;相同</span><br><span class="line">&quot;not tcp port 3128 and tcp port 23&quot;与&quot;not (tcp port 3128 and tcp port 23)&quot;不同</span><br></pre></td></tr></table></figure>
+
+<h3 id="显示过滤器（Display-Filter）"><a href="#显示过滤器（Display-Filter）" class="headerlink" title="显示过滤器（Display Filter）"></a>显示过滤器（Display Filter）</h3><p>参考：<a target="_blank" rel="noopener" href="https://wiki.wireshark.org/DisplayFilters">https://wiki.wireshark.org/DisplayFilters</a></p>
+<p>显示过滤器就是在用来过滤封包列表的，它不影响捕获的日志文件，只是用来过滤显示列表中显示的项目用，
+是在运行时设置的随时可以更改。</p>
+<p>示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ip.src != 10.1.2.3 and ip.dst != 10.4.5.6</span><br><span class="line">ip.dst == 14.215.177.38 and ip.src == 10.10.111.230 and ssl</span><br></pre></td></tr></table></figure>
+
+<h2 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h2><p>这个在TCP&#x2F;IP协议里面讲的太多了，就不多说了，直接给个图就能看得懂:</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/tcp01.png"></p>
+<p>那么通过抓取一次HTTP访问例子来说明这个握手过程，
+比如要访问<a target="_blank" rel="noopener" href="http://www.cnblogs.com/">http://www.cnblogs.com</a>，先通过ping命令拿到ip地址为”223.6.248.220”，
+然后新建一个Capture Filter，规则为<code>host 223.6.248.220</code>，运行后网页访问这个链接:</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/tcp02.png"></p>
+<p>非常清楚的显示了三次TCP握手过程。</p>
+<h2 id="跟踪一个请求"><a href="#跟踪一个请求" class="headerlink" title="跟踪一个请求"></a>跟踪一个请求</h2><p>在wireshark中输入http过滤，然后选中GET &#x2F; HTTP&#x2F;1.1的那条记录，右键然后点击”Follow TCP Stream”,
+这样做的目的是为了得到与浏览器打开网站相关的数据包</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/wireshark03.png"></p>
+<p>如果要跟踪HTTPS请求，先在Edit-&gt;Preferences-&gt;Protocols里面选择SSL</p>
+<h2 id="Wireshark解密TLS1-2数据包"><a href="#Wireshark解密TLS1-2数据包" class="headerlink" title="Wireshark解密TLS1.2数据包"></a>Wireshark解密TLS1.2数据包</h2><p>对于HTTPS通信的数据包，如果想要Wireshark在抓包过程中自动解密，则要求密钥套件算法中不能使用DH或DHE算法。 可将Nginx的密钥套件配置修改成如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">ssl_ciphers</span> HIGH:!aNULL:!DH;!DHE:!ECDH;</span><br></pre></td></tr></table></figure>
+
+<p>下载Nginx的私钥或者导出私钥和证书为nginx.p12格式的正式库文件。 然后下载最新的Wireshark3.2.7，选择<code>编辑 》 首选项 》 protocols 》 TLS</code>，配置私钥或PCKS12格式的证书库即可。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C%E5%B7%A5%E5%85%B7/" rel="tag"># 网络工具</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/basic/werkzeug.html" rel="prev" title="Werkzeug简易教程">
+                  <i class="fa fa-angle-left"></i> Werkzeug简易教程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/nginx/nginx01-basic.html" rel="next" title="nginx笔记 - 配置和使用">
+                  nginx笔记 - 配置和使用 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="以前一直使用virtualenv来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。 而pyenv可以帮到我。 pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚， 通过在PATH最前面插入shims来决定应用使用的python版本，从而将你的命令传递给正确的python程序。 我的系统环境是CentOS7.2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用pyenv创建多版本python环境">
+<meta property="og:url" content="http://yidao620c.github.io/python/basic/pyenv.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="以前一直使用virtualenv来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。 而pyenv可以帮到我。 pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚， 通过在PATH最前面插入shims来决定应用使用的python版本，从而将你的命令传递给正确的python程序。 我的系统环境是CentOS7.2">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-05-09T04:28:39.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:51:06.966Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/basic/pyenv.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/basic/pyenv.html","path":"python/basic/pyenv.html","title":"使用pyenv创建多版本python环境"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用pyenv创建多版本python环境 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%90%86%E8%A7%A3Shims"><span class="nav-number">1.</span> <span class="nav-text">理解Shims</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">3.</span> <span class="nav-text">环境变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%88%E6%9C%AC%E5%88%87%E6%8D%A2"><span class="nav-number">5.</span> <span class="nav-text">版本切换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BDpyenv"><span class="nav-number">6.</span> <span class="nav-text">卸载pyenv</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6pyenv-virtualenv"><span class="nav-number">7.</span> <span class="nav-text">插件pyenv-virtualenv</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/basic/pyenv.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用pyenv创建多版本python环境 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用pyenv创建多版本python环境
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-05-09 12:28:39" itemprop="dateCreated datePublished" datetime="2016-05-09T12:28:39+08:00">2016-05-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>以前一直使用<code>virtualenv</code>来管理python的包环境，但是有时候我需要多个python版本环境时候就不能愉快的玩耍了。
+而<a target="_blank" rel="noopener" href="https://github.com/pyenv/pyenv">pyenv</a>可以帮到我。</p>
+<p>pyenv是针对python版本的管理，通过修改环境变量的方式实现，在其官网说明上很清楚，
+通过在PATH最前面插入<code>shims</code>来决定应用使用的python版本，从而将你的命令传递给正确的python程序。</p>
+<p>我的系统环境是CentOS7.2</p>
+<span id="more"></span>
+
+<h2 id="理解Shims"><a href="#理解Shims" class="headerlink" title="理解Shims"></a>理解Shims</h2><p>pyenv会在你的PATH最前面插入一个<code>shims</code>目录:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$(pyenv root)/shims:/usr/local/bin:/usr/bin:/bin</span><br></pre></td></tr></table></figure>
+
+<p>通过一个<code>rehashing</code>操作就可以在该目录匹配所有已经安装的不同版本的python命令，比如<code>python</code>, <code>pip</code>等。
+所有对Python可执行文件的查找都会首先被这个shims路径截获，后面的设置就不生效了。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>推荐自动安装（保证系统上面先安装git）:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h2><p>编辑<code>~/.bash_profile</code>，最后面加入:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PYENV_ROOT=<span class="string">&quot;<span class="variable">$HOME</span>/.pyenv&quot;</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="string">&quot;<span class="variable">$PYENV_ROOT</span>/bin:<span class="variable">$PATH</span>&quot;</span></span><br><span class="line"><span class="built_in">eval</span> <span class="string">&quot;<span class="subst">$(pyenv init -)</span>&quot;</span></span><br><span class="line"><span class="built_in">eval</span> <span class="string">&quot;<span class="subst">$(pyenv virtualenv-init -)</span>&quot;</span></span><br><span class="line"><span class="built_in">export</span> PYENV_VIRTUALENV_DISABLE_PROMPT=1</span><br></pre></td></tr></table></figure>
+
+<p>重启 shell:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">exec</span> <span class="variable">$SHELL</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><ol>
+<li><code>pyenv versions</code> – 查看系统当前安装的python列表</li>
+<li><code>pyenv version</code>  – 查看系统当前使用的python版本</li>
+<li><code>pyenv install -v 3.5.3</code> – 安装python</li>
+<li><code>pyenv uninstall 2.7.13</code> – 卸载python</li>
+<li><code>pyenv rehash</code> – 为所有已安装的可执行文件（如：~&#x2F;.pyenv&#x2F;versions&#x2F;bin&#x2F;）创建shims，
+因此每当你增删了Python版本或带有可执行文件的包（如 pip）以后，都应该执行一次本命令）</li>
+</ol>
+<h2 id="版本切换"><a href="#版本切换" class="headerlink" title="版本切换"></a>版本切换</h2><ol>
+<li><code>pyenv global 3.5.3</code> – 设置全局的Python版本，通过将版本号写入<code>~/.pyenv/version</code>文件的方式</li>
+<li><code>pyenv local 2.7.13</code> – 设置面向程序的本地版本，通过将版本号写入当前目录下的<code>.python-version</code>文件的方式。
+通过这种方式设置的Python版本优先级较global高。</li>
+<li><code>pyenv shell 2.7.13</code> - 设置面向shell的Python版本，通过设置当前shell的<code>PYENV_VERSION</code>环境变量的方式</li>
+</ol>
+<p>优先级: shell &gt; local &gt; global</p>
+<h2 id="卸载pyenv"><a href="#卸载pyenv" class="headerlink" title="卸载pyenv"></a>卸载pyenv</h2><ol>
+<li>禁用pyenv很简单，只需要在<code>~/.bash_profile</code>中的<code>pyenv init</code>那行删了即可。</li>
+<li>完全移除pyenv，先执行上面第1步，然后删了pyenv的根目录: <code>rm -rf $(pyenv root)</code></li>
+</ol>
+<h2 id="插件pyenv-virtualenv"><a href="#插件pyenv-virtualenv" class="headerlink" title="插件pyenv-virtualenv"></a>插件pyenv-virtualenv</h2><p>官网地址: <a target="_blank" rel="noopener" href="https://github.com/pyenv/pyenv-virtualenv">https://github.com/pyenv/pyenv-virtualenv</a></p>
+<p>使用自动安装pyenv后，它会自动安装部分插件，通过<code>pyenv-virtualenv</code>插件可以很好的和<code>virtualenv</code>结合</p>
+<p>另外，一个可选配置是在<code>~/.bash_profile</code>最后添加:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval &quot;$(pyenv virtualenv-init -)&quot;</span><br></pre></td></tr></table></figure>
+
+<p>可以实现自动激活虚拟环境，这个特性非常有用建议都加上。</p>
+<ol>
+<li>创建虚拟环境: <code>pyenv virtualenv 2.7.13 virtual-env-2.7.13</code>，默认使用当前环境python版本。
+在文件夹<code>$(pyenv root)/versions/my-virtual-env-2.7.13</code>中创建一个基于Python 2.7.13的虚拟环境。</li>
+<li>列出虚拟环境: <code>pyenv virtualenvs</code>，对每个virtualenv显示2个, 短的只是个链接，那个<code>*</code>表示当前激活的。</li>
+<li>激活虚拟环境: <code>pyenv activate virtual-env-2.7.13</code></li>
+<li>退出虚拟环境: <code>pyenv deactivate</code></li>
+<li>删除虚拟环境: <code>pyenv uninstall virtual-env-2.7.13</code></li>
+</ol>
+<p>如果<code>eval &quot;$(pyenv virtualenv-init -)&quot;</code>写在你的shell配置中(比如上面的~&#x2F;.bash_profile),
+那么当<code>pyenv-virtualenv</code>进入&#x2F;离开某个含有<code>.python-version</code>目录时会自动激活&#x2F;退出虚拟环境。</p>
+<p>场景使用流程:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先创建一个虚拟环境</span></span><br><span class="line">pyenv versions</span><br><span class="line">pyenv virtualenv 2.7.13 virtual-env-2.7.13</span><br><span class="line"><span class="comment"># 进入某个目录比如/root/work/flask-demo</span></span><br><span class="line">pyenv <span class="built_in">local</span> virtual-env-2.7.13</span><br><span class="line"><span class="comment"># 然后再不需要去手动激活了</span></span><br></pre></td></tr></table></figure>
+
+<p>使用pyenv来管理多版本的python命令，使用pyenv-virtualenv插件来管理多版本python包环境。爽歪歪~</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/django/django-deploy.html" rel="prev" title="CentOS7上使用mod_wsgi部署Django">
+                  <i class="fa fa-angle-left"></i> CentOS7上使用mod_wsgi部署Django
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/basic/pyfunny.html" rel="next" title="一些有趣的python技巧">
+                  一些有趣的python技巧 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

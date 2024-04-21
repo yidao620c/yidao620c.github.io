@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="这一篇学习容器的各种操作，容器的状态之间如何转换，以及实现容器的底层技术。 运行容器 1docker run -d --name &quot;node001&quot; httpd  查看当前正在运行的容器 12docker psdocker container ls">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker每天学一点06 - 运行容器">
+<meta property="og:url" content="http://yidao620c.github.io/k8s/docker/docker06.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="这一篇学习容器的各种操作，容器的状态之间如何转换，以及实现容器的底层技术。 运行容器 1docker run -d --name &quot;node001&quot; httpd  查看当前正在运行的容器 12docker psdocker container ls">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker20.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker21.png">
+<meta property="article:published_time" content="2019-03-09T01:16:33.000Z">
+<meta property="article:modified_time" content="2023-07-30T00:53:52.138Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker20.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/k8s/docker/docker06.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/k8s/docker/docker06.html","path":"k8s/docker/docker06.html","title":"Docker每天学一点06 - 运行容器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Docker每天学一点06 - 运行容器 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E6%9E%9C%E8%AE%A9%E4%B8%80%E4%B8%AA%E5%AE%B9%E5%99%A8%E9%95%BF%E6%9C%9F%E8%BF%90%E8%A1%8C"><span class="nav-number">1.</span> <span class="nav-text">如果让一个容器长期运行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5%E5%AE%B9%E5%99%A8%E6%96%B9%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">进入容器方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%AE%B9%E5%99%A8%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.</span> <span class="nav-text">运行容器最佳实践</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C"><span class="nav-number">4.</span> <span class="nav-text">容器常用操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E7%8A%B6%E6%80%81"><span class="nav-number">5.</span> <span class="nav-text">容器状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%81%E4%B9%85%E5%8C%96%E5%AE%B9%E5%99%A8"><span class="nav-number">6.</span> <span class="nav-text">持久化容器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#docker-commit"><span class="nav-number">6.1.</span> <span class="nav-text">docker commit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA-Export"><span class="nav-number">6.2.</span> <span class="nav-text">导出(Export)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98-Save"><span class="nav-number">6.3.</span> <span class="nav-text">保存(Save)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BA%E5%92%8C%E4%BF%9D%E5%AD%98%E7%9A%84%E5%B7%AE%E5%88%AB"><span class="nav-number">6.4.</span> <span class="nav-text">导出和保存的差别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E9%99%90%E9%A2%9D"><span class="nav-number">7.</span> <span class="nav-text">内存限额</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CPU%E9%99%90%E5%88%B6"><span class="nav-number">8.</span> <span class="nav-text">CPU限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98IO%E9%99%90%E5%88%B6"><span class="nav-number">9.</span> <span class="nav-text">磁盘IO限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E5%BA%95%E5%B1%82%E6%8A%80%E6%9C%AF"><span class="nav-number">10.</span> <span class="nav-text">容器底层技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mount-namespace"><span class="nav-number">10.1.</span> <span class="nav-text">Mount namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UTS-namespace"><span class="nav-number">10.2.</span> <span class="nav-text">UTS namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IPC-namespace"><span class="nav-number">10.3.</span> <span class="nav-text">IPC namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PID-namespace"><span class="nav-number">10.4.</span> <span class="nav-text">PID namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-namespace"><span class="nav-number">10.5.</span> <span class="nav-text">Network namespace</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#User-namespace"><span class="nav-number">10.6.</span> <span class="nav-text">User namespace</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/k8s/docker/docker06.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Docker每天学一点06 - 运行容器 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker每天学一点06 - 运行容器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-09 09:16:33" itemprop="dateCreated datePublished" datetime="2019-03-09T09:16:33+08:00">2019-03-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>这一篇学习容器的各种操作，容器的状态之间如何转换，以及实现容器的底层技术。</p>
+<p>运行容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name <span class="string">&quot;node001&quot;</span> httpd</span><br></pre></td></tr></table></figure>
+
+<p>查看当前正在运行的容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br><span class="line">docker container <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>返回结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos ~]<span class="comment"># docker ps</span></span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES</span><br><span class="line">2d33b4ef85c4        registry:2          <span class="string">&quot;/entrypoint.sh /e...&quot;</span>   7 hours ago         Up 7 hours          0.0.0.0:5000-&gt;5000/tcp   vibrant_mestorf</span><br><span class="line">ef4e11f77711        my-image            <span class="string">&quot;/bin/bash&quot;</span>              2 days ago          Up 2 days                                    cranky_yalow</span><br><span class="line">3d5ea3e73344        httpd               <span class="string">&quot;httpd-foreground&quot;</span>       4 days ago          Up 4 days           0.0.0.0:8020-&gt;80/tcp     boring_bardeen</span><br></pre></td></tr></table></figure>
+
+<p>加一个<code>-a</code>选项可把所有容器都列出来：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
+
+<p>让容器长期运行，可以通过执行一个长期运行的命令来保持容器的运行状态，然后使用<code>-d</code>选项让它以后台方式启动容器。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d httpd</span><br></pre></td></tr></table></figure>
+
+<p><code>CONTAINER ID</code> 是容器的 “短ID”，前面启动容器时返回的是 “长ID”。短ID是长ID的前12个字符。</p>
+<p><code>NAMES</code> 字段显示容器的名字，在启动容器时可以通过 <code>--name</code> 参数显示地为容器命名，
+如果不指定，docker 会自动为容器分配名字。</p>
+<p>对于容器的后续操作，我们需要通过 “长ID”、”短ID” 或者 “名称” 来指定要操作的容器。比如下面停止一个容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop 3d5ea3e73344</span><br></pre></td></tr></table></figure>
+
+<p>查看容器启动时候执行的所有命令，<code>docker history</code> 会显示镜像的构建历史，也就是 Dockerfile 的执行过程。
+注意前面讲的容器是一个层次结构，从底部向上面一层一层构建的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">history</span> httpd</span><br></pre></td></tr></table></figure>
+
+<h2 id="如果让一个容器长期运行"><a href="#如果让一个容器长期运行" class="headerlink" title="如果让一个容器长期运行"></a>如果让一个容器长期运行</h2><p>默认情况下，容器中运行的进程如果没有前台进程了或者所有的前台进程都运行完只剩下后台进程，则容器会退出。
+因为Docker容器仅在它的1号进程（PID为1）运行时，会保持运行。如果1号进程退出了，Docker容器也就退出了。</p>
+<p>有几种办法可以让容器长期运行：</p>
+<ol>
+<li>使用runit或supervisord这类进程管理器来运行进程</li>
+<li>通过指定一些运行参数将后台服务以前台进程方式运行，比如<code>nginx -g &#39;daemon off;&#39;</code>，<code>/usr/sbin/apache2 -D FOREGROUND</code></li>
+<li>如果运行自己的脚本，可最后添加 <code>exec /bin/bash</code>，启动容器时候<code>docker run -dit image</code>即可</li>
+</ol>
+<h2 id="进入容器方法"><a href="#进入容器方法" class="headerlink" title="进入容器方法"></a>进入容器方法</h2><p>我们经常需要进到容器里去做一些工作，比如查看日志、调试、启动其他进程等。有两种方法进入容器：attach 和 exec。</p>
+<p>attach 方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach long_id</span><br></pre></td></tr></table></figure>
+
+<p>exec方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it &lt;container&gt; bash|sh</span><br></pre></td></tr></table></figure>
+
+<p>attach 与 exec 主要区别如下:</p>
+<ol>
+<li>attach直接进入容器启动命令的终端，不会启动新的进程。</li>
+<li>exec 则是在容器中打开新的终端，并且可以启动新的进程。</li>
+<li>如果想直接在终端中查看启动命令的输出，用attach；其他情况使用 exec。</li>
+</ol>
+<p>如果只是为了查看启动命令的输出，可以使用 docker logs 命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs -f 3d5ea3e73344</span><br></pre></td></tr></table></figure>
+
+<p><code>-f</code> 的作用与 <code>tail -f</code> 类似，能够持续打印输出。</p>
+<p><strong>查看容器进程</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top busybox</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看容器端口映射</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker port busybox</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行容器最佳实践"><a href="#运行容器最佳实践" class="headerlink" title="运行容器最佳实践"></a>运行容器最佳实践</h2><p>按用途容器大致可分为两类：服务类容器和工具类的容器。</p>
+<p>1. 服务类容器以 daemon 的形式运行，对外提供服务。比如 web server，数据库等。
+通过 -d 以后台方式启动这类容器是非常合适的。如果要排查问题，可以通过 <code>exec -it</code> 进入容器。</p>
+<p>2. 工具类容器通常给能我们提供一个临时的工作环境，通常以 <code>run -it</code> 方式运行，比如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -it busybox</span><br><span class="line"></span><br><span class="line">/<span class="comment"># wget www.baidu.com</span></span><br><span class="line">/<span class="comment"># exit</span></span><br></pre></td></tr></table></figure>
+
+<p>运行 busybox，<code>run -it</code> 的作用是在容器启动后就直接进入。我们这里通过 wget 验证了在容器中访问 internet 的能力。
+执行 <code>exit</code> 退出终端，同时容器停止。</p>
+<p>工具类容器多使用基础镜像，例如 busybox、debian、ubuntu 等。</p>
+<h2 id="容器常用操作"><a href="#容器常用操作" class="headerlink" title="容器常用操作"></a>容器常用操作</h2><p>启动、停止、重启容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker stop boring_bardeen</span><br><span class="line">docker start boring_bardeen</span><br><span class="line">docker restart boring_bardeen</span><br></pre></td></tr></table></figure>
+
+<p>容器可能会因某种错误而停止运行。对于服务类容器，我们通常希望在这种情况下容器能够自动重启。
+启动容器时设置 –restart 就可以达到这个效果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --restart=always httpd</span><br></pre></td></tr></table></figure>
+
+<p>暂停容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pause boring_bardeen</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker20.png"></p>
+<p>处于暂停状态的容器不会占用 CPU 资源，直到通过 docker unpause 恢复运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker unpause boring_bardeen</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker21.png"></p>
+<p>删除容器</p>
+<p>使用 docker 一段时间后，host 上可能会有大量已经退出了的容器，
+状态为Exited，这些容器依然会占用 host 的文件系统资源，如果确认不会再重启此类容器，
+可以通过 docker rm 删除：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a |grep <span class="string">&quot;Exited&quot;</span></span><br><span class="line">docker <span class="built_in">rm</span> de97841fbc9e</span><br></pre></td></tr></table></figure>
+
+<p>docker rm 一次可以指定多个容器，如果希望批量删除所有已经退出的容器，可以执行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> -v $(docker ps -aq -f status=exited)</span><br></pre></td></tr></table></figure>
+
+<p>注意：<code>docker rm</code> 是删除容器，而 <code>docker rmi</code> 是删除镜像。</p>
+<h2 id="容器状态"><a href="#容器状态" class="headerlink" title="容器状态"></a>容器状态</h2><ol>
+<li><code>docker create</code> 创建的容器处于 Created 状态</li>
+<li><code>docker start</code> 将以后台方式启动容器，容器状态处于 Running 状态。</li>
+<li>实际上，<code>docker run</code> 命令是<code>docker create</code> 和 <code>docker start</code> 的组合</li>
+</ol>
+<h2 id="持久化容器"><a href="#持久化容器" class="headerlink" title="持久化容器"></a>持久化容器</h2><p>前面我讲过了如何利用Dockerfile再其他已有镜像基础上创建新的镜像了。
+这里再讲一下如何将运行中的容器进行持久化。</p>
+<h3 id="docker-commit"><a href="#docker-commit" class="headerlink" title="docker commit"></a>docker commit</h3><p>可以通过 <code>docker commit</code> 将一个运行中的容器变成一个新的镜像，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit &lt;containner-id&gt; image-name</span><br></pre></td></tr></table></figure>
+
+<h3 id="导出-Export"><a href="#导出-Export" class="headerlink" title="导出(Export)"></a>导出(Export)</h3><p><code>docker export</code> 命令用于持久化容器（不是镜像）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="built_in">export</span> &lt;CONTAINER ID&gt; &gt; /home/export.tar</span><br></pre></td></tr></table></figure>
+
+<p>导入容器得到新的镜像：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入export.tar文件</span></span><br><span class="line"><span class="built_in">cat</span> /home/export.tar | sudo docker import - busybox-1-export:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看镜像</span></span><br><span class="line">sudo docker images</span><br></pre></td></tr></table></figure>
+
+<h3 id="保存-Save"><a href="#保存-Save" class="headerlink" title="保存(Save)"></a>保存(Save)</h3><p>Save命令用于持久化镜像（不是容器）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker save image-name &gt; /home/save.tar</span><br></pre></td></tr></table></figure>
+
+<p>导入镜像得到新的镜像：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> <span class="comment"># 导入save.tar文件</span></span><br><span class="line">docker load &lt; /home/save.tar</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看镜像</span></span><br><span class="line">sudo docker images</span><br></pre></td></tr></table></figure>
+
+<h3 id="导出和保存的差别"><a href="#导出和保存的差别" class="headerlink" title="导出和保存的差别"></a>导出和保存的差别</h3><p>导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失历史和层(layer)。
+这意味着使用导出后再导入的方式，你将无法回滚到之前的层(layer)，同时，使用保存后再加载的方式持久化整个镜像，
+就可以做到层回滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 显示镜像的所有层(layer)</span></span><br><span class="line">docker <span class="built_in">history</span> image-name</span><br></pre></td></tr></table></figure>
+
+<h2 id="内存限额"><a href="#内存限额" class="headerlink" title="内存限额"></a>内存限额</h2><p>与操作系统类似，容器可使用的内存包括两部分：物理内存和 swap。Docker 通过下面两组参数来控制容器内存的使用量：</p>
+<ol>
+<li>-m 或 –memory：设置内存的使用限额，例如 100M, 2G。</li>
+<li>–memory-swap：设置 <code>内存+swap</code> 的使用限额。</li>
+</ol>
+<p>当我们执行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -m 200M --memory-swap=300M httpd</span><br></pre></td></tr></table></figure>
+
+<p>其含义是允许该容器最多使用 200M 的内存和 100M 的 swap。默认情况下，
+上面两组参数为 -1，即对容器内存和 swap 的使用没有限制。</p>
+<p>如果在启动容器时只指定 -m 而不指定 –memory-swap，那么 –memory-swap 默认为 -m 的两倍。</p>
+<h2 id="CPU限制"><a href="#CPU限制" class="headerlink" title="CPU限制"></a>CPU限制</h2><p>默认设置下，所有容器可以平等地使用 host CPU 资源并且没有限制。</p>
+<p>Docker 可以通过 <code>-c</code> 或 <code>--cpu-shares</code> 设置容器使用 CPU 的权重。如果不指定，默认值为 1024。</p>
+<p>与内存限额不同，通过 -c 设置的 cpu share 并不是 CPU 资源的绝对数量，而是一个相对的权重值。
+某个容器最终能分配到的 CPU 资源取决于它的 cpu share 占所有容器 cpu share 总和的比例。</p>
+<p>换句话说：通过 cpu share 可以设置容器使用 CPU 的优先级。</p>
+<p>比如在 host 中启动了两个容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name <span class="string">&quot;container_A&quot;</span> -c 1024 centos</span><br><span class="line">docker run --name <span class="string">&quot;container_B&quot;</span> -c 512 centos</span><br></pre></td></tr></table></figure>
+
+<p>container_A 的 cpu share 1024，是 container_B 的两倍。
+当两个容器都需要 CPU 资源时，container_A 可以得到的 CPU 是 container_B 的两倍。</p>
+<h2 id="磁盘IO限制"><a href="#磁盘IO限制" class="headerlink" title="磁盘IO限制"></a>磁盘IO限制</h2><p>Block IO 是另一种可以限制容器使用的资源。Block IO 指的是磁盘的读写，
+docker 可通过设置权重、限制 bps 和 iops 的方式控制容器读写磁盘的带宽，下面分别讨论。</p>
+<p>注：目前 Block IO 限额只对 direct IO（不使用文件缓存）有效。</p>
+<p>默认情况下，所有容器能平等地读写磁盘，可以通过设置 <code>--blkio-weight</code> 参数来改变容器 block IO 的优先级。</p>
+<p><code>--blkio-weight</code> 与 <code>--cpu-shares</code> 类似，设置的是相对权重值，默认为 500。
+在下面的例子中，container_A 读写磁盘的带宽是 container_B 的两倍：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --name container_A --blkio-weight 600 centos   </span><br><span class="line">docker run -it --name container_B --blkio-weight 300 centos</span><br></pre></td></tr></table></figure>
+
+<p><strong>限制 bps 和 iops</strong></p>
+<ul>
+<li>bps 是 byte per second，每秒读写的数据量。</li>
+<li>iops 是 io per second，每秒 IO 的次数。</li>
+</ul>
+<p>可通过以下参数控制容器的 bps 和 iops：</p>
+<ol>
+<li>–device-read-bps，限制读某个设备的 bps。</li>
+<li>–device-write-bps，限制写某个设备的 bps。</li>
+<li>–device-read-iops，限制读某个设备的 iops。</li>
+<li>–device-write-iops，限制写某个设备的 iops。</li>
+</ol>
+<p>下面这个例子限制容器写 &#x2F;dev&#x2F;sda 的速率为 30 MB&#x2F;s ：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --device-write-bps /dev/sda:30MB centos</span><br></pre></td></tr></table></figure>
+
+<h2 id="容器底层技术"><a href="#容器底层技术" class="headerlink" title="容器底层技术"></a>容器底层技术</h2><p>cgroup 和 namespace 是最重要的两种技术。cgroup 实现资源限额， namespace 实现资源隔离。</p>
+<p><strong>cgroup</strong></p>
+<p>cgroup 全称 Control Group。Linux 操作系统通过 cgroup 可以设置进程使用 CPU、内存 和 IO 资源的限额。
+前面我们看到的 <code>--cpu-shares</code>、<code>-m</code>、<code>--device-write-bps</code> 实际上就是在配置 cgroup。</p>
+<p><strong>namespace</strong></p>
+<p>在每个容器中，我们都可以看到文件系统，网卡等资源，这些资源看上去是容器自己的。
+拿网卡来说，每个容器都会认为自己有一块独立的网卡，即使 host 上只有一块物理网卡。这种方式非常好，它使得容器更像一个独立的计算机。</p>
+<p>Linux 实现这种方式的技术是 namespace。namespace 管理着 host 中全局唯一的资源，并可以让每个容器都觉得只有自己在使用它。
+换句话说，namespace 实现了容器间资源的隔离。</p>
+<p>Linux 使用了六种 namespace，分别对应六种资源：Mount、UTS、IPC、PID、Network 和 User。</p>
+<h3 id="Mount-namespace"><a href="#Mount-namespace" class="headerlink" title="Mount namespace"></a>Mount namespace</h3><p>Mount namespace 让容器看上去拥有整个文件系统。</p>
+<p>容器有自己的 &#x2F; 目录，可以执行 mount 和 umount 命令。当然我们知道这些操作只在当前容器中生效，不会影响到 host 和其他容器。</p>
+<h3 id="UTS-namespace"><a href="#UTS-namespace" class="headerlink" title="UTS namespace"></a>UTS namespace</h3><p>UTS namespace 让容器有自己的 hostname。默认情况下，容器的 hostname 是它的短ID，可以通过 -h 或 –hostname 参数设置。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -h xnhost -it centos</span><br></pre></td></tr></table></figure>
+
+<h3 id="IPC-namespace"><a href="#IPC-namespace" class="headerlink" title="IPC namespace"></a>IPC namespace</h3><p>IPC namespace 让容器拥有自己的共享内存和信号量（semaphore）来实现进程间通信，而不会与 host 和其他容器的 IPC 混在一起。</p>
+<h3 id="PID-namespace"><a href="#PID-namespace" class="headerlink" title="PID namespace"></a>PID namespace</h3><p>所有容器的进程都挂在 dockerd 进程下，同时也可以看到容器自己的子进程。
+如果我们进入到某个容器，ps 就只能看到自己的进程了。
+容器拥有自己独立的一套 PID，这就是 PID namespace 提供的功能。</p>
+<h3 id="Network-namespace"><a href="#Network-namespace" class="headerlink" title="Network namespace"></a>Network namespace</h3><p>Network namespace 让容器拥有自己独立的网卡、IP、路由等资源。我们会在后面网络章节详细讨论。</p>
+<h3 id="User-namespace"><a href="#User-namespace" class="headerlink" title="User namespace"></a>User namespace</h3><p>User namespace 让容器能够管理自己的用户，host 不能看到容器中创建的用户。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker05.html" rel="prev" title="Docker每天学一点05 - Registry">
+                  <i class="fa fa-angle-left"></i> Docker每天学一点05 - Registry
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker07.html" rel="next" title="Docker每天学一点07 - 单主机网络">
+                  Docker每天学一点07 - 单主机网络 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

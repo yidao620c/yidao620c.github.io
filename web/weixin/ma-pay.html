@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="根据微信支付的官方文档，小程序支付需要绑定商户号，并且小程序和商户号的认证主体必须一致。 目前我们的商业逻辑是小程序平台主体和支付的商户主体不一致， 那么就需要从我们的小程序跳转到支付主体小程序完成支付后，再返回我们的小程序。 曾经尝试过在小程序中通过webview的方式嵌套H5网页，使用公众号支付方式，后来发现小程序并未开放这个JSAPI。 接下来详细介绍一下如何实现小程序之间的跳转支付。 首先">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小程序开发 - 跳转支付">
+<meta property="og:url" content="http://yidao620c.github.io/web/weixin/ma-pay.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="根据微信支付的官方文档，小程序支付需要绑定商户号，并且小程序和商户号的认证主体必须一致。 目前我们的商业逻辑是小程序平台主体和支付的商户主体不一致， 那么就需要从我们的小程序跳转到支付主体小程序完成支付后，再返回我们的小程序。 曾经尝试过在小程序中通过webview的方式嵌套H5网页，使用公众号支付方式，后来发现小程序并未开放这个JSAPI。 接下来详细介绍一下如何实现小程序之间的跳转支付。 首先">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma001.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma003.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma002.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma004.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma005.png">
+<meta property="article:published_time" content="2017-12-13T01:30:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.389Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="小程序">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/ma001.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/web/weixin/ma-pay.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/web/weixin/ma-pay.html","path":"web/weixin/ma-pay.html","title":"小程序开发 - 跳转支付"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>小程序开发 - 跳转支付 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%A5%E5%85%A5%E5%BE%AE%E4%BF%A1%E6%94%AF%E4%BB%98"><span class="nav-number">1.</span> <span class="nav-text">接入微信支付</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E8%B7%B3%E8%BD%AC"><span class="nav-number">2.</span> <span class="nav-text">小程序跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%A8%8B%E5%BA%8F%E6%94%AF%E4%BB%98"><span class="nav-number">3.</span> <span class="nav-text">小程序支付</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/web/weixin/ma-pay.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="小程序开发 - 跳转支付 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小程序开发 - 跳转支付
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-13 09:30:22" itemprop="dateCreated datePublished" datetime="2017-12-13T09:30:22+08:00">2017-12-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>根据微信支付的官方文档，小程序支付需要绑定商户号，并且小程序和商户号的认证主体必须一致。
+目前我们的商业逻辑是小程序平台主体和支付的商户主体不一致，
+那么就需要从我们的小程序跳转到支付主体小程序完成支付后，再返回我们的小程序。</p>
+<p>曾经尝试过在小程序中通过webview的方式嵌套H5网页，使用公众号支付方式，后来发现小程序并未开放这个JSAPI。</p>
+<p>接下来详细介绍一下如何实现小程序之间的跳转支付。</p>
+<p>首先我已经有了2个小程序：</p>
+<ol>
+<li>平台小程序A，认证主体是A公司</li>
+<li>支付小程序B，认证主体是B公司</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="接入微信支付"><a href="#接入微信支付" class="headerlink" title="接入微信支付"></a>接入微信支付</h2><p>支付小程序B要接入微信支付，必须要先注册并认证微信公众号，然后申请服务商商户，
+具体怎么申请参考<a target="_blank" rel="noopener" href="https://pay.weixin.qq.com/partner/public/home">微信支付服务商平台</a></p>
+<p>然后登录<a href="mp.weixin.qq.com">小程序后台</a>，点击左侧导航栏的微信支付，在页面中进行开通。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma001.png"></p>
+<p>点击开通按钮后，有2种方式可以获取微信支付能力，新申请微信支付商户号或绑定一个已有的微信支付商户号，
+请根据你的业务需要和具体情况选择，只能二选一。</p>
+<p>开通指引：<a target="_blank" rel="noopener" href="http://kf.qq.com/faq/140225MveaUz161230yqiIby.html">http://kf.qq.com/faq/140225MveaUz161230yqiIby.html</a></p>
+<p>小程序支付开发注意点：</p>
+<ul>
+<li>appid 必须为最后拉起收银台的小程序appid；</li>
+<li>mch_id 为和appid成对绑定的支付商户号，收款资金会进入该商户号；</li>
+<li>trade_type 请填写JSAPI；</li>
+<li>openid 为appid对应的用户标识，即使用wx.login接口获得的openid</li>
+</ul>
+<h2 id="小程序跳转"><a href="#小程序跳转" class="headerlink" title="小程序跳转"></a>小程序跳转</h2><p>参考官方文档<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/debug/wxadoc/dev/api/navigateToMiniProgram.html">打开小程序</a></p>
+<p><code>wx.navigateToMiniProgram(OBJECT)</code>，打开同一公众号下关联的另一个小程序。（注：必须是同一公众号下，而非同个open账号下）</p>
+<p>所以第一步要将两个小程序关联到同一个公众号上面去，这里一般都会关联到平台的公众号上去。
+关联操作需要从公众号发起，请登录公众平台上公众号的管理后台，在”设置-公众号设置-相关小程序”中进行关联。</p>
+<p>然后小程序的管理员会受到一条微信消息，点击进去同意即可。之后再进入小程序后台，就能看到小程序所关联的公众号了：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma003.png"></p>
+<p>小程序A跳转到B的示例代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">wx.<span class="title function_">navigateToMiniProgram</span>(&#123;</span><br><span class="line">    <span class="attr">appId</span>: <span class="string">&#x27;APPID&#x27;</span>,</span><br><span class="line">    <span class="attr">path</span>: <span class="string">&#x27;pages/index/index?id=123&#x27;</span>,</span><br><span class="line">    <span class="attr">extraData</span>: &#123;</span><br><span class="line">        <span class="attr">foo</span>: <span class="string">&#x27;bar&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">envVersion</span>: <span class="string">&#x27;develop&#x27;</span>,</span><br><span class="line">    <span class="title function_">success</span>(<span class="params">res</span>) &#123;</span><br><span class="line">        <span class="comment">// 打开成功</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>同时还可以给小程序B传递参数，通过<code>extraData</code>这个参数，小程序B接受参数的方法：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">App</span>(&#123;</span><br><span class="line">  <span class="attr">onLaunch</span>: <span class="keyword">function</span>(<span class="params">options</span>) &#123;</span><br><span class="line">    wx.<span class="title function_">setStorageSync</span>(<span class="string">&#x27;fromAppId&#x27;</span>, options.<span class="property">referrerInfo</span>.<span class="property">appId</span>)</span><br><span class="line">    wx.<span class="title function_">setStorageSync</span>(<span class="string">&#x27;foo&#x27;</span>, options.<span class="property">referrerInfo</span>.<span class="property">extraData</span>.<span class="property">foo</span>)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">onShow</span>: <span class="keyword">function</span>(<span class="params">options</span>) &#123;</span><br><span class="line">      <span class="comment">// Do something when show.</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">onHide</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">      <span class="comment">// Do something when hide.</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">onError</span>: <span class="keyword">function</span>(<span class="params">msg</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(msg)</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">globalData</span>: <span class="string">&#x27;I am global data&#x27;</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>小程序B处理完成后返回小程序A的方式：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;支付成功啦啦啦啦。。。。。&#x27;</span>)</span><br><span class="line">wx.<span class="title function_">navigateBackMiniProgram</span>(&#123;</span><br><span class="line">    <span class="attr">extraData</span>: &#123;</span><br><span class="line">        <span class="attr">payResult</span>: <span class="string">&#x27;good&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="title function_">success</span>(<span class="params">res</span>) &#123;</span><br><span class="line">        <span class="comment">// 打开成功</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>然后小程序A在<code>App.js</code>中接受到返回值：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">onShow</span>: <span class="keyword">function</span> (<span class="params">options</span>) &#123;</span><br><span class="line">    wx.<span class="title function_">setStorageSync</span>(<span class="string">&#x27;payResult&#x27;</span>, options.<span class="property">referrerInfo</span>.<span class="property">extraData</span>.<span class="property">payResult</span>)</span><br><span class="line">&#125;</span><br><span class="line">,</span><br></pre></td></tr></table></figure>
+
+<p>然后在相应的页面就能处理结果值了，这里还是用onShow函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">onShow</span>: <span class="keyword">function</span> (<span class="params">options</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="title function_">setData</span>(&#123;</span><br><span class="line">        <span class="string">&#x27;lalala&#x27;</span>: wx.<span class="title function_">getStorageSync</span>(<span class="string">&#x27;payResult&#x27;</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">,</span><br></pre></td></tr></table></figure>
+
+<h2 id="小程序支付"><a href="#小程序支付" class="headerlink" title="小程序支付"></a>小程序支付</h2><p>小程序B需要实现微信支付功能，还需要有一个后端系统，我这里通过一个SpringBoot工程搭建后端系统，
+另外引入一个微信支付的依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.binarywang<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>weixin-java-pay<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;weixin-java-pay.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>主要的逻辑是这样：</p>
+<ol>
+<li>小程序向服务端发送商品详情、金额、openid</li>
+<li>服务端向微信统一下单</li>
+<li>服务器收到返回信息二次签名发回给小程序</li>
+<li>小程序发起支付</li>
+<li>服务端收到回调</li>
+</ol>
+<p>这里需要注意的是，小程序调用后台接口的地址需要在小程序后台配置好服务器域名：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma002.png"></p>
+<p>服务器域名只能是https开头，所以需要先去给你的网站申请一个SSL证书，配置一下nginx来代理转发即可，
+比如我的域名为<code>https://aggrepay.enzhico.cn/</code>，这里我申请的是lets encrypted证书：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">443</span> ssl;</span><br><span class="line">    <span class="attribute">server_name</span> aggrepay.enzhico.cn;</span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">proxy_redirect</span> <span class="literal">off</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> <span class="string">&#x27;Access-Control-Allow-Origin&#x27;</span> <span class="string">&#x27;*&#x27;</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> <span class="string">&#x27;Access-Control-Allow-Credentials&#x27;</span> <span class="string">&#x27;true&#x27;</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> <span class="string">&#x27;Access-Control-Allow-Headers&#x27;</span> <span class="string">&#x27;Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,X-Requested-With&#x27;</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> <span class="string">&#x27;Access-Control-Allow-Methods&#x27;</span> <span class="string">&#x27;GET,POST,OPTIONS&#x27;</span>;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://119.29.12.177:8086/;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># letsencrypt生成的文件</span></span><br><span class="line">    <span class="attribute">ssl_certificate</span> /etc/letsencrypt/live/aggrepay.enzhico.cn/fullchain.pem;</span><br><span class="line">    <span class="attribute">ssl_certificate_key</span> /etc/letsencrypt/live/aggrepay.enzhico.cn/privkey.pem;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">ssl_session_timeout</span> <span class="number">1d</span>;</span><br><span class="line">    <span class="attribute">ssl_session_cache</span> shared:SSL:<span class="number">50m</span>;</span><br><span class="line">    <span class="attribute">ssl_session_tickets</span> <span class="literal">on</span>;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">ssl_dhparam</span> /etc/ssl/private/dhparam.pem;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">ssl_protocols</span> TLSv1 TLSv1.<span class="number">1</span> TLSv1.<span class="number">2</span>;</span><br><span class="line">    <span class="comment"># 一般推荐使用的ssl_ciphers值: https://wiki.mozilla.org/Security/Server_Side_TLS</span></span><br><span class="line">    <span class="attribute">ssl_ciphers</span> <span class="string">&#x27;ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128:AES256:AES:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK&#x27;</span>;</span><br><span class="line">    <span class="attribute">ssl_prefer_server_ciphers</span> <span class="literal">on</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>设置完服务器后，就将后台应用部署上去。</p>
+<p>回到小程序B中，先要获取到用户openid，小程序是通过登录操作获取到用户的openid的。</p>
+<p>参考官方的<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/debug/wxadoc/dev/api/api-login.html">小程序登录API</a></p>
+<p>很重要的一张登录时序图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma004.png"></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">  <span class="attr">onLoad</span>: <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> that = <span class="variable language_">this</span></span><br><span class="line">    <span class="comment">//登陆获取code</span></span><br><span class="line">    wx.<span class="title function_">login</span>(&#123;</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">res</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;code = &quot;</span> + res.<span class="property">code</span>)</span><br><span class="line">            <span class="comment">//获取openid</span></span><br><span class="line">            that.<span class="title function_">getOpenId</span>(res.<span class="property">code</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line">,</span><br><span class="line"><span class="attr">getOpenId</span>: <span class="keyword">function</span> (<span class="params">code</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> that = <span class="variable language_">this</span>;</span><br><span class="line">    wx.<span class="title function_">request</span>(&#123;</span><br><span class="line">        <span class="attr">url</span>: <span class="string">&quot;https://aggrepay.enzhico.cn/pay/openid?code=&quot;</span> + code,</span><br><span class="line">        <span class="attr">data</span>: &#123;&#125;,</span><br><span class="line">        <span class="attr">method</span>: <span class="string">&#x27;GET&#x27;</span>,</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">res</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;res.openid = &quot;</span> + res.<span class="property">data</span>.<span class="property">openid</span>)</span><br><span class="line">            that.<span class="title function_">generateOrder</span>(res.<span class="property">data</span>.<span class="property">openid</span>)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">fail</span>: <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">            <span class="comment">// fail</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">complete</span>: <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">            <span class="comment">// complete</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">,</span><br></pre></td></tr></table></figure>
+
+<p>对应后台代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * get openid</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 成功标准</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RequestMapping(value = &quot;/openid&quot;, method = RequestMethod.GET)</span></span><br><span class="line"><span class="meta">@ResponseBody</span></span><br><span class="line"><span class="keyword">public</span> String <span class="title function_">openid</span><span class="params">(<span class="meta">@RequestParam(value = &quot;code&quot;)</span> String code)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    logger.info(<span class="string">&quot;/openid start....&quot;</span>);</span><br><span class="line">    <span class="type">CloseableHttpClient</span> <span class="variable">httpclient</span> <span class="operator">=</span> HttpClients.createDefault();</span><br><span class="line">    <span class="type">HttpGet</span> <span class="variable">httpGet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpGet</span>(<span class="string">&quot;https://api.weixin.qq.com/sns/jscode2session?&quot;</span> +</span><br><span class="line">            <span class="string">&quot;appid=APPID&amp;secret=SECRET&amp;js_code=&quot;</span> + code + <span class="string">&quot;&amp;grant_type=authorization_code&quot;</span>);</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">CloseableHttpResponse</span> <span class="variable">response1</span> <span class="operator">=</span> httpclient.execute(httpGet)) &#123;</span><br><span class="line">        logger.info(response1.getStatusLine().toString());</span><br><span class="line">        <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> EntityUtils.toString(response1.getEntity(), StandardCharsets.UTF_8);</span><br><span class="line">        logger.info(<span class="string">&quot;result=&quot;</span> + result);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取到openid后就可以调用统一下单接口了：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">/**生成商户订单 */</span></span><br><span class="line"><span class="attr">generateOrder</span>: <span class="keyword">function</span> (<span class="params">openid</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> that = <span class="variable language_">this</span></span><br><span class="line">    <span class="comment">//统一支付</span></span><br><span class="line">    wx.<span class="title function_">request</span>(&#123;</span><br><span class="line">        <span class="attr">url</span>: <span class="string">&#x27;https://aggrepay.enzhico.cn/pay/unifiedOrder&#x27;</span>,</span><br><span class="line">        <span class="attr">method</span>: <span class="string">&#x27;POST&#x27;</span>,</span><br><span class="line">        <span class="attr">data</span>: &#123;</span><br><span class="line">            <span class="attr">outTradeNo</span>: <span class="title class_">Math</span>.<span class="title function_">random</span>().<span class="title function_">toString</span>(<span class="number">36</span>).<span class="title function_">substring</span>(<span class="number">7</span>),</span><br><span class="line">            <span class="attr">totalFee</span>: <span class="string">&#x27;7&#x27;</span>,</span><br><span class="line">            <span class="attr">body</span>: <span class="string">&#x27;支付测试&#x27;</span>,</span><br><span class="line">            <span class="attr">attach</span>: <span class="string">&#x27;云塔山香烟&#x27;</span>,</span><br><span class="line">            <span class="attr">spbillCreateIp</span>: <span class="string">&#x27;123.267.12.2&#x27;</span>,</span><br><span class="line">            <span class="attr">notifyURL</span>: <span class="string">&#x27;https://aggrepay.enzhico.cn/pay/parseOrderNotifyResult&#x27;</span>,</span><br><span class="line">            <span class="attr">tradeType</span>: <span class="string">&#x27;JSAPI&#x27;</span>,</span><br><span class="line">            <span class="attr">openid</span>: openid</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">res</span>) &#123;</span><br><span class="line">            <span class="comment">//发起支付</span></span><br><span class="line">            <span class="keyword">var</span> timeStamp = res.<span class="property">data</span>.<span class="property">timeStamp</span>;</span><br><span class="line">            <span class="keyword">var</span> packages = <span class="string">&#x27;prepay_id=&#x27;</span> + res.<span class="property">data</span>.<span class="property">prepayId</span>;</span><br><span class="line">            <span class="keyword">var</span> paySign = res.<span class="property">data</span>.<span class="property">sign</span>;</span><br><span class="line">            <span class="keyword">var</span> nonceStr = res.<span class="property">data</span>.<span class="property">nonceStr</span>;</span><br><span class="line">            <span class="keyword">var</span> param = &#123;</span><br><span class="line">                <span class="string">&quot;timeStamp&quot;</span>: timeStamp,</span><br><span class="line">                <span class="string">&quot;package&quot;</span>: packages,</span><br><span class="line">                <span class="string">&quot;paySign&quot;</span>: paySign,</span><br><span class="line">                <span class="string">&quot;signType&quot;</span>: <span class="string">&quot;MD5&quot;</span>,</span><br><span class="line">                <span class="string">&quot;nonceStr&quot;</span>: nonceStr</span><br><span class="line">            &#125;;</span><br><span class="line">            that.<span class="title function_">pay</span>(param)</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line">,</span><br></pre></td></tr></table></figure>
+
+<p>对应后台代码，注意二次签名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 统一下单(详见https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1)</span></span><br><span class="line"><span class="comment"> * 在发起微信支付前，需要调用统一下单接口，获取&quot;预支付交易会话标识&quot;</span></span><br><span class="line"><span class="comment"> * 接口地址：https://api.mch.weixin.qq.com/pay/unifiedorder</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> request 请求对象，注意一些参数如appid、mchid等不用设置，方法内会自动从配置对象中获取到（前提是对应配置中已经设置）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@PostMapping(&quot;/unifiedOrder&quot;)</span></span><br><span class="line"><span class="keyword">public</span> WxPayMpOrderResultVO <span class="title function_">unifiedOrder2</span><span class="params">(<span class="meta">@RequestBody</span> WxPayUnifiedOrderRequest request)</span> <span class="keyword">throws</span> WxPayException &#123;</span><br><span class="line">    <span class="type">WxPayUnifiedOrderResult</span> <span class="variable">result</span> <span class="operator">=</span>  <span class="built_in">this</span>.wxService.unifiedOrder(request);</span><br><span class="line">    logger.info(result.getReturnMsg());</span><br><span class="line">    <span class="type">String</span> <span class="variable">signType</span> <span class="operator">=</span> WxPayConstants.SignType.MD5;</span><br><span class="line">    <span class="type">WxPayMpOrderResultVO</span> <span class="variable">payResult</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WxPayMpOrderResultVO</span>();</span><br><span class="line">    payResult.setAppId(result.getAppid());</span><br><span class="line">    payResult.setTimeStamp(String.valueOf(System.currentTimeMillis() / <span class="number">1000</span>));</span><br><span class="line">    payResult.setNonceStr(result.getNonceStr());</span><br><span class="line">    payResult.setPackageValue(<span class="string">&quot;prepay_id=&quot;</span> + result.getPrepayId());</span><br><span class="line">    payResult.setSignType(signType);</span><br><span class="line">    payResult.setPrepayId(result.getPrepayId());</span><br><span class="line">    <span class="comment">// 二次签名</span></span><br><span class="line">    payResult.setSign(createSign(payResult, <span class="built_in">this</span>.wxService.getConfig().getMchKey()));</span><br><span class="line">    <span class="keyword">return</span> payResult;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 下面是我自己写的签名，最好调用框架的签名方法</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> String <span class="title function_">createSign</span><span class="params">(WxPayMpOrderResultVO p, String mchKey)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">tosstr</span> <span class="operator">=</span> <span class="string">&quot;appId=&quot;</span>+p.getAppId()+<span class="string">&quot;&amp;nonceStr=&quot;</span>+p.getNonceStr()+<span class="string">&quot;&amp;package=&quot;</span>+p.getPackageValue()</span><br><span class="line">            +<span class="string">&quot;&amp;signType=MD5&amp;timeStamp=&quot;</span>+p.getTimeStamp()+<span class="string">&quot;&amp;key=&quot;</span> + mchKey;</span><br><span class="line">    logger.info(tosstr);</span><br><span class="line">    <span class="keyword">return</span> DigestUtils.md5Hex(tosstr).toUpperCase();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>拿到预支付订单后，小程序B就能调用支付了，支付成功后返回到小程序A中，并将支付结果通过<code>extraData</code>参数回传过去：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 支付   */</span></span><br><span class="line"><span class="attr">pay</span>: <span class="keyword">function</span> (<span class="params">param</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;支付&quot;</span>)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(param)</span><br><span class="line">    wx.<span class="title function_">requestPayment</span>(&#123;</span><br><span class="line">        <span class="string">&#x27;timeStamp&#x27;</span>: param.<span class="property">timeStamp</span>,</span><br><span class="line">        <span class="string">&#x27;nonceStr&#x27;</span>: param.<span class="property">nonceStr</span>,</span><br><span class="line">        <span class="string">&#x27;package&#x27;</span>: param.<span class="property">package</span>,</span><br><span class="line">        <span class="string">&#x27;signType&#x27;</span>: param.<span class="property">signType</span>,</span><br><span class="line">        <span class="string">&#x27;paySign&#x27;</span>: param.<span class="property">paySign</span>,</span><br><span class="line">        <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">res</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;支付成功啦啦啦啦。。。。。&#x27;</span>)</span><br><span class="line">            wx.<span class="title function_">navigateBackMiniProgram</span>(&#123;</span><br><span class="line">                <span class="attr">extraData</span>: &#123;</span><br><span class="line">                    <span class="attr">payResult</span>: <span class="string">&#x27;good&#x27;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="title function_">success</span>(<span class="params">res</span>) &#123;</span><br><span class="line">                    <span class="comment">// 打开成功</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">fail</span>: <span class="keyword">function</span> (<span class="params">res</span>) &#123;</span><br><span class="line">            <span class="comment">// fail</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">complete</span>: <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">            <span class="comment">// complete</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>小程序的跳转需要上线版本才能看到效果，所以需要把代码上传后，提交上线审核。
+登录小程序后台，点击”开发管理”，在下面的开发版本中点击提交审核，一般半天左右审核完成。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ma005.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B0%8F%E7%A8%8B%E5%BA%8F/" rel="tag"># 小程序</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/web/weixin/ma-webview.html" rel="prev" title="小程序开发 - webview">
+                  <i class="fa fa-angle-left"></i> 小程序开发 - webview
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/web/weixin/ma-websocket.html" rel="next" title="小程序开发 - websocket">
+                  小程序开发 - websocket <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="REST，即Representational State Transfer的缩写，对这个词组的翻译是表现层状态转化。 RESTful是一种软件设计风格，就是目前最流行的一种互联网软件架构。它结构清晰、符合标准、易于理解、扩展方便，所以正得到越来越多网站的采用。 SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot系列 - 实现RESTful接口">
+<meta property="og:url" content="http://yidao620c.github.io/java/springboot/sb-restful.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="REST，即Representational State Transfer的缩写，对这个词组的翻译是表现层状态转化。 RESTful是一种软件设计风格，就是目前最流行的一种互联网软件架构。它结构清晰、符合标准、易于理解、扩展方便，所以正得到越来越多网站的采用。 SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-07-05T04:10:37.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:48:09.315Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="spring">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/springboot/sb-restful.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/springboot/sb-restful.html","path":"java/springboot/sb-restful.html","title":"SpringBoot系列 - 实现RESTful接口"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SpringBoot系列 - 实现RESTful接口 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%A0%E4%B8%AA%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.</span> <span class="nav-text">几个注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API%E8%AE%BE%E8%AE%A1"><span class="nav-number">2.</span> <span class="nav-text">API设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E4%BD%93%E5%AE%9A%E4%B9%89"><span class="nav-number">3.</span> <span class="nav-text">实体定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Controller%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">Controller实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GitHub%E6%BA%90%E7%A0%81"><span class="nav-number">6.</span> <span class="nav-text">GitHub源码</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/springboot/sb-restful.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SpringBoot系列 - 实现RESTful接口 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot系列 - 实现RESTful接口
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-07-05 12:10:37" itemprop="dateCreated datePublished" datetime="2017-07-05T12:10:37+08:00">2017-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>REST，即Representational State Transfer的缩写，对这个词组的翻译是<code>表现层状态转化</code>。</p>
+<p>RESTful是一种软件设计风格，就是目前最流行的一种互联网软件架构。它结构清晰、符合标准、易于理解、扩展方便，所以正得到越来越多网站的采用。</p>
+<p>SpringMVC对RESTful风格的接口有着天然的支持，本篇将讲述如何在SpringBoot中怎样写。</p>
+<span id="more"></span>
+
+<h2 id="几个注解"><a href="#几个注解" class="headerlink" title="几个注解"></a>几个注解</h2><p>在讲述使用之前，想要理解SpringMVC的几个常用注解：</p>
+<ol>
+<li>@Controller：修饰class，用来创建处理http请求的对象</li>
+<li></li>
+</ol>
+<p>@RestController：Spring4之后加入的注解，原来在@Controller中返回json需要@ResponseBody来配合，如果直接用@RestController替代@Controller就不需要再配置@ResponseBody，默认返回json格式。</p>
+<ol>
+<li>@RequestMapping：配置url映射</li>
+<li>@PostMapping: 这个是@RequestMapping+POST方法的简写</li>
+<li>@RequestHeader: 请求Header参数</li>
+<li>@PathVariable: URL路径参数，比如&#x2F;user&#x2F;{id}中的id参数</li>
+<li>@RequestParam: URL请求参数，比如&#x2F;user?id&#x3D;1中的id参数</li>
+<li>@RequestBody: 请求Body参数</li>
+</ol>
+<p>下面我们尝试使用Spring MVC来实现一组对User对象操作的RESTful API，配合注释详细说明在Spring MVC中如何映射HTTP请求、如何传参、如何编写单元测试。</p>
+<h2 id="API设计"><a href="#API设计" class="headerlink" title="API设计"></a>API设计</h2><p>RESTful API具体设计如下：</p>
+<table>
+<thead>
+<tr>
+<th>请求类型</th>
+<th>URL</th>
+<th>功能说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td>&#x2F;users</td>
+<td>查询用户列表</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>&#x2F;users</td>
+<td>创建一个用户</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>&#x2F;users&#x2F;{id}</td>
+<td>根据id查询用户</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>&#x2F;users&#x2F;{id}</td>
+<td>根据id更新用户</td>
+</tr>
+<tr>
+<td>DELTE</td>
+<td>&#x2F;users&#x2F;{id}</td>
+<td>更加id删除用户</td>
+</tr>
+</tbody></table>
+<p>RESTful架构有一些典型的设计误区，就是URI包含动词。因为”资源”表示一种实体，所以应该是名词，URI不应该有动词，动词应该放在HTTP协议中。
+上面设计的API的URI中都是名词。</p>
+<h2 id="实体定义"><a href="#实体定义" class="headerlink" title="实体定义"></a>实体定义</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="comment">// 下面省略getter/setter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Controller实现"><a href="#Controller实现" class="headerlink" title="Controller实现"></a>Controller实现</h2><p>接下来就可以编写RestController了，这里为了演示，会将数据保存到内存Map中，实际使用肯定是保存到数据库中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 接口类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(value = &quot;/users&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">_logger</span> <span class="operator">=</span> LoggerFactory.getLogger(UserController.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建线程安全的Map</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;Long, User&gt; users = Collections.synchronizedMap(<span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;Long, User&gt;());</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/&quot;, method = RequestMethod.GET)</span></span><br><span class="line">    <span class="keyword">public</span> BaseResponse&lt;List&lt;User&gt;&gt; <span class="title function_">getUserList</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 处理&quot;/users/&quot;的GET请求，用来获取用户列表</span></span><br><span class="line">        <span class="comment">// 还可以通过@RequestParam从页面中传递参数来进行查询条件或者翻页信息的传递</span></span><br><span class="line">        List&lt;User&gt; r = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(users.values());</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseResponse</span>&lt;&gt;(<span class="literal">true</span>, <span class="string">&quot;查询列表成功&quot;</span>, r);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/&quot;, method = RequestMethod.POST)</span></span><br><span class="line">    <span class="keyword">public</span> BaseResponse&lt;String&gt; <span class="title function_">postUser</span><span class="params">(<span class="meta">@ModelAttribute</span> User user)</span> &#123;</span><br><span class="line">        <span class="comment">// 处理&quot;/users/&quot;的POST请求，用来创建User</span></span><br><span class="line">        <span class="comment">// 除了@ModelAttribute绑定参数之外，还可以通过@RequestParam从页面中传递参数</span></span><br><span class="line">        users.put(user.getId(), user);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseResponse</span>&lt;&gt;(<span class="literal">true</span>, <span class="string">&quot;新增成功&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/&#123;id&#125;&quot;, method = RequestMethod.GET)</span></span><br><span class="line">    <span class="keyword">public</span> BaseResponse&lt;User&gt; <span class="title function_">getUser</span><span class="params">(<span class="meta">@PathVariable</span> Long id)</span> &#123;</span><br><span class="line">        <span class="comment">// 处理&quot;/users/&#123;id&#125;&quot;的GET请求，用来获取url中id值的User信息</span></span><br><span class="line">        <span class="comment">// url中的id可通过@PathVariable绑定到函数的参数中</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseResponse</span>&lt;&gt;(<span class="literal">true</span>, <span class="string">&quot;查询成功&quot;</span>, users.get(id));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/&#123;id&#125;&quot;, method = RequestMethod.PUT)</span></span><br><span class="line">    <span class="keyword">public</span> BaseResponse&lt;String&gt; <span class="title function_">putUser</span><span class="params">(<span class="meta">@PathVariable</span> Long id, <span class="meta">@ModelAttribute</span> User user)</span> &#123;</span><br><span class="line">        <span class="comment">// 处理&quot;/users/&#123;id&#125;&quot;的PUT请求，用来更新User信息</span></span><br><span class="line">        <span class="type">User</span> <span class="variable">u</span> <span class="operator">=</span> users.get(id);</span><br><span class="line">        u.setName(user.getName());</span><br><span class="line">        u.setAge(user.getAge());</span><br><span class="line">        users.put(id, u);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseResponse</span>&lt;&gt;(<span class="literal">true</span>, <span class="string">&quot;更新成功&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(value = &quot;/&#123;id&#125;&quot;, method = RequestMethod.DELETE)</span></span><br><span class="line">    <span class="keyword">public</span> BaseResponse&lt;String&gt; <span class="title function_">deleteUser</span><span class="params">(<span class="meta">@PathVariable</span> Long id)</span> &#123;</span><br><span class="line">        <span class="comment">// 处理&quot;/users/&#123;id&#125;&quot;的DELETE请求，用来删除User</span></span><br><span class="line">        users.remove(id);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">BaseResponse</span>&lt;&gt;(<span class="literal">true</span>, <span class="string">&quot;删除成功&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>接下来就是写一个测试来测一下，SpringMVC的内置测试支持非常方便。</p>
+<p>先写一个json和对象之间相互转化的工具类，使用Jackson库：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JacksonUtil</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">ObjectMapper</span> <span class="variable">mapper</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectMapper</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">bean2Json</span><span class="params">(Object obj)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mapper.writeValueAsString(obj);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (JsonProcessingException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; T <span class="title function_">json2Bean</span><span class="params">(String jsonStr, TypeReference&lt;T&gt; typeReference)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> mapper.readValue(jsonStr, typeReference);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后再编写单元测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@AutoConfigureMockMvc</span></span><br><span class="line"><span class="meta">@RunWith(SpringRunner.class)</span></span><br><span class="line"><span class="meta">@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApplicationTests</span> &#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> MockMvc mvc;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testUserController</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 测试UserController</span></span><br><span class="line">        RequestBuilder request;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1、get查一下user列表，应该为空</span></span><br><span class="line">        request = get(<span class="string">&quot;/users/&quot;</span>);</span><br><span class="line">        <span class="type">MvcResult</span> <span class="variable">result</span> <span class="operator">=</span> mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        <span class="type">String</span> <span class="variable">content</span> <span class="operator">=</span> result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;List&lt;User&gt;&gt; response = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;List&lt;User&gt;&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response.getMsg(), is(<span class="string">&quot;查询列表成功&quot;</span>));</span><br><span class="line">        assertThat(((List) response.getData()).size(), is(<span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2、post提交一个user</span></span><br><span class="line">        request = post(<span class="string">&quot;/users/&quot;</span>)</span><br><span class="line">                .param(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;1&quot;</span>)</span><br><span class="line">                .param(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;测试大师&quot;</span>)</span><br><span class="line">                .param(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;20&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;String&gt; response1 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;String&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response1.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response1.getMsg(), is(<span class="string">&quot;新增成功&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3、get获取user列表，应该有刚才插入的数据</span></span><br><span class="line">        request = get(<span class="string">&quot;/users/&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;List&lt;User&gt;&gt; response2 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;List&lt;User&gt;&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response2.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response2.getMsg(), is(<span class="string">&quot;查询列表成功&quot;</span>));</span><br><span class="line">        assertThat((response2.getData()).size(), is(<span class="number">1</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4、put修改id为1的user</span></span><br><span class="line">        request = put(<span class="string">&quot;/users/1&quot;</span>)</span><br><span class="line">                .param(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;测试终极大师&quot;</span>)</span><br><span class="line">                .param(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;30&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;String&gt; response3 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;String&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response3.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response3.getMsg(), is(<span class="string">&quot;更新成功&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5、get一个id为1的user</span></span><br><span class="line">        request = get(<span class="string">&quot;/users/1&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;User&gt; response4 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;User&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response4.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response4.getMsg(), is(<span class="string">&quot;查询成功&quot;</span>));</span><br><span class="line">        <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> response4.getData();</span><br><span class="line">        assertThat(user.getId(), is(<span class="number">1L</span>));</span><br><span class="line">        assertThat(user.getName(), is(<span class="string">&quot;测试终极大师&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 6、del删除id为1的user</span></span><br><span class="line">        request = delete(<span class="string">&quot;/users/1&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;String&gt; response5 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;String&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response5.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response5.getMsg(), is(<span class="string">&quot;删除成功&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 7、get查一下user列表，应该为空</span></span><br><span class="line">        request = get(<span class="string">&quot;/users/&quot;</span>);</span><br><span class="line">        result = mvc.perform(request)</span><br><span class="line">                .andExpect(status().isOk())</span><br><span class="line">                .andReturn();</span><br><span class="line">        content = result.getResponse().getContentAsString();</span><br><span class="line">        BaseResponse&lt;List&lt;User&gt;&gt; response6 = JacksonUtil.json2Bean(content, <span class="keyword">new</span> <span class="title class_">TypeReference</span>&lt;BaseResponse&lt;List&lt;User&gt;&gt;&gt;() &#123;&#125;);</span><br><span class="line">        assertThat(response6.isSuccess(), is(<span class="literal">true</span>));</span><br><span class="line">        assertThat(response6.getMsg(), is(<span class="string">&quot;查询列表成功&quot;</span>));</span><br><span class="line">        assertThat((response6.getData()).size(), is(<span class="number">0</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行测试，结果为green bar，测试通过。</p>
+<h2 id="GitHub源码"><a href="#GitHub源码" class="headerlink" title="GitHub源码"></a>GitHub源码</h2><p><a target="_blank" rel="noopener" href="https://github.com/yidao620c/SpringBootBucket/tree/master/springboot-restful">springboot-restful</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/spring/" rel="tag"># spring</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/springboot/sb-mongodb.html" rel="prev" title="SpringBoot系列 - 集成MongoDB">
+                  <i class="fa fa-angle-left"></i> SpringBoot系列 - 集成MongoDB
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java/springboot/sb-restclient.html" rel="next" title="SpringBoot系列 - 使用RestTemplate">
+                  SpringBoot系列 - 使用RestTemplate <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

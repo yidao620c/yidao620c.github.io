@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前面已经学习了 Docker 的几种网络方案：none、host、bridge 和 joined 容器， 它们解决了单个 Docker Host 内容器通信的问题。本章的重点则是讨论跨主机容器间通信的方案。 跨主机网络方案包括：  docker 原生的 overlay 和 macvlan。 第三方方案：常用的包括 flannel、weave 和 calico。  docker 网络是一个非常活跃的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker每天学一点10 - 容器网络overlay">
+<meta property="og:url" content="http://yidao620c.github.io/k8s/docker/docker10.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="前面已经学习了 Docker 的几种网络方案：none、host、bridge 和 joined 容器， 它们解决了单个 Docker Host 内容器通信的问题。本章的重点则是讨论跨主机容器间通信的方案。 跨主机网络方案包括：  docker 原生的 overlay 和 macvlan。 第三方方案：常用的包括 flannel、weave 和 calico。  docker 网络是一个非常活跃的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker-network21.webp">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker-network22.webp">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker100.jpg">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker101.jpg">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker102.jpg">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker20190215-01.jpg">
+<meta property="article:published_time" content="2019-03-15T01:56:12.000Z">
+<meta property="article:modified_time" content="2023-07-30T00:53:52.110Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker-network21.webp">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/k8s/docker/docker10.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/k8s/docker/docker10.html","path":"k8s/docker/docker10.html","title":"Docker每天学一点10 - 容器网络overlay"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Docker每天学一点10 - 容器网络overlay | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#libnetwork-CNM"><span class="nav-number">1.</span> <span class="nav-text">libnetwork &amp; CNM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">2.</span> <span class="nav-text">环境准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAoverlay%E7%BD%91%E7%BB%9C"><span class="nav-number">3.</span> <span class="nav-text">创建overlay网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8-overlay-%E4%B8%AD%E8%BF%90%E8%A1%8C%E5%AE%B9%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">在 overlay 中运行容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#overlay-%E7%BD%91%E7%BB%9C%E8%B7%A8%E4%B8%BB%E6%9C%BA%E9%80%9A%E4%BF%A1"><span class="nav-number">5.</span> <span class="nav-text">overlay 网络跨主机通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#overlay%E7%BD%91%E7%BB%9C%E9%9A%94%E7%A6%BB"><span class="nav-number">6.</span> <span class="nav-text">overlay网络隔离</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93Overlay%E7%BD%91%E7%BB%9C"><span class="nav-number">7.</span> <span class="nav-text">总结Overlay网络</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/k8s/docker/docker10.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Docker每天学一点10 - 容器网络overlay | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker每天学一点10 - 容器网络overlay
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-15 09:56:12" itemprop="dateCreated datePublished" datetime="2019-03-15T09:56:12+08:00">2019-03-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>前面已经学习了 Docker 的几种网络方案：none、host、bridge 和 joined 容器，
+它们解决了单个 Docker Host 内容器通信的问题。本章的重点则是讨论跨主机容器间通信的方案。</p>
+<p>跨主机网络方案包括：</p>
+<ul>
+<li>docker 原生的 overlay 和 macvlan。</li>
+<li>第三方方案：常用的包括 flannel、weave 和 calico。</li>
+</ul>
+<p>docker 网络是一个非常活跃的技术领域，不断有新的方案开发出来，那么要问个非常重要的问题了：
+如此众多的方案是如何与 docker 集成在一起的？</p>
+<p>答案是：libnetwork 以及 CNM（草泥马？）。</p>
+<span id="more"></span>
+
+<h2 id="libnetwork-CNM"><a href="#libnetwork-CNM" class="headerlink" title="libnetwork &amp; CNM"></a>libnetwork &amp; CNM</h2><p>libnetwork 是 docker 容器网络库，最核心的内容是其定义的 Container Network Model (CNM)，
+这个模型对容器网络进行了抽象，由以下三类组件组成：</p>
+<p><em>Sandbox</em></p>
+<p>Sandbox 是容器的网络栈，包含容器的 interface、路由表和 DNS 设置。 Linux Network Namespace 是 Sandbox 的标准实现。
+Sandbox 可以包含来自不同 Network 的 Endpoint。</p>
+<p><em>Endpoint</em></p>
+<p>Endpoint 的作用是将 Sandbox 接入 Network。Endpoint 的典型实现是 veth pair，后面我们会举例。
+一个 Endpoint 只能属于一个网络，也只能属于一个 Sandbox。</p>
+<p><em>Network</em></p>
+<p>Network 包含一组 Endpoint，同一 Network 的 Endpoint 可以直接通信。Network 的实现可以是 Linux Bridge、VLAN 等。</p>
+<p>下面是 CNM 的示例：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker-network21.webp"></p>
+<p>一个容器一个 Sandbox，每个 Sandbox 都有一个 Endpoint 连接到 Network 1，第二个 Sandbox 还有一个 Endpoint 将其接入 Network</p>
+<ol start="2">
+<li></li>
+</ol>
+<p>libnetwork CNM 定义了 docker 容器的网络模型，按照该模型开发出的 driver 就能与 docker daemon 协同工作，实现容器网络。
+docker 原生的 driver 包括 none、bridge、overlay 和 macvlan，第三方 driver 包括 flannel、weave、calico 等。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker-network22.webp"></p>
+<p>接下来我们将详细讨论各种跨主机网络方案，首先学习 Overlay。</p>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>为支持容器跨主机通信，Docker 提供了 overlay driver，使用户可以创建基于 VxLAN 的 overlay 网络。
+Docerk overlay 网络需要一个 key-value 数据库用于保存网络状态信息，包括 Network、Endpoint、IP 等。
+Consul、Etcd 和 ZooKeeper 都是 Docker 支持的 key-vlaue 软件，我们这里使用 Consul。</p>
+<p>目前实验环境我个人两台机器：host1和host2。在另外一台机器master(192.168.1.20)上面安装Consul。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 8500:8500 -h consul --name consul progrium/consul -server -bootstrap</span><br></pre></td></tr></table></figure>
+
+<p>然后访问<a href="http://192.168.1.20:8500：">http://192.168.1.20:8500：</a></p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker100.jpg"></p>
+<p>接下来修改 host1 和 host2 的 docker daemon 的配置文件<code>/usr/lib/systemd/system/docker.service</code>，
+我只列出ExecStart最后部分：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-H unix:///var/run/docker.sock \</span><br><span class="line">-H tcp://0.0.0.0:2376 \</span><br><span class="line">--cluster-store=consul://192.168.1.20:8500 \</span><br><span class="line">--cluster-advertise=enp0s3:2376</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>–cluster-store 指定 consul 的地址。</li>
+<li>–cluster-advertise 告知 consul 自己的连接地址。</li>
+</ul>
+<p>重启 docker daemon。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
+
+<p>再次刷新consul，查看KEY&#x2F;VALUE，发现多了两个节点：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker101.jpg"></p>
+<p>最后的实验环境如下：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker102.jpg"></p>
+<h2 id="创建overlay网络"><a href="#创建overlay网络" class="headerlink" title="创建overlay网络"></a>创建overlay网络</h2><p>在host1上面创建overlay网络ov_net1:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d overlay ov_net1</span><br></pre></td></tr></table></figure>
+
+<p><code>-d overlay</code> 指定 driver 为 overaly。</p>
+<p>查看当前所有docker网络：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">a72ce58f3bd2        bridge              bridge              local</span><br><span class="line">bc794f4afe7a        host                host                local</span><br><span class="line">3e0372add56d        none                null                local</span><br><span class="line">4c21b88438fb        ov_net1             overlay             global</span><br></pre></td></tr></table></figure>
+
+<p>注意到 ov_net1 的 SCOPE 为 global，而其他网络为 local。在 host2 上查看存在的网络：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">3f811e49c9f1        bridge              bridge              local</span><br><span class="line">a16bad2e5ceb        host                host                local</span><br><span class="line">8b8ed97c4bcc        none                null                local</span><br><span class="line">4c21b88438fb        ov_net1             overlay             global</span><br></pre></td></tr></table></figure>
+
+<p>host2 上也能看到 ov_net1。这是因为创建 ov_net1 时 host1 将 overlay 网络信息存入了 consul，
+host2 从 consul 读取到了新网络的数据。之后 ov_net1 的任何变化都会同步到 host1 和 host2。</p>
+<p><code>docker network inspect</code> 查看 ov_net1 的详细信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;ov_net1&quot;,</span><br><span class="line">        省略...</span><br><span class="line">        &quot;IPAM&quot;: &#123;</span><br><span class="line">            &quot;Driver&quot;: &quot;default&quot;,</span><br><span class="line">            &quot;Options&quot;: &#123;&#125;,</span><br><span class="line">            &quot;Config&quot;: [</span><br><span class="line">                &#123;</span><br><span class="line">                    &quot;Subnet&quot;: &quot;10.0.0.0/24&quot;,</span><br><span class="line">                    &quot;Gateway&quot;: &quot;10.0.0.1&quot;</span><br><span class="line">                &#125;</span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>IPAM 是指 IP Address Management，docker 自动为 ov_net1 分配的 IP 空间为 10.0.0.0&#x2F;24。</p>
+<h2 id="在-overlay-中运行容器"><a href="#在-overlay-中运行容器" class="headerlink" title="在 overlay 中运行容器"></a>在 overlay 中运行容器</h2><p>运行一个 busybox 容器并连接到 ov_net1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name bbox1 --network ov_net1 busybox</span><br></pre></td></tr></table></figure>
+
+<p>查看容器的网络配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker exec bbox1 ip r</span><br><span class="line">default via 172.18.0.1 dev eth1 </span><br><span class="line">10.0.0.0/24 dev eth0 scope link  src 10.0.0.2 </span><br><span class="line">172.18.0.0/16 dev eth1 scope link  src 172.18.0.2 </span><br></pre></td></tr></table></figure>
+
+<p>bbox1 有两个网络接口 eth0 和 eth1。eth0 IP 为 10.0.0.2，连接的是 overlay 网络 ov_net1。eth1 IP 172.18.0.2，
+容器的默认路由是走 eth1，eth1 是哪儿来的呢？</p>
+<p>其实，docker 会创建一个 bridge 网络 “docker_gwbridge”，为所有连接到 overlay 网络的容器提供访问外网的能力</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker network ls</span><br><span class="line">NETWORK ID          NAME                DRIVER              SCOPE</span><br><span class="line">a72ce58f3bd2        bridge              bridge              local</span><br><span class="line">375d48203637        docker_gwbridge     bridge              local</span><br><span class="line">bc794f4afe7a        host                host                local</span><br><span class="line">3e0372add56d        none                null                local</span><br><span class="line">4c21b88438fb        ov_net1             overlay             global</span><br></pre></td></tr></table></figure>
+
+<p>从 <code>docker network inspect docker_gwbridge</code> 输出可确认 docker_gwbridge 的 IP 地址范围是 172.18.0.0&#x2F;16，
+当前连接的容器就是 bbox1（172.18.0.2）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&quot;IPAM&quot;: &#123;</span><br><span class="line">    &quot;Driver&quot;: &quot;default&quot;,</span><br><span class="line">    &quot;Options&quot;: null,</span><br><span class="line">    &quot;Config&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;Subnet&quot;: &quot;172.18.0.0/16&quot;,</span><br><span class="line">            &quot;Gateway&quot;: &quot;172.18.0.1&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;,</span><br><span class="line">&quot;Internal&quot;: false,</span><br><span class="line">&quot;Attachable&quot;: false,</span><br><span class="line">&quot;Ingress&quot;: false,</span><br><span class="line">&quot;ConfigFrom&quot;: &#123;</span><br><span class="line">    &quot;Network&quot;: &quot;&quot;</span><br><span class="line">&#125;,</span><br><span class="line">&quot;ConfigOnly&quot;: false,</span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">    &quot;384ea73907b3c57ea3a7d66d7e131ce17457cd24e4485bb386f8d8b97562e5ce&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;gateway_742d88ece54f&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;d6069af3fa630d2d3e0f80ee71325aaabb061d9435df370dbff93cb6c92a1478&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;02:42:ac:12:00:02&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.18.0.2/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<p>而且此网络的网关就是网桥 docker_gwbridge 的 IP 172.18.0.1</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ifconfig docker_gwbridge</span><br><span class="line">docker_gwbridge: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.18.0.1  netmask 255.255.0.0  broadcast 172.18.255.255</span><br><span class="line">        inet6 fe80::42:3bff:fe06:a807  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br></pre></td></tr></table></figure>
+
+<p>这样容器 bbox1 就可以通过 docker_gwbridge 访问外网。</p>
+<p>如果外网要访问容器，可通过主机端口映射，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -p 80:80 -d --net ov_net1 --name web1 httpd</span><br></pre></td></tr></table></figure>
+
+<p>验证完外网的连通性，下一节验证 overlay 网络跨主机通信。</p>
+<h2 id="overlay-网络跨主机通信"><a href="#overlay-网络跨主机通信" class="headerlink" title="overlay 网络跨主机通信"></a>overlay 网络跨主机通信</h2><p>在 host2 中运行容器 bbox2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name bbox2 --network ov_net1 busybox</span><br></pre></td></tr></table></figure>
+
+<p>查看bbox2容器内网络配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# docker exec bbox2 ip r</span><br><span class="line">default via 172.18.0.1 dev eth1 </span><br><span class="line">10.0.0.0/24 dev eth0 scope link  src 10.0.0.3 </span><br><span class="line">172.18.0.0/16 dev eth1 scope link  src 172.18.0.2 </span><br></pre></td></tr></table></figure>
+
+<p>bbox2 IP 为 10.0.0.3，可以直接 ping bbox1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# docker exec bbox2 ping -c 2 bbox1</span><br><span class="line">PING bbox1 (10.0.0.2): 56 data bytes</span><br><span class="line">--- bbox1 ping statistics ---</span><br><span class="line">2 packets transmitted, 0 packets received, 100% packet loss</span><br></pre></td></tr></table></figure>
+
+<p>哦吼吼，ping不通</p>
+<p>找解决方案如下：</p>
+<p>第一步，所有主机名都修改一下，改成不同
+第二步，关闭selinux，防火墙开通几个端口或者完全关闭</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">iptables -A INPUT -p tcp -m tcp --dport 7946 -j ACCEPT</span><br><span class="line">iptables -A INPUT -p udp -m udp --dport 7946 -j ACCEPT</span><br><span class="line">iptables -A INPUT -p tcp -m tcp --dport 4789 -j ACCEPT</span><br><span class="line">iptables -A INPUT -p 50 -j ACCEPT</span><br><span class="line"></span><br><span class="line">systemctl stop firewalld</span><br></pre></td></tr></table></figure>
+
+<p>第三步，继续查找原因。我的几个机器是VirtualBox安装的，
+确保在virtualbox设置中打开了host1和host2所有虚拟网卡的混杂模式。</p>
+<p>成功搞定！</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# docker exec bbox2 ping -c 2 bbox1</span><br><span class="line">PING bbox1 (10.0.0.2): 56 data bytes</span><br><span class="line">64 bytes from 10.0.0.2: seq=0 ttl=64 time=1003.159 ms</span><br><span class="line">64 bytes from 10.0.0.2: seq=1 ttl=64 time=2.794 ms</span><br><span class="line"></span><br><span class="line">--- bbox1 ping statistics ---</span><br><span class="line">2 packets transmitted, 2 packets received, 0% packet loss</span><br></pre></td></tr></table></figure>
+
+<p>可见 overlay 网络中的容器可以直接通信，同时 docker 也实现了 DNS 服务。</p>
+<p>总结下overlay 网络的具体实现：</p>
+<p>docker 会为每个 overlay 网络创建一个独立的 network namespace，其中会有一个 linux bridge br0，
+endpoint 还是由 veth pair 实现，一端连接到容器中（即 eth0），另一端连接到 namespace 的 br0 上。</p>
+<p>br0 除了连接所有的 endpoint，还会连接一个 vxlan 设备，用于与其他 host 建立 vxlan tunnel。
+容器之间的数据就是通过这个 tunnel 通信的。逻辑网络拓扑结构如图所示（截的别人的图）：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker20190215-01.jpg"></p>
+<p>要查看 overlay 网络的 namespace 可以在 host1 和 host2 上执行 ip netns
+（请确保在此之前执行过 <code>ln -s /var/run/docker/netns /var/run/netns</code>），可以看到两个 host 上有一个相同的 namespace</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# ip netns</span><br><span class="line">d72b529b1df2 (id: 1)</span><br><span class="line">1-4c21b88438 (id: 0)</span><br></pre></td></tr></table></figure>
+
+<p>这就是 ov_net1 的 namespace，查看 namespace 中的 br0 上的设备。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# ip netns exec 1-4c21b88438 brctl show</span><br><span class="line">bridge name    bridge id		STP enabled	interfaces</span><br><span class="line">br0        8000.626988b3db42	no		    veth0</span><br><span class="line">                                        vxlan0</span><br></pre></td></tr></table></figure>
+
+<p>查看 vxlan0 设备的具体配置信息可知此 overlay 使用的 VNI（VxLAN ID）为 256。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host2 ~]# ip netns exec 1-4c21b88438 ip -d l show vxlan0</span><br><span class="line">6: vxlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1450 qdisc noqueue master br0 state UNKNOWN mode DEFAULT group default </span><br><span class="line">    link/ether da:53:ff:c8:09:98 brd ff:ff:ff:ff:ff:ff link-netnsid 0 promiscuity 1 </span><br><span class="line">    vxlan id 256 srcport 0 0 dstport 4789 proxy l2miss l3miss ageing 300 noudpcsum noudp6zerocsumtx noudp6zerocsumrx</span><br></pre></td></tr></table></figure>
+
+<h2 id="overlay网络隔离"><a href="#overlay网络隔离" class="headerlink" title="overlay网络隔离"></a>overlay网络隔离</h2><p>不同的 overlay 网络是相互隔离的。我在host1上面创建第二个 overlay 网络 ov_net2 并运行容器 bbox3。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d overlay ov_net2</span><br><span class="line">docker run -itd --name bbox3 --network ov_net2 busybox</span><br></pre></td></tr></table></figure>
+
+<p>查看bbox3容器的网络</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 ~]# docker exec bbox3 ip r</span><br><span class="line">default via 172.18.0.1 dev eth1 </span><br><span class="line">10.0.1.0/24 dev eth0 scope link  src 10.0.1.2 </span><br><span class="line">172.18.0.0/16 dev eth1 scope link  src 172.18.0.3</span><br></pre></td></tr></table></figure>
+
+<p>ip地址为10.0.1.2，尝试ping一下bbox1的ip地址（10.0.0.2）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 ~]# docker exec bbox3 ping -c 2 10.0.0.2</span><br><span class="line">PING 10.0.0.2 (10.0.0.2): 56 data bytes</span><br><span class="line"></span><br><span class="line">--- 10.0.0.2 ping statistics ---</span><br><span class="line">2 packets transmitted, 0 packets received, 100% packet loss</span><br></pre></td></tr></table></figure>
+
+<p>ping 失败，可见不同 overlay 网络之间是隔离的。即便是通过 docker_gwbridge 也不能通信。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@host1 ~]# docker exec bbox3 ping -c 2 172.18.0.2</span><br><span class="line">PING 172.18.0.2 (172.18.0.2): 56 data bytes</span><br><span class="line"></span><br><span class="line">--- 172.18.0.2 ping statistics ---</span><br><span class="line">2 packets transmitted, 0 packets received, 100% packet loss</span><br></pre></td></tr></table></figure>
+
+<p>docker 默认为 overlay 网络分配 24 位掩码的子网（10.0.X.0&#x2F;24），所有主机共享这个 subnet，
+容器启动时会顺序从此空间分配 IP。当然我们也可以通过 –subnet 指定 IP 空间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d overlay --subnet 10.22.1.0/24 ov_net3</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结Overlay网络"><a href="#总结Overlay网络" class="headerlink" title="总结Overlay网络"></a>总结Overlay网络</h2><ul>
+<li>Overlay网络会自动创建一个docker_gwbridge网卡，作用是为Docker容器提供上外网需求</li>
+<li>Docker容器不能通过docker_gwbridge网卡互相通信，即使在同一台Docker主机, 同一个Overlay网络也不行</li>
+<li>Docker容器间通信只能通过overlay网络</li>
+<li>Overlay网络间是相互隔离的，通过VXLan隔离</li>
+<li>Docker容器网络的命名空间与Overlay网络的命名空间通过一对veth pair连接起来</li>
+<li>Overlay网络独立的命名空间里面会有一个网桥br0</li>
+<li>Docker容器的veth pair对端veth0与vxlan0设备通过br0这个Linux bridge桥接在一起， br0在同一宿主机上起到虚拟交换机的作用，
+如果目标地址在同一宿主机上，则直接通信，如果不在则通过设置vxlan0这个VXLan设备进行跨主机通信</li>
+<li>VXLan0设备会在创建时，由Docker daemon 为其分配vxlan隧道ID，起到网络隔离的作用</li>
+<li>Docker Host集群会通过key&#x2F;value存储共享数据，在7496端口上，互相之间通过gossip协议学习各个宿主机上运行了那些容器。
+守护进程根据这些数据在vxlan0设备上生成静态MAC转发表</li>
+<li>根据静态MAC转发表的设置，通过UDP端口4789，将流量转发到对端宿主机网卡上</li>
+<li>根据流量包中的VxLan隧道ID，将流量转发到对端宿主机的overlay网络的网络命名空间中。</li>
+<li>对端宿主机的overlay网络的网络命名空间中br0网桥，起到虚拟交换机的作用，将流量根据MAC地址转发到对应容器内部。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker09.html" rel="prev" title="Docker每天学一点09 - 多主机管理">
+                  <i class="fa fa-angle-left"></i> Docker每天学一点09 - 多主机管理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker11.html" rel="next" title="Docker每天学一点11 - 容器网络macvlan">
+                  Docker每天学一点11 - 容器网络macvlan <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

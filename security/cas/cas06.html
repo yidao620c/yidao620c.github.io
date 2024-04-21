@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="默认情况下，cas是将票据信息存储到内存中，我们可以将票据存储到redis服务器中，cas采用的spring data redis 来控制redis 将票据存储到redis需要两个步骤：  配置cas关于redis的依赖 配置application.properties，添加redis的配置信息  接下来讲解如何通过Redis存储Ticket，以及通过Restful API方式验证Ticket。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS教程 - Ticket存储和验证">
+<meta property="og:url" content="http://yidao620c.github.io/security/cas/cas06.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="默认情况下，cas是将票据信息存储到内存中，我们可以将票据存储到redis服务器中，cas采用的spring data redis 来控制redis 将票据存储到redis需要两个步骤：  配置cas关于redis的依赖 配置application.properties，添加redis的配置信息  接下来讲解如何通过Redis存储Ticket，以及通过Restful API方式验证Ticket。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-01-13T03:19:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.385Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="CAS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/cas/cas06.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/cas/cas06.html","path":"security/cas/cas06.html","title":"CAS教程 - Ticket存储和验证"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CAS教程 - Ticket存储和验证 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#maven%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">maven配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#redis%E9%85%8D%E7%BD%AE"><span class="nav-number">2.</span> <span class="nav-text">redis配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ticket%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.</span> <span class="nav-text">Ticket接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96TGT"><span class="nav-number">3.1.</span> <span class="nav-text">获取TGT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AETGT%E8%8E%B7%E5%8F%96ST"><span class="nav-number">3.2.</span> <span class="nav-text">根据TGT获取ST</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E5%88%ABST%E6%98%AF%E5%90%A6%E6%9C%89%E6%95%88"><span class="nav-number">3.3.</span> <span class="nav-text">判别ST是否有效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A0%E9%99%A4TGT-%E7%9B%B8%E5%BD%93%E4%BA%8E%E5%9C%A8CAS-Server%E7%AB%AF%E6%B3%A8%E9%94%80"><span class="nav-number">3.4.</span> <span class="nav-text">删除TGT(相当于在CAS Server端注销)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Restful%E6%8E%A5%E5%8F%A3%E6%B5%8B%E8%AF%95"><span class="nav-number">3.5.</span> <span class="nav-text">Restful接口测试</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/cas/cas06.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CAS教程 - Ticket存储和验证 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CAS教程 - Ticket存储和验证
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-13 11:19:22" itemprop="dateCreated datePublished" datetime="2019-01-13T11:19:22+08:00">2019-01-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>默认情况下，cas是将票据信息存储到内存中，我们可以将票据存储到redis服务器中，cas采用的spring data redis 来控制redis</p>
+<p>将票据存储到redis需要两个步骤：</p>
+<ol>
+<li>配置cas关于redis的依赖</li>
+<li>配置application.properties，添加redis的配置信息</li>
+</ol>
+<p>接下来讲解如何通过Redis存储Ticket，以及通过Restful API方式验证Ticket。</p>
+<span id="more"></span>
+
+<h2 id="maven配置"><a href="#maven配置" class="headerlink" title="maven配置"></a>maven配置</h2><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--redis支持，将票据存在redis，默认是内存中--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apereo.cas<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>cas-server-support-redis-ticket-registry<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;cas.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="redis配置"><a href="#redis配置" class="headerlink" title="redis配置"></a>redis配置</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cas:</span></span><br><span class="line">  <span class="attr">ticket:</span></span><br><span class="line">    <span class="attr">st:</span></span><br><span class="line">      <span class="attr">timeToKillInSeconds:</span> <span class="number">20</span> <span class="comment">#ST票据生命周期</span></span><br><span class="line">    <span class="attr">pt:</span></span><br><span class="line">      <span class="attr">timeToKillInSeconds:</span> <span class="number">20</span> <span class="comment">#PT票据生命周期</span></span><br><span class="line">    <span class="attr">registry:</span></span><br><span class="line">      <span class="attr">redis:</span></span><br><span class="line">        <span class="attr">host:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">        <span class="attr">database:</span> <span class="number">1</span></span><br><span class="line">        <span class="attr">port:</span> <span class="number">6379</span></span><br><span class="line">        <span class="attr">password:</span> <span class="string">test</span></span><br><span class="line">        <span class="attr">timeout:</span> <span class="number">2000</span></span><br><span class="line">        <span class="attr">useSsl:</span> <span class="literal">false</span></span><br><span class="line">        <span class="attr">usePool:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">tgc:</span></span><br><span class="line">    <span class="attr">crypto:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">false</span> <span class="comment">#表示不对TGC进行加密，默认是true，TGC其实就是TGT经过JWT加密后的值而已</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Ticket接口"><a href="#Ticket接口" class="headerlink" title="Ticket接口"></a>Ticket接口</h2><p>cas可供调用的接口列表如下，通过这些接口可实现票据操作。</p>
+<h3 id="获取TGT"><a href="#获取TGT" class="headerlink" title="获取TGT"></a>获取TGT</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String <span class="title function_">getTicketGrantingTicket</span><span class="params">(String Server, String username, String password)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>参数server为CAS Server的访问URL；</li>
+<li>参数username为登录用户名；</li>
+<li>参数password为验证用的密码；</li>
+</ul>
+<p>返回：验证通过则返回TGT的值，否则抛出异常；</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">tgt</span> <span class="operator">=</span> casService.getTicketGrantingTicket(<span class="string">&quot;https://cas.hisign.com.cn:8443/cas&quot;</span>, <span class="string">&quot;casuser&quot;</span>, <span class="string">&quot;Mellon&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="根据TGT获取ST"><a href="#根据TGT获取ST" class="headerlink" title="根据TGT获取ST"></a>根据TGT获取ST</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String <span class="title function_">getServiceTicket</span><span class="params">(String Server, String ticketGrantingTicket, String service)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>参数server为CAS Server的访问URL；</li>
+<li>参数ticketGrantingTicket为已获得的TGT；</li>
+<li>参数service为欲访问的service的URL；</li>
+</ul>
+<p>返回：验证通过则返回ST的值，否则抛出异常；</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">st</span> <span class="operator">=</span> casService.getTicketGrantingTicket(<span class="string">&quot;https://cas.hisign.com.cn:8443/cas&quot;</span>, <span class="string">&quot;TGT-2-6eT-cas01.example.org&quot;</span>, <span class="string">&quot;https://app.xx.com:8443/app1&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="判别ST是否有效"><a href="#判别ST是否有效" class="headerlink" title="判别ST是否有效"></a>判别ST是否有效</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String <span class="title function_">verifySeviceTicket</span><span class="params">(String server, String serviceTicket, String service)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>参数server为CAS Server的访问URL；</li>
+<li>参数serviceTicket为已获得的ST；</li>
+<li>参数service为欲访问的service的URL；</li>
+</ul>
+<p>返回：ST有效返回登录用户名，无效返回null，若出错抛出异常；</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> <span class="variable">String</span> <span class="operator">=</span> casService.verifyServiceTicket(<span class="string">&quot;https://cas.hisign.com.cn:8443/cas&quot;</span>, <span class="string">&quot;ST-2-5kE-cas01.example.org&quot;</span>, <span class="string">&quot;https://app.xx.com:8443/app1&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="删除TGT-相当于在CAS-Server端注销"><a href="#删除TGT-相当于在CAS-Server端注销" class="headerlink" title="删除TGT(相当于在CAS Server端注销)"></a>删除TGT(相当于在CAS Server端注销)</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> <span class="title function_">deleteTicketGrantingTicket</span><span class="params">(String Server, String ticketGrantingTicket)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>参数server为CAS Server的访问URL；</li>
+<li>参数ticketGrantingTicket为已获得的TGT；</li>
+</ul>
+<p>返回：成功返回true，否则抛出异常；</p>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">boolean</span> <span class="variable">bool</span> <span class="operator">=</span> casService.deleteTicketGrantingTicket(<span class="string">&quot;https://cas.hisign.com.cn:8443/cas&quot;</span>, <span class="string">&quot;TGT-2-6eT-cas01.example.org&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意事项</strong>：参数server必须真实有效，可从配置文件获取；而参数service可以是虚构的、符合规范的格式。</p>
+<h3 id="Restful接口测试"><a href="#Restful接口测试" class="headerlink" title="Restful接口测试"></a>Restful接口测试</h3><p>添加maven依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.httpcomponents<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>httpclient<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.5.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.10.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>编写API接口访问工具类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 首先客户端提交用户名、密码、及Service三个参数，</span></span><br><span class="line"><span class="comment"> * 如果验证成功便返回用户的TGT(Ticket Granting Ticket)至客户端,</span></span><br><span class="line"><span class="comment"> * 然后客户端再根据 TGT 获取用户的 ST(Service Ticket)来进行验证登录。</span></span><br><span class="line"><span class="comment"> * 故名思意，TGT是用于生成一个新的Ticket(ST)的Ticket，</span></span><br><span class="line"><span class="comment"> * 而ST则是提供给客户端用于登录的Ticket，两者最大的区别在于，</span></span><br><span class="line"><span class="comment"> * TGT是用户名密码验证成功之后所生成的Ticket，并且会保存在Server中及Cookie中，</span></span><br><span class="line"><span class="comment"> * 而ST则必须是是根据TGT来生成，主要用于登录，并且当登录成功之后 ST 则会失效。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CasServerUtil</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 登录服务器地址</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">CAS_SERVER_PATH</span> <span class="operator">=</span> <span class="string">&quot;https://cas.server.com:8443&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 登录地址的token</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">GET_TOKEN_URL</span> <span class="operator">=</span> CAS_SERVER_PATH + <span class="string">&quot;/v1/tickets&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">tgt</span> <span class="operator">=</span> getTGT(<span class="string">&quot;tingfeng&quot;</span>, <span class="string">&quot;tingfeng&quot;</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;TGT：&quot;</span> + tgt);</span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">service</span> <span class="operator">=</span> <span class="string">&quot;http://app1.com:8181/fire/users.html&quot;</span>;</span><br><span class="line">            <span class="type">String</span> <span class="variable">st</span> <span class="operator">=</span> getST(tgt, service);</span><br><span class="line">            System.out.println(<span class="string">&quot;ST：&quot;</span> + st);</span><br><span class="line"></span><br><span class="line">            System.out.println(service + <span class="string">&quot;?ticket=&quot;</span> + st);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取TGT</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getTGT</span><span class="params">(String username, String password)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="type">CookieStore</span> <span class="variable">httpCookieStore</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BasicCookieStore</span>();</span><br><span class="line"><span class="comment">//        CloseableHttpClient client = createHttpClientWithNoSsl(httpCookieStore);</span></span><br><span class="line"></span><br><span class="line">            <span class="type">CloseableHttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClients.createDefault();</span><br><span class="line"></span><br><span class="line">            <span class="type">HttpPost</span> <span class="variable">httpPost</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpPost</span>(GET_TOKEN_URL);</span><br><span class="line">            List&lt;NameValuePair&gt; params = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;NameValuePair&gt;();</span><br><span class="line">            params.add(<span class="keyword">new</span> <span class="title class_">BasicNameValuePair</span>(<span class="string">&quot;username&quot;</span>, username));</span><br><span class="line">            params.add(<span class="keyword">new</span> <span class="title class_">BasicNameValuePair</span>(<span class="string">&quot;password&quot;</span>, password));</span><br><span class="line">            httpPost.setEntity(<span class="keyword">new</span> <span class="title class_">UrlEncodedFormEntity</span>(params));</span><br><span class="line">            <span class="type">HttpResponse</span> <span class="variable">response</span> <span class="operator">=</span> client.execute(httpPost);</span><br><span class="line"></span><br><span class="line"><span class="comment">//        System.out.println(&quot;\n 获取TGT，Header响应&quot;);</span></span><br><span class="line"><span class="comment">//        Header[] allHeaders = response.getAllHeaders();</span></span><br><span class="line"><span class="comment">//        for (int i = 0; i &lt; allHeaders.length; i++) &#123;</span></span><br><span class="line"><span class="comment">//            System.out.println(&quot;Key：&quot; + allHeaders[i].getName() + &quot;，Value：&quot; + allHeaders[i].getValue() + &quot;，Elements:&quot; + Arrays.toString(allHeaders[i].getElements()));</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"></span><br><span class="line">            <span class="type">Header</span> <span class="variable">headerLocation</span> <span class="operator">=</span> response.getFirstHeader(<span class="string">&quot;Location&quot;</span>);</span><br><span class="line">            <span class="type">String</span> <span class="variable">location</span> <span class="operator">=</span> headerLocation == <span class="literal">null</span> ? <span class="literal">null</span> : headerLocation.getValue();</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;Location：&quot;</span> + location);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (location != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> location.substring(location.lastIndexOf(<span class="string">&quot;/&quot;</span>) + <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"><span class="comment">//</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取ST</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getST</span><span class="params">(String TGT, String service)</span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line"><span class="comment">//        CookieStore httpCookieStore = new BasicCookieStore();</span></span><br><span class="line"><span class="comment">//        CloseableHttpClient client = createHttpClientWithNoSsl(httpCookieStore);</span></span><br><span class="line"></span><br><span class="line">            <span class="type">CloseableHttpClient</span> <span class="variable">client</span> <span class="operator">=</span> HttpClients.createDefault();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="comment">// service 需要encoder编码</span></span><br><span class="line">            <span class="comment">// service = URLEncoder.encode(service, &quot;utf-8&quot;);</span></span><br><span class="line"></span><br><span class="line">            <span class="type">HttpPost</span> <span class="variable">httpPost</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpPost</span>(GET_TOKEN_URL + <span class="string">&quot;/&quot;</span> + TGT);</span><br><span class="line">            List&lt;NameValuePair&gt; params = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;NameValuePair&gt;();</span><br><span class="line">            params.add(<span class="keyword">new</span> <span class="title class_">BasicNameValuePair</span>(<span class="string">&quot;service&quot;</span>, service));</span><br><span class="line">            httpPost.setEntity(<span class="keyword">new</span> <span class="title class_">UrlEncodedFormEntity</span>(params));</span><br><span class="line">            <span class="type">HttpResponse</span> <span class="variable">response</span> <span class="operator">=</span> client.execute(httpPost);</span><br><span class="line"></span><br><span class="line"><span class="comment">//        System.out.println(&quot;\n 获取ST，Header响应&quot;);</span></span><br><span class="line"><span class="comment">//        Header[] allHeaders = response.getAllHeaders();</span></span><br><span class="line"><span class="comment">//        for (int i = 0; i &lt; allHeaders.length; i++) &#123;</span></span><br><span class="line"><span class="comment">//            System.out.println(&quot;Key：&quot; + allHeaders[i].getName() + &quot;，Value：&quot; + allHeaders[i].getValue() + &quot;，Elements:&quot; + Arrays.toString(allHeaders[i].getElements()));</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">//        List&lt;Cookie&gt; cookies = httpCookieStore.getCookies();</span></span><br><span class="line"><span class="comment">//        System.out.println(&quot;Cookie.size：&quot; + cookies.size());</span></span><br><span class="line"><span class="comment">//        for (Cookie cookie : cookies) &#123;</span></span><br><span class="line"><span class="comment">//            System.out.println(&quot;Cookie: &quot; + new Gson().toJson(cookie));</span></span><br><span class="line"><span class="comment">//        &#125;</span></span><br><span class="line"></span><br><span class="line">            <span class="type">String</span> <span class="variable">st</span> <span class="operator">=</span> readResponse(response);</span><br><span class="line">            <span class="keyword">return</span> st == <span class="literal">null</span> ? <span class="literal">null</span> : (st == <span class="string">&quot;&quot;</span> ? <span class="literal">null</span> : st);</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 读取 response body 内容为字符串</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> response</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> IOException</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">readResponse</span><span class="params">(HttpResponse response)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">BufferedReader</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(response.getEntity().getContent()));</span><br><span class="line">        <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>();</span><br><span class="line">        String line;</span><br><span class="line">        <span class="keyword">while</span> ((line = in.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">            result += line;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建模拟客户端（针对 https 客户端禁用 SSL 验证）</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> cookieStore 缓存的 Cookies 信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> CloseableHttpClient <span class="title function_">createHttpClientWithNoSsl</span><span class="params">(CookieStore cookieStore)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// Create a trust manager that does not validate certificate chains</span></span><br><span class="line">        TrustManager[] trustAllCerts = <span class="keyword">new</span> <span class="title class_">TrustManager</span>[]&#123;</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">X509TrustManager</span>() &#123;</span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> X509Certificate[] getAcceptedIssuers() &#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">checkClientTrusted</span><span class="params">(X509Certificate[] certs, String authType)</span> &#123;</span><br><span class="line">                        <span class="comment">// don&#x27;t check</span></span><br><span class="line">                    &#125;</span><br><span class="line"></span><br><span class="line">                    <span class="meta">@Override</span></span><br><span class="line">                    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">checkServerTrusted</span><span class="params">(X509Certificate[] certs, String authType)</span> &#123;</span><br><span class="line">                        <span class="comment">// don&#x27;t check</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="type">SSLContext</span> <span class="variable">ctx</span> <span class="operator">=</span> SSLContext.getInstance(<span class="string">&quot;TLS&quot;</span>);</span><br><span class="line">        ctx.init(<span class="literal">null</span>, trustAllCerts, <span class="literal">null</span>);</span><br><span class="line">        <span class="type">LayeredConnectionSocketFactory</span> <span class="variable">sslSocketFactory</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SSLConnectionSocketFactory</span>(ctx);</span><br><span class="line">        <span class="keyword">return</span> HttpClients.custom()</span><br><span class="line">                .setSSLSocketFactory(sslSocketFactory)</span><br><span class="line">                .setDefaultCookieStore(cookieStore == <span class="literal">null</span> ? <span class="keyword">new</span> <span class="title class_">BasicCookieStore</span>() : cookieStore)</span><br><span class="line">                .build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CAS/" rel="tag"># CAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/cas/cas05.html" rel="prev" title="CAS教程 - Service配置">
+                  <i class="fa fa-angle-left"></i> CAS教程 - Service配置
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/cas/cas07.html" rel="next" title="CAS教程 - Restful API方式实现SSO">
+                  CAS教程 - Restful API方式实现SSO <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

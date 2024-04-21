@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="密码学领域有对称加密和非对称加密算法，本篇将使用Java语言来实现几种常见的加解密算法。 完整源码请参考 GitHub源码 对称加密算法概念 加密密钥和解密密钥相同，大部分算法加密揭秘过程互逆。 特点：算法公开、（相比非对称加密）计算量小、加密速度快、效率高。 弱点：双方都使用同样的密钥，安全性得不到保证。 常用对称加密算法  DES（Data Encryption Standard） 3DES（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【安全贴士】Java加解密算法">
+<meta property="og:url" content="http://yidao620c.github.io/security/crypto/java-crypto.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="密码学领域有对称加密和非对称加密算法，本篇将使用Java语言来实现几种常见的加解密算法。 完整源码请参考 GitHub源码 对称加密算法概念 加密密钥和解密密钥相同，大部分算法加密揭秘过程互逆。 特点：算法公开、（相比非对称加密）计算量小、加密速度快、效率高。 弱点：双方都使用同样的密钥，安全性得不到保证。 常用对称加密算法  DES（Data Encryption Standard） 3DES（">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-25T14:12:09.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:58.045Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="安全贴士">
+<meta property="article:tag" content="加解密">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/crypto/java-crypto.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/crypto/java-crypto.html","path":"security/crypto/java-crypto.html","title":"【安全贴士】Java加解密算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>【安全贴士】Java加解密算法 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">非对称加密算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%97%E6%B3%95%E9%80%89%E6%8B%A9"><span class="nav-number">2.</span> <span class="nav-text">算法选择</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/crypto/java-crypto.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="【安全贴士】Java加解密算法 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          【安全贴士】Java加解密算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-25 22:12:09" itemprop="dateCreated datePublished" datetime="2020-05-25T22:12:09+08:00">2020-05-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>密码学领域有对称加密和非对称加密算法，本篇将使用Java语言来实现几种常见的加解密算法。</p>
+<p>完整源码请参考 <a target="_blank" rel="noopener" href="https://github.com/yidao620c/thinking-java/tree/master/src/main/java/ch02utils/crypto">GitHub源码</a></p>
+<p>对称加密算法概念</p>
+<p>加密密钥和解密密钥相同，大部分算法加密揭秘过程互逆。</p>
+<p>特点：算法公开、（相比非对称加密）计算量小、加密速度快、效率高。</p>
+<p>弱点：双方都使用同样的密钥，安全性得不到保证。</p>
+<p>常用对称加密算法</p>
+<ul>
+<li>DES（Data Encryption Standard）</li>
+<li>3DES（DES加强版，使用3次DES计算，Triple DES，DESede）</li>
+<li>AES（Advanced Encryption Standard，3DES加强版）</li>
+</ul>
+<p>这里只列出最常用的AES算法实现，也是安全等级最高，推荐使用的对称加密算法，其他实现请参考我的GitHub上的源码。</p>
+<span id="more"></span>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 对称加密/解密算法（推荐算法）：AES</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> XiongNeng</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> 1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@since</span> 2017-11-22</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AESUtil</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">DATA</span> <span class="operator">=</span> <span class="string">&quot;这个是内容&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">KEY_ALGORITHM</span> <span class="operator">=</span> <span class="string">&quot;AES&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">CIPHER_ALGORITHM</span> <span class="operator">=</span> <span class="string">&quot;AES/ECB/PKCS5Padding&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Charset</span> <span class="variable">UTF8</span> <span class="operator">=</span> Charset.forName(<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encrypt(String data, String key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> encrypt(data.getBytes(UTF8), key.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encrypt(String data, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> encrypt(data.getBytes(UTF8), key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encrypt(<span class="type">byte</span>[] data, String key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> encrypt(data, key.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encrypt(<span class="type">byte</span>[] data, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Key</span> <span class="variable">k</span> <span class="operator">=</span> genSecretKey(key);</span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(CIPHER_ALGORITHM);</span><br><span class="line">        cipher.init(Cipher.ENCRYPT_MODE, k);</span><br><span class="line">        <span class="keyword">return</span> cipher.doFinal(data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] decrypt(String data, String key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> decrypt(data.getBytes(UTF8), key.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] decrypt(String data, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> decrypt(data.getBytes(UTF8), key);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] decrypt(<span class="type">byte</span>[] data, String key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> decrypt(data, key.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] decrypt(<span class="type">byte</span>[] data, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Key</span> <span class="variable">k</span> <span class="operator">=</span> genSecretKey(key);</span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(CIPHER_ALGORITHM);</span><br><span class="line">        cipher.init(Cipher.DECRYPT_MODE, k);</span><br><span class="line">        <span class="keyword">return</span> cipher.doFinal(data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * AES only supports key sizes of 16, 24 or 32 bytes</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Key <span class="title function_">genSecretKey</span><span class="params">(<span class="type">byte</span>[] key)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (key.length == <span class="number">16</span> || key.length == <span class="number">24</span> || key.length == <span class="number">32</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SecretKeySpec</span>(key, KEY_ALGORITHM);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;AES only supports key sizes of 16, 24 or 32 bytes&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> <span class="string">&quot;1234567890123456&quot;</span>;</span><br><span class="line">        <span class="type">byte</span>[] desResult = encrypt(DATA, key);</span><br><span class="line">        System.out.println(DATA + <span class="string">&quot;&gt;&gt;&gt;AES 加密结果&gt;&gt;&gt;&quot;</span> + Hex.encodeHexString(desResult));</span><br><span class="line"></span><br><span class="line">        <span class="type">byte</span>[] desPlain = decrypt(desResult, key);</span><br><span class="line">        System.out.println(DATA + <span class="string">&quot;&gt;&gt;&gt;AES 解密结果&gt;&gt;&gt;&quot;</span> + <span class="keyword">new</span> <span class="title class_">String</span>(desPlain, Charset.forName(<span class="string">&quot;UTF-8&quot;</span>)));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="非对称加密算法"><a href="#非对称加密算法" class="headerlink" title="非对称加密算法"></a>非对称加密算法</h2><p><strong>非对称密码概念</strong></p>
+<p>发送者使用接收者的公钥加密，接收者使用自己的私钥解密。需要两个密钥进行加密或解密，分为公钥和私钥。</p>
+<p>特点：安全性高，速度慢</p>
+<p>常用算法</p>
+<ul>
+<li>RSA算法</li>
+<li>DH密钥交换算法</li>
+<li>ElGamal算法那</li>
+</ul>
+<p>用途：</p>
+<ul>
+<li>密钥交换</li>
+<li>加密&#x2F;解密</li>
+<li>数字签名</li>
+</ul>
+<p>RSA算法示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RSAUtil</span> &#123;</span><br><span class="line">    <span class="comment">// 非对称密钥算法</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">KEY_ALGORITHM</span> <span class="operator">=</span> <span class="string">&quot;RSA&quot;</span>;</span><br><span class="line">    <span class="comment">// 密钥长度必须是64的倍数，在512到65536位之间</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">KEY_SIZE</span> <span class="operator">=</span> <span class="number">2048</span>;</span><br><span class="line">    <span class="comment">// 公钥</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">PUBLIC_KEY</span> <span class="operator">=</span> <span class="string">&quot;RSAPublicKey&quot;</span>;</span><br><span class="line">    <span class="comment">// 私钥</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">PRIVATE_KEY</span> <span class="operator">=</span> <span class="string">&quot;RSAPrivateKey&quot;</span>;</span><br><span class="line">    <span class="comment">// 字符编码</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Charset</span> <span class="variable">UTF8</span> <span class="operator">=</span> Charset.forName(<span class="string">&quot;UTF-8&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私钥加密</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dataStr 待加密数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key  密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> byte[] 加密数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encryptByPrivateKey(String dataStr, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//取得私钥</span></span><br><span class="line">        <span class="type">PKCS8EncodedKeySpec</span> <span class="variable">pkcs8KeySpec</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PKCS8EncodedKeySpec</span>(key);</span><br><span class="line">        <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(KEY_ALGORITHM);</span><br><span class="line">        <span class="comment">//生成私钥</span></span><br><span class="line">        <span class="type">PrivateKey</span> <span class="variable">privateKey</span> <span class="operator">=</span> keyFactory.generatePrivate(pkcs8KeySpec);</span><br><span class="line">        <span class="comment">//数据加密</span></span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(keyFactory.getAlgorithm());</span><br><span class="line">        cipher.init(Cipher.ENCRYPT_MODE, privateKey);</span><br><span class="line">        <span class="keyword">return</span> cipher.doFinal(dataStr.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 公钥加密</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dataStr 待加密数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key  密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> byte[] 加密数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">byte</span>[] encryptByPublicKey(String dataStr, <span class="type">byte</span>[] key) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//实例化密钥工厂</span></span><br><span class="line">        <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(KEY_ALGORITHM);</span><br><span class="line">        <span class="comment">//初始化公钥，密钥材料转换</span></span><br><span class="line">        <span class="type">X509EncodedKeySpec</span> <span class="variable">x509KeySpec</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">X509EncodedKeySpec</span>(key);</span><br><span class="line">        <span class="comment">//产生公钥</span></span><br><span class="line">        <span class="type">PublicKey</span> <span class="variable">pubKey</span> <span class="operator">=</span> keyFactory.generatePublic(x509KeySpec);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//数据加密</span></span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(keyFactory.getAlgorithm());</span><br><span class="line">        cipher.init(Cipher.ENCRYPT_MODE, pubKey);</span><br><span class="line">        <span class="keyword">return</span> cipher.doFinal(dataStr.getBytes(UTF8));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 私钥解密</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> data 待解密数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key  密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> String 解密数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">decryptByPrivateKey</span><span class="params">(<span class="type">byte</span>[] data, <span class="type">byte</span>[] key)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//取得私钥</span></span><br><span class="line">        <span class="type">PKCS8EncodedKeySpec</span> <span class="variable">pkcs8KeySpec</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PKCS8EncodedKeySpec</span>(key);</span><br><span class="line">        <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(KEY_ALGORITHM);</span><br><span class="line">        <span class="comment">//生成私钥</span></span><br><span class="line">        <span class="type">PrivateKey</span> <span class="variable">privateKey</span> <span class="operator">=</span> keyFactory.generatePrivate(pkcs8KeySpec);</span><br><span class="line">        <span class="comment">//数据解密</span></span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(keyFactory.getAlgorithm());</span><br><span class="line">        cipher.init(Cipher.DECRYPT_MODE, privateKey);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(cipher.doFinal(data), UTF8);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 公钥解密</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> data 待解密数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key  密钥</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> String 解密数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">decryptByPublicKey</span><span class="params">(<span class="type">byte</span>[] data, <span class="type">byte</span>[] key)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//实例化密钥工厂</span></span><br><span class="line">        <span class="type">KeyFactory</span> <span class="variable">keyFactory</span> <span class="operator">=</span> KeyFactory.getInstance(KEY_ALGORITHM);</span><br><span class="line">        <span class="comment">//初始化公钥，密钥材料转换</span></span><br><span class="line">        <span class="type">X509EncodedKeySpec</span> <span class="variable">x509KeySpec</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">X509EncodedKeySpec</span>(key);</span><br><span class="line">        <span class="comment">//产生公钥</span></span><br><span class="line">        <span class="type">PublicKey</span> <span class="variable">pubKey</span> <span class="operator">=</span> keyFactory.generatePublic(x509KeySpec);</span><br><span class="line">        <span class="comment">//数据解密</span></span><br><span class="line">        <span class="type">Cipher</span> <span class="variable">cipher</span> <span class="operator">=</span> Cipher.getInstance(keyFactory.getAlgorithm());</span><br><span class="line">        cipher.init(Cipher.DECRYPT_MODE, pubKey);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">String</span>(cipher.doFinal(data), UTF8);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始化密钥对</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> Map 甲方密钥的Map</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, Object&gt; <span class="title function_">initKey</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//实例化密钥生成器</span></span><br><span class="line">        <span class="type">KeyPairGenerator</span> <span class="variable">keyPairGenerator</span> <span class="operator">=</span> KeyPairGenerator.getInstance(KEY_ALGORITHM);</span><br><span class="line">        <span class="comment">//初始化密钥生成器</span></span><br><span class="line">        keyPairGenerator.initialize(KEY_SIZE);</span><br><span class="line">        <span class="comment">//生成密钥对</span></span><br><span class="line">        <span class="type">KeyPair</span> <span class="variable">keyPair</span> <span class="operator">=</span> keyPairGenerator.generateKeyPair();</span><br><span class="line">        <span class="comment">//甲方公钥</span></span><br><span class="line">        <span class="type">RSAPublicKey</span> <span class="variable">publicKey</span> <span class="operator">=</span> (RSAPublicKey) keyPair.getPublic();</span><br><span class="line">        <span class="comment">//甲方私钥</span></span><br><span class="line">        <span class="type">RSAPrivateKey</span> <span class="variable">privateKey</span> <span class="operator">=</span> (RSAPrivateKey) keyPair.getPrivate();</span><br><span class="line">        <span class="comment">//将密钥存储在map中</span></span><br><span class="line">        Map&lt;String, Object&gt; keyMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, Object&gt;();</span><br><span class="line">        keyMap.put(PUBLIC_KEY, publicKey);</span><br><span class="line">        keyMap.put(PRIVATE_KEY, privateKey);</span><br><span class="line">        <span class="keyword">return</span> keyMap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取得私钥</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> keyMap 密钥map</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> byte[] 私钥</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] getPrivateKey(Map&lt;String, Object&gt; keyMap) &#123;</span><br><span class="line">        <span class="type">Key</span> <span class="variable">key</span> <span class="operator">=</span> (Key) keyMap.get(PRIVATE_KEY);</span><br><span class="line">        <span class="keyword">return</span> key.getEncoded();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取得公钥</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> keyMap 密钥map</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> byte[] 公钥</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">byte</span>[] getPublicKey(Map&lt;String, Object&gt; keyMap) <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Key</span> <span class="variable">key</span> <span class="operator">=</span> (Key) keyMap.get(PUBLIC_KEY);</span><br><span class="line">        <span class="keyword">return</span> key.getEncoded();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> args args</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception ex</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">//初始化密钥，生成密钥对</span></span><br><span class="line">        Map&lt;String, Object&gt; keyMap = initKey();</span><br><span class="line">        <span class="comment">//公钥</span></span><br><span class="line">        <span class="type">byte</span>[] publicKey = getPublicKey(keyMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//私钥</span></span><br><span class="line">        <span class="type">byte</span>[] privateKey = getPrivateKey(keyMap);</span><br><span class="line">        System.out.println(<span class="string">&quot;公钥：&quot;</span> + Base64.encodeBase64String(publicKey));</span><br><span class="line">        System.out.println(<span class="string">&quot;私钥：&quot;</span> + Base64.encodeBase64String(privateKey));</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;================密钥对构造完毕,甲方将公钥公布给乙方，开始进行加密数据的传输=============&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">str</span> <span class="operator">=</span> <span class="string">&quot;RSA密码交换算法&quot;</span>;</span><br><span class="line">        System.out.println(<span class="string">&quot;===========甲方向乙方发送加密数据==============&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;原文:&quot;</span> + str);</span><br><span class="line">        <span class="comment">//甲方进行数据的加密</span></span><br><span class="line">        <span class="type">byte</span>[] code1 = encryptByPrivateKey(str, privateKey);</span><br><span class="line">        System.out.println(<span class="string">&quot;加密后的数据：&quot;</span> + Base64.encodeBase64String(code1));</span><br><span class="line">        System.out.println(<span class="string">&quot;===========乙方使用甲方提供的公钥对数据进行解密==============&quot;</span>);</span><br><span class="line">        <span class="comment">//乙方进行数据的解密</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">decode1</span> <span class="operator">=</span> decryptByPublicKey(code1, publicKey);</span><br><span class="line">        System.out.println(<span class="string">&quot;乙方解密后的数据：&quot;</span> + decode1);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;===========反向进行操作，乙方向甲方发送数据==============&quot;</span>);</span><br><span class="line"></span><br><span class="line">        str = <span class="string">&quot;乙方向甲方发送数据RSA算法&quot;</span>;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;原文:&quot;</span> + str);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//乙方使用公钥对数据进行加密</span></span><br><span class="line">        <span class="type">byte</span>[] code2 = encryptByPublicKey(str, publicKey);</span><br><span class="line">        System.out.println(<span class="string">&quot;===========乙方使用公钥对数据进行加密==============&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;加密后的数据：&quot;</span> + Base64.encodeBase64String(code2));</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;=============乙方将数据传送给甲方======================&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;===========甲方使用私钥对数据进行解密==============&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//甲方使用私钥对数据进行解密</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">decode2</span> <span class="operator">=</span> decryptByPrivateKey(code2, privateKey);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;甲方解密后的数据：&quot;</span> + decode2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="算法选择"><a href="#算法选择" class="headerlink" title="算法选择"></a>算法选择</h2><p>RSA 算法规定：</p>
+<ol>
+<li>待加密的字节数不能超过密钥的长度值除以 8 再减去 11（即：KeySize &#x2F; 8 - 11），</li>
+<li>加密后得到密文的字节数，正好是密钥的长度值除以 8（即：KeySize &#x2F; 8）</li>
+</ol>
+<p>也就是对于常见的2048位的密钥，最大加密长度为256 - 11 &#x3D; 245个字节</p>
+<p>针对超长问题，常见的解决办法有两种，</p>
+<p>一、对待加密数据进行拆分，分成众多小片段，解密时，也分段解密。</p>
+<p>二、结合对称加密算法使用，使用RSA加密对称加密算法的密钥。</p>
+<p>RSA是企业级应用标准，很多第三方的加密软件使用RSA 2048bit加密</p>
+<p>优点：密码分配简单，安全保障性高</p>
+<p>缺点：</p>
+<ol>
+<li>速度慢，RSA最快的情况也比DES慢上好几倍，RSA的速度比对应同样安全级别的对称密码算法要慢1000倍左右</li>
+<li>一般来说只用于少量数据加密</li>
+<li>产生密钥很麻烦，受到素数产生技术的限制，因而难以做到一次一密。</li>
+</ol>
+<p>实际上，这些缺点是非对称加密本身的局限。</p>
+<p>对称加密和非对称加密算法各自用途和功能以及非常明确了。实际内容传输都会使用对称加密， 而安全的交换对称密钥、数字签名就使用非对称加密。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AE%89%E5%85%A8%E8%B4%B4%E5%A3%AB/" rel="tag"># 安全贴士</a>
+              <a href="/tags/%E5%8A%A0%E8%A7%A3%E5%AF%86/" rel="tag"># 加解密</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/certificate/openssl.html" rel="prev" title="【安全贴士】证书操作工具OpenSSL">
+                  <i class="fa fa-angle-left"></i> 【安全贴士】证书操作工具OpenSSL
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/certificate/java-ssl-auth.html" rel="next" title="【安全贴士】Java实现证书双向认证">
+                  【安全贴士】Java实现证书双向认证 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

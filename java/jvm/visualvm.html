@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="VisualVM是功能最强大的运行监控和故障处理工具之一，曾经很长一段时间是Oracle官方主力发展的虚拟机故障处理工具。 它除了常规的运行监视、故障处理外，还提供性能分析（Profiling）。VisualVM不需要被监视程序基于特殊Agent去运行， 因此它的通用性极强，对应用程序实际性能影响很小，使得它能直接应用在生产环境中。 从JDK9开始，不再打包到JDK中，需要单独下载。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM工具-可视化工具VisualVM">
+<meta property="og:url" content="http://yidao620c.github.io/java/jvm/visualvm.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="VisualVM是功能最强大的运行监控和故障处理工具之一，曾经很长一段时间是Oracle官方主力发展的虚拟机故障处理工具。 它除了常规的运行监视、故障处理外，还提供性能分析（Profiling）。VisualVM不需要被监视程序基于特殊Agent去运行， 因此它的通用性极强，对应用程序实际性能影响很小，使得它能直接应用在生产环境中。 从JDK9开始，不再打包到JDK中，需要单独下载。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100513.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100514.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100515.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100516.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100517.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100701.png">
+<meta property="article:published_time" content="2021-04-25T06:12:55.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.937Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="jvm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/img-2021100513.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/jvm/visualvm.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/jvm/visualvm.html","path":"java/jvm/visualvm.html","title":"JVM工具-可视化工具VisualVM"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JVM工具-可视化工具VisualVM | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">使用方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E3%80%81%E6%B5%8F%E8%A7%88%E5%A0%86%E8%BD%AC%E5%82%A8%E5%BF%AB%E7%85%A7"><span class="nav-number">1.1.</span> <span class="nav-text">生成、浏览堆转储快照</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E7%A8%8B%E5%BA%8F%E6%80%A7%E8%83%BD"><span class="nav-number">1.2.</span> <span class="nav-text">分析程序性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BTrace%E5%8A%A8%E6%80%81%E6%97%A5%E5%BF%97%E8%B7%9F%E8%B8%AA"><span class="nav-number">1.3.</span> <span class="nav-text">BTrace动态日志跟踪</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OQL%E7%9A%84%E8%AF%AD%E6%B3%95%E6%94%AF%E6%8C%81"><span class="nav-number">2.</span> <span class="nav-text">OQL的语法支持</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%9F%A5%E8%AF%A2%E8%AF%AD%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">基本查询语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%BD%AEheap%E5%AF%B9%E8%B1%A1%E6%9F%A5%E8%AF%A2"><span class="nav-number">2.2.</span> <span class="nav-text">内置heap对象查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.</span> <span class="nav-text">对象函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88-%E7%BB%9F%E8%AE%A1%E5%87%BD%E6%95%B0"><span class="nav-number">2.4.</span> <span class="nav-text">集合&#x2F;统计函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%8C%96OQL"><span class="nav-number">2.5.</span> <span class="nav-text">程序化OQL</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/jvm/visualvm.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JVM工具-可视化工具VisualVM | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM工具-可视化工具VisualVM
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-25 14:12:55" itemprop="dateCreated datePublished" datetime="2021-04-25T14:12:55+08:00">2021-04-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>VisualVM是功能最强大的运行监控和故障处理工具之一，曾经很长一段时间是Oracle官方主力发展的虚拟机故障处理工具。
+它除了常规的运行监视、故障处理外，还提供性能分析（Profiling）。VisualVM不需要被监视程序基于特殊Agent去运行，
+因此它的通用性极强，对应用程序实际性能影响很小，使得它能直接应用在生产环境中。</p>
+<p>从JDK9开始，不再打包到JDK中，需要单独下载。</p>
+<span id="more"></span>
+
+<h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>VisualVM基于NetBeans平台开发，具备通过插件扩展功能的能力，可以做到</p>
+<ol>
+<li>显示虚拟机进程以及进程的配置、环境信息。</li>
+<li>监视应用程序的处理器、垃圾收集、堆、方法区以及线程的信息。</li>
+<li>dump以及分析堆转储快照能力。</li>
+<li>方法级程序性能分析，找出被调用最多、运行时间最长的方法。</li>
+<li>离线程序快照：收集程序的运行时配置、线程dump、内存dump等信息建立一个快照，将快照导出。</li>
+<li>其他扩展插件带来的无限可能性。</li>
+</ol>
+<p>官方下载地址：<a target="_blank" rel="noopener" href="https://visualvm.github.io/download.html">https://visualvm.github.io/download.html</a></p>
+<p>下载后，解压后。修改下<code>/etc/visualvm.conf</code>文件，将<code>visualvm_jdkhome=</code>修改成本机JDK目录地址即可。
+双击bin目录下的visualvm.exe即可运行。</p>
+<p>初次启动时并未加载任何插件，所以第一步肯定是安装插件。安装插件可以手动也可以自动安装。
+推荐在网络环境下，通过点击工具 &gt; 插件菜单，弹出插件页签，在里面的可用插件以及已安装中都有。</p>
+<p>选择一个需要监视的程序进入程序主界面。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100513.png" alt="img.png"></p>
+<h3 id="生成、浏览堆转储快照"><a href="#生成、浏览堆转储快照" class="headerlink" title="生成、浏览堆转储快照"></a>生成、浏览堆转储快照</h3><p>在应用程序窗口双击某个进程后，点击Monitor页签，然后点击Heap Dump即可生成dump文件。
+生成后会在该堆的应用程序下增加一个以[heap-dump]开头的子节点，并在主页签中打开该转储快照。
+如果想要把dump文件导出，则点击另存为即可。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100514.png" alt="img.png"></p>
+<p>在Summary标签页看到应用程序dump的运行时参数、System.getProperties()内容、线程堆栈等信息。
+切换至Objects标签可查看所有对象的信息。OQL是对象查询语句，需要下载对应插件。Threads标签查看线程信息。</p>
+<h3 id="分析程序性能"><a href="#分析程序性能" class="headerlink" title="分析程序性能"></a>分析程序性能</h3><p>在Profiler页签中，VisualVM提供了程序运行期方法级的处理器执行时间分析以及内存分析。
+一般不会在生产环境使用这项功能，或者改用JMC来完成。</p>
+<p>要开始性能分析，选择CPU和内存按钮中的一个，然后切换到应用程序中对程序进行操作，
+VisualVM会记录这段时间内应用程序执行过的所有方法。如果是进行处理器执行时间分析，
+将会统计每个方法执行次数、执行耗时；如果是内存分析，则会统计每个方法关联的对象数以及占用空间。
+监控结束后，点击停止按钮即可。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100515.png" alt="img.png"></p>
+<h3 id="BTrace动态日志跟踪"><a href="#BTrace动态日志跟踪" class="headerlink" title="BTrace动态日志跟踪"></a>BTrace动态日志跟踪</h3><p>BTrace是一个很神奇的VisualVM插件，它本身也是一个可运行的独立程序。
+其作用是在不中断目标程序运行前提下，通过HotSpot虚拟机的Instrument功能动态增加原本不存在的调试代码。
+这项功能在实际生产环境中非常有用，当生产环境中程序出现问题，排错时又忘记打印日志了。
+这时候不需要在源码中添加日志，然后发包，再替换、重启服务。可在运行期间就加入日志代码解决问题。</p>
+<p>安装完BTrace插件后，在应用查询面板中右键点击要调试的应用查询，会出现Trace Application的菜单。
+点击后进入BTrace面板。这个面板看上去就是一个简单额Java程序开发环境，里面甚至还有一小段代码。
+<img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100516.png" alt="img.png"></p>
+<p>比如我的演示程序的API接口中会调用如下的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">sleep</span><span class="params">(<span class="type">int</span> time)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;start to do task&quot;</span>);</span><br><span class="line">        Thread.sleep(time);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在我想知道传入的参数time的值是什么。下面是TracingScript脚本代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* BTrace Script Template */</span></span><br><span class="line"><span class="keyword">import</span> org.openjdk.btrace.core.annotations.*;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.openjdk.btrace.core.BTraceUtils.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BTrace</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TracingScript</span> &#123;</span><br><span class="line">    <span class="meta">@OnMethod(clazz=&quot;com.xncoding.pos.controller.UserController&quot;,</span></span><br><span class="line"><span class="meta">    method=&quot;sleep&quot;,</span></span><br><span class="line"><span class="meta">    location=@Location(Kind.RETURN))</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">func</span><span class="params">(<span class="meta">@Self</span> com.xncoding.pos.controller.UserController instance, <span class="type">int</span> time)</span> &#123;</span><br><span class="line">        println(<span class="string">&quot;调用堆栈&quot;</span>);</span><br><span class="line">        <span class="comment">// jstack();</span></span><br><span class="line">        println(strcat(<span class="string">&quot;方法入参time=&quot;</span>, str(time)));</span><br><span class="line">        <span class="comment">// 强烈建议加上，否则会因为输出缓冲看不到最新打印结果</span></span><br><span class="line">        println(<span class="string">&quot;==========================&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>点击Start按钮后稍等片刻，出现Done表示成功。当程序运行时，这里output就会打印调试信息。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100517.png" alt="img.png"></p>
+<p>BTrace用途很广泛，打印调用堆栈、参数、返回值只是最基本的，在它网站上有性能监视、定位连接泄露、内存泄露、
+解决多线程竞争问题等使用案例，可去它的官网了解。</p>
+<p>BTrace能实现动态修改程序行为，是因为它基于Java虚拟机的Instrument开发的。Instrument是JVM工具接口的重要组件。
+提供了一套代理机制，是的第三方工具程序可以代理方式访问和修改Java虚拟机内部的数据，
+阿里巴巴可以的诊断工具Arthas也是通过Instrument实现了跟BTrace类似的功能。</p>
+<h2 id="OQL的语法支持"><a href="#OQL的语法支持" class="headerlink" title="OQL的语法支持"></a>OQL的语法支持</h2><p>Visual VM提供了对OQL（对象查询语言）的支持，以便于开发人员在庞大的堆内存数据中，快速定位所需的资源。</p>
+<p>官方使用文档：<a target="_blank" rel="noopener" href="http://cr.openjdk.java.net/~sundar/8022483/webrev.01/raw_files/new/src/share/classes/com/sun/tools/hat/resources/oqlhelp.html">http://cr.openjdk.java.net/~sundar/8022483/webrev.01/raw_files/new/src/share/classes/com/sun/tools/hat/resources/oqlhelp.html</a></p>
+<h3 id="基本查询语法"><a href="#基本查询语法" class="headerlink" title="基本查询语法"></a>基本查询语法</h3><p>OQL 语言是一种类似SQL的查询语言。基本语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">select &lt;JavaScript expression to select&gt;</span><br><span class="line">[ from [instanceof] &lt;class name&gt; &lt;identifier&gt;</span><br><span class="line">[ where &lt;JavaScript boolean expression to filter&gt; ] ]</span><br></pre></td></tr></table></figure>
+
+<p>OQL由3个部分组成：select 子句、from 子句和where 子句。select 子句指定查询结果要显示的内容；from 子句指定查询范围，
+可指定类名，如<code>java.lang.String</code>、<code>char[]</code>、<code>[Ljava.io.File</code>（File数组）；where 子句用于指定查询条件。</p>
+<p>select 子句和where 子句支持使用Javascript 语法处理较为复杂的查询逻辑；
+select 子句可以使用类似json的语法输出多个列；from子句中可以使用instanceof关键字，将给定类的子类也包括到输出列表中。</p>
+<p>在Visual VM的OQL中，可以直接访问对象的属性和部分方法。如下例中，筛选出长度大于等于100的字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select s from java.lang.String s where s.value.length &gt; 100</span><br></pre></td></tr></table></figure>
+
+<p>选取长度大于等于256的 int 数组：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select a from [I a where a.length &gt;= 256</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/img-2021100701.png" alt="img.png"></p>
+<p>筛选出表示两位数整数的字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select &#123;instance: s, content: s.toString()&#125; from java.lang.String s where /^\d&#123;2&#125;$/.test(s.toString())</span><br></pre></td></tr></table></figure>
+<p>上例中，select 子句使用了json语法，指定输出两列为String对象以及String.toString() 的输出。
+where 子句使用正则表达式，指定了符合<code>/^\d&#123;2&#125;$/</code>条件的字符串。</p>
+<p>查询文件对象的path路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select file.path.value.toString() from java.io.File file</span><br></pre></td></tr></table></figure>
+
+<p>下例使用 instance 关键字选取所有的ClassLoader，包括子类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select classof(cl).name from instanceof java.lang.ClassLoader cl</span><br></pre></td></tr></table></figure>
+
+<p>由于在Java程序中一个类可能会被多个ClassLoader同时载入，因此这种情况下，可能需要使用Class的ID来指定Class。
+如下例，选出了所有ID为0x37A014D8的Class对象实例。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select o from instanceof 0xd404b198 o</span><br></pre></td></tr></table></figure>
+
+<h3 id="内置heap对象查询"><a href="#内置heap对象查询" class="headerlink" title="内置heap对象查询"></a>内置heap对象查询</h3><p>heap对象是 Visual VM OQL 的内置对象。通过 heap 对象可以实现一些强大的OQL功能。heap 对象的主要方法如下：</p>
+<ul>
+<li>forEachClass()：对每一个Class对象执行一个回调操作。它的使用方法类似于 heap.forEachClass(callback)，其中 callback 为 Javascript 函数。</li>
+<li>findClass()：查找给定名称的类对象，返回类的方法和属性参考下表，它的调用方法类似 heap.findClass(className)。</li>
+<li>classes()：返回堆快照中所有的类集合。使用方法如 heap.classes()。</li>
+<li>objects()：返回堆快照中所有的对象集合。使用方法如 heap.objects(clazz,[includeSubtypes],[filter])，
+其中clazz指定类名称，includeSubtypes指定是否选出子类，filter 为过滤器，指定筛选规则。includeSubtypes 和 filter 可以省略。</li>
+<li>livepaths()：返回指定对象的存活路径。即，显示哪些对象直接或者间接引用了给定对象。它的使用方法如heap.livepaths(obj)。</li>
+<li>roots()：返回这个堆的根对象。使用方法如heap.roots()。</li>
+</ul>
+<p>使用findClass()返回的Class对象拥有的属性和方法 ：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>name：类名称</td>
+<td>isSubclassOf()：是否是指定类的子类</td>
+</tr>
+<tr>
+<td>superclass：父类</td>
+<td>isSuperclassOf()：是否是指定类的父类</td>
+</tr>
+<tr>
+<td>statics：类的静态变量的名称和值</td>
+<td>subclasses()：返回所有子类</td>
+</tr>
+<tr>
+<td>fields：类的域信息</td>
+<td>superclasses()：返回所有父类</td>
+</tr>
+</tbody></table>
+<p>下例查找java.util.Vector类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.findClass(&quot;java.util.Vector&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>查找java.util.Vector的所有父类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.findClass(&quot;java.util.Vector&quot;).superclasses()</span><br></pre></td></tr></table></figure>
+
+<p>查找所有在java.io包下的类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select filter(heap.classes(), &quot;/java.io./.test(it.name)&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>查找字符串“56”的引用链：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.livepaths(s) from java.lang.String s where s.toString()==&#x27;56&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>如下是一种可能的输出结果，其中java.lang.String#1600即字符串“56”。它显示了该字符串被一个WebPage对象持有。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.String#1600-&gt;package.WebPage#57-&gt;java.lang.Object[]#341-&gt;java.util.Vector#11-&gt;package.Student#3</span><br></pre></td></tr></table></figure>
+
+<p>下例查找当前堆中所有java.io.File对象实例，参数true表示java.io.File的子类也需要被显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.objects(&quot;java.io.File&quot;,true)</span><br></pre></td></tr></table></figure>
+
+<p>下例访问了TraceStudent类的静态成员webpages对象：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.findClass(&quot;package.TraceStudent&quot;).webpagess</span><br></pre></td></tr></table></figure>
+
+<p>查找系统属性</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select heap.findClass(&quot;java.lang.System&quot;).statics.props</span><br></pre></td></tr></table></figure>
+
+<h3 id="对象函数"><a href="#对象函数" class="headerlink" title="对象函数"></a>对象函数</h3><p>在Visual VM中，为OQL语言还提供了一组以对象为操作目标的内置函数。通过这些函数，可以获取目标对象的更多信息。本节主要介绍一些常用的对象函数。</p>
+<p><strong>classof()函数</strong></p>
+<p>返回给定Java对象的类。调用方法形如classof(objname)。返回的类对象有以下属性。</p>
+<ul>
+<li>name：类名称。</li>
+<li>superclass：父类。</li>
+<li>statics：类的静态变量的名称和值。</li>
+<li>fields：类的域信息。</li>
+</ul>
+<p>同时返回的Class对象又有如下的方法可以继续调用</p>
+<ul>
+<li>isSubclassOf()：是否是指定类的子类。</li>
+<li>isSuperclassOf()：是否是指定类的父类。</li>
+<li>subclasses()：返回所有子类。</li>
+<li>superclasses()：返回所有父类。</li>
+</ul>
+<p>下例将返回所有Vector类以及子类的类型：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select classof(v) from instanceof java.util.Vector v</span><br></pre></td></tr></table></figure>
+
+<p><strong>objectid()函数</strong></p>
+<p>objectid()函数返回对象的ID。使用方法如objectid(objname)。</p>
+<p>返回所有Vector对象（不包含子类）的ID：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select objectid(v) from java.util.Vector v</span><br></pre></td></tr></table></figure>
+
+<p><strong>reachables()函数</strong></p>
+<p>eachables()函数返回给定对象的可达对象集合。使用方法如reachables(obj,[exclude])。obj为给定对象，
+exclude指定忽略给定对象中的某一字段的可达引用。</p>
+<p>下例返回’56’这个String对象的所有可达对象：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">select reachables(s) from java.lang.String s where s.toString()==&#x27;56&#x27;</span><br><span class="line">select reachables(s, &quot;java.lang.String.value&quot;) from java.lang.String s where s.toString()==&#x27;56&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>referrers()函数</strong></p>
+<p>返回引用给定对象的对象集合。使用方法如：referrers(obj)。</p>
+<p>下例返回了引用“56”String对象的对象集合：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select referrers(s) from java.lang.String s where s.toString()==&#x27;56&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>referees()函数</strong></p>
+<p>referees()函数返回给定对象的直接引用对象集合，用法形如：referees(obj)。</p>
+<p>例返回了File对象的静态成员引用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select referees(heap.findClass(&quot;java.io.File&quot;))</span><br></pre></td></tr></table></figure>
+
+<p><strong>sizeof()函数</strong></p>
+<p>sizeof()函数返回指定对象的大小（不包括它的引用对象），即浅堆（Shallow Size）。</p>
+<p>注意：sizeof()函数返回对象的大小不包括对象的引用对象。因此，sizeof()的返回值由对象的类型决定，
+和对象的具体内容无关。</p>
+<p>下例返回所有Vector的大小以及对象：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select &#123;size:sizeof(o),Object:o&#125; from java.util.Vector o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，不论Vector集合包含多少对象。Vector对象所占用的内存大小始终为36字节。这是由Vector本身的结构决定的，
+与其内容无关。sizeof()函数就是返回对象的固有大小。</p>
+<p><strong>rsizeof()函数</strong></p>
+<p>rsizeof()函数返回对象以及其引用对象的大小总和，即深堆（Retained Size）。这个数值不仅与类本身的结构有关，
+还与对象的当前数据内容有关。</p>
+<p>下例显示了所有Vector对象的Shallow Size以及Retained Size：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select &#123;size:sizeof(o),rsize:rsizeof(o)&#125; from java.util.Vector o</span><br></pre></td></tr></table></figure>
+
+<p>输出结果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">size = 36,</span><br><span class="line">rsize = 140</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">size = 36,</span><br><span class="line">rsize = 140</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">size = 36,</span><br><span class="line">rsize = 140</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：resizeof()取得对象以及其引用对象的大小总和。因此，它的返回值与对象的当前数据内容有关。</p>
+<p><strong>toHtml()函数</strong></p>
+<p>toHtml()函数将对象转为HTML显示。</p>
+<p>下例将Vector对象的输出使用HTML进行加粗和斜体显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select &quot;&lt;b&gt;&lt;em&gt;&quot;+toHtml(o)+&quot;&lt;/em&gt;&lt;/b&gt;&quot; from java.util.Vector o</span><br></pre></td></tr></table></figure>
+
+<h3 id="集合-统计函数"><a href="#集合-统计函数" class="headerlink" title="集合&#x2F;统计函数"></a>集合&#x2F;统计函数</h3><p>Visual VM中还有一组用于集合操作和统计的函数。可以方便地对结果集进行后处理或者统计操作。
+集合&#x2F;统计函数主要有contains()、count()、filter()、length()、map()、max()、min()、sort()、top()等。</p>
+<p>下例返回被 File 对象引用的 String 对象集合。首先通过 referrers(s) 得到所有引用String 对象的对象集合。
+使用 contains() 函数及其参数布尔等式表达式classof(it).name &#x3D;&#x3D; ‘java.io.File’)，
+将 contains() 的筛选条件设置为类名是java.io.File 的对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select s.toString() from java.lang.String s where contains(referrers(s), &quot;classof(it).name == &#x27;java.io.File&#x27;&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>通过该OQL，得到了当前堆中所有的File对象的文件名称。可以理解为当前Java程序通过java.io.File获得已打开或持有的所有文件。</p>
+<p><strong>count()函数</strong></p>
+<p>count()函数返回指定集合内满足给定布尔表达式的对象数量。它的基本使用方法如：count(set, [boolexpression])。
+参数set指定要统计总数的集合，boolexpression为布尔条件表达式，可以省略，但如果指定，
+count()函数只计算满足表达式的对象个数。在boolexpression表达式中，可以使用以下内置对象。</p>
+<ul>
+<li>it：当前访问对象。</li>
+<li>index：当前对象索引。</li>
+<li>array：当前迭代的数组&#x2F;集合。</li>
+</ul>
+<p>下例返回堆中所有java.io包中的类的数量，布尔表达式使用正则表达式表示。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(heap.classes(), &quot;/java.io./.test(it.name)&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>下列返回堆中所有类的数量。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(heap.classes())</span><br></pre></td></tr></table></figure>
+
+<p>filter()函数返回给定集合中，满足某一个布尔表达式的对象子集合。使用方法形如filter(set, boolexpression)。
+在boolexpression中，可以使用以下内置对象。</p>
+<ul>
+<li>it：当前访问对象。</li>
+<li>index：当前对象索引。</li>
+<li>array：当前迭代的数组&#x2F;集合。</li>
+</ul>
+<p>下例返回所有java.io包中的类。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select filter(heap.classes(), &quot;/java.io./.test(it.name)&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>下例返回了当前堆中，引用了java.io.File对象并且不在java.io包中的所有对象实例。
+首先使用referrers()函数得到所有引用java.io.File对象的实例，接着使用filter()函数进行过滤，
+只选取不在java.io包中的对象。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select filter(referrers(f), &quot;! /java.io./.test(classof(it).name)&quot;) from java.io.File f</span><br></pre></td></tr></table></figure>
+
+<p>map()函数将结果集中的每一个元素按照特定的规则进行转换，以方便输出显示。
+使用方法形如：map(set, transferCode)。set为目标集合，transferCode为转换代码。
+在transferCode中可以使用以下内置对象。</p>
+<ul>
+<li>it：当前访问对象。</li>
+<li>index：当前对象索引。</li>
+<li>array：当前迭代的数组&#x2F;集合。</li>
+</ul>
+<p>下例将当前堆中的所有File对象进行格式化输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select map(heap.objects(&quot;java.io.File&quot;), &quot;index + &#x27;=&#x27; + it.path.toString()&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>top()函数返回在给定集合中，按照特定顺序排序的前几个对象。一般使用方法为：top(set, expression,num)。
+其中set为给定集合，expression为排序逻辑，num指定输出前几个对象。在expression中，可以使用以下内置对象。</p>
+<ul>
+<li>lhs：用于比较的左侧元素。</li>
+<li>rhs：用于比较的右侧元素。</li>
+</ul>
+<p>下例显示了长度最长的前5个字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select top(filter(heap.objects(&#x27;java.lang.String&#x27;),&#x27;it.value!=null&#x27;), &#x27;rhs.value.length - lhs.value.length&#x27;, 5)</span><br></pre></td></tr></table></figure>
+
+<p>sum()函数用于计算集合的累计值。它的一般使用方法为：sum(set,[expression])。其中第一个参数set为给定集合，
+参数expression用于将当前对象映射到一个整数，以便用于求和。参数expression可以省略，
+如果省略，则可以使用map()函数作为替代。</p>
+<p>下例计算所有 java.util.Properties 对象的可达对象的总大小：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select sum(map(reachables(p), &#x27;sizeof(it)&#x27;)) from java.util.Properties p</span><br></pre></td></tr></table></figure>
+
+<p>unique()函数将除去指定集合中的重复元素，返回不包含重复元素的集合。它的一般使用方法形如unique(set)。</p>
+<p>下例返回当前堆中，有多个不同的字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select count(unique(map(heap.objects(&#x27;java.lang.String&#x27;), &#x27;it.value&#x27;)))</span><br></pre></td></tr></table></figure>
+
+<h3 id="程序化OQL"><a href="#程序化OQL" class="headerlink" title="程序化OQL"></a>程序化OQL</h3><p>Visual VM不仅支持在OQL控制台上执行OQL查询语言，也可以通过其OQL相关的JAR包，将OQL查询程序化，
+从而获得更加灵活的对象查询功能，实现堆快照分析的自动化。</p>
+<p>在进行OQL开发前，工程需要引用Visual VM安装目录下JAR包。</p>
+<p>这里以分析Tomcat堆溢出文件为例，展示程序化OQL带来的便利。 对于给定的Tomcat堆溢出Dump文件，
+这里将展示如何通过程序，计算Tomcat平均每秒产生的session数量，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AveLoadTomcatOOM</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">dumpFilePath</span> <span class="operator">=</span> <span class="string">&quot;d:/tmp/tomcat_oom/tomcat.hprof&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String args[])</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        OQLEngine engine;</span><br><span class="line">        <span class="keyword">final</span> List&lt;Long&gt; creationTimes = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Long&gt;(<span class="number">000</span>);</span><br><span class="line">        engine = <span class="keyword">new</span> <span class="title class_">OQLEngine</span>(HeapFactory.createHeap(<span class="keyword">new</span> <span class="title class_">File</span>(dumpFilePath)));</span><br><span class="line">        <span class="type">String</span> <span class="variable">query</span> <span class="operator">=</span> <span class="string">&quot;select s.creationTime from org.apache.catalina. session.StandardSession s&quot;</span>; <span class="comment">//第8行</span></span><br><span class="line">        engine.executeQuery(query, <span class="keyword">new</span> <span class="title class_">OQLEngine</span>.ObjectVisitor() &#123;</span><br><span class="line">            <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">visit</span><span class="params">(Object obj)</span> &#123;</span><br><span class="line">                creationTimes.add((Long) obj);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        Collections.sort(creationTimes);</span><br><span class="line">        <span class="type">long</span> <span class="variable">min</span> <span class="operator">=</span> creationTimes.get(<span class="number">0</span>) / <span class="number">1000</span>;<span class="comment">//第18行</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">max</span> <span class="operator">=</span> creationTimes.get(creationTimes.size() - <span class="number">1</span>) / <span class="number">1000</span>;</span><br><span class="line">        System.out.println(<span class="string">&quot;平均压力：&quot;</span> + creationTimes.size() * <span class="number">1.0</span> / (max - min) + <span class="string">&quot;次/秒&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码第8行，通过OQL语句得到所有session的创建时间，
+在第18、19行获得所有session中最早创建和最晚创建的session时间，在第21行计算整个时间段内的平均session创建速度。</p>
+<p>使用这种方式可以做到堆转存文件的全自动化分析，并将结果导出到给定文件，当有多个堆转存文件需要分析时，有着重要的作用。</p>
+<p>除了使用以上方式外，Visual VM的OQL控制台也支持直接使用JavaScript代码进行编程，如下代码实现了相同功能：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">var sessions=toArray(heap.objects(&quot;org.apache.catalina.session.StandardSession&quot;));</span><br><span class="line">var count=sessions.length;</span><br><span class="line">var createtimes=new Array();</span><br><span class="line">for(var i=0;i&lt;count;i++)&#123;</span><br><span class="line">    createtimes[i]=sessions[i].creationTime;</span><br><span class="line">&#125;</span><br><span class="line">createtimes.sort();</span><br><span class="line">var min=createtimes[0]/1000;</span><br><span class="line">var max=createtimes[count-1]/1000;</span><br><span class="line">count/(max-min)+&quot;次/秒&quot;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jvm/" rel="tag"># jvm</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/jvm/jhsdb.html" rel="prev" title="JVM工具-可视化工具JHSDB">
+                  <i class="fa fa-angle-left"></i> JVM工具-可视化工具JHSDB
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java/jvm/jvm-tools.html" rel="next" title="JVM工具-基础监控工具">
+                  JVM工具-基础监控工具 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

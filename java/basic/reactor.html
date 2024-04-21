@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多">
+<meta property="og:type" content="article">
+<meta property="og:title" content="聊聊Reactor I&#x2F;O模型">
+<meta property="og:url" content="http://yidao620c.github.io/java/basic/reactor.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。 I&#x2F;O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪）， 能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。 与多">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor05.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor02.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor03.png">
+<meta property="article:published_time" content="2018-04-05T01:23:12.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:17.630Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/java/basic/reactor.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/java/basic/reactor.html","path":"java/basic/reactor.html","title":"聊聊Reactor I/O模型"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>聊聊Reactor I/O模型 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E8%A7%A3Reactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">图解Reactor模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E7%9A%84%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%96%B9%E5%BC%8F"><span class="nav-number">1.1.</span> <span class="nav-text">传统的多线程方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reactor%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">Reactor方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java%E4%B8%AD%E5%AE%9E%E7%8E%B0Reactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">Java中实现Reactor模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">经典模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E5%B7%A5%E4%BD%9C%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.</span> <span class="nav-text">多工作线程模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9AReactor%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.3.</span> <span class="nav-text">多Reactor模式</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/java/basic/reactor.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="聊聊Reactor I/O模型 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          聊聊Reactor I/O模型
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-05 09:23:12" itemprop="dateCreated datePublished" datetime="2018-04-05T09:23:12+08:00">2018-04-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>上一篇介绍了Unix系统支持的I&#x2F;O模型，以及相应的在Java中的实现方式。本篇重点讲解一下Reactor模型原理和实现机制。</p>
+<p>I&#x2F;O多路复用又被称为”事件驱动”，就是通过一种机制，一个进程可以监视多个描述符，一旦某个描述符就绪（一般是读就绪或者写就绪），
+能够通知程序进行相应的读写操作，技术上是通过调用操作系统的select、pselect、poll、epoll来实现。</p>
+<p>与多进程和多线程技术相比，I&#x2F;O多路复用技术的最大优势是系统开销小，系统不必创建进程&#x2F;线程，也不必维护这些进程&#x2F;线程，从而大大减小了系统的开销。</p>
+<p>Reactor是一种应用在服务器端的开发模式，目的是提高服务端程序的并发能力，其实就是实现了I&#x2F;O多路复用这种I&#x2F;O模型。</p>
+<span id="more"></span>
+
+<h2 id="图解Reactor模式"><a href="#图解Reactor模式" class="headerlink" title="图解Reactor模式"></a>图解Reactor模式</h2><p>为了形象的解释这个模式，我用一个餐厅点餐的例子来直观的说明一下。</p>
+<h3 id="传统的多线程方式"><a href="#传统的多线程方式" class="headerlink" title="传统的多线程方式"></a>传统的多线程方式</h3><p>每个顾客都有自己的服务团队（线程），在人少的情况下是可以良好的运作的，流程如下：</p>
+<ol>
+<li>服务员给出菜单，并等待点菜</li>
+<li>顾客查看菜单，并点菜</li>
+<li>服务员把菜单交给厨师，厨师照着做菜</li>
+<li>厨师做好菜后端到餐桌上</li>
+</ol>
+<p>如下图所示</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor04.png"></p>
+<p>现在餐厅的口碑好，顾客人数不断增加，这时服务员就有点处理不过来了。这时老板发现，每个服务员在服务完客人后，都要去休息一下，
+因此老板就说，”你们都别休息了，在旁边待命”。这样可能 10 个服务员也来得及服务 20 个顾客了。这也是”线程池”的方式，
+通过重用线程来减少线程的创建和销毁时间，从而提高性能。</p>
+<h3 id="Reactor方式"><a href="#Reactor方式" class="headerlink" title="Reactor方式"></a>Reactor方式</h3><p>但是客人又进一步增加了，仅仅靠剥削服务员的休息时间也没有办法服务这么多客人。老板仔细观察，
+发现其实服务员并不是一直在干活的，大部分时间他们只是站在餐桌旁边等客人点菜。</p>
+<p>于是老板就对服务员说，客人点菜的时候你们就别傻站着了，先去服务其它客人，有客人点好的时候喊你们再过去。对应于下图：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor05.png"></p>
+<p>最后，老板发现根本不需要那么多的服务员，于是裁了一波员，最终甚至可以只有一个服务员。</p>
+<p>这就是 Reactor 模式的核心思想：减少等待。当遇到需要等待 IO 时，先释放资源，而在 IO 完成时，
+再通过事件驱动 (event driven) 的方式，继续接下来的处理。从整体上减少了资源的消耗。</p>
+<h2 id="Java中实现Reactor模式"><a href="#Java中实现Reactor模式" class="headerlink" title="Java中实现Reactor模式"></a>Java中实现Reactor模式</h2><p>本篇详细讲解一下Java中如何来实现Reactor模式。</p>
+<p>Reactor模式又分为三种实现方式</p>
+<h3 id="经典模式"><a href="#经典模式" class="headerlink" title="经典模式"></a>经典模式</h3><p>精典的Reactor模式示意图如下所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor01.png"></p>
+<p>在Reactor模式中，包含如下角色</p>
+<ul>
+<li>Reactor 将I&#x2F;O事件发派给对应的Handler</li>
+<li>Acceptor 处理客户端连接请求</li>
+<li>Handlers 执行非阻塞读&#x2F;写</li>
+</ul>
+<p>最简单的Reactor模式实现代码如下所示</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NIOServer</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> LoggerFactory.getLogger(NIOServer.class);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> Selector.open();</span><br><span class="line">    <span class="type">ServerSocketChannel</span> <span class="variable">serverSocketChannel</span> <span class="operator">=</span> ServerSocketChannel.open();</span><br><span class="line">    serverSocketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">    serverSocketChannel.bind(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="number">1234</span>));</span><br><span class="line">    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">    <span class="keyword">while</span> (selector.select() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();</span><br><span class="line">      Iterator&lt;SelectionKey&gt; iterator = keys.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">        <span class="type">SelectionKey</span> <span class="variable">key</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">        iterator.remove();</span><br><span class="line">        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">          <span class="type">ServerSocketChannel</span> <span class="variable">acceptServerSocketChannel</span> <span class="operator">=</span> (ServerSocketChannel) key.channel();</span><br><span class="line">          <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> acceptServerSocketChannel.accept();</span><br><span class="line">          socketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">          LOGGER.info(<span class="string">&quot;Accept request from &#123;&#125;&quot;</span>, socketChannel.getRemoteAddress());</span><br><span class="line">          socketChannel.register(selector, SelectionKey.OP_READ);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">          <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> (SocketChannel) key.channel();</span><br><span class="line">          <span class="type">ByteBuffer</span> <span class="variable">buffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">          <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> socketChannel.read(buffer);</span><br><span class="line">          <span class="keyword">if</span> (count &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">            socketChannel.close();</span><br><span class="line">            key.cancel();</span><br><span class="line">            LOGGER.info(<span class="string">&quot;Received invalide data, close the connection&quot;</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">          &#125;</span><br><span class="line">          LOGGER.info(<span class="string">&quot;Received message &#123;&#125;&quot;</span>, <span class="keyword">new</span> <span class="title class_">String</span>(buffer.array()));</span><br><span class="line">        &#125;</span><br><span class="line">        keys.remove(key);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上示代码中可以看到，多个Channel可以注册到同一个Selector对象上，实现了一个线程同时监控多个请求状态（Channel）。
+同时注册时需要指定它所关注的事件，例如上示代码中socketServerChannel对象只注册了OP_ACCEPT事件，
+而socketChannel对象只注册了OP_READ事件。</p>
+<p>selector.select()是阻塞的，当有至少一个通道可用时该方法返回可用通道个数。同时该方法只捕获Channel注册时指定的所关注的事件。</p>
+<h3 id="多工作线程模式"><a href="#多工作线程模式" class="headerlink" title="多工作线程模式"></a>多工作线程模式</h3><p>经典Reactor模式中，尽管一个线程可同时监控多个请求（Channel），但是所有读&#x2F;写请求以及对新连接请求的处理都在同一个线程中处理，
+无法充分利用多CPU的优势，同时读&#x2F;写操作也会阻塞对新连接请求的处理。因此可以引入多线程，并行处理多个读&#x2F;写操作，如下图所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor02.png"></p>
+<p>多线程Reactor模式示例代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NIOServer</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> LoggerFactory.getLogger(NIOServer.class);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> Selector.open();</span><br><span class="line">    <span class="type">ServerSocketChannel</span> <span class="variable">serverSocketChannel</span> <span class="operator">=</span> ServerSocketChannel.open();</span><br><span class="line">    serverSocketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">    serverSocketChannel.bind(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="number">1234</span>));</span><br><span class="line">    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span>(selector.selectNow() &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();</span><br><span class="line">      Iterator&lt;SelectionKey&gt; iterator = keys.iterator();</span><br><span class="line">      <span class="keyword">while</span>(iterator.hasNext()) &#123;</span><br><span class="line">        <span class="type">SelectionKey</span> <span class="variable">key</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">        iterator.remove();</span><br><span class="line">        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">          <span class="type">ServerSocketChannel</span> <span class="variable">acceptServerSocketChannel</span> <span class="operator">=</span> (ServerSocketChannel) key.channel();</span><br><span class="line">          <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> acceptServerSocketChannel.accept();</span><br><span class="line">          socketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">          LOGGER.info(<span class="string">&quot;Accept request from &#123;&#125;&quot;</span>, socketChannel.getRemoteAddress());</span><br><span class="line">          <span class="type">SelectionKey</span> <span class="variable">readKey</span> <span class="operator">=</span> socketChannel.register(selector, SelectionKey.OP_READ);</span><br><span class="line">          readKey.attach(<span class="keyword">new</span> <span class="title class_">Processor</span>());</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">          <span class="type">Processor</span> <span class="variable">processor</span> <span class="operator">=</span> (Processor) key.attachment();</span><br><span class="line">          processor.process(key);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从上示代码中可以看到，注册完SocketChannel的OP_READ事件后，可以对相应的SelectionKey
+绑定一个对象（本例中绑定了一个Processor对象，该对象处理读请求），并且在获取到可读事件后，可以取出该对象。</p>
+<p>具体的读请求处理在如下所示的Processor类中。该类中设置了一个静态的线程池处理所有请求。而process方法并不直接处理I&#x2F;O请求，
+而是把该I&#x2F;O操作提交给上述线程池去处理，这样就充分利用了多线程的优势，同时将对新连接的处理和读&#x2F;写操作的处理放在了不同的线程中，
+读&#x2F;写操作不再阻塞对新连接请求的处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Processor</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> LoggerFactory.getLogger(Processor.class);</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ExecutorService</span> <span class="variable">service</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">16</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">process</span><span class="params">(SelectionKey selectionKey)</span> &#123;</span><br><span class="line">    service.submit(() -&gt; &#123;</span><br><span class="line">      <span class="type">ByteBuffer</span> <span class="variable">buffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">      <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> (SocketChannel) selectionKey.channel();</span><br><span class="line">      <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> socketChannel.read(buffer);</span><br><span class="line">      <span class="keyword">if</span> (count &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        socketChannel.close();</span><br><span class="line">        selectionKey.cancel();</span><br><span class="line">        LOGGER.info(<span class="string">&quot;&#123;&#125;\t Read ended&quot;</span>, socketChannel);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span>(count == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      LOGGER.info(<span class="string">&quot;&#123;&#125;\t Read message &#123;&#125;&quot;</span>, socketChannel, <span class="keyword">new</span> <span class="title class_">String</span>(buffer.array()));</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="多Reactor模式"><a href="#多Reactor模式" class="headerlink" title="多Reactor模式"></a>多Reactor模式</h3><p>Netty中使用的Reactor模式，引入了多Reactor，也即一个主Reactor负责监控所有的连接请求，多个子Reactor负责监控并处理读&#x2F;写请求，
+减轻了主Reactor的压力，降低了主Reactor压力太大而造成的延迟。并且每个子Reactor分别属于一个独立的线程，
+每个成功连接后的Channel的所有操作由同一个线程处理。这样保证了同一请求的所有状态和上下文在同一个线程中，
+避免了不必要的上下文切换，同时也方便了监控请求响应状态。</p>
+<p>多Reactor模式示意图如下所示。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/reactor03.png"></p>
+<p>多Reactor示例代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NIOServer</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> LoggerFactory.getLogger(NIOServer.class);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="type">Selector</span> <span class="variable">selector</span> <span class="operator">=</span> Selector.open();</span><br><span class="line">    <span class="type">ServerSocketChannel</span> <span class="variable">serverSocketChannel</span> <span class="operator">=</span> ServerSocketChannel.open();</span><br><span class="line">    serverSocketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">    serverSocketChannel.bind(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="number">1234</span>));</span><br><span class="line">    serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);</span><br><span class="line">    <span class="type">int</span> <span class="variable">coreNum</span> <span class="operator">=</span> Runtime.getRuntime().availableProcessors();</span><br><span class="line">    Processor[] processors = <span class="keyword">new</span> <span class="title class_">Processor</span>[coreNum];</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; processors.length; i++) &#123;</span><br><span class="line">      processors[i] = <span class="keyword">new</span> <span class="title class_">Processor</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (selector.select() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      Set&lt;SelectionKey&gt; keys = selector.selectedKeys();</span><br><span class="line">      <span class="keyword">for</span> (SelectionKey key : keys) &#123;</span><br><span class="line">        keys.remove(key);</span><br><span class="line">        <span class="keyword">if</span> (key.isAcceptable()) &#123;</span><br><span class="line">          <span class="type">ServerSocketChannel</span> <span class="variable">acceptServerSocketChannel</span> <span class="operator">=</span> (ServerSocketChannel) key.channel();</span><br><span class="line">          <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> acceptServerSocketChannel.accept();</span><br><span class="line">          socketChannel.configureBlocking(<span class="literal">false</span>);</span><br><span class="line">          LOGGER.info(<span class="string">&quot;Accept request from &#123;&#125;&quot;</span>, socketChannel.getRemoteAddress());</span><br><span class="line">          <span class="type">Processor</span> <span class="variable">processor</span> <span class="operator">=</span> processors[(<span class="type">int</span>) ((index++) % coreNum)];</span><br><span class="line">          processor.addChannel(socketChannel);</span><br><span class="line">          processor.wakeup();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上代码所示，本文设置的子Reactor个数是当前机器可用核数的两倍（与Netty默认的子Reactor个数一致）。
+对于每个成功连接的SocketChannel，通过round robin的方式交给不同的子Reactor。</p>
+<p>子Reactor对SocketChannel的处理如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Processor</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> LoggerFactory.getLogger(Processor.class);</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">ExecutorService</span> <span class="variable">service</span> <span class="operator">=</span></span><br><span class="line">      Executors.newFixedThreadPool(<span class="number">2</span> * Runtime.getRuntime().availableProcessors());</span><br><span class="line">  <span class="keyword">private</span> Selector selector;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">Processor</span><span class="params">()</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">    <span class="built_in">this</span>.selector = SelectorProvider.provider().openSelector();</span><br><span class="line">    start();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addChannel</span><span class="params">(SocketChannel socketChannel)</span> <span class="keyword">throws</span> ClosedChannelException &#123;</span><br><span class="line">    socketChannel.register(<span class="built_in">this</span>.selector, SelectionKey.OP_READ);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">wakeup</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.selector.wakeup();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">    service.submit(() -&gt; &#123;</span><br><span class="line">      <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (selector.select(<span class="number">500</span>) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Set&lt;SelectionKey&gt; keys = selector.selectedKeys();</span><br><span class="line">        Iterator&lt;SelectionKey&gt; iterator = keys.iterator();</span><br><span class="line">        <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">          <span class="type">SelectionKey</span> <span class="variable">key</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">          iterator.remove();</span><br><span class="line">          <span class="keyword">if</span> (key.isReadable()) &#123;</span><br><span class="line">            <span class="type">ByteBuffer</span> <span class="variable">buffer</span> <span class="operator">=</span> ByteBuffer.allocate(<span class="number">1024</span>);</span><br><span class="line">            <span class="type">SocketChannel</span> <span class="variable">socketChannel</span> <span class="operator">=</span> (SocketChannel) key.channel();</span><br><span class="line">            <span class="type">int</span> <span class="variable">count</span> <span class="operator">=</span> socketChannel.read(buffer);</span><br><span class="line">            <span class="keyword">if</span> (count &lt; <span class="number">0</span>) &#123;</span><br><span class="line">              socketChannel.close();</span><br><span class="line">              key.cancel();</span><br><span class="line">              LOGGER.info(<span class="string">&quot;&#123;&#125;\t Read ended&quot;</span>, socketChannel);</span><br><span class="line">              <span class="keyword">continue</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (count == <span class="number">0</span>) &#123;</span><br><span class="line">              LOGGER.info(<span class="string">&quot;&#123;&#125;\t Message size is 0&quot;</span>, socketChannel);</span><br><span class="line">              <span class="keyword">continue</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              LOGGER.info(<span class="string">&quot;&#123;&#125;\t Read message &#123;&#125;&quot;</span>, socketChannel, <span class="keyword">new</span> <span class="title class_">String</span>(buffer.array()));</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在Processor中，同样创建了一个静态的线程池，且线程池的大小为机器核数的两倍。每个Processor实例均包含一个Selector实例。
+同时每次获取Processor实例时均提交一个任务到该线程池，并且该任务正常情况下一直循环处理，不会停止。
+而提交给该Processor的SocketChannel通过在其Selector注册事件，加入到相应的任务中。
+由此实现了每个子Reactor包含一个Selector对象，并由一个独立的线程处理。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/java/basic/io.html" rel="prev" title="聊聊Java中的几种I/O模型">
+                  <i class="fa fa-angle-left"></i> 聊聊Java中的几种I/O模型
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/web/basic/npm-version.html" rel="next" title="NPM版本号规则以及更新策略">
+                  NPM版本号规则以及更新策略 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

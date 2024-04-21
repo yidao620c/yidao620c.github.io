@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Expect 是一个可以通过脚本和其它交互程序通信的程序，也可以直接被用于C或C++。 可以实现什么？  让计算机自动回应，比如你可以登录，无需手动输入 开始一个游戏，如果最佳配置没有出现，一直重启直到他出现，然后把控制权交给你。 基于预先确定的标准，运行回话，回答问题“是”、“否”，然后把控制权交给你 传递环境变量，当前路径或者任何类型的信息通过rlogin, telnet, tip, su,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用expect实现自动交互脚本">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/expect.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Expect 是一个可以通过脚本和其它交互程序通信的程序，也可以直接被用于C或C++。 可以实现什么？  让计算机自动回应，比如你可以登录，无需手动输入 开始一个游戏，如果最佳配置没有出现，一直重启直到他出现，然后把控制权交给你。 基于预先确定的标准，运行回话，回答问题“是”、“否”，然后把控制权交给你 传递环境变量，当前路径或者任何类型的信息通过rlogin, telnet, tip, su,">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-27T04:21:33.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:18.205Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/expect.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/expect.html","path":"linux/basic/expect.html","title":"使用expect实现自动交互脚本"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用expect实现自动交互脚本 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#expect%E5%8F%82%E6%95%B0"><span class="nav-number">1.</span> <span class="nav-text">expect参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8telnet%E4%BC%9A%E8%AF%9D"><span class="nav-number">3.</span> <span class="nav-text">自动telnet会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%BB%BA%E7%AB%8BFTP%E4%BC%9A%E8%AF%9D"><span class="nav-number">4.</span> <span class="nav-text">自动建立FTP会话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95ssh%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4"><span class="nav-number">5.</span> <span class="nav-text">自动登录ssh执行命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95ssh"><span class="nav-number">6.</span> <span class="nav-text">自动登录ssh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E7%99%BB%E5%BD%95ssh%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%89%A7%E8%A1%8C%E6%93%8D%E4%BD%9C%E8%8C%83%E4%BE%8B%EF%BC%8Cfor%E8%AF%AD%E6%B3%95"><span class="nav-number">7.</span> <span class="nav-text">批量登录ssh服务器执行操作范例，for语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E7%99%BB%E5%BD%95ssh%E5%B9%B6%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%8Cforeach%E8%AF%AD%E6%B3%95"><span class="nav-number">8.</span> <span class="nav-text">批量登录ssh并执行命令，foreach语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8E%E5%91%BD%E4%BB%A4%E8%A1%8C%E8%8E%B7%E5%8F%96%E6%9C%8D%E5%8A%A1%E5%99%A8IP%EF%BC%8Cforeach%E8%AF%AD%E6%B3%95%EF%BC%8Cexpect%E5%B5%8C%E5%A5%97"><span class="nav-number">9.</span> <span class="nav-text">从命令行获取服务器IP，foreach语法，expect嵌套</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E9%87%8Fssh%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%8C%E7%94%A8shell%E8%B0%83%E7%94%A8tclsh%E6%96%B9%E5%BC%8F%E3%80%81%E5%A4%9A%E8%BF%9B%E7%A8%8B%E5%90%8C%E6%97%B6%E6%89%A7%E8%A1%8C"><span class="nav-number">10.</span> <span class="nav-text">批量ssh执行命令，用shell调用tclsh方式、多进程同时执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ssh%E7%99%BB%E5%BD%95%E8%BF%87%E7%A8%8B%E5%B8%B8%E8%A7%84%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97"><span class="nav-number">11.</span> <span class="nav-text">ssh登录过程常规提示文字</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E4%B8%BB%E6%9C%BA%E7%99%BB%E5%BD%95%E4%BE%8B%E5%AD%90"><span class="nav-number">12.</span> <span class="nav-text">批量主机登录例子</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/expect.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="使用expect实现自动交互脚本 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用expect实现自动交互脚本
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-27 12:21:33" itemprop="dateCreated datePublished" datetime="2021-01-27T12:21:33+08:00">2021-01-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Expect 是一个可以通过脚本和其它交互程序通信的程序，也可以直接被用于C或C++。</p>
+<p>可以实现什么？</p>
+<ul>
+<li>让计算机自动回应，比如你可以登录，无需手动输入</li>
+<li>开始一个游戏，如果最佳配置没有出现，一直重启直到他出现，然后把控制权交给你。</li>
+<li>基于预先确定的标准，运行回话，回答问题“是”、“否”，然后把控制权交给你</li>
+<li>传递环境变量，当前路径或者任何类型的信息通过rlogin, telnet, tip, su, chgrp等</li>
+</ul>
+<p>安装：<code>yum install expect</code></p>
+<p>本篇通过一个自动远程登录脚本来演示expect的使用。</p>
+<span id="more"></span>
+
+<h2 id="expect参数"><a href="#expect参数" class="headerlink" title="expect参数"></a>expect参数</h2><ul>
+<li>-c:执行脚本前先执行的命令，可多次使用。</li>
+<li>-d:debug模式，可以在运行时输出一些诊断信息，与在脚本开始处使用exp_internal 1相似。</li>
+<li>-D:启用交换调式器,可设一整数参数。</li>
+<li>-f:从文件读取命令，仅用于使用#!时。如果文件名为”-“，则从stdin读取(使用”.&#x2F;-“从文件名为-的文件读取)。</li>
+<li>-i:交互式输入命令，使用”exit”或”EOF”退出输入状态。</li>
+<li>–:标示选项结束(如果你需要传递与expect选项相似的参数给脚本时)，可放到#!行:#!&#x2F;usr&#x2F;bin&#x2F;expect –。</li>
+<li>-v:显示expect版本信息。</li>
+</ul>
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><ul>
+<li>close:关闭当前进程的连接。</li>
+<li>debug:控制调试器。</li>
+<li>disconnect:断开进程连接(进程仍在后台运行)。</li>
+<li>exit:退出expect。</li>
+<li>exp_continue [-continue_timer]:继续执行下面的匹配。</li>
+<li>exp_internal [-f file] value:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 命令行参数 </span></span><br><span class="line"><span class="comment"># $argv，参数数组，使用[lindex $argv n]获取，$argv 0为脚本名字</span></span><br><span class="line"><span class="comment"># $argc，参数个数</span></span><br><span class="line"><span class="built_in">set</span> username [lindex <span class="variable">$argv</span> 1]  <span class="comment"># 获取第1个参数</span></span><br><span class="line"><span class="built_in">set</span> passwd [lindex <span class="variable">$argv</span> 2]    <span class="comment"># 获取第2个参数</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span> 30 <span class="comment"># 设置超时</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># spawn是expect内部命令，开启ssh连接</span></span><br><span class="line">spawn ssh -l username 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 判断上次输出结果里是否包含“password:”的字符串，如果有则立即返回，否则就等待一段时间(timeout)后返回</span></span><br><span class="line">expect <span class="string">&quot;password:&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送内容ispass(密码、命令等)</span></span><br><span class="line">send <span class="string">&quot;ispass\r&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 发送内容给用户</span></span><br><span class="line">send_user <span class="string">&quot;<span class="variable">$argv0</span> [lrange <span class="variable">$argv</span> 0 2]\n&quot;</span></span><br><span class="line">send_user <span class="string">&quot;It&#x27;s OK\r&quot;</span></span><br><span class="line"><span class="comment"># 执行完成后保持交互状态，控制权交给控制台(手工操作)。否则会完成后会退出。</span></span><br><span class="line">interact</span><br></pre></td></tr></table></figure>
+
+<h2 id="自动telnet会话"><a href="#自动telnet会话" class="headerlink" title="自动telnet会话"></a>自动telnet会话</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect -f</span></span><br><span class="line"><span class="built_in">set</span> ip [lindex <span class="variable">$argv</span> 0 ]         <span class="comment"># 接收第1个参数,作为IP</span></span><br><span class="line"><span class="built_in">set</span> userid [lindex <span class="variable">$argv</span> 1 ]     <span class="comment"># 接收第2个参数,作为userid</span></span><br><span class="line"><span class="built_in">set</span> mypassword [lindex <span class="variable">$argv</span> 2 ] <span class="comment"># 接收第3个参数,作为密码</span></span><br><span class="line"><span class="built_in">set</span> mycommand [lindex <span class="variable">$argv</span> 3 ]  <span class="comment"># 接收第4个参数，作为命令</span></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span> 10                   <span class="comment"># 设置超时时间</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 向远程服务器请求打开一个telnet会话，并等待服务器询问用户名</span></span><br><span class="line">spawn telnet <span class="variable">$ip</span></span><br><span class="line">    expect <span class="string">&quot;username:&quot;</span></span><br><span class="line">    <span class="comment"># 输入用户名，并等待服务器询问密码</span></span><br><span class="line">    send <span class="string">&quot;<span class="variable">$userid</span>\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;password:&quot;</span></span><br><span class="line">    <span class="comment"># 输入密码，并等待键入需要运行的命令</span></span><br><span class="line">    send <span class="string">&quot;<span class="variable">$mypassword</span>\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;%&quot;</span></span><br><span class="line">    <span class="comment"># 输入预先定好的密码，等待运行结果</span></span><br><span class="line">    send <span class="string">&quot;<span class="variable">$mycommand</span>\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;%&quot;</span></span><br><span class="line">    <span class="comment"># 将运行结果存入到变量中，显示出来或者写到磁盘中</span></span><br><span class="line">    <span class="built_in">set</span> results <span class="variable">$expect_out</span>(buffer)</span><br><span class="line">    <span class="comment"># 退出telnet会话，等待服务器的退出提示EOF</span></span><br><span class="line">    send <span class="string">&quot;exit\r&quot;</span></span><br><span class="line">    expect eof</span><br></pre></td></tr></table></figure>
+
+<h2 id="自动建立FTP会话"><a href="#自动建立FTP会话" class="headerlink" title="自动建立FTP会话"></a>自动建立FTP会话</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect -f</span></span><br><span class="line"><span class="built_in">set</span> ip [lindex <span class="variable">$argv</span> 0 ]         <span class="comment"># 接收第1个参数,作为IP</span></span><br><span class="line"><span class="built_in">set</span> userid [lindex <span class="variable">$argv</span> 1 ]     <span class="comment"># 接收第2个参数,作为Userid</span></span><br><span class="line"><span class="built_in">set</span> mypassword [lindex <span class="variable">$argv</span> 2 ] <span class="comment"># 接收第3个参数,作为密码</span></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span> 10                   <span class="comment"># 设置超时时间</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 向远程服务器请求打开一个FTP会话，并等待服务器询问用户名</span></span><br><span class="line">spawn ftp <span class="variable">$ip</span></span><br><span class="line">    expect <span class="string">&quot;username:&quot;</span></span><br><span class="line">    <span class="comment"># 输入用户名，并等待服务器询问密码</span></span><br><span class="line">    send <span class="string">&quot;<span class="variable">$userid</span>\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;password:&quot;</span></span><br><span class="line">    <span class="comment"># 输入密码，并等待FTP提示符的出现</span></span><br><span class="line">    send <span class="string">&quot;<span class="variable">$mypassword</span>\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;ftp&gt;&quot;</span></span><br><span class="line">    <span class="comment"># 切换到二进制模式，并等待FTP提示符的出现</span></span><br><span class="line">    send <span class="string">&quot;bin\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;ftp&gt;&quot;</span></span><br><span class="line">    <span class="comment"># 关闭ftp的提示符</span></span><br><span class="line">    send <span class="string">&quot;prompt\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;ftp&gt;&quot;</span></span><br><span class="line">    <span class="comment"># 下载所有文件</span></span><br><span class="line">    send <span class="string">&quot;mget *\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;ftp&gt;&quot;</span></span><br><span class="line">    <span class="comment"># 退出此次ftp会话，并等待服务器的退出提示EOF</span></span><br><span class="line">    send <span class="string">&quot;bye\r&quot;</span></span><br><span class="line">    expect eof</span><br></pre></td></tr></table></figure>
+
+<h2 id="自动登录ssh执行命令"><a href="#自动登录ssh执行命令" class="headerlink" title="自动登录ssh执行命令"></a>自动登录ssh执行命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect</span></span><br><span class="line"><span class="built_in">set</span> IP     [lindex <span class="variable">$argv</span> 0]</span><br><span class="line"><span class="built_in">set</span> USER   [lindex <span class="variable">$argv</span> 1]</span><br><span class="line"><span class="built_in">set</span> PASSWD [lindex <span class="variable">$argv</span> 2]</span><br><span class="line"><span class="built_in">set</span> CMD    [lindex <span class="variable">$argv</span> 3]</span><br><span class="line"></span><br><span class="line">spawn ssh <span class="variable">$USER</span>@<span class="variable">$IP</span> <span class="variable">$CMD</span></span><br><span class="line">expect &#123;</span><br><span class="line">    <span class="string">&quot;(yes/no)?&quot;</span> &#123;</span><br><span class="line">        send <span class="string">&quot;yes\r&quot;</span></span><br><span class="line">        expect <span class="string">&quot;password:&quot;</span></span><br><span class="line">        send <span class="string">&quot;<span class="variable">$PASSWD</span>\r&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    <span class="string">&quot;password:&quot;</span> &#123;send <span class="string">&quot;<span class="variable">$PASSWD</span>\r&quot;</span>&#125;</span><br><span class="line">    <span class="string">&quot;* to host&quot;</span> &#123;<span class="built_in">exit</span> 1&#125;</span><br><span class="line">    &#125;</span><br><span class="line">expect eof</span><br></pre></td></tr></table></figure>
+
+<h2 id="自动登录ssh"><a href="#自动登录ssh" class="headerlink" title="自动登录ssh"></a>自动登录ssh</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect -f  </span></span><br><span class="line"><span class="built_in">set</span> ip [lindex <span class="variable">$argv</span> 0 ]         <span class="comment"># 接收第1个参数,作为IP</span></span><br><span class="line"><span class="built_in">set</span> username [lindex <span class="variable">$argv</span> 1 ]   <span class="comment"># 接收第2个参数,作为username</span></span><br><span class="line"><span class="built_in">set</span> mypassword [lindex <span class="variable">$argv</span> 2 ] <span class="comment"># 接收第3个参数,作为密码</span></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span> 10                   <span class="comment"># 设置超时时间 </span></span><br><span class="line"></span><br><span class="line">spawn ssh <span class="variable">$username</span>@<span class="variable">$ip</span>       <span class="comment"># 发送ssh请求</span></span><br><span class="line">expect &#123;                      <span class="comment"># 返回信息匹配 </span></span><br><span class="line"><span class="string">&quot;*yes/no&quot;</span> &#123; send <span class="string">&quot;yes\r&quot;</span>; exp_continue&#125;  <span class="comment"># 第一次ssh连接会提示yes/no,继续  </span></span><br><span class="line"><span class="string">&quot;*password:&quot;</span> &#123; send <span class="string">&quot;<span class="variable">$mypassword</span>\r&quot;</span> &#125;    <span class="comment"># 出现密码提示,发送密码  </span></span><br><span class="line">&#125; </span><br><span class="line">interact        <span class="comment"># 交互模式,用户会停留在远程服务器上面</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="批量登录ssh服务器执行操作范例，for语法"><a href="#批量登录ssh服务器执行操作范例，for语法" class="headerlink" title="批量登录ssh服务器执行操作范例，for语法"></a>批量登录ssh服务器执行操作范例，for语法</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect</span></span><br><span class="line"><span class="keyword">for</span> &#123;<span class="built_in">set</span> i 10&#125; &#123;<span class="variable">$i</span> &lt;= 12&#125; &#123;incr i&#125; &#123;</span><br><span class="line">    <span class="built_in">set</span> <span class="built_in">timeout</span> 30</span><br><span class="line">    <span class="built_in">set</span> ssh_user [lindex <span class="variable">$argv</span> 0]</span><br><span class="line">    spawn ssh -i .ssh/<span class="variable">$ssh_user</span> abc<span class="variable">$i</span>.com</span><br><span class="line"></span><br><span class="line">    expect_before <span class="string">&quot;no)?&quot;</span> &#123;</span><br><span class="line">    send <span class="string">&quot;yes\r&quot;</span> &#125;</span><br><span class="line">    <span class="built_in">sleep</span> 1</span><br><span class="line">    expect <span class="string">&quot;password*&quot;</span></span><br><span class="line">    send <span class="string">&quot;hello\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;*#&quot;</span></span><br><span class="line">    send <span class="string">&quot;echo hello expect! &gt; /tmp/expect.txt\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;*#&quot;</span></span><br><span class="line">    send <span class="string">&quot;echo\r&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">exit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="批量登录ssh并执行命令，foreach语法"><a href="#批量登录ssh并执行命令，foreach语法" class="headerlink" title="批量登录ssh并执行命令，foreach语法"></a>批量登录ssh并执行命令，foreach语法</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect</span></span><br><span class="line"><span class="keyword">if</span> &#123;<span class="variable">$argc</span>!=2&#125; &#123;</span><br><span class="line">    send_user <span class="string">&quot;usage: ./expect ssh_user password\n&quot;</span></span><br><span class="line">    <span class="built_in">exit</span></span><br><span class="line">&#125;</span><br><span class="line">foreach i &#123;11 12&#125; &#123;</span><br><span class="line">    <span class="built_in">set</span> <span class="built_in">timeout</span> 30</span><br><span class="line">    <span class="built_in">set</span> ssh_user [lindex <span class="variable">$argv</span> 0]</span><br><span class="line">    <span class="built_in">set</span> password [lindex <span class="variable">$argv</span> 1]</span><br><span class="line">    spawn ssh -i .ssh/<span class="variable">$ssh_user</span> root@xxx.yy.com</span><br><span class="line">    expect_before <span class="string">&quot;no)?&quot;</span> &#123;</span><br><span class="line">    send <span class="string">&quot;yes\r&quot;</span> &#125;</span><br><span class="line">    <span class="built_in">sleep</span> 1</span><br><span class="line"></span><br><span class="line">    expect <span class="string">&quot;Enter passphrase for key*&quot;</span></span><br><span class="line">    send <span class="string">&quot;password\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;*#&quot;</span></span><br><span class="line">    send <span class="string">&quot;echo hello expect! &gt; /tmp/expect.txt\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;*#&quot;</span></span><br><span class="line">    send <span class="string">&quot;echo\r&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">exit</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="从命令行获取服务器IP，foreach语法，expect嵌套"><a href="#从命令行获取服务器IP，foreach语法，expect嵌套" class="headerlink" title="从命令行获取服务器IP，foreach语法，expect嵌套"></a>从命令行获取服务器IP，foreach语法，expect嵌套</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/expect</span></span><br><span class="line"><span class="comment"># 使用方法: script_name ip1 ip2 ip3 ...</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">set</span> <span class="built_in">timeout</span> 20</span><br><span class="line"><span class="keyword">if</span> &#123;<span class="variable">$argc</span> &lt; 1&#125; &#123;</span><br><span class="line">  puts <span class="string">&quot;Usage: script IPs&quot;</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment"># 替换你自己的用户名</span></span><br><span class="line"><span class="built_in">set</span> user <span class="string">&quot;username&quot;</span></span><br><span class="line"><span class="comment">#替换你自己的登录密码</span></span><br><span class="line"><span class="built_in">set</span> password <span class="string">&quot;yourpassword&quot;</span></span><br><span class="line"></span><br><span class="line">foreach IP <span class="variable">$argv</span> &#123;</span><br><span class="line">spawn ssh <span class="variable">$user</span>@<span class="variable">$IP</span></span><br><span class="line"></span><br><span class="line">expect \</span><br><span class="line">  <span class="string">&quot;(yes/no)?&quot;</span> &#123;</span><br><span class="line">    send <span class="string">&quot;yes\r&quot;</span></span><br><span class="line">    expect <span class="string">&quot;password:?&quot;</span> &#123;</span><br><span class="line">      send <span class="string">&quot;<span class="variable">$password</span>\r&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="string">&quot;password:?&quot;</span> &#123;</span><br><span class="line">    send <span class="string">&quot;<span class="variable">$password</span>\r&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">expect <span class="string">&quot;\$?&quot;</span></span><br><span class="line"><span class="comment"># 替换你要执行的命令</span></span><br><span class="line">send <span class="string">&quot;last\r&quot;</span></span><br><span class="line">expect <span class="string">&quot;\$?&quot;</span></span><br><span class="line"><span class="built_in">sleep</span> 10</span><br><span class="line">send <span class="string">&quot;exit\r&quot;</span></span><br><span class="line">expect eof</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="批量ssh执行命令，用shell调用tclsh方式、多进程同时执行"><a href="#批量ssh执行命令，用shell调用tclsh方式、多进程同时执行" class="headerlink" title="批量ssh执行命令，用shell调用tclsh方式、多进程同时执行"></a>批量ssh执行命令，用shell调用tclsh方式、多进程同时执行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="comment"># -*- tcl -*- \</span></span><br><span class="line"><span class="built_in">exec</span> tclsh <span class="variable">$0</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span></span><br><span class="line">package require Expect</span><br><span class="line"><span class="built_in">set</span> username [lindex <span class="variable">$argv</span> 0]</span><br><span class="line"><span class="built_in">set</span> password [lindex <span class="variable">$argv</span> 1]</span><br><span class="line"><span class="built_in">set</span> argv [lrange <span class="variable">$argv</span> 2 end]</span><br><span class="line"><span class="built_in">set</span> prompt <span class="string">&quot;(%|#|\\$) $&quot;</span></span><br><span class="line">foreach ip <span class="variable">$argv</span> &#123;</span><br><span class="line">    spawn ssh -t <span class="variable">$username</span>@<span class="variable">$ip</span> sh</span><br><span class="line">    lappend ids <span class="variable">$spawn_id</span></span><br><span class="line">&#125;</span><br><span class="line">expect_before -i ids eof &#123;</span><br><span class="line">    <span class="built_in">set</span> index [lsearch <span class="variable">$ids</span> <span class="variable">$expect_out</span>(spawn_id)]</span><br><span class="line">    <span class="built_in">set</span> ids [lreplace <span class="variable">$ids</span> <span class="variable">$index</span> <span class="variable">$index</span>]</span><br><span class="line">    <span class="keyword">if</span> [llength <span class="variable">$ids</span>] exp_continue</span><br><span class="line">&#125;</span><br><span class="line">expect -i ids <span class="string">&quot;(yes/no)\\?&quot;</span> &#123;</span><br><span class="line">    send -i <span class="variable">$expect_out</span>(spawn_id) <span class="built_in">yes</span>\r</span><br><span class="line">    exp_continue</span><br><span class="line">&#125; -i ids <span class="string">&quot;Enter passphrase for key&quot;</span> &#123;</span><br><span class="line">    send -i <span class="variable">$expect_out</span>(spawn_id) \r</span><br><span class="line">    exp_continue</span><br><span class="line">&#125; -i ids <span class="string">&quot;assword:&quot;</span> &#123;</span><br><span class="line">    send -i <span class="variable">$expect_out</span>(spawn_id) <span class="variable">$password</span>\r</span><br><span class="line">    exp_continue</span><br><span class="line">&#125; -i ids -re <span class="variable">$prompt</span> &#123;</span><br><span class="line">    <span class="built_in">set</span> spawn_id <span class="variable">$expect_out</span>(spawn_id)</span><br><span class="line">    send <span class="string">&quot;echo hello; exit\r&quot;</span></span><br><span class="line">    exp_continue</span><br><span class="line">&#125; <span class="built_in">timeout</span> &#123;</span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="ssh登录过程常规提示文字"><a href="#ssh登录过程常规提示文字" class="headerlink" title="ssh登录过程常规提示文字"></a>ssh登录过程常规提示文字</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">The authenticity of host &#x27;192.168.17.35 (192.168.17.35)&#x27; can&#x27;t be established.</span><br><span class="line">RSA key fingerprint is 25:e8:4c:89:a3:b2:06:ee:de:66:c7:7e:1b:fa:1c:c5.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)?</span><br><span class="line"></span><br><span class="line">Warning: Permanently added &#x27;192.168.17.35&#x27; (RSA) to the list of known hosts.</span><br><span class="line">Enter passphrase for key &#x27;/data/key/my_dsa&#x27;:</span><br><span class="line"></span><br><span class="line">Last login: Sun Jan 26 13:39:37 2014 from 192.168.11.143</span><br><span class="line">[root@master003 ~]#</span><br><span class="line">root@192.168.16.90&#x27;s password:</span><br><span class="line"></span><br><span class="line">Last login: Thu Jan 23 17:50:43 2014 from 192.168.11.102</span><br><span class="line">[root@lvsmaster ~]#</span><br></pre></td></tr></table></figure>
+
+<h2 id="批量主机登录例子"><a href="#批量主机登录例子" class="headerlink" title="批量主机登录例子"></a>批量主机登录例子</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#########################################################################</span></span><br><span class="line"><span class="comment"># 演示通过expect实现批量主机操作</span></span><br><span class="line"><span class="comment"># 任务：以普通用户SSH登录远程主机后su切换至root再执行命令，自动完成口令输入。</span></span><br><span class="line"><span class="comment"># author: xiongneng</span></span><br><span class="line"><span class="comment"># 使用方法：</span></span><br><span class="line"><span class="comment"># 首先准备一个配置文件config.txt，把主机IP、普通用户密码、root密码。每行一条，逗号隔开。</span></span><br><span class="line"><span class="comment"># 然后执行 ./xx.sh config.txt</span></span><br><span class="line"><span class="comment">#########################################################################</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">main</span></span>() &#123;</span><br><span class="line">    config_file=<span class="variable">$1</span></span><br><span class="line">    user_name=user</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> $(<span class="built_in">cat</span> <span class="variable">$config_file</span>); <span class="keyword">do</span></span><br><span class="line">        IFS=<span class="string">&#x27;,&#x27;</span> <span class="built_in">read</span> -r a record &lt;&lt;&lt;<span class="string">&quot;<span class="variable">$line</span>&quot;</span></span><br><span class="line">        ip=$(record[0])</span><br><span class="line">        user_pwd=$(record[1])</span><br><span class="line">        root_pwd=$(record[2])</span><br><span class="line">        /usr/bin/expect &lt;&lt;-<span class="string">EOF</span></span><br><span class="line"><span class="string">        set timeout 10</span></span><br><span class="line"><span class="string">        log_file error.log</span></span><br><span class="line"><span class="string">        spawn -noecho ssh -tq $user_name@$ip &quot;su -c \&quot;</span></span><br><span class="line"><span class="string">        chown root:root /etc/ssh/*.key &amp;&amp; chmod 400 /etc/ssh/*.key;</span></span><br><span class="line"><span class="string">        chown root:root /etc/ssh/*.key.pub &amp;&amp; chmod 400 /etc/ssh/*.key.pub;</span></span><br><span class="line"><span class="string">        systemctl restart sshd\&quot;&quot;</span></span><br><span class="line"><span class="string">        expect &#123;</span></span><br><span class="line"><span class="string">            &quot;*yes/no&quot; &#123;send &quot;yes\r&quot;; exp_continue&#125;</span></span><br><span class="line"><span class="string">            &quot;*s password&quot; &#123;send &quot;$&#123;user_pwd&#125;\r&quot;&#125;</span></span><br><span class="line"><span class="string">            &quot;*No route to host&quot; &#123;send_log &quot;\nno route to ip, =====$ip=====\n&quot;; exit&#125;</span></span><br><span class="line"><span class="string">            timeout &#123;send_log &quot;\nconnect ip timeout, =====$ip=====\n&quot;; exit&#125;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        expect &#123;</span></span><br><span class="line"><span class="string">            &quot;*s password&quot; &#123;send &quot;\nuser password error, =====$ip=====\n&quot;; exit&#125;</span></span><br><span class="line"><span class="string">            &quot;Password:&quot; &#123;send &quot;$&#123;root_pwd&#125;\r&quot;; exp_continue&#125;</span></span><br><span class="line"><span class="string">            &quot;*Permission denied&quot; &#123;send_log &quot;\nroot password error, =====$ip=====\n&quot;; exit&#125;</span></span><br><span class="line"><span class="string">        &#125;</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;ip=<span class="variable">$ip</span> process finished&quot;</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;All tasks finish successfully.&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [[ <span class="string">&quot;<span class="variable">$#</span>&quot;</span> &lt; 1 ]]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;[error] input invalid, usage: &quot;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;./xx.sh config.txt&quot;</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">main <span class="variable">$1</span></span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/linux/basic/vagrant.html" rel="prev" title="Vagrant创建虚拟化开发环境">
+                  <i class="fa fa-angle-left"></i> Vagrant创建虚拟化开发环境
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/monitor/grafana.html" rel="next" title="Grafana快速入门">
+                  Grafana快速入门 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

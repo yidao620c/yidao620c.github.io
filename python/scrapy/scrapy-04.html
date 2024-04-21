@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="在你爬取网页的时候，最普遍的事情就是在页面源码中提取需要的数据，我们有几个库可以帮你完成这个任务：  BeautifulSoup是python中一个非常流行的抓取库, 它还能合理的处理错误格式的标签，但是有一个唯一缺点就是：它运行很慢。 lxml是一个基于ElementTree 的XML解析库(同时还能解析HTML), 不过lxml并不是Python标准库  而Scrapy实现了自己的数据提取机制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy笔记04- Selector详解">
+<meta property="og:url" content="http://yidao620c.github.io/python/scrapy/scrapy-04.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="在你爬取网页的时候，最普遍的事情就是在页面源码中提取需要的数据，我们有几个库可以帮你完成这个任务：  BeautifulSoup是python中一个非常流行的抓取库, 它还能合理的处理错误格式的标签，但是有一个唯一缺点就是：它运行很慢。 lxml是一个基于ElementTree 的XML解析库(同时还能解析HTML), 不过lxml并不是Python标准库  而Scrapy实现了自己的数据提取机制">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-03-13T18:00:15.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.882Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="scrapy">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/scrapy/scrapy-04.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/scrapy/scrapy-04.html","path":"python/scrapy/scrapy-04.html","title":"Scrapy笔记04- Selector详解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Scrapy笔记04- Selector详解 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E9%80%89%E6%8B%A9%E5%99%A8"><span class="nav-number">1.</span> <span class="nav-text">关于选择器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E9%80%89%E6%8B%A9%E5%99%A8"><span class="nav-number">2.</span> <span class="nav-text">使用选择器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E9%80%89%E6%8B%A9%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">嵌套选择器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">4.</span> <span class="nav-text">使用正则表达式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XPath%E7%9B%B8%E5%AF%B9%E8%B7%AF%E5%BE%84"><span class="nav-number">5.</span> <span class="nav-text">XPath相对路径</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#XPath%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.</span> <span class="nav-text">XPath建议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8text%E4%BD%9C%E4%B8%BA%E6%9D%A1%E4%BB%B6%E6%97%B6"><span class="nav-number">6.1.</span> <span class="nav-text">使用text作为条件时</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#node-1-%E5%92%8C-node-1-%E5%8C%BA%E5%88%AB"><span class="nav-number">6.2.</span> <span class="nav-text">&#x2F;&#x2F;node[1]和(&#x2F;&#x2F;node)[1]区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87class%E6%9F%A5%E6%89%BE%E6%97%B6%E4%BC%98%E5%85%88%E8%80%83%E8%99%91CSS"><span class="nav-number">6.3.</span> <span class="nav-text">通过class查找时优先考虑CSS</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/scrapy/scrapy-04.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Scrapy笔记04- Selector详解 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy笔记04- Selector详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-03-14 02:00:15" itemprop="dateCreated datePublished" datetime="2016-03-14T02:00:15+08:00">2016-03-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在你爬取网页的时候，最普遍的事情就是在页面源码中提取需要的数据，我们有几个库可以帮你完成这个任务：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="http://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a>是python中一个非常流行的抓取库,
+它还能合理的处理错误格式的标签，但是有一个唯一缺点就是：它运行很慢。</li>
+<li><a target="_blank" rel="noopener" href="http://lxml.de/">lxml</a>是一个基于<a target="_blank" rel="noopener" href="https://docs.python.org/2/library/xml.etree.elementtree.html">ElementTree</a>
+的XML解析库(同时还能解析HTML),
+不过lxml并不是Python标准库</li>
+</ol>
+<p>而Scrapy实现了自己的数据提取机制，它们被称为选择器，通过<a target="_blank" rel="noopener" href="http://www.w3.org/TR/xpath">XPath</a>
+或<a target="_blank" rel="noopener" href="http://www.w3.org/TR/selectors">CSS</a>表达式在HTML文档中来选择特定的部分</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.w3.org/TR/xpath">XPath</a>是一用来在XML中选择节点的语言，同时可以用在HTML上面。</li>
+<li><a target="_blank" rel="noopener" href="http://www.w3.org/TR/selectors">CSS</a>是一种HTML文档上面的样式语言。</li>
+</ul>
+<p>Scrapy选择器构建在lxml基础之上，所以可以保证速度和准确性。</p>
+<p>本章我们来详细讲解下选择器的工作原理，还有它们极其简单和相似的API，比lxml的API少多了，因为lxml可以用于很多其他领域。</p>
+<p>完整的API请查看<a target="_blank" rel="noopener" href="http://doc.scrapy.org/en/latest/topics/selectors.html#topics-selectors-ref">Selector参考</a></p>
+<span id="more"></span>
+
+<h2 id="关于选择器"><a href="#关于选择器" class="headerlink" title="关于选择器"></a>关于选择器</h2><p>Scrapy帮我们下载完页面后，我们怎样在满是html标签的内容中找到我们所需要的元素呢，这里就需要使用到选择器了，它们是用来定位元素并且提取元素的值。先来举几个例子看看：</p>
+<ul>
+<li>&#x2F;html&#x2F;head&#x2F;title: 选择<code>&lt;title&gt;</code>节点, 它位于html文档的<code>&lt;head&gt;</code>节点内</li>
+<li>&#x2F;html&#x2F;head&#x2F;title&#x2F;text(): 选择上面的<code>&lt;title&gt;</code>节点的内容.</li>
+<li>&#x2F;&#x2F;td: 选择页面中所有的<td>元素</li>
+<li>&#x2F;&#x2F;div[@class&#x3D;”mine”]: 选择所有拥有属性<code>class=&quot;mine&quot;</code>的div元素</li>
+</ul>
+<p>Scrapy使用css和xpath选择器来定位元素，它有四个基本方法：</p>
+<ul>
+<li>xpath(): 返回选择器列表，每个选择器代表使用xpath语法选择的节点</li>
+<li>css(): 返回选择器列表，每个选择器代表使用css语法选择的节点</li>
+<li>extract(): 返回被选择元素的unicode字符串</li>
+<li>re(): 返回通过正则表达式提取的unicode字符串列表</li>
+</ul>
+<h2 id="使用选择器"><a href="#使用选择器" class="headerlink" title="使用选择器"></a>使用选择器</h2><p>下面我们通过Scrapy
+shell演示下选择器的使用，假设我们有如下的一个网页<a target="_blank" rel="noopener" href="http://doc.scrapy.org/en/latest/_static/selectors-sample1.html">http://doc.scrapy.org/en/latest/_static/selectors-sample1.html</a>，内容如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">base</span> <span class="attr">href</span>=<span class="string">&#x27;http://example.com/&#x27;</span> /&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>Example website<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&#x27;images&#x27;</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&#x27;image1.html&#x27;</span>&gt;</span>Name: My image 1 <span class="tag">&lt;<span class="name">br</span> /&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#x27;image1_thumb.jpg&#x27;</span> /&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&#x27;image2.html&#x27;</span>&gt;</span>Name: My image 2 <span class="tag">&lt;<span class="name">br</span> /&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#x27;image2_thumb.jpg&#x27;</span> /&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&#x27;image3.html&#x27;</span>&gt;</span>Name: My image 3 <span class="tag">&lt;<span class="name">br</span> /&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#x27;image3_thumb.jpg&#x27;</span> /&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&#x27;image4.html&#x27;</span>&gt;</span>Name: My image 4 <span class="tag">&lt;<span class="name">br</span> /&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#x27;image4_thumb.jpg&#x27;</span> /&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&#x27;image5.html&#x27;</span>&gt;</span>Name: My image 5 <span class="tag">&lt;<span class="name">br</span> /&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#x27;image5_thumb.jpg&#x27;</span> /&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>首先我们打开shell</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy shell http://doc.scrapy.org/en/latest/_static/selectors-sample1.html</span><br></pre></td></tr></table></figure>
+
+<p>运行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//title/text()&#x27;)</span><br><span class="line">[&lt;Selector (text) xpath=//title/text()&gt;]</span><br><span class="line">&gt;&gt;&gt; response.css(&#x27;title::text&#x27;)</span><br><span class="line">[&lt;Selector (text) xpath=//title/text()&gt;]</span><br></pre></td></tr></table></figure>
+
+<p>结果可以看出,<code>xpath()</code>和<code>css()</code>方法返回的是<code>SelectorList</code>实例，是一个选择器列表，你可以选择嵌套的数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.css(&#x27;img&#x27;).xpath(&#x27;@src&#x27;).extract()</span><br><span class="line">[u&#x27;image1_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image2_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image3_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image4_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image5_thumb.jpg&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>必须使用<code>.extract()</code>才能提取最终的数据，如果你只想获得第一个匹配的，可以使用<code>.extract_first()</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//div[@id=&quot;images&quot;]/a/text()&#x27;).extract_first()</span><br><span class="line">u&#x27;Name: My image 1 &#x27;</span><br></pre></td></tr></table></figure>
+
+<p>如果没有找到，会返回<code>None</code>，还可选择默认值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//div[@id=&quot;not-exists&quot;]/text()&#x27;).extract_first(default=&#x27;not-found&#x27;)</span><br><span class="line">&#x27;not-found&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>而CSS选择器还可以使用CSS3标准：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.css(&#x27;title::text&#x27;).extract()</span><br><span class="line">[u&#x27;Example website&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>下面是几个比较全面的示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//base/@href&#x27;).extract()</span><br><span class="line">[u&#x27;http://example.com/&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.css(&#x27;base::attr(href)&#x27;).extract()</span><br><span class="line">[u&#x27;http://example.com/&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//a[contains(@href, &quot;image&quot;)]/@href&#x27;).extract()</span><br><span class="line">[u&#x27;image1.html&#x27;,</span><br><span class="line"> u&#x27;image2.html&#x27;,</span><br><span class="line"> u&#x27;image3.html&#x27;,</span><br><span class="line"> u&#x27;image4.html&#x27;,</span><br><span class="line"> u&#x27;image5.html&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.css(&#x27;a[href*=image]::attr(href)&#x27;).extract()</span><br><span class="line">[u&#x27;image1.html&#x27;,</span><br><span class="line"> u&#x27;image2.html&#x27;,</span><br><span class="line"> u&#x27;image3.html&#x27;,</span><br><span class="line"> u&#x27;image4.html&#x27;,</span><br><span class="line"> u&#x27;image5.html&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//a[contains(@href, &quot;image&quot;)]/img/@src&#x27;).extract()</span><br><span class="line">[u&#x27;image1_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image2_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image3_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image4_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image5_thumb.jpg&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.css(&#x27;a[href*=image] img::attr(src)&#x27;).extract()</span><br><span class="line">[u&#x27;image1_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image2_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image3_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image4_thumb.jpg&#x27;,</span><br><span class="line"> u&#x27;image5_thumb.jpg&#x27;]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="嵌套选择器"><a href="#嵌套选择器" class="headerlink" title="嵌套选择器"></a>嵌套选择器</h2><p><code>xpath()</code>和<code>css()</code>返回的是选择器列表，所以你可以继续使用它们的方法。举例来讲：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; links = response.xpath(&#x27;//a[contains(@href, &quot;image&quot;)]&#x27;)</span><br><span class="line">&gt;&gt;&gt; links.extract()</span><br><span class="line">[u&#x27;&lt;a href=&quot;image1.html&quot;&gt;Name: My image 1 &lt;br&gt;&lt;img src=&quot;image1_thumb.jpg&quot;&gt;&lt;/a&gt;&#x27;,</span><br><span class="line"> u&#x27;&lt;a href=&quot;image2.html&quot;&gt;Name: My image 2 &lt;br&gt;&lt;img src=&quot;image2_thumb.jpg&quot;&gt;&lt;/a&gt;&#x27;,</span><br><span class="line"> u&#x27;&lt;a href=&quot;image3.html&quot;&gt;Name: My image 3 &lt;br&gt;&lt;img src=&quot;image3_thumb.jpg&quot;&gt;&lt;/a&gt;&#x27;,</span><br><span class="line"> u&#x27;&lt;a href=&quot;image4.html&quot;&gt;Name: My image 4 &lt;br&gt;&lt;img src=&quot;image4_thumb.jpg&quot;&gt;&lt;/a&gt;&#x27;,</span><br><span class="line"> u&#x27;&lt;a href=&quot;image5.html&quot;&gt;Name: My image 5 &lt;br&gt;&lt;img src=&quot;image5_thumb.jpg&quot;&gt;&lt;/a&gt;&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; for index, link in enumerate(links):</span><br><span class="line">...     args = (index, link.xpath(&#x27;@href&#x27;).extract(), link.xpath(&#x27;img/@src&#x27;).extract())</span><br><span class="line">...     print &#x27;Link number %d points to url %s and image %s&#x27; % args</span><br><span class="line"></span><br><span class="line">Link number 0 points to url [u&#x27;image1.html&#x27;] and image [u&#x27;image1_thumb.jpg&#x27;]</span><br><span class="line">Link number 1 points to url [u&#x27;image2.html&#x27;] and image [u&#x27;image2_thumb.jpg&#x27;]</span><br><span class="line">Link number 2 points to url [u&#x27;image3.html&#x27;] and image [u&#x27;image3_thumb.jpg&#x27;]</span><br><span class="line">Link number 3 points to url [u&#x27;image4.html&#x27;] and image [u&#x27;image4_thumb.jpg&#x27;]</span><br><span class="line">Link number 4 points to url [u&#x27;image5.html&#x27;] and image [u&#x27;image5_thumb.jpg&#x27;]</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用正则表达式"><a href="#使用正则表达式" class="headerlink" title="使用正则表达式"></a>使用正则表达式</h2><p><code>Selector</code>有一个<code>re()</code>方法通过正则表达式提取数据，它返回的是unicode字符串列表，你不能再去嵌套使用</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//a[contains(@href, &quot;image&quot;)]/text()&#x27;).re(r&#x27;Name:\s*(.*)&#x27;)</span><br><span class="line">[u&#x27;My image 1&#x27;,</span><br><span class="line"> u&#x27;My image 2&#x27;,</span><br><span class="line"> u&#x27;My image 3&#x27;,</span><br><span class="line"> u&#x27;My image 4&#x27;,</span><br><span class="line"> u&#x27;My image 5&#x27;]</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; response.xpath(&#x27;//a[contains(@href, &quot;image&quot;)]/text()&#x27;).re_first(r&#x27;Name:\s*(.*)&#x27;)</span><br><span class="line">u&#x27;My image 1&#x27;</span><br></pre></td></tr></table></figure>
+
+<h2 id="XPath相对路径"><a href="#XPath相对路径" class="headerlink" title="XPath相对路径"></a>XPath相对路径</h2><p>当你嵌套使用XPath时候，不要使用<code>/</code>开头的，因为这个会相对文档根节点开始算起，需要使用相对路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; divs = response.xpath(&#x27;//div&#x27;)</span><br><span class="line">&gt;&gt;&gt; for p in divs.xpath(&#x27;.//p&#x27;):  # extracts all &lt;p&gt; inside</span><br><span class="line">...     print p.extract()</span><br><span class="line"></span><br><span class="line"># 或者下面这个直接使用p也可以</span><br><span class="line">&gt;&gt;&gt; for p in divs.xpath(&#x27;p&#x27;):</span><br><span class="line">...     print p.extract()</span><br></pre></td></tr></table></figure>
+
+<h2 id="XPath建议"><a href="#XPath建议" class="headerlink" title="XPath建议"></a>XPath建议</h2><h3 id="使用text作为条件时"><a href="#使用text作为条件时" class="headerlink" title="使用text作为条件时"></a>使用text作为条件时</h3><p>避免使用<code>.//text()</code>,直接使用<code>.</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; sel.xpath(&quot;//a[contains(., &#x27;Next Page&#x27;)]&quot;).extract()</span><br><span class="line">[u&#x27;&lt;a href=&quot;#&quot;&gt;Click here to go to the &lt;strong&gt;Next Page&lt;/strong&gt;&lt;/a&gt;&#x27;]</span><br></pre></td></tr></table></figure>
+
+<h3 id="node-1-和-node-1-区别"><a href="#node-1-和-node-1-区别" class="headerlink" title="&#x2F;&#x2F;node[1]和(&#x2F;&#x2F;node)[1]区别"></a>&#x2F;&#x2F;node[1]和(&#x2F;&#x2F;node)[1]区别</h3><ul>
+<li>&#x2F;&#x2F;node[1]: 选择所有位于第一个子节点位置的node节点</li>
+<li>(&#x2F;&#x2F;node)[1]: 选择所有的node节点，然后返回结果中的第一个node节点</li>
+</ul>
+<h3 id="通过class查找时优先考虑CSS"><a href="#通过class查找时优先考虑CSS" class="headerlink" title="通过class查找时优先考虑CSS"></a>通过class查找时优先考虑CSS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt; from scrapy import Selector</span><br><span class="line">&gt;&gt;&gt; sel = Selector(text=&#x27;&lt;div class=&quot;hero shout&quot;&gt;&lt;time datetime=&quot;2014-07-23 19:00&quot;&gt;Special date&lt;/time&gt;&lt;/div&gt;&#x27;)</span><br><span class="line">&gt;&gt;&gt; sel.css(&#x27;.shout&#x27;).xpath(&#x27;./time/@datetime&#x27;).extract()</span><br><span class="line">[u&#x27;2014-07-23 19:00&#x27;]</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/scrapy/" rel="tag"># scrapy</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/scrapy/scrapy-03.html" rel="prev" title="Scrapy笔记03- Spider详解">
+                  <i class="fa fa-angle-left"></i> Scrapy笔记03- Spider详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/scrapy/scrapy-05.html" rel="next" title="Scrapy笔记05- Item详解">
+                  Scrapy笔记05- Item详解 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Docker 为容器提供了两种存放数据的资源：  由 storage driver 管理的镜像层和容器层。 Data Volume  接下来分别介绍下这两种存储方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker每天学一点08 - 存储卷">
+<meta property="og:url" content="http://yidao620c.github.io/k8s/docker/docker08.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="Docker 为容器提供了两种存放数据的资源：  由 storage driver 管理的镜像层和容器层。 Data Volume  接下来分别介绍下这两种存储方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker33.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker34.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker35.png">
+<meta property="article:published_time" content="2019-03-11T02:37:55.000Z">
+<meta property="article:modified_time" content="2023-07-30T00:53:52.164Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/docker33.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/k8s/docker/docker08.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/k8s/docker/docker08.html","path":"k8s/docker/docker08.html","title":"Docker每天学一点08 - 存储卷"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Docker每天学一点08 - 存储卷 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#storage-driver"><span class="nav-number">1.</span> <span class="nav-text">storage driver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Volume"><span class="nav-number">2.</span> <span class="nav-text">Data Volume</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volume-container"><span class="nav-number">3.</span> <span class="nav-text">volume container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#data-packed-volume-container"><span class="nav-number">4.</span> <span class="nav-text">data-packed volume container</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#volume-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">5.</span> <span class="nav-text">volume 生命周期</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/k8s/docker/docker08.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Docker每天学一点08 - 存储卷 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker每天学一点08 - 存储卷
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-11 10:37:55" itemprop="dateCreated datePublished" datetime="2019-03-11T10:37:55+08:00">2019-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/k8s/" itemprop="url" rel="index"><span itemprop="name">k8s</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Docker 为容器提供了两种存放数据的资源：</p>
+<ol>
+<li>由 storage driver 管理的镜像层和容器层。</li>
+<li>Data Volume</li>
+</ol>
+<p>接下来分别介绍下这两种存储方式。</p>
+<span id="more"></span>
+
+<h2 id="storage-driver"><a href="#storage-driver" class="headerlink" title="storage driver"></a>storage driver</h2><p>在镜像章节我们学习到 Docker 镜像的分层结构：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker33.png"></p>
+<p>容器由最上面一个可写的容器层，以及若干只读的镜像层组成，容器的数据就存放在这些层中。这样的分层结构最大的特性是
+Copy-on-Write：</p>
+<ol>
+<li>新数据会直接存放在最上面的容器层。</li>
+<li>修改现有数据会先从镜像层将数据复制到容器层，修改后的数据直接保存在容器层中，镜像层保持不变。</li>
+<li>如果多个层中有命名相同的文件，用户只能看到最上面那层中的文件。</li>
+</ol>
+<p>分层结构使镜像和容器的创建、共享以及分发变得非常高效，而这些都要归功于 Docker storage driver。
+正是 storage driver 实现了多层数据的堆叠并为用户提供一个单一的合并之后的统一视图。</p>
+<p>Docker 安装时会根据当前系统的配置选择默认的 driver。默认 driver 具有最好的稳定性，因为默认 driver 在发行版上经过了严格的测试。</p>
+<p>运行docker info查看 CentOS 7 的默认 driver：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# docker info</span><br><span class="line">Containers: 3</span><br><span class="line"> Running: 3</span><br><span class="line"> Paused: 0</span><br><span class="line"> Stopped: 0</span><br><span class="line">Images: 17</span><br><span class="line">Server Version: 18.03.0-ce</span><br><span class="line">Storage Driver: devicemapper</span><br></pre></td></tr></table></figure>
+
+<p>可见CentOS 7的默认driver是devicemapper</p>
+<p>对于某些容器，直接将数据放在由 storage driver 维护的层中是很好的选择，比如那些无状态的应用。
+无状态意味着容器没有需要持久化的数据，随时可以从镜像直接创建。</p>
+<p>比如 busybox，它是一个工具箱，我们启动 busybox 是为了执行诸如 wget，ping 之类的命令，不需要保存数据供以后使用，
+使用完直接退出，容器删除时存放在容器层中的工作数据也一起被删除，这没问题，下次再启动新容器即可。</p>
+<p>对于大部分容器而言，都有持久化数据的需求，容器启动时需要加载已有的数据，容器销毁时希望保留产生的新数据，也就是说，这类容器是有状态的。
+这就要用到 Docker 的另一种存储机制：Data Volume</p>
+<h2 id="Data-Volume"><a href="#Data-Volume" class="headerlink" title="Data Volume"></a>Data Volume</h2><p>Data Volume 本质上是 Docker Host 文件系统中的目录或文件，有以下几个特点：</p>
+<ol>
+<li>Data Volume 是目录或文件，而非没有格式化的磁盘（块设备）。</li>
+<li>容器可以读写 volume 中的数据。</li>
+<li>volume 数据可以被永久的保存，即使使用它的容器已经销毁。</li>
+</ol>
+<p>docker 提供了两种类型的 volume：bind mount 和 docker managed volume。</p>
+<p><strong>bind mount</strong></p>
+<p>bind mount 是将 host 上已存在的目录或文件 mount 到容器。</p>
+<p>例如 docker host 上有目录 &#x2F;opt&#x2F;htdocs ：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# cat /opt/htdocs/index.html </span><br><span class="line">&lt;h1&gt;Hi, Girl.&lt;/h1&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后通过 -v 参数将这个目录mount到httpd容器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# docker run -d -p 8080:80 -v /opt/htdocs:/usr/local/apache2/htdocs httpd</span><br><span class="line">9ee8a32d718345e2e60496eb3ad93d95a7a933646cb0fd8c65b3af4fd71853ba</span><br></pre></td></tr></table></figure>
+
+<p>注意，在主机上面是没有容器的目录的<code>/usr/local/apache2/htdocs</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# ll /usr/local/apache2/htdocs</span><br><span class="line">ls: cannot access /usr/local/apache2/htdocs: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>-v 的格式为 <code>&lt;host path&gt;:&lt;container path&gt;</code></p>
+<p><code>/usr/local/apache2/htdocs</code> 就是 apache server 存放静态文件的地方。由于之前在容器中 <code>/usr/local/apache2/htdocs</code> 已经存在，
+原有数据会被隐藏起来，取而代之的是 host上目录 <code>/opt/htdocs/</code> 中的数据，这与 linux mount 命令的行为是一致的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# curl localhost:8080</span><br><span class="line">&lt;h1&gt;Hi, Girl.&lt;/h1&gt;</span><br><span class="line">[root@VM_22_2_centos docker]# </span><br></pre></td></tr></table></figure>
+
+<p>curl 显示当前主页确实是 &#x2F;opt&#x2F;htdocs&#x2F;index.html 中的内容。更新一下，看是否能生效：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# echo &quot;updated index page&quot; &gt; /opt/htdocs/index.html </span><br><span class="line">[root@VM_22_2_centos docker]# curl localhost:8080</span><br><span class="line">updated index page</span><br><span class="line">[root@VM_22_2_centos docker]#</span><br></pre></td></tr></table></figure>
+
+<p>host 中的修改确实生效了，bind mount 可以让 host 与容器共享数据。这在管理上是非常方便的。</p>
+<p>除了 bind mount 目录，还可以单独指定一个文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 80:80 -v ~/htdocs/index.html:/usr/local/apache2/htdocs/new_index.html httpd</span><br></pre></td></tr></table></figure>
+
+<p>使用 bind mount 单个文件的场景是：只需要向容器添加文件，不希望覆盖整个目录。
+在上面的例子中，我们将 html 文件加到 apache 中，同时也保留了容器原有的数据。
+使用单一文件有一点要注意：host 中的源文件必须要存在，不然会当作一个新目录 bind mount 给容器。</p>
+<p>mount point 有很多应用场景，比如我们可以将源代码目录 mount 到容器中，在 host 中修改代码就能看到应用的实时效果。
+再比如将 mysql 容器的数据放在 bind mount 里，这样 host 可以方便地备份和迁移数据。</p>
+<p>bind mount 的使用直观高效，易于理解，但它也有不足的地方：bind mount 需要指定 host 文件系统的特定路径，这就限制了容器的可移植性，
+当需要将容器迁移到其他 host，而该 host 没有要 mount 的数据或者数据不在相同的路径时，操作会失败。</p>
+<p>备注：这种方式的共享用来主机和容器共享，非常适合开发阶段。</p>
+<p>移植性更好的方式是 docker managed volume，就是接下来我要讲解的。</p>
+<p><strong>docker managed volume</strong></p>
+<p>docker managed volume 与 bind mount 在使用上的最大区别是不需要指定 mount 源，指明 mount point 就行了。还是以 httpd 容器为例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 8080:80 -v /usr/local/apache2/htdocs httpd</span><br></pre></td></tr></table></figure>
+
+<p>每当容器申请 <code>docker managed volume</code> 时，docker 都会在<code>/var/lib/docker/volumes</code> 下生成一个目录，这个目录就是 mount 源。
+volume 的内容跟容器中原有 <code>/usr/local/apache2/htdocs</code>目录里面内容完全一样，这是怎么回事呢？</p>
+<p>这是因为：如果 mount point 指向的是已有目录，原有数据会被复制到 volume 中。</p>
+<p>此时的 <code>/usr/local/apache2/htdocs</code> 已经不再是由 storage driver 管理的层数据了，它已经是一个 data volume。
+我们可以像 bind mount 一样对数据进行操作。</p>
+<p>docker managed volume 的创建过程：</p>
+<ol>
+<li>容器启动时，简单的告诉 docker “我需要一个 volume 存放数据，帮我 mount 到目录 &#x2F;abc”。</li>
+<li>docker 在<code>/var/lib/docker/volumes</code> 中生成一个随机目录作为 mount 源。</li>
+<li>如果容器中的目录 &#x2F;abc 已经存在，则将其中的数据复制到 mount 源，</li>
+<li>将 volume mount 到 &#x2F;abc</li>
+</ol>
+<h2 id="volume-container"><a href="#volume-container" class="headerlink" title="volume container"></a>volume container</h2><p>volume container（数据卷容器） 是专门为其他容器提供 volume 的容器。它提供的卷可以是 bind mount，也可以是 docker managed
+volume。</p>
+<p>接下来我创建一个volume container试试看：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# docker create --name vc_data \</span><br><span class="line">&gt; -v /opt/htdocs:/usr/local/apache2/htdocs \</span><br><span class="line">&gt; -v /other/useful/tools \</span><br><span class="line">&gt; busybox</span><br><span class="line">f9960d7960fce345c983e77435b38a8044f4805b2ce2682d86e09dc2fbc0e350</span><br></pre></td></tr></table></figure>
+
+<p>我们将容器命名为 vc_data（vc 是 volume container 的缩写）。注意这里执行的是 docker create 命令，
+这是因为 volume container 的作用只是提供数据，它本身不需要处于运行状态。容器 mount 了两个 volume：</p>
+<ol>
+<li>bind mount，存放 web server 的静态文件。</li>
+<li>docker managed volume，存放一些实用工具（当然现在是空的，这里只是做个示例）。</li>
+</ol>
+<p>通过 <code>docker inspect vc_data</code> 可以查看到这两个 volume</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker34.png"></p>
+<p>其他容器可以通过 <code>--volumes-from</code> 使用 vc_data 这个 volume container。下面我启动三个httpd的容器，并共享这个存储容器：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# docker run --name web1 -d -p 80 --volumes-from vc_data httpd </span><br><span class="line">55dca74022ac8409282249dd7603671c4dad21fbfdabe2b7f63a68fd1a872e18</span><br><span class="line">[root@VM_22_2_centos docker]# docker run --name web2 -d -p 80 --volumes-from vc_data httpd </span><br><span class="line">6408133e7237dc0ea1d1c273b228c0bae5b3a0ccf1035ba3bd6fb3c13216cb14</span><br><span class="line">[root@VM_22_2_centos docker]# docker run --name web3 -d -p 80 --volumes-from vc_data httpd </span><br><span class="line">86a3b71c8d057fd52a3c31206129c5732352d6f4750b1160b75c82c158534b4f</span><br></pre></td></tr></table></figure>
+
+<p>验证一下数据共享的效果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# echo &quot;this content is from a volume containner&quot; &gt; /opt/htdocs/index.html </span><br><span class="line">[root@VM_22_2_centos docker]# curl 127.0.0.1:32770</span><br><span class="line">this content is from a volume containner</span><br><span class="line">[root@VM_22_2_centos docker]# curl 127.0.0.1:32769</span><br><span class="line">this content is from a volume containner</span><br><span class="line">[root@VM_22_2_centos docker]# curl 127.0.0.1:32768</span><br><span class="line">this content is from a volume containner</span><br></pre></td></tr></table></figure>
+
+<p>可见，三个容器已经成功共享了 volume container 中的 volume。</p>
+<p>总结一下 volume container 的特点：</p>
+<ol>
+<li>与 bind mount 相比，不必为每一个容器指定 host path，所有 path 都在 volume container 中定义好了，
+容器只需与 volume container 关联，实现了容器与 host 的解耦。</li>
+<li>使用 volume container 的容器其 mount point 是一致的，有利于配置的规范和标准化，但也带来一定的局限，使用时需要综合考虑。</li>
+</ol>
+<h2 id="data-packed-volume-container"><a href="#data-packed-volume-container" class="headerlink" title="data-packed volume container"></a>data-packed volume container</h2><p>上面讨论的volume container 的数据归根到底还是在 host 里，有没有办法将数据完全放到 volume container 中，同时又能与其他容器共享呢？</p>
+<p>当然可以，通常我们称这种容器为 data-packed volume container。其原理是将数据打包到镜像中，然后通过 docker managed volume 共享。</p>
+<p>我们用下面的 Dockfile 构建镜像：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">FROM busybox:lastest</span><br><span class="line">ADD htdocs /usr/local/apache2/htdocs</span><br><span class="line">VOLUME /usr/local/apache2/htdocs</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/docker35.png"></p>
+<p>ADD 将静态文件目录<code>htdocs</code>复制到容器目录 <code>/usr/local/apache2/htdocs</code></p>
+<p>VOLUME 的作用与 -v 等效，用来创建 docker managed volume，mount point 为 <code>/usr/local/apache2/htdocs</code>，
+因为这个目录就是 ADD 添加的目录，所以会将已有数据拷贝到 volume 中。</p>
+<p>先删除之前的vc_data，然后用新镜像创建 data-packed volume container：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_22_2_centos docker]# docker rm vc_data</span><br><span class="line">[root@VM_22_2_centos docker]# docker create --name vc_data datapacked</span><br><span class="line">301cbcff7e654a8923e1ab2ea543d4f3d9e80bdb37e1c821990dc09914585318</span><br><span class="line">[root@VM_22_2_centos docker]# docker run -d -p 80 --volumes-from vc_data httpd</span><br><span class="line">56598537f816e10d6b7a88eb942291761e2eeb4e004615b39cfcf3c326ea06cf</span><br><span class="line">[root@VM_22_2_centos docker]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                                                                 NAMES</span><br><span class="line">56598537f816        httpd               &quot;httpd-foreground&quot;     8 seconds ago       Up 6 seconds        0.0.0.0:32771-&gt;80/tcp                                                 zealous_leakey</span><br><span class="line">[root@VM_22_2_centos docker]# curl 127.0.0.1:32771</span><br><span class="line">this content is from a volume containner</span><br></pre></td></tr></table></figure>
+
+<p>容器能够正确读取 volume 中的数据。data-packed volume container 是自包含的，不依赖 host 提供数据，具有很强的移植性，
+非常适合<strong>只使用</strong>静态数据的场景，比如应用的配置信息、web server 的静态文件等。对于开发和生产环境中有不同的配置文件的时候很方便。</p>
+<h2 id="volume-生命周期"><a href="#volume-生命周期" class="headerlink" title="volume 生命周期"></a>volume 生命周期</h2><p>最后一节讨论如何备份、恢复、迁移和销毁 data volume。</p>
+<p><strong>备份</strong></p>
+<p>因为 volume 实际上是 host 文件系统中的目录和文件，所以 volume 的备份实际上是对文件系统的备份。</p>
+<p><strong>恢复</strong></p>
+<p>volume 的恢复也很简单，如果数据损坏了，直接用之前备份的数据拷贝到value的源目录可以了。</p>
+<p><strong>迁移</strong></p>
+<p>如果我们想使用更新版本的镜像启动容器，这就涉及到数据迁移，方法是：</p>
+<ol>
+<li>docker stop 当前 Registry 容器。</li>
+<li>启动新版本容器并 mount 原有 volume。</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 5000:5000 -v /myregistry:/var/lib/registry registry:latest</span><br></pre></td></tr></table></figure>
+
+<p>当然，在启用新容器前要确保新版本的默认数据路径是否发生变化。</p>
+<p><strong>销毁</strong></p>
+<p>可以删除不再需要的 volume，但一定要确保知道自己正在做什么，volume 删除后数据是找不回来的。</p>
+<ul>
+<li>docker 不会销毁 bind mount，删除数据的工作只能由 host 负责。</li>
+<li>对于 docker managed volume，在执行 docker rm 删除容器时可以带上 -v 参数，</li>
+</ul>
+<p>docker 会将容器使用到的 volume 一并删除，但前提是没有其他容器 mount 该 volume，目的是保护数据，非常合理。</p>
+<p>如果想批量删除孤儿 volume，可以执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume rm $(docker volume ls -q)</span><br></pre></td></tr></table></figure>
+
+<p>这章我们学习的只是单个 docker host 中的存储方案。而跨主机存储也是一个重要的主题，当然也更复杂，我们会在容器进阶技术章节详细讨论。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/docker/" rel="tag"># docker</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker07.html" rel="prev" title="Docker每天学一点07 - 单主机网络">
+                  <i class="fa fa-angle-left"></i> Docker每天学一点07 - 单主机网络
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/k8s/docker/docker09.html" rel="next" title="Docker每天学一点09 - 多主机管理">
+                  Docker每天学一点09 - 多主机管理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

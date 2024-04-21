@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。 统一使用 SpringBoot+Meven 构建。    项目 地址 说明    cas-overlay https:&#x2F;&#x2F;cas.server.com:8443&#x2F;cas cas-server 服务端   cas-app1 http:&#x2F;&#x2F;app1.com:8181 cas-client 客户端1   ca">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS教程 - 实现单点登录">
+<meta property="og:url" content="http://yidao620c.github.io/security/cas/cas04.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。 统一使用 SpringBoot+Meven 构建。    项目 地址 说明    cas-overlay https:&#x2F;&#x2F;cas.server.com:8443&#x2F;cas cas-server 服务端   cas-app1 http:&#x2F;&#x2F;app1.com:8181 cas-client 客户端1   ca">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-01-09T10:16:55.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.357Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="CAS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/cas/cas04.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/cas/cas04.html","path":"security/cas/cas04.html","title":"CAS教程 - 实现单点登录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CAS教程 - 实现单点登录 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%85%8D%E7%BD%AEhosts%E6%96%87%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">一、配置hosts文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AEcas%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="nav-number">2.</span> <span class="nav-text">二、配置cas服务端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%85%8D%E7%BD%AE%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">3.</span> <span class="nav-text">三、配置客户端</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%A0%E4%B8%AA%E5%B8%B8%E7%94%A8%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">4.</span> <span class="nav-text">几个常用配置项</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/cas/cas04.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CAS教程 - 实现单点登录 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CAS教程 - 实现单点登录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-09 18:16:55" itemprop="dateCreated datePublished" datetime="2019-01-09T18:16:55+08:00">2019-01-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>通过前面几篇的介绍，熟悉了CAS Server的运行和调试，这一篇演示一个实际的单点登录例子。
+统一使用 SpringBoot+Meven 构建。</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>地址</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cas-overlay</td>
+<td><a target="_blank" rel="noopener" href="https://cas.server.com:8443/cas">https://cas.server.com:8443/cas</a></td>
+<td>cas-server 服务端</td>
+</tr>
+<tr>
+<td>cas-app1</td>
+<td><a target="_blank" rel="noopener" href="http://app1.com:8181/">http://app1.com:8181</a></td>
+<td>cas-client 客户端1</td>
+</tr>
+<tr>
+<td>cas-app2</td>
+<td><a target="_blank" rel="noopener" href="http://app2.com:8282/">http://app2.com:8282</a></td>
+<td>cas-client 客户端2</td>
+</tr>
+</tbody></table>
+<p>接下来，老夫就要开始飙车了。</p>
+<span id="more"></span>
+
+<h2 id="一、配置hosts文件"><a href="#一、配置hosts文件" class="headerlink" title="一、配置hosts文件"></a>一、配置hosts文件</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># SSO单点登录Demo</span><br><span class="line">127.0.0.1    cas.server.com</span><br><span class="line">127.0.0.1    app1.com</span><br><span class="line">127.0.0.1    app2.com</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、配置cas服务端"><a href="#二、配置cas服务端" class="headerlink" title="二、配置cas服务端"></a>二、配置cas服务端</h2><p><strong>配置json服务注册</strong></p>
+<ol>
+<li>在src&#x2F;main&#x2F;resources&#x2F;目录下创建services文件夹</li>
+<li>在war包中，找到HTTPSandIMAPS-10000001.json文件，并copy到services文件夹中</li>
+<li>将HTTPSandIMAPS-10000001.json文件内容修改如下</li>
+</ol>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;@class&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;org.apereo.cas.services.RegexRegisteredService&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;serviceId&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;^(https|http|imaps)://.*&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;HTTPS and HTTP and IMAPS&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span> <span class="punctuation">:</span> <span class="number">10000001</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;This service definition authorizes all application urls that support HTTPS and HTTP and IMAPS protocols.&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;evaluationOrder&quot;</span> <span class="punctuation">:</span> <span class="number">10000</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>默认cas支持https，不支持http客户端站点来登录，所以需要手动进行配置兼容。
+如果不做此操作就会出现如下图：未认证授权的服务，所以还是乖乖的听话，跟着我的飙车轨道，别跑丢了。</p>
+<p>体json文件中代表什么含义，后续篇会详细讲解到。</p>
+<p><strong>application.properties 配置</strong></p>
+<p>application.properties文件中，增加配置项cas.serviceRegistry.initFromJson&#x3D;true表示开启了json注册服务。</p>
+<p>另外为了Demo尽可能的简单方便理解，我这里启用静态账号密码方式认证（非JDBC和Rest）</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##</span></span><br><span class="line"><span class="comment"># CAS Authentication Credentials</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cas.authn.accept.users</span>=<span class="string">test::test</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">##</span></span><br><span class="line"><span class="comment"># 开启json服务注册</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cas.serviceRegistry.initFromJson</span>=<span class="string">true</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">##</span></span><br><span class="line"><span class="comment"># 登出后允许跳转到指定页面</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cas.logout.followServiceRedirects</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、配置客户端"><a href="#三、配置客户端" class="headerlink" title="三、配置客户端"></a>三、配置客户端</h2><p>客户端 app1 和 app2 的项目逻辑相同，不多说。</p>
+<p><strong>pom.xml 配置</strong></p>
+<p>添加 cas-client 包依赖，我用的 3.5.1 版本</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">cas.client.version</span>&gt;</span>3.5.1<span class="tag">&lt;/<span class="name">cas.client.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--cas的客户端 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.jasig.cas.client<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>cas-client-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;java.cas.client.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>源代码我已上传至GitHub，主要几个类如下。</p>
+<p>CasClientConfig.java是CAS 客户端配置类，这个最重要。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CasClientConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*========================== SSO配置-开始  ============================*/</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * SingleSignOutFilter 登出过滤器</span></span><br><span class="line"><span class="comment">     * 该过滤器用于实现单点登出功能，可选配置</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> FilterRegistrationBean <span class="title function_">filterSingleRegistration</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">FilterRegistrationBean</span> <span class="variable">registration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterRegistrationBean</span>();</span><br><span class="line">        registration.setFilter(<span class="keyword">new</span> <span class="title class_">SingleSignOutFilter</span>());</span><br><span class="line">        <span class="comment">// 设定匹配的路径</span></span><br><span class="line">        registration.addUrlPatterns(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">        Map&lt;String, String&gt; initParameters = <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        initParameters.put(<span class="string">&quot;casServerUrlPrefix&quot;</span>, CasConfig.CAS_SERVER_LOGIN_PATH);</span><br><span class="line">        registration.setInitParameters(initParameters);</span><br><span class="line">        <span class="comment">// 设定加载的顺序</span></span><br><span class="line">        registration.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * SingleSignOutHttpSessionListener 添加监听器</span></span><br><span class="line"><span class="comment">     * 用于单点退出，该过滤器用于实现单点登出功能，可选配置</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> ServletListenerRegistrationBean&lt;EventListener&gt; <span class="title function_">singleSignOutListenerRegistration</span><span class="params">()</span> &#123;</span><br><span class="line">        ServletListenerRegistrationBean&lt;EventListener&gt; registrationBean = <span class="keyword">new</span> <span class="title class_">ServletListenerRegistrationBean</span>&lt;EventListener&gt;();</span><br><span class="line">        registrationBean.setListener(<span class="keyword">new</span> <span class="title class_">SingleSignOutHttpSessionListener</span>());</span><br><span class="line">        registrationBean.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registrationBean;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Cas30ProxyReceivingTicketValidationFilter 验证过滤器</span></span><br><span class="line"><span class="comment">     * 该过滤器负责对Ticket的校验工作，必须启用它</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> FilterRegistrationBean <span class="title function_">filterValidationRegistration</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">FilterRegistrationBean</span> <span class="variable">registration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterRegistrationBean</span>();</span><br><span class="line">        registration.setFilter(<span class="keyword">new</span> <span class="title class_">Cas30ProxyReceivingTicketValidationFilter</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 设定匹配的路径</span></span><br><span class="line">        registration.addUrlPatterns(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">        Map&lt;String, String&gt; initParameters = <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        initParameters.put(<span class="string">&quot;casServerUrlPrefix&quot;</span>, CasConfig.CAS_SERVER_PATH);</span><br><span class="line">        initParameters.put(<span class="string">&quot;serverName&quot;</span>, CasConfig.SERVER_NAME);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 是否对serviceUrl进行编码，默认true：设置false可以在302对URL跳转时取消显示;jsessionid=xxx的字符串</span></span><br><span class="line">        <span class="comment">// 观察CommonUtils.constructServiceUrl方法可以看到</span></span><br><span class="line">        initParameters.put(<span class="string">&quot;encodeServiceUrl&quot;</span>, <span class="string">&quot;false&quot;</span>);</span><br><span class="line"></span><br><span class="line">        registration.setInitParameters(initParameters);</span><br><span class="line">        <span class="comment">// 设定加载的顺序</span></span><br><span class="line">        registration.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * AuthenticationFilter 授权过滤器</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> FilterRegistrationBean <span class="title function_">filterAuthenticationRegistration</span><span class="params">()</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">FilterRegistrationBean</span> <span class="variable">registration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterRegistrationBean</span>();</span><br><span class="line">        Map&lt;String, String&gt; initParameters = <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"></span><br><span class="line">        registration.setFilter(<span class="keyword">new</span> <span class="title class_">AuthenticationFilter</span>());</span><br><span class="line">        registration.addUrlPatterns(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">        initParameters.put(<span class="string">&quot;casServerLoginUrl&quot;</span>, CasConfig.CAS_SERVER_LOGIN_PATH);</span><br><span class="line">        initParameters.put(<span class="string">&quot;serverName&quot;</span>, CasConfig.SERVER_NAME);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 不拦截的请求 .* 有后缀的文件</span></span><br><span class="line">        initParameters.put(<span class="string">&quot;ignorePattern&quot;</span>, <span class="string">&quot;.*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 表示过滤所有</span></span><br><span class="line">        initParameters.put(<span class="string">&quot;ignoreUrlPatternType&quot;</span>, <span class="string">&quot;com.xncoding.cas.config.SimpleUrlPatternMatcherStrategy&quot;</span>);</span><br><span class="line"></span><br><span class="line">        registration.setInitParameters(initParameters);</span><br><span class="line">        <span class="comment">// 设定加载的顺序</span></span><br><span class="line">        registration.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * AssertionThreadLocalFilter</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;</span></span><br><span class="line"><span class="comment">     * 该过滤器使得开发者可以通过org.jasig.cas.client.util.AssertionHolder来获取用户的登录名。</span></span><br><span class="line"><span class="comment">     * 比如AssertionHolder.getAssertion().getPrincipal().getName()。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> FilterRegistrationBean <span class="title function_">filterAssertionThreadLocalRegistration</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">FilterRegistrationBean</span> <span class="variable">registration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterRegistrationBean</span>();</span><br><span class="line">        registration.setFilter(<span class="keyword">new</span> <span class="title class_">AssertionThreadLocalFilter</span>());</span><br><span class="line">        <span class="comment">// 设定匹配的路径</span></span><br><span class="line">        registration.addUrlPatterns(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">        <span class="comment">// 设定加载的顺序</span></span><br><span class="line">        registration.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * HttpServletRequestWrapperFilter wraper过滤器</span></span><br><span class="line"><span class="comment">     * 该过滤器负责实现HttpServletRequest请求的包裹，</span></span><br><span class="line"><span class="comment">     * 比如允许开发者通过HttpServletRequest的getRemoteUser()方法获得SSO登录用户的登录名，可选配置。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * @return</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> FilterRegistrationBean <span class="title function_">filterWrapperRegistration</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">FilterRegistrationBean</span> <span class="variable">registration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterRegistrationBean</span>();</span><br><span class="line">        registration.setFilter(<span class="keyword">new</span> <span class="title class_">HttpServletRequestWrapperFilter</span>());</span><br><span class="line">        <span class="comment">// 设定匹配的路径</span></span><br><span class="line">        registration.addUrlPatterns(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">        <span class="comment">// 设定加载的顺序</span></span><br><span class="line">        registration.setOrder(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">return</span> registration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* =========================   SSO配置-结束   ========================*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>URL拦截匹配规则类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SimpleUrlPatternMatcherStrategy</span> <span class="keyword">implements</span> <span class="title class_">UrlPatternMatcherStrategy</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 机能概要: 判断是否匹配这个字符串</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> url 用户请求的连接</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> true : 不拦截</span></span><br><span class="line"><span class="comment">     * false :必须得登录了</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">matches</span><span class="params">(String url)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (url.contains(<span class="string">&quot;/logout&quot;</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        List&lt;String&gt; list = Arrays.asList(</span><br><span class="line">                <span class="string">&quot;/&quot;</span>,</span><br><span class="line">                <span class="string">&quot;/index&quot;</span>,</span><br><span class="line">                <span class="string">&quot;/favicon.ico&quot;</span></span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> url.substring(url.lastIndexOf(<span class="string">&quot;/&quot;</span>));</span><br><span class="line">        <span class="keyword">if</span> (name.contains(<span class="string">&quot;?&quot;</span>)) &#123;</span><br><span class="line">            name = name.substring(<span class="number">0</span>, name.indexOf(<span class="string">&quot;?&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;name：&quot;</span> + name);</span><br><span class="line">        <span class="type">boolean</span> <span class="variable">result</span> <span class="operator">=</span> list.contains(name);</span><br><span class="line">        <span class="keyword">if</span> (!result) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;拦截URL：&quot;</span> + url);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 正则表达式的规则，这个地方可以是web传递过来的</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setPattern</span><span class="params">(String pattern)</span> &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Cas的一些配置项，这里我写成常量了，其实作为Properties配置文件才是最好：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CasConfig</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 当前应用程序的baseUrl（注意最后面的斜线）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">SERVER_NAME</span> <span class="operator">=</span> <span class="string">&quot;http://app1.com:8080/&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * App1 登出成功url</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">APP_LOGOUT_PATH</span> <span class="operator">=</span> SERVER_NAME + <span class="string">&quot;user/logout/success&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * CAS服务器地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">CAS_SERVER_PATH</span> <span class="operator">=</span> <span class="string">&quot;https://cas.server.com:8443/cas&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * CAS登陆服务器地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">CAS_SERVER_LOGIN_PATH</span> <span class="operator">=</span> <span class="string">&quot;https://cas.server.com:8443/cas/login&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * CAS登出服务器地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">String</span> <span class="variable">CAS_SERVER_LOGOUT_PATH</span> <span class="operator">=</span> <span class="string">&quot;https://cas.server.com:8443/cas/logout&quot;</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后就是几个Controller接口类，定义的&#x2F;books是需要登录才能访问，而&#x2F;index不需要拦截。这里就不贴了。</p>
+<h2 id="几个常用配置项"><a href="#几个常用配置项" class="headerlink" title="几个常用配置项"></a>几个常用配置项</h2><ol>
+<li>cas.logout.followServiceRedirects&#x3D;true 是否允许客户端Logout后重定向到service参数指定的资源</li>
+<li>tgt.maxTimeToLiveInSeconds&#x3D;28800 指定Session的最大有效时间,即从生成到指定时间后就将超时,默认28800s,即8小时</li>
+<li>tgt.timeToKillInSeconds&#x3D;7200 指定用户操作的超时时间,即用户在多久不操作后就超时,默认7200s,即2小时。
+还要注意客户端web.xml配置的超时时间，即只有客户端配置超时时间不大于tgt.timeToKillInSeconds时才能看见服务端设置的效果</li>
+<li>st.timeToKillInSeconds&#x3D;10 指定service ticket的有效时间,默认10s，
+这也是debug追踪CAS应用认证过程中经常会失败的原因,因为追踪的时候service ticket已经过了10秒有效期了</li>
+<li>slo.callbacks.disabled&#x3D;false 是否禁用单点登出</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CAS/" rel="tag"># CAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/cas/cas03.html" rel="prev" title="CAS教程 - 定制开发">
+                  <i class="fa fa-angle-left"></i> CAS教程 - 定制开发
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/cas/cas05.html" rel="next" title="CAS教程 - Service配置">
+                  CAS教程 - Service配置 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

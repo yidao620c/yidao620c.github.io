@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="之前写过一篇 使用Ajax实现异步任务 的文章， 介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。 但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费， 这里正式介绍如果通过WebSocket + RabbitMQ来优雅的实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ简易教程 - WebSocket">
+<meta property="og:url" content="http://yidao620c.github.io/middleware/mq/rabbitmq-tutorial07.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="之前写过一篇 使用Ajax实现异步任务 的文章， 介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。 但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费， 这里正式介绍如果通过WebSocket + RabbitMQ来优雅的实现。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb09.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb10.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb14.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb11.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb12.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb13.png">
+<meta property="article:published_time" content="2017-05-17T00:24:25.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.695Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="rabbitmq">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/rb09.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/middleware/mq/rabbitmq-tutorial07.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/middleware/mq/rabbitmq-tutorial07.html","path":"middleware/mq/rabbitmq-tutorial07.html","title":"RabbitMQ简易教程 - WebSocket"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>RabbitMQ简易教程 - WebSocket | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#WebSocket-%E5%8F%8C%E5%90%91%E9%80%9A%E4%BF%A1"><span class="nav-number">1.</span> <span class="nav-text">WebSocket 双向通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E-RabbitMQ-%E7%9A%84%E5%AE%9E%E6%97%B6%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81"><span class="nav-number">2.</span> <span class="nav-text">基于 RabbitMQ 的实时消息推送</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Edestination"><span class="nav-number">3.</span> <span class="nav-text">关于destination</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E5%BB%BA%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">最后建议</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/middleware/mq/rabbitmq-tutorial07.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="RabbitMQ简易教程 - WebSocket | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RabbitMQ简易教程 - WebSocket
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-05-17 08:24:25" itemprop="dateCreated datePublished" datetime="2017-05-17T08:24:25+08:00">2017-05-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>之前写过一篇 <a target="_blank" rel="noopener" href="https://www.xncoding.com/2017/05/02/web/async.html">使用Ajax实现异步任务</a> 的文章，
+介绍了对于需要知道异步处理返回结果的情况，使用Ajax的轮训和长连接方式实现。
+但是这两种方式都会生成大量的HTTP连接，对服务器资源是一种巨大的浪费，
+这里正式介绍如果通过<code>WebSocket</code> + <code>RabbitMQ</code>来优雅的实现。</p>
+<span id="more"></span>
+
+<h2 id="WebSocket-双向通信"><a href="#WebSocket-双向通信" class="headerlink" title="WebSocket 双向通信"></a>WebSocket 双向通信</h2><p>WebSocket 是 HTML5 中一种新的通信协议，能够实现浏览器与服务器之间全双工通信。
+如果浏览器和服务端都支持 WebSocket 协议的话，该方式实现的消息推送无疑是最高效、简洁的。
+并且最新版本的 IE、Firefox、Chrome 等浏览器都已经支持 WebSocket 协议，
+Apache Tomcat 7.0.27 以后的版本也开始支持 WebSocket。</p>
+<h2 id="基于-RabbitMQ-的实时消息推送"><a href="#基于-RabbitMQ-的实时消息推送" class="headerlink" title="基于 RabbitMQ 的实时消息推送"></a>基于 RabbitMQ 的实时消息推送</h2><p>RabbitMQ 有很多第三方插件，可以在 AMQP 协议基础上做出许多扩展的应用。
+Web STOMP 插件就是基于 AMQP 之上的 STOMP 文本协议插件，
+利用 WebSocket 能够轻松实现浏览器和服务器之间的实时消息传递。</p>
+<p>首先打开<code>Web STOMP</code> 插件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmq-plugins <span class="built_in">enable</span> rabbitmq_web_stomp</span><br></pre></td></tr></table></figure>
+
+<p>这里我通过一个实际的例子来演示怎样通过websocket实现异步任务的页面自动刷新。</p>
+<p>大致步骤：</p>
+<ol>
+<li>后端通过一个python程序向名字为<code>rabbitmq</code>的exchange发送消息，并设置routing key为<code>zjj</code></li>
+<li>页面通过js，创建一个自动删除的队列，并且将这个队列跟这个<code>rabbitmq</code>的exchange进行绑定，binding key为<code>zjj</code></li>
+<li>页面初始显示<code>loading...</code>，当收到消息后将内容更新为消息字符串。</li>
+</ol>
+<p>RabbitMQ Web STOMP 插件可以理解为 HTML5 WebSocket 与 STOMP 协议间的桥接，
+目的也是为了让浏览器能够使用 RabbitMQ。当 RabbitMQ 消息服务器开启了 STOMP 和 Web STOMP 插件后，浏览器端就可以轻松地使用
+WebSocket 或者 SockerJS 客户端实现与 RabbitMQ 服务器进行通信。</p>
+<p>RabbitMQ Web STOMP 是对 STOMP 协议的桥接，因此其语法也完全遵循 STOMP 协议。
+STOMP 是基于 frame 的协议，与 HTTP 的 frame 相似。
+一个 Frame 包含一个 command，一系列可选的 headers 和一个 body。
+STOMP client 的用户代理可以充当两个角色，当然也可能同时充当：
+作为生产者，通过 SEND frame 发送消息到服务器；
+作为消费者，发送 SUBCRIBE frame 到目的地并且通过 MESSAGE frame 从服务器获取消息。</p>
+<p>在 Web 页面中利用 WebSocket 使用 STOMP 协议只需要下载 <code>stomp.js</code> 即可，
+考虑到老版本的浏览器不支持 WebSocket，SockJS 则提供了 WebSocket 的模拟支持。</p>
+<p>web页面代码：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Echarts demo<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">href</span>=<span class="string">&quot;../../bootstrap/css/bootstrap.min.css&quot;</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 引入 ECharts 文件 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;../../js/jquery-1.12.4.min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;./sockjs.min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;./stomp.min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span> <span class="attr">style</span>=<span class="string">&quot;margin-left: 15px;&quot;</span>&gt;</span>测试Websocket自动刷新页面状态<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;row&quot;</span> <span class="attr">style</span>=<span class="string">&quot;margin-left: 0&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;col-md-3&quot;</span> <span class="attr">style</span>=<span class="string">&quot;font-size: large&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">span</span>&gt;</span>状态更新：<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;load&quot;</span> <span class="attr">style</span>=<span class="string">&quot;color: #5bc0de&quot;</span>&gt;</span>loading...<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    $(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;starting...&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Stomp.js boilerplate</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> ws;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">if</span> (<span class="keyword">typeof</span> (<span class="title class_">WebSocket</span>) === <span class="string">&quot;function&quot;</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;ws协议...&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">            ws = <span class="keyword">new</span> <span class="title class_">WebSocket</span>(<span class="string">&#x27;ws://192.168.217.226:15674/ws&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">        &#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;http协议...&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">            ws = <span class="keyword">new</span> <span class="title class_">SockJS</span>(<span class="string">&#x27;http://192.168.217.226:15674/stomp&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Init Client</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> client = <span class="title class_">Stomp</span>.<span class="title function_">over</span>(ws);</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// SockJS does not support heart-beat: disable heart-beats</span></span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// client will send heartbeats every xxxms</span></span></span><br><span class="line"><span class="language-javascript">        client.<span class="property">heartbeat</span>.<span class="property">outgoing</span> = <span class="number">0</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// client does not want to receive heartbeats</span></span></span><br><span class="line"><span class="language-javascript">        client.<span class="property">heartbeat</span>.<span class="property">incoming</span> = <span class="number">0</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Declare on_connect</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> on_connect = <span class="keyword">function</span> (<span class="params">x</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            client.<span class="title function_">subscribe</span>(<span class="string">&quot;/exchange/rabbitmq/zjj&quot;</span>, <span class="keyword">function</span> (<span class="params">d</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                <span class="comment">// update result</span></span></span><br><span class="line"><span class="language-javascript">                $(<span class="string">&quot;#load&quot;</span>).<span class="title function_">empty</span>().<span class="title function_">text</span>(d.<span class="property">body</span>);</span></span><br><span class="line"><span class="language-javascript">                <span class="comment">// disconnect client</span></span></span><br><span class="line"><span class="language-javascript">                <span class="comment">// when close the brower, it will be closed automatically too</span></span></span><br><span class="line"><span class="language-javascript">                client.<span class="title function_">disconnect</span>(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;See you next time!&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">                &#125;);</span></span><br><span class="line"><span class="language-javascript">            &#125;);</span></span><br><span class="line"><span class="language-javascript">        &#125;;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Declare on_error</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> on_error = <span class="keyword">function</span> (<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;error&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">        &#125;;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// Conect to RabbitMQ</span></span></span><br><span class="line"><span class="language-javascript">        client.<span class="title function_">connect</span>(<span class="string">&#x27;guest&#x27;</span>, <span class="string">&#x27;guest&#x27;</span>, on_connect, on_error, <span class="string">&#x27;/&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">    &#125;);</span></span><br><span class="line"><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>刚开始打开的效果：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb09.png"></p>
+<p>web页面控制台日志如下，说明已经连上了队列：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb10.png"></p>
+<p>同时我去看rabbitmq管理界面，发现生成了一个随机队列：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb14.png"></p>
+<p>后台python发送消息代码：</p>
+<figure class="highlight python"><figcaption><span>send.py</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pika</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line">connection = pika.BlockingConnection(pika.ConnectionParameters(host=<span class="string">&#x27;192.168.217.226&#x27;</span>, port=<span class="number">5673</span>))</span><br><span class="line">channel = connection.channel()</span><br><span class="line"></span><br><span class="line">channel.exchange_declare(exchange=<span class="string">&#x27;rabbitmq&#x27;</span>,</span><br><span class="line">                         <span class="built_in">type</span>=<span class="string">&#x27;topic&#x27;</span>)</span><br><span class="line"></span><br><span class="line">routing_key = <span class="string">&#x27;zjj&#x27;</span></span><br><span class="line">message = <span class="string">&#x27;[disk.info] Hello World!333&#x27;</span></span><br><span class="line">channel.basic_publish(exchange=<span class="string">&#x27;rabbitmq&#x27;</span>,</span><br><span class="line">                      routing_key=routing_key,</span><br><span class="line">                      body=message)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot; [x] Sent %r:%r&quot;</span> % (routing_key, message))</span><br><span class="line"></span><br><span class="line">connection.close()</span><br></pre></td></tr></table></figure>
+
+<p>先运行后台消息发送：<code>python send.py</code></p>
+<p>然后看看页面，变成这样了：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb11.png"></p>
+<p>web页面控制台情况：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb12.png"></p>
+<p>在看rabbitmq的管理界面：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/rb13.png"></p>
+<p>可以看出，当我把websocket连接断了之后，那个queue自动删了，
+另外把页面关闭的时候websocket连接也会自动关闭。</p>
+<h2 id="关于destination"><a href="#关于destination" class="headerlink" title="关于destination"></a>关于destination</h2><p>使用<code>Web STOMP</code>的时候，最核心的两个东西是发送和订阅消息：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 发送消息</span></span><br><span class="line">client.<span class="title function_">send</span>(destination, head, body);</span><br><span class="line"><span class="comment">// 订阅消息</span></span><br><span class="line">client.<span class="title function_">subcribe</span>(destination, callback);</span><br></pre></td></tr></table></figure>
+
+<p>这里需要详细讲解<code>destination</code>的含义，根据使用场景的不同，主要有以下4种：</p>
+<ol>
+<li>&#x2F;exchange&#x2F;<exchangeName></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 一般为&#x2F;exchange&#x2F;<exchangeName>&#x2F;[&#x2F;pattern] 的形式。
+该 destination 会创建一个唯一的、自动删除的随机queue，
+并根据 pattern 将该 queue 绑定到所给的 exchange，实现对该队列的消息订阅。</p>
+<p>对于 SEND frame，destination 一般为&#x2F;exchange&#x2F;<exchangeName>&#x2F;[&#x2F;routingKey] 的形式。
+这种情况下消息就会被发送到定义的 exchange 中，并且指定了 routingKey。</p>
+<ol start="2">
+<li>&#x2F;queue&#x2F;<queueName></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 会定义<queueName>的共享 queue，并且实现对该队列的消息订阅。</p>
+<p>对于 SEND frame，destination 只会在第一次发送消息的时候会定义<queueName>的共享 queue。
+该消息会被发送到默认的 exchange 中，routingKey 即为<queueName>。</p>
+<ol start="3">
+<li>&#x2F;amq&#x2F;queue&#x2F;<queueName></li>
+</ol>
+<p>这种情况下无论是 SUBCRIBE frame 还是 SEND frame 都不会产生 queue。
+但如果该 queue 不存在，SUBCRIBE frame 会报错。</p>
+<p>对于 SUBCRIBE frame，destination 会实现对队列<queueName>的消息订阅。
+对于 SEND frame，消息会通过默认的 exhcange 直接被发送到队列<queueName>中。</p>
+<ol start="4">
+<li>&#x2F;topic&#x2F;<topicName></li>
+</ol>
+<p>对于 SUBCRIBE frame，destination 创建出自动删除的、非持久的 queue 并根据 routingkey 为<topicName>
+绑定到 amq.topic exchange 上，同时实现对该 queue 的订阅。</p>
+<p>对于 SEND frame，消息会被发送到 amq.topic exchange 中，routingKey 为<topicName>。</p>
+<p>对于在页面发送消息的例子跟订阅类似，这里就不再演示。</p>
+<h2 id="最后建议"><a href="#最后建议" class="headerlink" title="最后建议"></a>最后建议</h2><p>WebSocket 作为 HTML5 提供的新一代客户端-服务器异步通信方法，能够轻松完成前端与后台的双向通信。
+RabbitMQ 服务提供了一个 STOMP 插件，能够实现与 WebSocket 的桥接，这样既能够实现消息的主动推送，
+同时也能够实现消息的异步处理。</p>
+<p>在传统的 Web 开发中存在许多状态变更实时性的需求，比如资源被占用后需要广播它的实时状态，
+利用本文提出的解决方案，可以方便将其推送到所有监听的客户端。
+因此在开发新的 Web 项目中，建议使用本文提出的方案替代原来 ajax 轮询或长连接刷新状态。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/rabbitmq/" rel="tag"># rabbitmq</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/middleware/mq/rabbitmq-tutorial06.html" rel="prev" title="RabbitMQ简易教程 - RPC">
+                  <i class="fa fa-angle-left"></i> RabbitMQ简易教程 - RPC
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/mq/rabbitmq-tutorial08.html" rel="next" title="RabbitMQ简易教程 - 并发调度">
+                  RabbitMQ简易教程 - 并发调度 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

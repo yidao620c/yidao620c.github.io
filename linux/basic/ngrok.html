@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过公共的端口和外部建立一个安全的通道， 使得外网可以访问本地的计算机服务。也就是说，我们提供的服务（比如web站点）无需搭建在外部服务器， 只要通过ngrok把站点映射出去，别人即可直接访问到我们的服务。 有做过微信公众号开发的人，对它应该不陌生。因为用户跟微信公众号产生的交互行为，微信会把用户的相关信息推送到我们自己的服务器， 如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS7搭建ngrok服务器">
+<meta property="og:url" content="http://yidao620c.github.io/linux/basic/ngrok.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过公共的端口和外部建立一个安全的通道， 使得外网可以访问本地的计算机服务。也就是说，我们提供的服务（比如web站点）无需搭建在外部服务器， 只要通过ngrok把站点映射出去，别人即可直接访问到我们的服务。 有做过微信公众号开发的人，对它应该不陌生。因为用户跟微信公众号产生的交互行为，微信会把用户的相关信息推送到我们自己的服务器， 如">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ngrok01.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ngrok03.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ngrok02.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/ngrok04.png">
+<meta property="article:published_time" content="2017-12-29T01:48:19.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.930Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/ngrok01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/linux/basic/ngrok.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/linux/basic/ngrok.html","path":"linux/basic/ngrok.html","title":"CentOS7搭建ngrok服务器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS7搭建ngrok服务器 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%90%AD%E5%BB%BAngrok%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.</span> <span class="nav-text">搭建ngrok服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85go%E8%AF%AD%E8%A8%80%E7%8E%AF%E5%A2%83"><span class="nav-number">2.1.</span> <span class="nav-text">安装go语言环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85git"><span class="nav-number">2.2.</span> <span class="nav-text">安装git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDngrok%E6%BA%90%E7%A0%81"><span class="nav-number">2.3.</span> <span class="nav-text">下载ngrok源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E8%87%AA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="nav-number">2.4.</span> <span class="nav-text">生成自签名证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8lets-encrypt%E5%85%8D%E8%B4%B9%E8%AF%81%E4%B9%A6"><span class="nav-number">2.5.</span> <span class="nav-text">使用lets encrypt免费证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%AF%91ngrokd%E5%92%8Cngrok"><span class="nav-number">2.6.</span> <span class="nav-text">编译ngrokd和ngrok</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8ngrokd%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">2.7.</span> <span class="nav-text">启动ngrokd服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx%E9%85%8D%E7%BD%AE80%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">2.8.</span> <span class="nav-text">Nginx配置80端口转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">2.9.</span> <span class="nav-text">启用客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%83%A6%E6%81%BC%E7%9A%84%E4%BA%8B%E6%83%85"><span class="nav-number">3.</span> <span class="nav-text">烦恼的事情</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Docker"><span class="nav-number">4.</span> <span class="nav-text">使用Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85docker"><span class="nav-number">4.1.</span> <span class="nav-text">安装docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E9%95%9C%E8%B1%A1"><span class="nav-number">4.2.</span> <span class="nav-text">构建镜象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker%E5%AE%B9%E5%99%A8%E7%9A%84https"><span class="nav-number">4.3.</span> <span class="nav-text">Docker容器的https</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E9%95%9C%E8%B1%A1"><span class="nav-number">4.4.</span> <span class="nav-text">运行镜象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">4.5.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">4.6.</span> <span class="nav-text">运行客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%86%85%E5%85%8D%E8%B4%B9%E7%9A%84ngrok"><span class="nav-number">5.</span> <span class="nav-text">国内免费的ngrok</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%AB%A0"><span class="nav-number">6.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/linux/basic/ngrok.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS7搭建ngrok服务器 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS7搭建ngrok服务器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-12-29 09:48:19" itemprop="dateCreated datePublished" datetime="2017-12-29T09:48:19+08:00">2017-12-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/linux/" itemprop="url" rel="index"><span itemprop="name">linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>ngrok是一个反向代理，它能够让你本地的web服务或tcp服务通过公共的端口和外部建立一个安全的通道，
+使得外网可以访问本地的计算机服务。也就是说，我们提供的服务（比如web站点）无需搭建在外部服务器，
+只要通过ngrok把站点映射出去，别人即可直接访问到我们的服务。</p>
+<p>有做过微信公众号开发的人，对它应该不陌生。因为用户跟微信公众号产生的交互行为，微信会把用户的相关信息推送到我们自己的服务器，
+如果服务在本地，那微信当然无法推送给我们，这使得开发功能的时候调试相当麻烦。我们可以使用ngrok把本地站点映射出去，解决这个问题。</p>
+<p>另外如果我们想把本地开发时候的系统临时给外网用户看，无需部署到服务器上面去就可以，非常方便。</p>
+<p>ngrok是开源的，官网地址：<a target="_blank" rel="noopener" href="https://github.com/inconshreveable/ngrok">https://github.com/inconshreveable/ngrok</a></p>
+<p>下面，我们开始搭建ngrok服务。操作系统为CentOS 7.2</p>
+<span id="more"></span>
+
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>搭建ngrok服务需要有一个外网服务器及一个域名解析到外网服务器上，我已经有了一个<code>xncoding.com</code>域名，并且拥有一台腾讯云主机。</p>
+<p>在腾讯云主机的域名解析处，配置2个A记录，比如我新建2个<code>ngrok.xncoding.com</code> 和 <code>*.ngrok.xncoding.com</code> 解析到vps服务器上。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ngrok01.png"></p>
+<h2 id="搭建ngrok服务"><a href="#搭建ngrok服务" class="headerlink" title="搭建ngrok服务"></a>搭建ngrok服务</h2><h3 id="安装go语言环境"><a href="#安装go语言环境" class="headerlink" title="安装go语言环境"></a>安装go语言环境</h3><p>ngrok是基于go语言开发的，所以需要先安装go语言开发环境，CentOS可以使用yum安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install golang</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装git"><a href="#安装git" class="headerlink" title="安装git"></a>安装git</h3><p>默认的git版本太低了，需要升级到git2.5，具体步骤如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo yum remove git</span><br><span class="line">sudo yum install epel-release</span><br><span class="line">sudo yum install https://centos7.iuscommunity.org/ius-release.rpm</span><br><span class="line">sudo yum install git2u</span><br></pre></td></tr></table></figure>
+
+<p><code>git --version</code>，返回 <code>git version 2.5.0</code>，安装成功。</p>
+<h3 id="下载ngrok源码"><a href="#下载ngrok源码" class="headerlink" title="下载ngrok源码"></a>下载ngrok源码</h3><p>新建一个目录，并clone一份源码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> ~/go/src/github.com/inconshreveable</span><br><span class="line"><span class="built_in">cd</span> ~/go/src/github.com/inconshreveable</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/inconshreveable/ngrok.git</span><br><span class="line"><span class="built_in">export</span> GOPATH=~/go/src/github.com/inconshreveable/ngrok</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成自签名证书"><a href="#生成自签名证书" class="headerlink" title="生成自签名证书"></a>生成自签名证书</h3><p>使用ngrok.com官方服务时，我们使用的是官方的SSL证书。自己建立ngrok服务，需要我们生成自己的证书，并提供携带该证书的ngrok客户端。</p>
+<p>证书生成过程需要有自己的一个基础域名，比如我的就是<code>ngrok.xncoding.com</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ngrok</span><br><span class="line">$ openssl genrsa -out rootCA.key 2048</span><br><span class="line">$ openssl req -x509 -new -nodes -key rootCA.key -subj <span class="string">&quot;/CN=ngrok.xncoding.com&quot;</span> -days 5000 -out rootCA.pem</span><br><span class="line">$ openssl genrsa -out device.key 2048</span><br><span class="line">$ openssl req -new -key device.key -subj <span class="string">&quot;/CN=ngrok.xncoding.com&quot;</span> -out device.csr</span><br><span class="line">$ openssl x509 -req -<span class="keyword">in</span> device.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out device.crt -days 5000</span><br></pre></td></tr></table></figure>
+
+<p>执行完成以上命令后，在ngrok目录下，会新生成6个文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-rw-r--r-- 1 root root   1001 Dec 29 11:53 device.crt</span><br><span class="line">-rw-r--r-- 1 root root    903 Dec 29 11:44 device.csr</span><br><span class="line">-rw-r--r-- 1 root root   1675 Dec 29 11:44 device.key</span><br><span class="line">-rw-r--r-- 1 root root   1679 Dec 29 11:44 rootCA.key</span><br><span class="line">-rw-r--r-- 1 root root   1119 Dec 29 11:44 rootCA.pem</span><br><span class="line">-rw-r--r-- 1 root root     17 Dec 29 11:53 rootCA.srl</span><br></pre></td></tr></table></figure>
+
+<p>我们在编译可执行文件之前，需要把生成的证书分别替换到 <code>assets/client/tls</code>和<code>assets/server/tls</code>中，
+这两个目录分别存放着ngrok和ngrokd的默认证书。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cp</span> rootCA.pem assets/client/tls/ngrokroot.crt</span><br><span class="line">$ <span class="built_in">cp</span> device.crt assets/server/tls/snakeoil.crt</span><br><span class="line">$ <span class="built_in">cp</span> device.key assets/server/tls/snakeoil.key</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用lets-encrypt免费证书"><a href="#使用lets-encrypt免费证书" class="headerlink" title="使用lets encrypt免费证书"></a>使用lets encrypt免费证书</h3><p>如果想让浏览器不弹出提示，最好不要使用自签名证书，现在lets encrypt推出泛域名证书了，所以可以先申请个免费域名证书。</p>
+<p>客户端用证书 ：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ngrok</span><br><span class="line"><span class="built_in">cp</span> /etc/letsencrypt/live/xncoding.com/chain.pem assets/client/tls/ngrokroot.crt</span><br></pre></td></tr></table></figure>
+
+<p>服务器端用证书：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> /etc/letsencrypt/live/xncoding.com/cert.pem assets/server/tls/snakeoil.crt</span><br><span class="line"><span class="built_in">cp</span> /etc/letsencrypt/live/xncoding.com/privkey.pem assets/server/tls/snakeoil.key</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译ngrokd和ngrok"><a href="#编译ngrokd和ngrok" class="headerlink" title="编译ngrokd和ngrok"></a>编译ngrokd和ngrok</h3><p>首先需要知道，ngrokd 为服务端的执行文件，ngrok为客户端的执行文件。</p>
+<p>接下来我们来编译ngrokd，在ngrok目录下，执行如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ make release-server</span><br></pre></td></tr></table></figure>
+
+<p>编译过程需要等待一会，因为需要通过git安装相关依赖包。如果提示没有权限，使用 sudo 命令来安装。</p>
+<p>由于客户端的平台版本较多，我们需要交叉编译来选择生成的平台。
+以windows、arm、linux版本编译，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ GOOS=linux GOARCH=amd64 make release-client</span><br><span class="line">$ GOOS=windows GOARCH=amd64 make release-client</span><br><span class="line">$ GOOS=linux GOARCH=arm make release-client</span><br></pre></td></tr></table></figure>
+
+<p>不同平台使用不同的 GOOS 和 GOARCH，GOOS为go编译出来的操作系统 (windows,linux,darwin)，GOARCH, 对应的构架 (386,amd64,arm)</p>
+<p>通过上面的步骤，将生成所有客户端文件，客户端文件放在对于的文件夹中，如windows 64位的为：windows_amd64，linux客户端在bin目录下的ngrok文件。</p>
+<p>完成之后，把相应的客户端文件使用SFTP或其他方式分发到客户端电脑上面，比如我用的windows电脑，就把<code>windows_amd64/ngrok.exe</code>
+文件复制过去。</p>
+<h3 id="启动ngrokd服务器"><a href="#启动ngrokd服务器" class="headerlink" title="启动ngrokd服务器"></a>启动ngrokd服务器</h3><p>请将 bin&#x2F;ngrokd 放入PATH环境变量中，启动命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">nohup</span> ngrokd -domain=ngrok.xncoding.com -httpAddr=:5442 -httpsAddr=:5443 -tunnelAddr=<span class="string">&quot;:4443&quot;</span> &amp;</span><br></pre></td></tr></table></figure>
+
+<p><code>-domain</code>为你的服务域名，<code>-httpAddr</code>为http服务端口地址，访问形式为<code>xxx.ngrok.xncoding.com:5442</code>
+，也可设置为80默认端口，<code>-httpsAddr</code>为https服务，同上。</p>
+<p>ngrokd还会开一个端口用来跟客户端通讯（可通过<code>-tunnelAddr=&quot;:xxx&quot;</code> 指定），如果你配置了 iptables 规则，需要放行这个通讯端口(
+4443)上的 TCP 协议。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --add-port=4443/tcp --permanent</span><br><span class="line">firewall-cmd --reload</span><br></pre></td></tr></table></figure>
+
+<h3 id="Nginx配置80端口转发"><a href="#Nginx配置80端口转发" class="headerlink" title="Nginx配置80端口转发"></a>Nginx配置80端口转发</h3><p>我们在微信开发时候不允许使用端口访问，那么最好使用nginx反向代理转发，首先申请一个<code>demo.ngrok.xncoding.com</code>
+的免费证书，然后修改nginx配置如下：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span>       <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span>  demo.ngrok.xncoding.com;</span><br><span class="line">    <span class="attribute">return</span>       <span class="number">301</span> https://demo.ngrok.xncoding.com<span class="variable">$request_uri</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span>       <span class="number">443</span> ssl http2;</span><br><span class="line">    <span class="attribute">server_name</span>  demo.ngrok.xncoding.com;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">charset</span> utf-<span class="number">8</span>;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">ssl_certificate</span> /etc/letsencrypt/live/demo.ngrok.xncoding.com/fullchain.pem;</span><br><span class="line">    <span class="attribute">ssl_certificate_key</span> /etc/letsencrypt/live/demo.ngrok.xncoding.com/privkey.pem;</span><br><span class="line">    <span class="attribute">ssl_trusted_certificate</span> /etc/letsencrypt/live/demo.ngrok.xncoding.com/chain.pem;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">access_log</span> /var/log/nginx/ngrok.log main;</span><br><span class="line">    <span class="attribute">error_log</span> /var/log/nginx/ngrok_error.log <span class="literal">error</span>;</span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://127.0.0.1:5442;</span><br><span class="line">        <span class="attribute">proxy_redirect</span> <span class="literal">off</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host       <span class="variable">$http_host</span>:<span class="number">5442</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP  <span class="variable">$remote_addr</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是！这里就有一个很烦躁的地方了，ngrokd 里面有一层自己的 Host 处理，于是 <code>proxy_set_header Host</code> 必须带上 ngrokd 所监听的端口，
+否则就算请求被转发到对应端口上， ngrokd 也不会正确的处理。</p>
+<h3 id="启用客户端"><a href="#启用客户端" class="headerlink" title="启用客户端"></a>启用客户端</h3><p>在刚刚复制过来的ngrok.exe客户端文件夹中，新建一个客户端配置<code>ngrok.cfg</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">server_addr: &quot;ngrok.xncoding.com:4443&quot;</span><br><span class="line">trust_host_root_certs: false</span><br></pre></td></tr></table></figure>
+
+<p>本地启动一个SpringBoot的WEB工程，端口8092，然后通过下面命令启动客户端：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ngrok.exe -subdomain demo -config=ngrok.cfg -log=log.txt 8092</span><br></pre></td></tr></table></figure>
+
+<p>看到下面的画面说明连接成功了：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ngrok03.png"></p>
+<p>访问页面，浏览器中输入：<code>https://demo.ngrok.xncoding.com</code>，成功访问本地SpringBoot站点内容。</p>
+<p>浏览器输入：<code>127.0.0.1:4040</code> 查看页面请求情况：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ngrok02.png"></p>
+<h2 id="烦恼的事情"><a href="#烦恼的事情" class="headerlink" title="烦恼的事情"></a>烦恼的事情</h2><p>带上端口号又会导致了另一个操蛋的问题：你请求的时候是<code>demo.ngrok.xncoding.com</code>，
+你在 web 应用中获取到的 Host 是 <code>demo.ngrok.xncoding.com:5442</code>，
+如果你的程序里面有基于 Request Host 的重定向，就会被重定向到 <code>demo.ngrok.xncoding.com:5442</code> 下面去。</p>
+<p>要完美的解决这个端口的问题，就需要让 ngrokd 直接监听 80 端口，或者使用Docker容器的端口映射来解决。</p>
+<h2 id="使用Docker"><a href="#使用Docker" class="headerlink" title="使用Docker"></a>使用Docker</h2><p>上面我讲到自己手动搭建的时候出现的端口问题，没办法解决。
+一般80端口早就被占用了，不可能就给你ngrok使用，最完美的方式是使用Docker + Nginx的方式。</p>
+<h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><p>参考我的这篇<a target="_blank" rel="noopener" href="https://www.xncoding.com/2017/04/01/docker/docker01.html">Docker入门</a>来安装docker。</p>
+<h3 id="构建镜象"><a href="#构建镜象" class="headerlink" title="构建镜象"></a>构建镜象</h3><p>这里使用的是<a target="_blank" rel="noopener" href="https://github.com/hteen/docker-ngrok">hteen&#x2F;docker-ngrok</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/hteen/docker-ngrok.git</span><br><span class="line"><span class="built_in">cd</span> docker-ngrok</span><br><span class="line">docker build -t hteen/ngrok .</span><br></pre></td></tr></table></figure>
+
+<p>这里需要等待一段时间下载</p>
+<h3 id="Docker容器的https"><a href="#Docker容器的https" class="headerlink" title="Docker容器的https"></a>Docker容器的https</h3><p>关于 https 的支持</p>
+<p>由于 ngrok 工作是通过分配 subdomain 的方式，所以我们实际使用到的域名都是 <code>ngrok.xncoding.com</code> 的子域名，
+如 <code>demo.ngrok.xncoding.com</code> 如果要对这个子域名启用 https 服务，那么至少需要三点支持：</p>
+<ol>
+<li>ngrok 支持 https， 这个默认就是开启的</li>
+<li><code>demo.ngrok.xncoding.com</code> 也需要有证书或包含在一个泛域名证书中</li>
+<li>浏览器（或其他终端）信任 <code>demo.ngrok.xncoding.com</code> 的根证书</li>
+</ol>
+<p>好消息是现在lets encrypt支持通配符域名了，所以很简单，具体怎么申请，请参考我博客中的nginx相关文章。</p>
+<p>这里请先申请<code>ngrok.xncoding.com</code>的通配符证书。</p>
+<p>申请好之后，增加配置<code>/etc/nginx/conf.d/ngrok.conf</code> 添加反向代理配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">map $scheme $proxy_port &#123;</span><br><span class="line">    &quot;http&quot;  &quot;5442&quot;;</span><br><span class="line">    &quot;https&quot; &quot;5443&quot;;</span><br><span class="line">    default &quot;5442&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen      80;</span><br><span class="line">    listen      443;</span><br><span class="line">    server_name ngrok.xncoding.com *.ngrok.xncoding.com;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        proxy_pass  $scheme://127.0.0.1:$proxy_port;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ssl on;</span><br><span class="line">    ssl_certificate /etc/letsencrypt/live/ngrok.xncoding.com/fullchain.pem;</span><br><span class="line">    ssl_certificate_key /etc/letsencrypt/live/ngrok.xncoding.com/privkey.pem;</span><br><span class="line"></span><br><span class="line">    proxy_set_header    X-Real-IP $remote_addr;</span><br><span class="line">    proxy_set_header    Host $http_host;</span><br><span class="line">    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line"></span><br><span class="line">    access_log off;</span><br><span class="line">    log_not_found off;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行镜象"><a href="#运行镜象" class="headerlink" title="运行镜象"></a>运行镜象</h3><p>上一步已经申请<code>ngrok.xncoding.com</code>这个域名的通配符lets encrypt证书，然后修改脚本<code>server.sh</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-tlsKey=/etc/letsencrypt/live/ngrok.xncoding.com/privkey.pem -tlsCrt=/etc/letsencrypt/live/ngrok.xncoding.com/fullchain.pem</span><br></pre></td></tr></table></figure>
+
+<p>也就是将之前的证书变量改成你实际的证书路径即可。</p>
+<p>然后运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -idt --name ngrok-server \</span><br><span class="line">-p 5442:80 -p 5443:443 -p 4443:4443 \</span><br><span class="line">-v /data/ngrok:/myfiles \</span><br><span class="line">-e DOMAIN=<span class="string">&#x27;ngrok.xncoding.com&#x27;</span> -e HTTP_ADDR=<span class="string">&#x27;:80&#x27;</span> -e HTTPS_ADDR=<span class="string">&#x27;:443&#x27;</span> hteen/ngrok /bin/sh /server.sh</span><br></pre></td></tr></table></figure>
+
+<p>如果在腾讯云主机上面，还需要本级防火墙放行4443端口，以及在腾讯云安全组中也要放开4443端口。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1.查看已开放的端口(默认不开放任何端口)</span><br><span class="line">firewall-cmd --list-ports</span><br><span class="line">2.开启4443端口</span><br><span class="line">firewall-cmd --zone=public --add-port=4443/tcp --permanent</span><br><span class="line">3.重启防火墙</span><br><span class="line">systemctl restart firewalld</span><br></pre></td></tr></table></figure>
+
+<p>这里会把主机的5442端口映射到Docker容器中的80端口，讲5443端口映射到443端口，同时将本机的&#x2F;data&#x2F;ngrok文件夹映射到docker容器的&#x2F;myfiles目录。</p>
+<p>运行后，会要等一段时间，因为要编译客户端。一直等到&#x2F;data&#x2F;ngrok&#x2F;目录里面有&#x2F;bin目录就OK了。</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p>因为ngrok有心跳机制，每次心跳均会产生日志，所以以docker方式运行，会产生很多日志。实测试中，大概每个星期会产生100M的日志文件。</p>
+<p>查年docker日志文件位置<code>sudo docker inspect &lt;id&gt; | grep LogPath</code></p>
+<p>查看大小<code>sudo ls -lh /var/lib/docker/containers/&lt;id&gt;/&lt;id&gt;-json.log</code></p>
+<h3 id="运行客户端"><a href="#运行客户端" class="headerlink" title="运行客户端"></a>运行客户端</h3><p>在<code>/data/ngrok/bin/</code>目录下会生成客户端程序，每个平台的版本都有。以windows64位来说，
+在windows_amd64目录下，拷贝到自己的windows电脑上。</p>
+<p>新建配置文件ngrok.cfg，跟ngrok.exe同级目录，里面的内容跟之前讲的一样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">server_addr: &quot;ngrok.xncoding.com:4443&quot;</span><br><span class="line">trust_host_root_certs: false</span><br></pre></td></tr></table></figure>
+
+<p>然后打开windows的命令行，cd到<code>ngrok.exe</code>所在的目录中，到这个运行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ngrok -config=ngrok.cfg -subdomain=demo -log=log.txt 8092</span><br></pre></td></tr></table></figure>
+
+<p>或者为了方便，在<code>ngrok.exe</code>所在的目录中新建一个<code>run.bat</code>文件，内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">@echo off</span><br><span class="line">ngrok.exe -config=ngrok.cfg -subdomain=demo -log=log.txt 8092</span><br></pre></td></tr></table></figure>
+
+<p>上面的subdomain是你想去访问域名前缀，后面的端口是你本机应用启动端口。</p>
+<p>看到下面的结果表示成功了：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/ngrok04.png"></p>
+<p>然后再打开<code>http://demo.ngrok.xncoding.com</code>看看，发现不会像之前那样出现端口了。</p>
+<h2 id="国内免费的ngrok"><a href="#国内免费的ngrok" class="headerlink" title="国内免费的ngrok"></a>国内免费的ngrok</h2><p>如果你自己没VPS，或者你机子上面80端口已经被nginx占用不想搞了，就直接使用免费的ngrok吧，
+我推荐你使用<a target="_blank" rel="noopener" href="https://www.ngrok.cc/">https://www.ngrok.cc/</a>。</p>
+<p>比如我自己弄了个<code>yidao620.free.ngrok.cc</code>，启动本地客户端后，映射到本地的8092端口了，也还不错。</p>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://morongs.github.io/2016/12/28/dajian-ngrok/">从零教你搭建ngrok服务器</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/4b03fb532145">ngrok使用自己的证书通过https访问</a></li>
+<li><a target="_blank" rel="noopener" href="https://yii.im/posts/pretty-self-hosted-ngrokd/">搭建并配置优雅的 ngrok 服务实现内网穿透</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.fengcl.com/2017/05/24/how-to-use-docker-build-ngrok-to-network-penetrate/">使用Docker搭建Ngrok服务器实现内网穿透</a></li>
+<li><a target="_blank" rel="noopener" href="https://fengqi.me/unix/409.html">搭建自己的Ngrok服务器, 并与Nginx并存</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/linux/" rel="tag"># linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/web/weixin/ma-websocket.html" rel="prev" title="小程序开发 - websocket">
+                  <i class="fa fa-angle-left"></i> 小程序开发 - websocket
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/java/basic/jmh.html" rel="next" title="Java微基准测试框架JMH">
+                  Java微基准测试框架JMH <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="nginx是一个优秀的 HTTP 和反向代理服务器，一个邮件代理服务器， 一个通用TCP&#x2F;UDP代理服务器，官网地址：https:&#x2F;&#x2F;nginx.org&#x2F;en&#x2F; nginx由于出色的性能，在世界范围内受到了越来越多人的关注。其特点是占有内存少，并发能力强， 事实上nginx的并发能力确实在同类型的网页伺服器中表现较好。 目前中国大陆使用nginx网站用户有新浪、网易、腾讯，另外知名的微网">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx笔记 - 配置和使用">
+<meta property="og:url" content="http://yidao620c.github.io/middleware/nginx/nginx01-basic.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="nginx是一个优秀的 HTTP 和反向代理服务器，一个邮件代理服务器， 一个通用TCP&#x2F;UDP代理服务器，官网地址：https:&#x2F;&#x2F;nginx.org&#x2F;en&#x2F; nginx由于出色的性能，在世界范围内受到了越来越多人的关注。其特点是占有内存少，并发能力强， 事实上nginx的并发能力确实在同类型的网页伺服器中表现较好。 目前中国大陆使用nginx网站用户有新浪、网易、腾讯，另外知名的微网">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/nginx-welcome.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/nginx-xnindex.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/nginx-blog.png">
+<meta property="article:published_time" content="2017-01-08T04:22:15.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:56.476Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/nginx-welcome.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/middleware/nginx/nginx01-basic.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/middleware/nginx/nginx01-basic.html","path":"middleware/nginx/nginx01-basic.html","title":"nginx笔记 - 配置和使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>nginx笔记 - 配置和使用 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E7%AF%87"><span class="nav-number">1.</span> <span class="nav-text">安装篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#yum-%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">yum 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%AE%89%E8%A3%85"><span class="nav-number">1.2.</span> <span class="nav-text">源码安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#systemd%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.3.</span> <span class="nav-text">systemd服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%B8%E8%BD%BD"><span class="nav-number">1.4.</span> <span class="nav-text">卸载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%AF%87"><span class="nav-number">2.</span> <span class="nav-text">配置篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nginx-conf%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.1.</span> <span class="nav-text">nginx.conf位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#main%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">main全局配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#events"><span class="nav-number">2.3.</span> <span class="nav-text">events</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#http"><span class="nav-number">2.4.</span> <span class="nav-text">http</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#server"><span class="nav-number">2.5.</span> <span class="nav-text">server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#location"><span class="nav-number">2.6.</span> <span class="nav-text">location</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%8C%B9%E9%85%8D"><span class="nav-number">2.6.1.</span> <span class="nav-text">关于匹配</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-%E9%85%8D%E7%BD%AE%E5%AE%9E%E8%B7%B5"><span class="nav-number">3.</span> <span class="nav-text">nginx 配置实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0-DNS"><span class="nav-number">3.1.</span> <span class="nav-text">本地 DNS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-nginx"><span class="nav-number">3.2.</span> <span class="nav-text">配置 nginx</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/middleware/nginx/nginx01-basic.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="nginx笔记 - 配置和使用 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nginx笔记 - 配置和使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-01-08 12:22:15" itemprop="dateCreated datePublished" datetime="2017-01-08T12:22:15+08:00">2017-01-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>nginx是一个优秀的 HTTP 和反向代理服务器，一个邮件代理服务器，
+一个通用TCP&#x2F;UDP代理服务器，官网地址：<a target="_blank" rel="noopener" href="https://nginx.org/en/">https://nginx.org/en/</a></p>
+<p>nginx由于出色的性能，在世界范围内受到了越来越多人的关注。其特点是占有内存少，并发能力强，
+事实上nginx的并发能力确实在同类型的网页伺服器中表现较好。
+目前中国大陆使用nginx网站用户有新浪、网易、腾讯，另外知名的微网志Plurk也使用nginx</p>
+<p>之前写过一篇关于nginx的入门篇，nginx作为一款受欢迎的高性能 Web 服务器，
+有必要重新捣鼓一下，这次选择centos7演示。</p>
+<span id="more"></span>
+
+<h2 id="安装篇"><a href="#安装篇" class="headerlink" title="安装篇"></a>安装篇</h2><h3 id="yum-安装"><a href="#yum-安装" class="headerlink" title="yum 安装"></a>yum 安装</h3><p>Nginx 的稳定版包含在 CentOS 7 的软件仓库里，所以可以直接用 yum 去安装它:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装</span></span><br><span class="line">yum install nginx -y</span><br><span class="line"><span class="comment"># 启动nginx</span></span><br><span class="line">systemctl start nginx</span><br><span class="line"><span class="comment"># 自启动nginx</span></span><br><span class="line">systemctl <span class="built_in">enable</span> nginx</span><br><span class="line"><span class="comment"># 查看 nginx 的状态</span></span><br><span class="line">systemctl status nginx</span><br></pre></td></tr></table></figure>
+
+<p>打开浏览器，输入服务器的 IP 地址即可看到首页，就这么简单！
+<img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-welcome.png"></p>
+<h3 id="源码安装"><a href="#源码安装" class="headerlink" title="源码安装"></a>源码安装</h3><p>我喜欢这种安装方式，可以控制的东西很多</p>
+<p>首先由于nginx的一些模块依赖一些lib库，所以在安装nginx之前，必须先安装这些lib库，
+这些依赖库主要有g++、gcc、openssl-devel、pcre-devel和zlib-devel 所以执行如下命令安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl--devel</span><br></pre></td></tr></table></figure>
+
+<p>安装之前，最好检查一下是否已经安装有 nginx</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name nginx</span><br></pre></td></tr></table></figure>
+
+<p>如果系统已经安装了nginx，那么就先卸载，并删除和nginx相关的目录。</p>
+<p>去nginx的官网下载页面 <a target="_blank" rel="noopener" href="http://nginx.org/en/download.html">http://nginx.org/en/download.html</a> 下载最新文档版本源码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget http://nginx.org/download/nginx-1.10.3.tar.gz</span><br><span class="line">tar -zxvf nginx-1.10.3.tar.gz</span><br><span class="line"><span class="built_in">cd</span> nginx-1.10.3/</span><br></pre></td></tr></table></figure>
+
+<p>接下来安装，使用–prefix参数指定nginx安装的目录,make、make install安装：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --prefix=/usr/local/nginx</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>更多编译参数请参考 <a target="_blank" rel="noopener" href="http://nginx.org/en/docs/configure.html">nginx编译参数</a> ，这里我使用默认参数</p>
+<p>如果没有报错，顺利完成后，最好看一下 nginx 的安装目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">whereis nginx</span><br></pre></td></tr></table></figure>
+
+<h3 id="systemd服务"><a href="#systemd服务" class="headerlink" title="systemd服务"></a>systemd服务</h3><p>每次进入目录启动很不方便，centos7自带的systemd可很好的管理这些启动服务。</p>
+<p><code>vi /usr/lib/systemd/system/nginx.service</code> 并输入如下内容：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span> = nginx - high performance web server</span><br><span class="line"><span class="attr">Documentation</span> = http://nginx.org/en/docs/</span><br><span class="line"><span class="attr">After</span> = network.target remote-fs.target nss-lookup.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span> = forking</span><br><span class="line"><span class="attr">PIDFile</span> = /usr/local/nginx/logs/nginx.pid</span><br><span class="line"><span class="attr">ExecStartPre</span> = /usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf</span><br><span class="line"><span class="attr">ExecStart</span> = /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</span><br><span class="line"><span class="attr">ExecReload</span> = /bin/kill -s HUP <span class="variable">$MAINPID</span></span><br><span class="line"><span class="attr">ExecStop</span> = /bin/kill -s QUIT <span class="variable">$MAINPID</span></span><br><span class="line"><span class="attr">PrivateTmp</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span> = multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>注意上面的几个路径，请修改成你自己nginx安装目录：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">PIDFile</span> = /usr/local/nginx/logs/nginx.pid  <span class="comment"># 在nginx.conf中指定的pid</span></span><br><span class="line"><span class="attr">ExecStartPre</span> = /usr/local/nginx/sbin/nginx -t -c /usr/local/nginx/conf/nginx.conf</span><br><span class="line"><span class="attr">ExecStart</span> = /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf</span><br></pre></td></tr></table></figure>
+
+<p>修改权限</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x /usr/lib/systemd/system/nginx.service</span><br></pre></td></tr></table></figure>
+
+<p>关于systemd的使用我另外专门写了一篇文章《centos7上systemd详解》，可以去看看下。</p>
+<p>现在可以使用下面的指令来控制nginx：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> nginx.service</span><br><span class="line">systemctl <span class="built_in">disable</span> nginx.service</span><br><span class="line">systemctl reload nginx.service</span><br><span class="line">systemctl start nginx.service</span><br><span class="line">systemctl stop nginx.service</span><br><span class="line">systemctl restart nginx.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="卸载"><a href="#卸载" class="headerlink" title="卸载"></a>卸载</h3><p>如果是 yum 安装方式就很简单，直接运行 <code>yum remove nginx</code>，如果源码安装，就停掉nginx后，删除其安装目录。
+默认目录就是<code>/usr/local/nginx</code>，或者是你通过<code>--prefix</code>编译时的目录。</p>
+<h2 id="配置篇"><a href="#配置篇" class="headerlink" title="配置篇"></a>配置篇</h2><p>nginx最复杂的就是它的配置了，这里我先讲解基本配置，也就是满足日常需求的配置。</p>
+<p>nginx 是由一些模块组成的，不同的模块定义了各自的一些指令（Directives），指令控制了模块的行为，
+在 nginx 的配置文件里可以去配置这些指令。主要的配置文件是 nginx.conf ，在这个配置文件里，会用到 include 指令，
+把其它地方的配置文件包含到这个主要的配置文件里，用这种方法可以让配置文件更有条理，也更容易维护。</p>
+<h3 id="nginx-conf位置"><a href="#nginx-conf位置" class="headerlink" title="nginx.conf位置"></a>nginx.conf位置</h3><p>不同操作系统配置文件位置不一样，可通过find命令来查找：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name nginx.conf</span><br></pre></td></tr></table></figure>
+
+<p>在centos7上面的位置是 <code>/etc/nginx/nginx.conf</code>，如果源码安装，位置为<code>/usr/local/nginx/conf/nginx.conf</code></p>
+<p>在<code>nginx.conf</code>文件的同级目录里面，会包含一些其它的文件， <code>.default</code> 结尾的文件应该是原文件的备份，
+如果 <code>nginx.conf</code> 出了问题，你可以把 <code>nginx.conf.default</code> 重命名为 <code>nginx.conf</code> 代替原来的文件。</p>
+<p>打开 <code>nginx.conf</code>，你会看到 nginx 的配置文件的样式，里面有些说明，这些内容前面都有 <code>#</code> 号，
+表示这是注释内容，nginx 不会理会这些用 <code>#</code> 开头的内容。真正生效的配置，是不带 <code>#</code> 号开头的。
+这些配置一般就是一个指令的名字，后面一个空格，再加上这个指令的参数值，结尾用一个分号。</p>
+<p>下面是刚刚安装nginx的默认配置：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">user</span> nginx;</span><br><span class="line"><span class="attribute">worker_processes</span>  <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">#error_log  logs/error.log;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  notice;</span></span><br><span class="line"><span class="comment">#error_log  logs/error.log  info;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#pid        logs/nginx.pid;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">events</span> &#123;</span><br><span class="line">    <span class="attribute">worker_connections</span>  <span class="number">1024</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="section">http</span> &#123;</span><br><span class="line">    <span class="attribute">include</span>       mime.types;</span><br><span class="line">    <span class="attribute">default_type</span>  application/octet-stream;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;</span></span><br><span class="line">    <span class="comment">#                  &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;</span></span><br><span class="line">    <span class="comment">#                  &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#access_log  logs/access.log  main;</span></span><br><span class="line"></span><br><span class="line">    <span class="attribute">index</span>   index.html index.htm;</span><br><span class="line">    <span class="attribute">include</span> /usr/local/nginx/conf/conf.d/<span class="regexp">*.conf</span>;</span><br><span class="line"></span><br><span class="line">    <span class="attribute">sendfile</span>        <span class="literal">on</span>;</span><br><span class="line">    <span class="comment">#tcp_nopush     on;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#keepalive_timeout  0;</span></span><br><span class="line">    <span class="attribute">keepalive_timeout</span>  <span class="number">65</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">#gzip  on;</span></span><br><span class="line"></span><br><span class="line">    <span class="section">server</span> &#123;</span><br><span class="line">        <span class="attribute">listen</span>       <span class="number">80</span>;</span><br><span class="line">        <span class="attribute">server_name</span>  localhost;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#charset koi8-r;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">#access_log  logs/host.access.log  main;</span></span><br><span class="line">        <span class="comment">#root        /usr/local/nginx/html;</span></span><br><span class="line"></span><br><span class="line">        <span class="section">location</span> / &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">            <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="attribute">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  /50x.html;</span><br><span class="line">        <span class="section">location</span> = /50x.html &#123;</span><br><span class="line">            <span class="attribute">root</span>   html;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment"># ...省略</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># ...省略</span></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="main全局配置"><a href="#main全局配置" class="headerlink" title="main全局配置"></a>main全局配置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">user nginx;</span><br></pre></td></tr></table></figure>
+
+<p>user 是指令的名字，这个指令可以设置系统运行 nginx 时候用的用户名，这里设置成了 nginx 这个用户</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">worker_processes  1;</span><br></pre></td></tr></table></figure>
+
+<p>worker_processes 指令设置了 nginx 同时运行的进程数，或者叫 nginx 的实例。
+nginx 有一个 master 进程，还有一些 worker 进程。master 进程的主要工作是读取和鉴定配置，维护 worker 进程。
+真正提供服务的是 worker 进程，nginx 用了一种有效的方式，把请求分布到不同的 worker 进程上去处理。
+worker_processes 指令设置的就是这个 woker 进程的数量，这个数量可以根据服务器的 CPU 核心数来设定，
+8 核的 CPU 就设置成 8 个 worker 进程。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error_log  logs/error.log;</span><br></pre></td></tr></table></figure>
+
+<p>error_log 指令设置了错误日志存放的位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pid        logs/nginx.pid;</span><br></pre></td></tr></table></figure>
+
+<p>pid 指令设置了 nginx 的 master 进程 ID（PID） 写入的位置，操作系统会用到这个 PID 跟踪还有发送信号给 nginx 的进程。</p>
+<p>上面这些配置直接写在配置顶层，另外配置还可以放到一些上下文里面，
+比如 events，http，server，location，等等，
+直接放到 nginx.conf顶层 配置文件的下面的上下文是 main ，这些配置会影响到整个服务器。</p>
+<h3 id="events"><a href="#events" class="headerlink" title="events"></a>events</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">worker_connections  1024;</span><br></pre></td></tr></table></figure>
+
+<p>上面这块配置用到了一组大括号，上下文是 events ，里面用了一个 worker_connections 指令，
+它可以设置每个 woker 进程同时能为多少个连接提供服务。它的值设置成多少，需要多在服务器上实践，
+一般你可以用 CPU 核心数 * 1024 ，得到的结果设置成 worker_connections 的参数值</p>
+<h3 id="http"><a href="#http" class="headerlink" title="http"></a>http</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接着是一个 http 上下文的配置区块，一般我们对服务器的设置都放到这个区块里面。http 配置区块里面会包含 server 配置区块，
+我们可以定义多个 server 区块，去配置不同的服务器，也就是虚拟主机。server 配置区块下面又会包含 location 区块，
+这些区块可以设置匹配不同的请求，根据请求的地址，提供不同的服务，有些请求直接给它们静态文件，有些请求可能要交给其它的服务器处理，
+比如 FastCGI 服务器。</p>
+<p>再看几个 http 配置区块里的配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include       mime.types;</span><br></pre></td></tr></table></figure>
+
+<p>这里用了一个 include 指令，把 <code>mime.types</code> 这个文件的内容加载进来，
+在这个文件里定义了 <code>MIME type</code> ， <code>MIME type</code> 告诉浏览器，怎么样去处理不同类型的文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">access_log  logs/access.log  main;</span><br></pre></td></tr></table></figure>
+
+<p>access_log 指令设置了访问的日志存储的位置，在 server 和 location 区块里也可以使用这个指令。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">index   index.html index.htm;</span><br></pre></td></tr></table></figure>
+
+<p>index 指令设置了当请求的地址里不包含特定的文件的时候，默认打开的文件。这里设置成了 <code>index.html index.htm</code> ，
+如果目录下面有 index.html 就打开它，如果没有就去找 index.htm，还没有就返回 404 错误。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include /usr/local/nginx/conf/conf.d/*.conf;</span><br></pre></td></tr></table></figure>
+
+<p>include 指令可以把其它的文件包含进来，这样可以保持配置文件的整洁。
+这里包含的是 <code>/usr/local/nginx/conf/conf.d/*.conf</code>，<code>*.conf</code>  表示所有的带 <code>.conf</code> 后缀的文件。
+也就是我们可以把自己的配置放到 <code>/usr/local/nginx/conf/conf.d/</code> 这个目录的下面，
+只要文件的后缀是 .conf ，这些配置文件都会起作用。</p>
+<h3 id="server"><a href="#server" class="headerlink" title="server"></a>server</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这又是一个配置区块，上下文是 server，在这种类型的配置区块里可以配置不同的服务器。
+就是每个 server 区块都可以定义一台虚拟主机，如果你想在一台服务器上运行多个网站的话，
+你应该会用到这种配置区块。一般每个 server 区块的配置都可以单独放到一个文件里。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listen       80 default_server;</span><br></pre></td></tr></table></figure>
+
+<p>listen 指令可以设置服务器监听的端口号，还有 IP 地址或者主机名。这里监听了 80 端口，这是 http 协议默认的端口号，
+default_server 的意思是，在 80 端口的请求，如果不匹配在其它地方配置的虚拟主机，
+就会默认使用这个服务器（default_server）。在监听的端口前面可以加上 IP 地址或许本地的主机名，
+像这样：<code>127.0.0.1:80</code> ，<code>localhost:80</code>，<code>42.120.40.68:80</code> …</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_name  localhost;</span><br></pre></td></tr></table></figure>
+
+<p>server_name，这个指令可以创建基于主机名的虚拟主机，比如我的域名是 <code>xiongneng.cc</code> ，
+我又为这个域名添加了一些主机名，<code>www.xiongneng.cc</code> ，<code>blog.xiongneng.cc</code>，<code>talk.xiongneng.cc</code> 等等。
+我想让用户在访问这些主机名的时候，打开不同的网站。这就可以去创建多个 server 配置区块，
+每个区块里用 <code>server_name</code> 去指定这个虚拟主机的主机名，用户在访问这个主机名的时候，
+nginx 会根据请求的头部上的信息来决定用哪个虚拟主机为用户提供服务。下面是一些参考例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_name  xiongneng.cc;</span><br></pre></td></tr></table></figure>
+
+<p>nginx 会处理用户对 <code>xiongneng.cc</code> 的请求</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_name  xiongneng.cc www.xiongneng.cc;</span><br></pre></td></tr></table></figure>
+
+<p>nginx 会处理对 <code>xiongneng.cc</code> 还有 <code>www.xiongneng.cc</code> 的请求</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_name  *.xiongneng.cc;</span><br></pre></td></tr></table></figure>
+
+<p>nginx 会处理所有的对 <code>xiongneng.cc</code> 子域名的请求。继续再看一下 <code>nginx.conf</code> 里的 server 配置区块</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">root</span>         /usr/local/nginx/html;</span><br></pre></td></tr></table></figure>
+
+<p>root 指令配置了这个虚拟主机的根目录。之前安装好 nginx，在浏览器里打开服务器的 IP 地址，看到的测试页面，就在这个目录的下面。</p>
+<h3 id="location"><a href="#location" class="headerlink" title="location"></a>location</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">location</span> / &#123;</span><br><span class="line">    <span class="attribute">root</span>   html;</span><br><span class="line">    <span class="attribute">index</span>  index.html index.htm;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>location 配置区块会定义在 server 配置区块里边儿。它可以配置 nginx 怎么样响应请求的资源，
+server_name 指令告诉 nginx 怎么样处理对域名的请求，location 指令设置的是对特定的文件还有目录的请求。</p>
+<p>root html: 以 nginx 下的 html 文件夹作为根目录, html 里的文件是开放的, 可以被访问到的, 而 html 外面的则不可以</p>
+<p>index index.html index.htm: 指的是如果访问路径, 那就访问尝试匹配 <code>index.html</code> 或 <code>index.htm</code></p>
+<p>每个 server 区块里面可以定义多个 location 区块，分别去配置对不同目录或者文件的请求应该怎么样响应。</p>
+<p>下面再看几个 location 的配置例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~ \.(gif|jpg|png)$ &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的 location 后面是一个 ~ 号，表示它的后面是一个正则表示式，这里的意思是，
+请求的是服务器里的 .gif ，.jpg，或者 .png 格式的文件。具体怎么处理，可以放到它后面的大括号里。
+注意这个匹配是区分大小写的，如果请求的是 .GIF ，这个请求就不匹配这个 location 的配置。
+如果想不区分大小写，在 ~ 后面，加上一个 * 号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ~* \.(gif|jpg|png)$ &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>location 定义匹配，更具体的那个会胜出，比如一个是 &#x2F; ，另一个是 &#x2F;blog ，这样就会用 &#x2F;blog 这个 location 。
+你可以使用 ^~ ，让 nginx 停止查找更具体的匹配，意思就是，如果有请求匹配这个 location ，
+就直接用它里面的配置，不要再继续查找别的 location 设置的匹配了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location ^~ /blog/ &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<p>精确的匹配，可以用一个 &#x3D; 号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">location = / &#123; ... &#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="关于匹配"><a href="#关于匹配" class="headerlink" title="关于匹配"></a>关于匹配</h4><p>关于这个匹配问题还是想多讲点</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">= 开头：表示精确匹配</span><br><span class="line">^~ 开头：让 nginx 停止查找更具体的匹配</span><br><span class="line">~ 开头：表示区分大小写的正则匹配;</span><br><span class="line">~* 开头：表示不区分大小写的正则匹配</span><br><span class="line">/ 通用匹配, 如果没有其它匹配,任何请求都会匹配到</span><br><span class="line"></span><br><span class="line">顺序 no优先级：</span><br><span class="line">(location =) &gt; (location 完整路径) &gt; (location ^~ 路径) &gt; (location ~/~* 正则顺序) &gt; (location 部分起始路径) &gt; (/)</span><br></pre></td></tr></table></figure>
+
+<h2 id="nginx-配置实践"><a href="#nginx-配置实践" class="headerlink" title="nginx 配置实践"></a>nginx 配置实践</h2><p>nginx 最主要的工作就是对外提供静态的文件，html，css，javascript，images等等。
+下面我们去实践一下配置 nginx 的虚拟主机。为虚拟主机绑定域名，设置不同的 location 为请求提供资源。</p>
+<h3 id="本地-DNS"><a href="#本地-DNS" class="headerlink" title="本地 DNS"></a>本地 DNS</h3><p>我们的电脑上没有固定的公网 IP 地址，所以，很难去设置真正的 DNS。解决的方法是，
+可以通过手工修改电脑上的 hosts 文件，让某些域名或者主机名指向虚拟机的 IP 地址。<code>vi /etc/hosts </code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">192.168.217.161 xiongneng.cc</span><br><span class="line">192.168.217.161 www.xiongneng.cc</span><br><span class="line">192.168.217.161 blog.xiongneng.cc</span><br></pre></td></tr></table></figure>
+
+<p>编辑 hosts 文件需要管理员的权限。保存对它的修改，然后可以用 ping 命令去测试一下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping xiongneng.cc</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-nginx"><a href="#配置-nginx" class="headerlink" title="配置 nginx"></a>配置 nginx</h3><p>在 <code>http</code> 区块中用一个 <code>include</code> 指令将 <code>/usr/local/nginx/conf/conf.d</code>目录中的<code>.conf</code>文件包含进来。
+这样我们只需要写自己的配置放到那个目录就可以了。</p>
+<p><code>vi /usr/local/nginx/conf/conf.d/xn.dev.conf</code>，内容如下</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">  <span class="attribute">listen</span>        <span class="number">80</span>;</span><br><span class="line">  <span class="attribute">server_name</span>   xiongneng.cc www.xiongneng.cc;</span><br><span class="line">  <span class="attribute">root</span>          /usr/local/nginx/xnhtml;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的配置用了一个 server 配置区块，定义了一个虚拟主机或者也可以叫服务器。它会监听 80 端口，
+这也是 http 的默认端口号，server_name 指令后面加了两个东西，<code>xiongneng.cc www.xiongneng.cc</code> ，
+把虚拟主机的根目录（root）设置成了 <code>/usr/local/nginx/xnhtml</code></p>
+<p>在<code>xnhtml</code>目录下面，再新建一个 html 文件，命名为 index.html，在这个文件里，
+添加一行文字：<code>This is Xiong Neng&#39;s Main page</code>，然后保存文件。</p>
+<p>先测试一下配置文件是否有效：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@controller161 xnhtml]# /usr/local/nginx/sbin/nginx -t</span><br><span class="line">nginx: the configuration file /usr/local/nginx/conf/nginx.conf syntax is ok</span><br><span class="line">nginx: configuration file /usr/local/nginx/conf/nginx.conf test is successful</span><br></pre></td></tr></table></figure>
+
+<p>syntax is ok ，语法正确，test is successful ，测试成功。这样就可以去重新载入 nginx 了。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl reload nginx</span><br></pre></td></tr></table></figure>
+
+<p>完成以后，打开本地电脑上的浏览器，输入 <code>xiongneng.cc</code> 或者 <code>www.xiongneng.cc</code> 看看效果
+<img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-xnindex.png"></p>
+<p>想再创建一个虚拟主机，可以在 conf.d 目录下面，再去创建一个 .conf 文件，
+这次把这个文件命名为 xnblog.dev.conf ，你也可以在同一个配置文件里定义多个 server 配置区块去定义多个服务器，
+不过把不同的服务器的配置分割成不同的文件更好一些。打开这个文件，输入下面的内容：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">  <span class="attribute">listen</span>        <span class="number">80</span>;</span><br><span class="line">  <span class="attribute">server_name</span>   blog.xiongneng.cc;</span><br><span class="line">  <span class="attribute">root</span>          /usr/local/nginx/xnblog;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>/usr/local/nginx/xnblog</code>下面同样创建一个<code>index.html</code>，然后写一行<code>this is a blog index</code></p>
+<p>测试一下 nginx 的配置 <code>/usr/local/nginx/sbin/nginx -t</code>，
+再重新加载 <code>systemctl reload nginx</code>， 成功以后，打开本地电脑上的浏览器</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/nginx-blog.png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/nginx/" rel="tag"># nginx</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/tool/network/wireshark.html" rel="prev" title="WireShark基本使用">
+                  <i class="fa fa-angle-left"></i> WireShark基本使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/middleware/nginx/nginx02-advance.html" rel="next" title="nginx笔记 - 进阶篇">
+                  nginx笔记 - 进阶篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

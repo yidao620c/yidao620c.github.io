@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="MySQL的高可用方案一般有如下几种： mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Galera Cluster 我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。 对于小公司，一般推荐使用keepalived+双主，简单。 当主从复制正在进行中时，如果想查看从库两个线程运行状态，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于keepalived实现mysql双主">
+<meta property="og:url" content="http://yidao620c.github.io/middleware/database/mysql-keepalived.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="MySQL的高可用方案一般有如下几种： mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Galera Cluster 我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。 对于小公司，一般推荐使用keepalived+双主，简单。 当主从复制正在进行中时，如果想查看从库两个线程运行状态，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql-copy.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql101.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql103.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql102.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql103.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql105.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql106.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql107.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql108.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql109.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql110.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql113.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql111.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql112.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql114.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql115.png">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql116.png">
+<meta property="article:published_time" content="2016-09-19T13:17:24.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:17.428Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/mysql-copy.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/middleware/database/mysql-keepalived.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/middleware/database/mysql-keepalived.html","path":"middleware/database/mysql-keepalived.html","title":"基于keepalived实现mysql双主"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于keepalived实现mysql双主 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8C%E4%B8%BB%E9%AB%98%E5%8F%AF%E7%94%A8%E5%8E%9F%E7%90%86"><span class="nav-number">1.</span> <span class="nav-text">双主高可用原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">部署环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E8%BD%AF%E4%BB%B6"><span class="nav-number">3.</span> <span class="nav-text">安装必要软件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85MySQL%E5%8F%8C%E4%B8%BB%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">安装MySQL双主结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">4.1.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%A4%8D%E5%88%B6%E7%94%A8%E6%88%B7"><span class="nav-number">4.2.</span> <span class="nav-text">创建复制用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8CCHANGE-MASTER-TO%E8%AF%AD%E5%8F%A5"><span class="nav-number">4.3.</span> <span class="nav-text">执行CHANGE MASTER TO语句</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8Cstart-slave%E8%AF%AD%E5%8F%A5"><span class="nav-number">4.4.</span> <span class="nav-text">执行start slave语句</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEKeepalived"><span class="nav-number">5.</span> <span class="nav-text">配置Keepalived</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#master1%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">5.1.</span> <span class="nav-text">master1的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#master2%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-number">5.2.</span> <span class="nav-text">master2的配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%81%A2%E5%A4%8D%E5%8E%9F%E4%B8%BB"><span class="nav-number">6.</span> <span class="nav-text">恢复原主</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">7.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%B8%B8%E6%83%85%E5%86%B5"><span class="nav-number">7.1.</span> <span class="nav-text">正常情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E6%83%85%E5%86%B5"><span class="nav-number">7.2.</span> <span class="nav-text">异常情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E5%BA%93%E6%81%A2%E5%A4%8D"><span class="nav-number">7.3.</span> <span class="nav-text">主库恢复</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E8%AF%B4%E6%98%8E"><span class="nav-number">8.</span> <span class="nav-text">重要说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89keepalived%E7%9A%84%E6%97%A5%E5%BF%97%E8%BE%93%E5%87%BA%E6%96%87%E4%BB%B6"><span class="nav-number">9.</span> <span class="nav-text">自定义keepalived的日志输出文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FAQ"><span class="nav-number">10.</span> <span class="nav-text">FAQ</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88"><span class="nav-number">11.</span> <span class="nav-text">改进方案</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/middleware/database/mysql-keepalived.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于keepalived实现mysql双主 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于keepalived实现mysql双主
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2016-09-19 21:17:24" itemprop="dateCreated datePublished" datetime="2016-09-19T21:17:24+08:00">2016-09-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">中间件</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>MySQL的高可用方案一般有如下几种：</p>
+<p>mysql自带的主从、keepalived+双主、MHA、MMM、Heartbeat+DRBD、PXC、Galera Cluster</p>
+<p>我在前面一篇博客讲解过mysql自带的主从复制，不过更加常用的是keepalived+双主，MHA和PXC。
+对于小公司，一般推荐使用keepalived+双主，简单。</p>
+<p>当主从复制正在进行中时，如果想查看从库两个线程运行状态，
+可以通过执行在从库里执行 <code>show slave status\G</code> 语句，以下的字段可以给你想要的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Master_Log_File       — 上一个从主库拷贝过来的binlog文件</span><br><span class="line">Read_Master_Log_Pos   — 主库的binlog文件被拷贝到从库的relay log中的位置</span><br><span class="line">Relay_Master_Log_File — SQL线程当前处理中的relay log文件</span><br><span class="line">Exec_Master_Log_Pos   — 当前binlog文件正在被执行的语句的位置</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>整个主从复制的流程可以通过以下图示理解：</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql-copy.png"></p>
+<p>步骤说明：</p>
+<ol>
+<li>步骤一：主库db的更新事件(update、insert、delete)被写到binlog</li>
+<li>步骤二：从库发起连接，连接到主库</li>
+<li>步骤三：此时主库创建一个binlog dump thread，把binlog的内容发送到从库</li>
+<li>步骤四：从库启动之后，创建一个I&#x2F;O线程，读取主库传过来的binlog内容并写入到relay log</li>
+<li>步骤五：还会创建一个SQL线程，从relay log里面读取内容，从Exec_Master_Log_Pos位置开始执行读取到的更新事件，将更新内容写入到slave的db</li>
+</ol>
+<p>注：上面的解释是解释每一步做了什么，整个mysql主从复制是异步的，不是按照上面的步骤执行的。</p>
+<h2 id="双主高可用原理"><a href="#双主高可用原理" class="headerlink" title="双主高可用原理"></a>双主高可用原理</h2><p>在主主复制结构中，两台的任何一台上面的数据库存发生了改变都会同步到另一台服务器上，
+这个改变是基于sql语句的改变，如果删除系统数据库源文件或删除后新创建同名MYSQL表实现同步则无效。
+这样两台服务器互为主从，并且都能向外提供服务，这就比使用主从复制具有更好的性能。</p>
+<p>虽然理论上，双主只要数据不冲突就可以工作的很好，但实际情况中还是很容发生数据冲突的，比如在同步完成之前，
+双方都修改同一条记录。因此在实际中，最好不要让两边同时修改，即逻辑上仍按照主从的方式工作。</p>
+<p>所以可以借助keepalived这样的软件实现自动主从切换，工作时候仍然按照主从方式复制，
+并且只允许一台主节点写数据，这样就不会产生冲突了，一旦主库出现问题可以自动切换。</p>
+<h2 id="部署环境"><a href="#部署环境" class="headerlink" title="部署环境"></a>部署环境</h2><table>
+<thead>
+<tr>
+<th>HOSTNAME</th>
+<th>ROLE</th>
+<th>IP</th>
+<th>OS</th>
+<th>software</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>node001</td>
+<td>master1</td>
+<td>172.17.0.2</td>
+<td>centos7</td>
+<td>mysql5.7&#x2F;keepalived</td>
+</tr>
+<tr>
+<td>node002</td>
+<td>master2</td>
+<td>172.17.0.3</td>
+<td>centos7</td>
+<td>mysql5.7&#x2F;keepalived</td>
+</tr>
+<tr>
+<td>node003</td>
+<td>client</td>
+<td>172.17.0.1</td>
+<td>centos7</td>
+<td>mysql-client5.7</td>
+</tr>
+</tbody></table>
+<p>VIP：172.17.0.4</p>
+<p>由于公司做开发只有一台腾讯云测试机器，所以为了试验我使用了Docker容器来部署集群。</p>
+<p>node003是腾讯云主机，作为mysql的客户端来测试集群，docker网络ip为172.17.0.1。</p>
+<p>其他两个节点是在centos7.2镜像上面构建的Docker容器，安装了mysql5.7和keepalived软件。</p>
+<p>在Docker启动容器后执行systemctl命令遇到的坑记录一下。</p>
+<p>解决 CentOS7 容器 <code>Failed to get D-Bus connection: Operation not permitted</code></p>
+<p>首先要先在后台启动一个 CentOS7 容器（注意不要少参数）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -e <span class="string">&quot;container=docker&quot;</span> --privileged=<span class="literal">true</span> -v /sys/fs/cgroup:/sys/fs/cgroup --name node001 centos7.2-mysql /usr/sbin/init</span><br></pre></td></tr></table></figure>
+
+<p>然后再进入这个容器即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it node001 /bin/bash</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装必要软件"><a href="#安装必要软件" class="headerlink" title="安装必要软件"></a>安装必要软件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y net-tools iproute</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装MySQL双主结构"><a href="#安装MySQL双主结构" class="headerlink" title="安装MySQL双主结构"></a>安装MySQL双主结构</h2><p>安装mysql5.7的步骤请参考我的另一篇 <a target="_blank" rel="noopener" href="https://www.xncoding.com/2016/09/17/database/mysql.html">《MySQL核心知识整理》</a></p>
+<p>安装好之后要对mysql进行配置。</p>
+<p>重要提示：创建好数据库后，请再创建业务数据库访问用户，只给有限的权限。不要使用super权限的用户比如root来进行业务访问。</p>
+<h3 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><p>master1中有关复制的配置如下，<code>vim /etc/my.cnf</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line"># master-master cluster settings --added by Xiong Neng</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">server-id=1</span><br><span class="line">log_slave_updates=1</span><br><span class="line">secure_file_priv=&quot;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>master2中相关配置如下，<code>vim /etc/my.cnf</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[mysqld]</span><br><span class="line"># master-master cluster settings --added by Xiong Neng</span><br><span class="line">log-bin=mysql-bin</span><br><span class="line">server-id=2</span><br><span class="line">log_slave_updates=1</span><br><span class="line">read_only=1</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建复制用户"><a href="#创建复制用户" class="headerlink" title="创建复制用户"></a>创建复制用户</h3><p>先登录mysql：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+
+<p>master1中创建：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CREATE USER &#x27;repl&#x27;@&#x27;172.17.0.3&#x27; IDENTIFIED BY &#x27;_vsMysql0&#x27;;</span><br><span class="line"></span><br><span class="line"># 查一下加密后的密码</span><br><span class="line">mysql&gt; select password(&#x27;_vsMysql0&#x27;);</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| password(&#x27;_vsMysql0&#x27;)                     |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">| *225F5795D77E27308BB5158C81B21A1023DEACDB |</span><br><span class="line">+-------------------------------------------+</span><br><span class="line">1 row in set, 1 warning (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#x27;repl&#x27;@&#x27;172.17.0.3&#x27; IDENTIFIED BY PASSWORD &#x27;*225F5795D77E27308BB5158C81B21A1023DEACDB&#x27;;</span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">mysql&gt; show master status;</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| mysql-bin.000001 |     4364 |              |                  |                   |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line"># 请记住上面的File和Position，在另外一个节点上面配置master的时候需要用到</span><br></pre></td></tr></table></figure>
+
+<p>如果创建的用户输错了，就把用户drop掉：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use mysql</span><br><span class="line">mysql&gt; select user,host from user;</span><br><span class="line">mysql&gt; drop user &#x27;repl&#x27;@&#x27;172.17.0.3&#x27;;</span><br></pre></td></tr></table></figure>
+
+<p>master2中创建：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CREATE USER &#x27;repl&#x27;@&#x27;172.17.0.2&#x27; IDENTIFIED BY &#x27;_vsMysql0&#x27;;</span><br><span class="line">mysql&gt; GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO &#x27;repl&#x27;@&#x27;172.17.0.2&#x27; IDENTIFIED BY PASSWORD &#x27;*225F5795D77E27308BB5158C81B21A1023DEACDB&#x27;;</span><br><span class="line">mysql&gt; flush privileges;</span><br><span class="line">mysql&gt; show master status;</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB | Executed_Gtid_Set |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line">| mysql-bin.000001 |     2259 |              |                  |                   |</span><br><span class="line">+------------------+----------+--------------+------------------+-------------------+</span><br><span class="line"># 请记住上面的File和Position，在另外一个节点上面配置master的时候需要用到</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行CHANGE-MASTER-TO语句"><a href="#执行CHANGE-MASTER-TO语句" class="headerlink" title="执行CHANGE MASTER TO语句"></a>执行CHANGE MASTER TO语句</h3><p>因是从头搭建MySQL主从复制集群，所以不需要获取全局读锁来得到二进制日志文件的位置，直接根据<code>show master status</code>的输出来确认。</p>
+<p>master1上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CHANGE MASTER TO</span><br><span class="line">    -&gt; MASTER_HOST=&#x27;172.17.0.3&#x27;,</span><br><span class="line">    -&gt; MASTER_USER=&#x27;repl&#x27;,</span><br><span class="line">    -&gt; MASTER_PASSWORD=&#x27;_vsMysql0&#x27;,</span><br><span class="line">    -&gt; MASTER_LOG_FILE=&#x27;mysql-bin.000001&#x27;,</span><br><span class="line">    -&gt; MASTER_LOG_POS=2259;</span><br></pre></td></tr></table></figure>
+
+<p>master2上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; CHANGE MASTER TO</span><br><span class="line">    -&gt; MASTER_HOST=&#x27;172.17.0.2&#x27;,</span><br><span class="line">    -&gt; MASTER_USER=&#x27;repl&#x27;,</span><br><span class="line">    -&gt; MASTER_PASSWORD=&#x27;_vsMysql0&#x27;,</span><br><span class="line">    -&gt; MASTER_LOG_FILE=&#x27;mysql-bin.000001&#x27;,</span><br><span class="line">    -&gt; MASTER_LOG_POS=4364;</span><br></pre></td></tr></table></figure>
+
+<h3 id="执行start-slave语句"><a href="#执行start-slave语句" class="headerlink" title="执行start slave语句"></a>执行start slave语句</h3><p>分别在两个节点上执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; start slave;</span><br></pre></td></tr></table></figure>
+
+<p>如果出现下列错误：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR 1872 (HY000): Slave failed to initialize relay log info structure from the repository</span><br></pre></td></tr></table></figure>
+
+<p>执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; reset slave;</span><br><span class="line">mysql&gt; start slave;</span><br></pre></td></tr></table></figure>
+
+<p>然后执行下面语句查看复制是否搭建成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show slave status\G</span><br></pre></td></tr></table></figure>
+
+<p>成功标准：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Slave_IO_Running: Yes</span><br><span class="line">Slave_SQL_Running: Yes</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置Keepalived"><a href="#配置Keepalived" class="headerlink" title="配置Keepalived"></a>配置Keepalived</h2><p>安装Keepalived：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yum install -y rsyslog</span><br><span class="line">yum install -y keepalived</span><br></pre></td></tr></table></figure>
+
+<h3 id="master1的配置"><a href="#master1的配置" class="headerlink" title="master1的配置"></a>master1的配置</h3><p>在master1上面，修改Keepalived的配置文件 <code>vim /etc/keepalived/keepalived.conf</code>：</p>
+<p>除了<code>global_defs</code>部分定义外，其余都删了，然后添加下面的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">vrrp_script chk_mysql &#123;</span><br><span class="line">    script &quot;/etc/keepalived/check_mysql.sh&quot;</span><br><span class="line">    interval 10   #设置检查间隔时长，可根据自己的需求自行设定</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP  #通过下面的priority来区分MASTER和BACKUP，也只有如此，底下的nopreempt才有效</span><br><span class="line">    interface eth0@if49</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    nopreempt     #防止切换到从库后，主keepalived恢复后自动切换回主库</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_mysql</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        172.17.0.4/16</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>要注意的几个就是，<code>interface eth0</code>这个是指定HA监测网络的接口，在docker上面执行<code>ifconfig</code>
+可以查看到网络接口名字，<code>172.17.0.4/16</code>是虚拟IP地址。</p>
+<p>关于keepalived的参数的详细介绍，可参考：<a target="_blank" rel="noopener" href="http://www.cnblogs.com/ivictor/p/5261445.html">LVS+Keepalived搭建高可用负载均衡集群</a></p>
+<p>其中，<code>/etc/keepalived/check_mysql.sh</code>内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###判断如果上次检查的脚本还没执行完，则退出此次执行</span></span><br><span class="line"><span class="keyword">if</span> [ `ps -ef|grep -w <span class="string">&quot;<span class="variable">$0</span>&quot;</span>|grep -v <span class="string">&quot;grep&quot;</span>|<span class="built_in">wc</span> -l` -gt 2 ];<span class="keyword">then</span></span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line">mysql_con=<span class="string">&#x27;mysql -uroot -p_vsBaoBao122&#x27;</span></span><br><span class="line">error_log=<span class="string">&quot;/etc/keepalived/check_mysql.err&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###定义一个简单判断mysql是否可用的函数</span></span><br><span class="line"><span class="keyword">function</span> excute_query &#123;</span><br><span class="line">    <span class="variable">$&#123;mysql_con&#125;</span> -e <span class="string">&quot;select 1;&quot;</span> 2&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">###定义无法执行查询，且mysql服务异常时的处理函数</span></span><br><span class="line"><span class="keyword">function</span> service_error &#123;</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----mysql service error, now stop keepalived-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    systemctl stop keepalived.service &amp;&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;DB1 keepalived has stoped&quot;</span>|mail -s <span class="string">&quot;DB1 keepalived stoped&quot;</span> xn@enzhico.com 2&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;\n---------------------------------------------------------\n&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">###定义无法执行查询,但mysql服务正常的处理函数</span></span><br><span class="line"><span class="keyword">function</span> query_error &#123;</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----query error, but mysql service ok, retry after 15s-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    <span class="built_in">sleep</span> 15</span><br><span class="line">    excute_query</span><br><span class="line">    <span class="keyword">if</span> [ $? -ne 0 ];<span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----still can&#x27;t execute query-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">###对DB1设置read_only属性</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----set read_only = 1 on DB1-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        mysql_con -e <span class="string">&quot;set global read_only = 1;&quot;</span> 2&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">###kill掉当前客户端连接</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----kill current client thread-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        <span class="built_in">rm</span> -f /tmp/kill.sql &amp;&gt;/dev/null</span><br><span class="line">        <span class="comment">###这里其实是一个批量kill线程的小技巧</span></span><br><span class="line">        mysql_con -e <span class="string">&#x27;select concat(&quot;kill &quot;,id,&quot;;&quot;) from  information_schema.PROCESSLIST where command=&quot;Query&quot; or command=&quot;Execute&quot; into outfile &quot;/tmp/kill.sql&quot;;&#x27;</span></span><br><span class="line">        mysql_con -e <span class="string">&quot;source /tmp/kill.sql&quot;</span></span><br><span class="line">        <span class="built_in">sleep</span> 2  <span class="comment">###给kill一个执行和缓冲时间</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----stop keepalived-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        systemctl stop keepalived.service &amp;&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;DB1 keepalived has stoped&quot;</span>|mail -s <span class="string">&quot;DB1 keepalived has stoped&quot;</span> xn@enzhico.com 2&gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;\n---------------------------------------------------------\n&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----query ok after 15s-----&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">        <span class="built_in">echo</span> -e <span class="string">&quot;\n---------------------------------------------------------\n&quot;</span> &gt;&gt; <span class="variable">$&#123;error_log&#125;</span></span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">###检查开始: 执行查询</span></span><br><span class="line">excute_query</span><br><span class="line"><span class="keyword">if</span> [ $? -ne 0 ];<span class="keyword">then</span></span><br><span class="line">    systemctl status mysqld.service &amp;&gt;/dev/null</span><br><span class="line">    <span class="keyword">if</span> [ $? -ne 0 ];<span class="keyword">then</span></span><br><span class="line">        service_error</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        query_error</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>通过具体的查询语句来判断数据库服务的可用性，如果查询失败，则判断mysqld进程本身的状态，如果不正常，则直接停止当前节点的keepalived，
+将VIP转移到另外一个节点，如果正常，则等待15s，再次执行查询语句，还是失败，则将当前的master节点设置为read_only，
+并kill掉当前的客户端连接，然后停止当前的keepalived。</p>
+<h3 id="master2的配置"><a href="#master2的配置" class="headerlink" title="master2的配置"></a>master2的配置</h3><p>在master2上面，修改Keepalived的配置文件 <code>vim /etc/keepalived/keepalived.conf</code>：</p>
+<p>除了<code>global_defs</code>部分定义外，其余都删了，然后添加下面的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    interface eth0@if51</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 90</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    notify_master /etc/keepalived/notify_master_mysql.sh</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        172.17.0.4/16</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>/etc/keepalived/notify_master_mysql.sh</code>的内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">###当keepalived监测到本机转为MASTER状态时，执行该脚本</span></span><br><span class="line"></span><br><span class="line">change_log=/etc/keepalived/state_change.log</span><br><span class="line">mysql_con=<span class="string">&#x27;mysql -uroot -p_vsBaoBao122&#x27;</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`   -----keepalived change to MASTER-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">slave_info</span></span>() &#123;</span><br><span class="line">    <span class="comment">###统一定义一个函数取得slave的position、running、和log_file等信息</span></span><br><span class="line">    <span class="comment">###根据函数后面所跟参数来决定取得哪些数据</span></span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$1</span> = slave_status ];<span class="keyword">then</span></span><br><span class="line">        slave_stat=`<span class="variable">$&#123;mysql_con&#125;</span> -e <span class="string">&quot;show slave status\G;&quot;</span>|egrep -w <span class="string">&quot;Slave_IO_Running|Slave_SQL_Running&quot;</span>`</span><br><span class="line">        Slave_IO_Running=`<span class="built_in">echo</span> <span class="variable">$slave_stat</span>|awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>`</span><br><span class="line">        Slave_SQL_Running=`<span class="built_in">echo</span> <span class="variable">$slave_stat</span>|awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span>`</span><br><span class="line">    <span class="keyword">elif</span> [ <span class="variable">$1</span> = log_file -a <span class="variable">$2</span> = pos ];<span class="keyword">then</span></span><br><span class="line">        log_file_pos=`<span class="variable">$&#123;mysql_con&#125;</span> -e <span class="string">&quot;show slave status\G;&quot;</span>|egrep -w <span class="string">&quot;Master_Log_File|Read_Master_Log_Pos|Relay_Master_Log_File|Exec_Master_Log_Pos&quot;</span>`</span><br><span class="line">        Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>`</span><br><span class="line">        Read_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span>`</span><br><span class="line">        Relay_Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $6&#125;&#x27;</span>`</span><br><span class="line">        Exec_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $8&#125;&#x27;</span>`</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">action</span></span>() &#123;</span><br><span class="line">    <span class="comment">###经判断&#x27;应该&amp;可以&#x27;切换时执行的动作</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----set read_only = 0 on DB2-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">###解除read_only属性</span></span><br><span class="line">    <span class="variable">$&#123;mysql_con&#125;</span> -e <span class="string">&quot;set global read_only = 0;&quot;</span> 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;DB2 keepalived change to MASTER&quot;</span>|mail -s <span class="string">&quot;DB2 keepalived change to MASTER&quot;</span> xn@enzhico.com 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;---------------------------------------------------------\n&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">slave_info slave_status</span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$Slave_SQL_Running</span> = Yes ];<span class="keyword">then</span></span><br><span class="line">    i=0  <span class="comment">###一个计数器</span></span><br><span class="line">    slave_info log_file pos</span><br><span class="line">    <span class="comment">###判断从master接收到的binlog是否全部在本地执行(这样仍无法完全确定从库已追上主库，因为无法完全保证io_thread没有延时(由网络传输问题导致的从库落后的概率很小)</span></span><br><span class="line">    <span class="keyword">until</span> [ <span class="variable">$Master_Log_File</span> = <span class="variable">$Relay_Master_Log_File</span> -a <span class="variable">$Read_Master_Log_Pos</span> = <span class="variable">$Exec_Master_Log_Pos</span> ]</span><br><span class="line">     <span class="keyword">do</span></span><br><span class="line">        <span class="keyword">if</span> [ <span class="variable">$i</span> -lt 10 ];<span class="keyword">then</span>   <span class="comment">###将等待exec_pos追上read_pos的时间限制为10s</span></span><br><span class="line">            <span class="comment">###输出消息到日志，等待exec_pos=read_pos</span></span><br><span class="line">            <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`  -----Relay_Master_Log_File=<span class="variable">$Relay_Master_Log_File</span>,Exec_Master_Log_Pos=<span class="variable">$Exec_Master_Log_Pos</span> is behind Master_Log_File=<span class="variable">$Master_Log_File</span>,Read_Master_Log_Pos=<span class="variable">$Read_Master_Log_Pos</span>, wait......&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">            i=$((<span class="variable">$i</span>+<span class="number">1</span>))</span><br><span class="line">            <span class="built_in">sleep</span> 1</span><br><span class="line">            slave_info log_file pos</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="built_in">echo</span> -e <span class="string">&quot;The waits time is more than 10s,now force change. Master_Log_File=<span class="variable">$Master_Log_File</span> Read_Master_Log_Pos=<span class="variable">$Read_Master_Log_Pos</span> Relay_Master_Log_File=<span class="variable">$Relay_Master_Log_File</span> Exec_Master_Log_Pos=<span class="variable">$Exec_Master_Log_Pos</span>&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">            action</span><br><span class="line">            <span class="built_in">exit</span> 0</span><br><span class="line">        <span class="keyword">fi</span></span><br><span class="line">    <span class="keyword">done</span></span><br><span class="line">    action</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    slave_info log_file pos</span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;DB2&#x27;s slave status is wrong,now force change. Master_Log_File=<span class="variable">$Master_Log_File</span> Read_Master_Log_Pos=<span class="variable">$Read_Master_Log_Pos</span> Relay_Master_Log_File=<span class="variable">$Relay_Master_Log_File</span> Exec_Master_Log_Pos=<span class="variable">$Exec_Master_Log_Pos</span>&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">    action</span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>整个脚本的逻辑是让从的Exec_Master_Log_Pos尽可能的追上Read_Master_Log_Pos，它给了10s的限制，如果还是没有追上，
+则直接将master2设置为主（通过解除read_only属性），其实这里面还是有待商榷的，譬如10s的限制是否合理，
+还是一定需要<code>Exec_Master_Log_Pos=Read_Master_Log_Pos</code>才切换。</p>
+<h2 id="恢复原主"><a href="#恢复原主" class="headerlink" title="恢复原主"></a>恢复原主</h2><p>当原主恢复正常后，如何将VIP从master2切回到master1中呢？</p>
+<p>自己写一个脚本，放到master2主机上面，手动执行将主库切换回DB1的操作，比如将其命名为<code>/etc/keepalived/reset_master_mysql.sh</code>
+，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">###手动执行将主库切换回DB1的操作</span></span><br><span class="line"></span><br><span class="line">root_pwd=<span class="string">&quot;_vsBaoBao122&quot;</span></span><br><span class="line">repl_pwd=<span class="string">&quot;_vsMysql0&quot;</span></span><br><span class="line">master1_ip=<span class="string">&quot;172.17.0.2&quot;</span></span><br><span class="line">change_log=/etc/keepalived/state_change.log</span><br><span class="line"></span><br><span class="line">mysql_con=<span class="string">&quot;mysql -uroot -p<span class="variable">$&#123;root_pwd&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----change to BACKUP manually-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----set read_only = 1 on DB2-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"><span class="variable">$mysql_con</span> -e <span class="string">&quot;set global read_only = 1;&quot;</span> 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###kill掉当前客户端连接</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----kill current client thread-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"><span class="built_in">rm</span> -f /tmp/kill.sql &amp;&gt;/dev/null</span><br><span class="line"><span class="comment">###这里其实是一个批量kill线程的小技巧</span></span><br><span class="line"><span class="variable">$mysql_con</span> -e <span class="string">&#x27;select concat(&quot;kill &quot;,id,&quot;;&quot;) from  information_schema.PROCESSLIST where command=&quot;Query&quot; or command=&quot;Execute&quot; into outfile &quot;/tmp/kill.sql&quot;;&#x27;</span></span><br><span class="line"><span class="variable">$mysql_con</span> -e <span class="string">&quot;source /tmp/kill.sql&quot;</span> 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"><span class="built_in">sleep</span> 2  <span class="comment">###给kill一个执行和缓冲时间</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###确保DB1已经追上了,下面的repl为复制所用的账户，-h后跟DB1的内网IP</span></span><br><span class="line">log_file_pos=`mysql -urepl -p<span class="variable">$&#123;repl_pwd&#125;</span> -h<span class="variable">$&#123;master1_ip&#125;</span> -e <span class="string">&quot;show slave status\G;&quot;</span>|egrep -w <span class="string">&quot;Master_Log_File|Read_Master_Log_Pos|Relay_Master_Log_File|Exec_Master_Log_Pos&quot;</span>`</span><br><span class="line">Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>`</span><br><span class="line">Read_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span>`</span><br><span class="line">Relay_Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $6&#125;&#x27;</span>`</span><br><span class="line">Exec_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $8&#125;&#x27;</span>`</span><br><span class="line"><span class="keyword">until</span> [ <span class="variable">$Read_Master_Log_Pos</span> = <span class="variable">$Exec_Master_Log_Pos</span> -a <span class="variable">$Master_Log_File</span> = <span class="variable">$Relay_Master_Log_File</span> ]</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`  -----DB1 Exec_Master_Log_Pos(<span class="variable">$exec_pos</span>) is behind Read_Master_Log_Pos(<span class="variable">$read_pos</span>), wait......&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">    <span class="built_in">sleep</span> 1</span><br><span class="line">    log_file_pos=`mysql -urepl -p<span class="variable">$&#123;repl_pwd&#125;</span> -h<span class="variable">$&#123;master1_ip&#125;</span> -e <span class="string">&quot;show slave status\G;&quot;</span>|egrep -w <span class="string">&quot;Master_Log_File|Read_Master_Log_Pos|Relay_Master_Log_File|Exec_Master_Log_Pos&quot;</span>`</span><br><span class="line">    Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $2&#125;&#x27;</span>`</span><br><span class="line">    Read_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span>`</span><br><span class="line">    Relay_Master_Log_File=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $6&#125;&#x27;</span>`</span><br><span class="line">    Exec_Master_Log_Pos=`<span class="built_in">echo</span> <span class="variable">$log_file_pos</span>|awk <span class="string">&#x27;&#123;print $8&#125;&#x27;</span>`</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###然后解除DB1的read_only属性</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----set read_only = 0 on DB1-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">ssh <span class="variable">$&#123;master1_ip&#125;</span> <span class="string">&#x27;mysql -uroot -p_vsBaoBao122 -e &quot;set global read_only = 0;&quot; &amp;&amp; systemctl restart keepalived.service&#x27;</span> 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br><span class="line"><span class="comment">###重启DB2的keepalived使VIP漂移到DB1</span></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;`date &quot;</span>+%F  %H:%M:%S<span class="string">&quot;`    -----make VIP move to DB1-----&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line">systemctl restart keepalived.service &amp;&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;DB2 keepalived to BACKUP, master db to DB1&quot;</span>|mail -s <span class="string">&quot;DB2 keepalived change to BACKUP&quot;</span> xn@enzhico.com 2&gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;--------------------------------------------------\n&quot;</span> &gt;&gt; <span class="variable">$change_log</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>注：涉及到切换主备，就会有中断时间，所以推荐此步骤在业务低谷期执行。</p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>集群配置完成后</p>
+<h3 id="正常情况"><a href="#正常情况" class="headerlink" title="正常情况"></a>正常情况</h3><p>keepalived日志：</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql101.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql103.png"></p>
+<hr>
+<p>mysql的read_only变量：</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql102.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql103.png"></p>
+<p>注意：read_only&#x3D;1只读模式，可以限定普通用户进行数据修改的操作，但不会限定具有super权限的用户的数据修改操作；</p>
+<hr>
+<p>IP地址：</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql105.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql106.png"></p>
+<p>通过查看上面三个，很明显就知道VIP现在在master1上面，并且master1上面的数据库是主库可写，
+master2是从库只读。</p>
+<hr>
+<p>接下来我测试一下数据库的操作，看看数据是否能同步到从库上面。</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql107.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql108.png"></p>
+<p>可以看到，无论是在master1上面创建数据库、新建表、插入新数据，在master2上面都能同步到。</p>
+<h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><p>这里通过将master1上面的mysql服务停掉来模拟异常情况。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop mysqld.service</span><br></pre></td></tr></table></figure>
+
+<p>keepalived日志：</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql109.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql110.png"></p>
+<hr>
+<p>mysql的read_only变量：</p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql113.png"></p>
+<p>可以看到master2此时的read_only关闭，可写了。</p>
+<hr>
+<p>IP地址：</p>
+<p>master1</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql111.png"></p>
+<p>master2</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql112.png"></p>
+<p>VIP现在跑到master2上面了。</p>
+<hr>
+<p>通过VIP 172.17.0.4访问数据库，并在t_test表里面删除一条数据。</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql114.png"></p>
+<h3 id="主库恢复"><a href="#主库恢复" class="headerlink" title="主库恢复"></a>主库恢复</h3><p>当我修复好主库后，要重新还原回来，这里修复完成后就重启mysql服务，</p>
+<p>master1上面：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart mysqld.service</span><br></pre></td></tr></table></figure>
+
+<p>master2上面执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/keepalived/reset_master_mysql.sh</span><br></pre></td></tr></table></figure>
+
+<p>在master1上面查看ip：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/mysql115.png"></p>
+<p>在看看master1中的数据库，刚刚我删的一条数据同步回来没？</p>
+<p><img src="https://xnstatic-1253397658.file.myqcloud.com/mysql116.png"></p>
+<p>其他的我就不再截图演示了，总之成功切换回来了，并且数据库也同步回来了。</p>
+<h2 id="重要说明"><a href="#重要说明" class="headerlink" title="重要说明"></a>重要说明</h2><p>三个脚本文件：</p>
+<ol>
+<li>master1上面的<code>/etc/keepalived/check_mysql.sh</code></li>
+<li>master2上面的<code>/etc/keepalived/notify_master_mysql.sh</code></li>
+<li>master2上面的<code>/etc/keepalived/reset_master_mysql.sh</code></li>
+</ol>
+<p>另外需要配置master2的root用户可以通过ssh免密码登录master1</p>
+<p>两个容器上面都要执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">passwd</span><br><span class="line">yum -y install openssh-server openssh-clients</span><br><span class="line">ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
+
+<p>然后再master2上面执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-copy-id 172.17.0.2</span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义keepalived的日志输出文件"><a href="#自定义keepalived的日志输出文件" class="headerlink" title="自定义keepalived的日志输出文件"></a>自定义keepalived的日志输出文件</h2><p>keepalived的日志默认是输出到&#x2F;var&#x2F;log&#x2F;messages中，这样不便于查看。如何自定义keepalived的日志输出文件呢？</p>
+<p>修改<code>/etc/sysconfig/keepalived</code>文件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KEEPALIVED_OPTIONS=&quot;-D -d -S 0&quot;</span><br></pre></td></tr></table></figure>
+
+<p>修改<code>/etc/rsyslog.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># keepalived -S 0 </span><br><span class="line">local0.*                                                /var/log/keepalived.log</span><br></pre></td></tr></table></figure>
+
+<p>重启syslog：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart rsyslog</span><br><span class="line">systemctl restart keepalived</span><br></pre></td></tr></table></figure>
+
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p>keepalived运行后产生大量的core.*文件，撑爆磁盘空间，查看日志<code>/var/log/keepalived.log</code>发现报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">IPVS: Can&#x27;t initialize ipvs: Protocol not available</span><br></pre></td></tr></table></figure>
+
+<p>解决办法：</p>
+<p>首先你必须得先安装ipvsadm：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y ipvsadm</span><br></pre></td></tr></table></figure>
+
+<p>要是你已经安装过了,这句就直接忽略掉吧,之后在执行一下命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ipvsadm</span><br></pre></td></tr></table></figure>
+
+<p>还是报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Can&#x27;t initialize ipvs: Protocol not available</span><br><span class="line">Are you sure that IP Virtual Server is built in the kernel or as module?</span><br></pre></td></tr></table></figure>
+
+<p>原因是ip_vs模块系统默认没有自动加载，可以通过</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsmod | grep ip_vs</span><br></pre></td></tr></table></figure>
+
+<p>查看一下，如果没有任何输出则表示ip_vs模块并没有被内核加载，需要手动加载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">modprobe ip_vs</span><br><span class="line">modprobe ip_vs_wrr</span><br></pre></td></tr></table></figure>
+
+<p>如果要让系统开机加载此模块的话得讲刚才那两句话写到<code>/etc/rc.local</code>文件中，这样开机就能自动加载了。</p>
+<p>这样试过仍然还是不行，再想办法。</p>
+<p>执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">modinfo ip_vs</span><br></pre></td></tr></table></figure>
+
+<p>发现没有这个ip_vs模块可以加载。</p>
+<ol>
+<li>首先必须要保证宿主机上面安装<code>yum install -y ipvsadm &amp;&amp; ipvsadm</code></li>
+<li>启动docker容器必须加参数<code>--privileged</code></li>
+</ol>
+<p>重新启动docker容器就正常了。</p>
+<h2 id="改进方案"><a href="#改进方案" class="headerlink" title="改进方案"></a>改进方案</h2><p>在Keepalived中有两种模式，分别是master-&gt;backup模式和backup-&gt;backup模式，在master-&gt;backup模式下，一旦主库宕掉，
+虚拟IP会自动漂移到从库，当主库修复后，keepalived启动后，还会把虚拟IP抢过来，即使你设置nopreempt（不抢占）的方式抢占IP的动作也会发生。
+在backup-&gt;backup模式下，当主库宕掉后虚拟IP会自动漂移到从库上，当原主恢复之后重启keepalived服务，并不会抢占新主的虚拟IP，
+即使是优先级高于从库的优先级别，也不会抢占IP。</p>
+<p>为了减少IP的漂移次数，生产中我们通常是把修复好的主库当做新主库的备库，本篇的方案还是通过手动执行<code>reset_master_mysql.sh</code>
+将master1切换回主库。
+更优方案是master1修复好之后，只需要启动上面的keepalived软件。master2作为新的主库，而master1现在变成了备库。</p>
+<p>另外当主库出现问题的时候通知机制，现在并没有配置邮箱服务，后面把邮件通知服务也加上去就完美了。</p>
+<p>有空的时候把这个改进方案补充上来。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql/" rel="tag"># mysql</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/middleware/database/mysql-basic.html" rel="prev" title="MySQL核心知识整理">
+                  <i class="fa fa-angle-left"></i> MySQL核心知识整理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/linux/basic/sed.html" rel="next" title="sed命令笔记">
+                  sed命令笔记 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

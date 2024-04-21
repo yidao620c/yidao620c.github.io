@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="cas客户端接入称之为service，必须经过cas的允许才能进行登录，当然不同的客户端可以做不同的事情，其中包括：  自定义主题（各客户端登录页自定义） 自定义属性（服务属性（固定）与用户属性（动态）） 自定义协议 自定义登录后跳转方式，跳转路径 授权策略（拒绝属性、可登录时间范围限制、等等） 拒绝授权模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAS教程 - Service配置">
+<meta property="og:url" content="http://yidao620c.github.io/security/cas/cas05.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="cas客户端接入称之为service，必须经过cas的允许才能进行登录，当然不同的客户端可以做不同的事情，其中包括：  自定义主题（各客户端登录页自定义） 自定义属性（服务属性（固定）与用户属性（动态）） 自定义协议 自定义登录后跳转方式，跳转路径 授权策略（拒绝属性、可登录时间范围限制、等等） 拒绝授权模式">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-01-12T15:10:22.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:57.847Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="CAS">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/security/cas/cas05.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/security/cas/cas05.html","path":"security/cas/cas05.html","title":"CAS教程 - Service配置"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CAS教程 - Service配置 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON%E9%85%8D%E7%BD%AE"><span class="nav-number">1.</span> <span class="nav-text">JSON配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E8%AF%86%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">启用识别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E7%99%BB%E5%BD%95%E7%95%8C%E9%9D%A2%E5%92%8C%E4%B8%BB%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">自定义登录界面和主题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%A5%E5%85%A5%E6%9C%8D%E5%8A%A1%E6%8C%87%E5%AE%9A%E4%B8%BB%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">接入服务指定主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%BB%98%E8%AE%A4%E4%B8%BB%E9%A2%98"><span class="nav-number">3.2.</span> <span class="nav-text">修改默认主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#css%E6%A0%B7%E5%BC%8F%E8%A1%A8"><span class="nav-number">3.3.</span> <span class="nav-text">css样式表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.4.</span> <span class="nav-text">主题配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%99%BB%E5%BD%95%E6%A8%A1%E7%89%88"><span class="nav-number">3.5.</span> <span class="nav-text">登录模版</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/security/cas/cas05.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CAS教程 - Service配置 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CAS教程 - Service配置
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-01-12 23:10:22" itemprop="dateCreated datePublished" datetime="2019-01-12T23:10:22+08:00">2019-01-12</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>cas客户端接入称之为service，必须经过cas的允许才能进行登录，当然不同的客户端可以做不同的事情，其中包括：</p>
+<ol>
+<li>自定义主题（各客户端登录页自定义）</li>
+<li>自定义属性（服务属性（固定）与用户属性（动态））</li>
+<li>自定义协议</li>
+<li>自定义登录后跳转方式，跳转路径</li>
+<li>授权策略（拒绝属性、可登录时间范围限制、等等）</li>
+<li>拒绝授权模式</li>
+</ol>
+<span id="more"></span>
+
+<p>持久化策略：</p>
+<ul>
+<li>InMemory XML(通过spring bean进行内存存储)</li>
+<li>JSON(通过json文件存储)</li>
+<li>YAML(通过yml文件存储)</li>
+<li>Mongo(文档数据库持久化)</li>
+<li>JPA(关系型数据库持久化)</li>
+<li>DynameDb</li>
+<li>LDAP</li>
+<li>Cochbase</li>
+</ul>
+<p>在sso初步上线时推荐采用json文件存储，后面逐步多服务注入时推荐采用Mongo进行存储，
+采用cas-management 通过UI方式进行管理我们的数据，目前阶段，持久化策略必须和cas进行配置一致才能生效。</p>
+<p>本章进行service的json配置及介绍，yml文件格式配置，参考文档：</p>
+<p><a target="_blank" rel="noopener" href="https://apereo.github.io/cas/5.3.x/installation/JSON-Service-Management.html">https://apereo.github.io/cas/5.3.x/installation/JSON-Service-Management.html</a></p>
+<p>接下来正式进入Service配置实战篇。</p>
+<h2 id="JSON配置"><a href="#JSON配置" class="headerlink" title="JSON配置"></a>JSON配置</h2><p>这里我只允许<a target="_blank" rel="noopener" href="http://localhost开头请求的service才能认证./">http://localhost开头请求的service才能认证。</a></p>
+<p>在resources&#x2F;services下新建文件localhost-10000002.json，内容如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;@class&quot;</span><span class="punctuation">:</span> <span class="string">&quot;org.apereo.cas.services.RegexRegisteredService&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;serviceId&quot;</span><span class="punctuation">:</span> <span class="string">&quot;^(http)://localhost.*&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;本地服务&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">10000002</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一个本地允许的服务，通过localhost访问都允许通过&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;evaluationOrder&quot;</span><span class="punctuation">:</span> <span class="number">1</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>注意：json文件名字规则为<code>$&#123;name&#125;-$&#123;id&#125;.json</code>, id必须为json文件内容id一致。</p>
+<p>json文件解释：</p>
+<ul>
+<li>@class：必须为org.apereo.cas.services.RegisteredService的实现类，
+对其他属性进行一个json反射对象，常用的有RegexRegisteredService，匹配策略为id的正则表达式</li>
+<li>serviceId：唯一的服务id</li>
+<li>name： 服务名称，会显示在默认登录页</li>
+<li>id：全局唯一标志</li>
+<li>description：服务描述，会显示在默认登录页</li>
+<li>evaluationOrder： 匹配争取时的执行循序（越小越优先）</li>
+<li>theme：主题，默认是apereo</li>
+</ul>
+<p>除了以上说的还有很多配置策略以及节点，具体看官方文档, 配置不同的RegisteredService也会有稍微不一样</p>
+<h2 id="启用识别"><a href="#启用识别" class="headerlink" title="启用识别"></a>启用识别</h2><p>上面新建了json文件cas还不知道要去识别json，需要打开开关.</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开启识别json文件，默认false</span></span><br><span class="line"><span class="attr">cas.serviceRegistry.initFromJson</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#自动扫描服务配置，默认开启</span></span><br><span class="line"><span class="comment">#cas.serviceRegistry.watcherEnabled=true</span></span><br><span class="line"><span class="comment">#120秒扫描一遍</span></span><br><span class="line"><span class="comment">#cas.serviceRegistry.schedule.repeatInterval=120000</span></span><br><span class="line"><span class="comment">#延迟15秒开启</span></span><br><span class="line"><span class="comment">#cas.serviceRegistry.schedule.startDelay=15000</span></span><br><span class="line"><span class="comment">#默认json/yml资源加载路径为resources/services</span></span><br><span class="line"><span class="comment">#cas.serviceRegistry.json.location=classpath:/services</span></span><br></pre></td></tr></table></figure>
+
+<p>所有配置可以参考：</p>
+<p><a target="_blank" rel="noopener" href="https://apereo.github.io/cas/5.3.x/installation/Configuration-Properties.html">https://apereo.github.io/cas/5.3.x/installation/Configuration-Properties.html</a></p>
+<p>另外还需要在 pom.xml 文件中加入依赖配置</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--json服务注册--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apereo.cas<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>cas-server-support-json-service-registry<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;cas.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="自定义登录界面和主题"><a href="#自定义登录界面和主题" class="headerlink" title="自定义登录界面和主题"></a>自定义登录界面和主题</h2><p>主题就意味着风格不一，目的就是为了在不同的接入端（service）展示不同的页面，
+就例如淘宝登录、天猫登录，其中登录点还是一个sso，但淘宝登录卖的广告是淘宝的，而天猫登录卖的广告是天猫的。</p>
+<p>简略看完后，会有以下的规范：</p>
+<ol>
+<li>静态资源(js,css)存放目录为src&#x2F;main&#x2F;resources&#x2F;static</li>
+<li>html资源存(thymeleaf)放目录为src&#x2F;main&#x2F;resources&#x2F;templates</li>
+<li>主题配置文件存放在src&#x2F;main&#x2F;resources并且命名为[theme_name].properties</li>
+<li>主题页面html存放目录为src&#x2F;main&#x2F;resources&#x2F;templates&#x2F;<theme-id></li>
+</ol>
+<p>官方文档明确说明，登录页渲染文件为casLoginView.html,那意味我们在主题具体目录下新增改文件并且按照cas要求写那就可以了</p>
+<h3 id="接入服务指定主题"><a href="#接入服务指定主题" class="headerlink" title="接入服务指定主题"></a>接入服务指定主题</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;@class&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;org.apereo.cas.services.RegexRegisteredService&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;serviceId&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;^(http|https)://app1.*&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;app1&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;id&quot;</span> <span class="punctuation">:</span> <span class="number">100006</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;这是一个app1域名下的服务，通过app1访问都允许通过&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;evaluationOrder&quot;</span><span class="punctuation">:</span> <span class="number">10</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;theme&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;app1&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="修改默认主题"><a href="#修改默认主题" class="headerlink" title="修改默认主题"></a>修改默认主题</h3><figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">cas.theme.defaultThemeName</span>=<span class="string">app1</span></span><br></pre></td></tr></table></figure>
+
+<p>配置默认后，将直接指定该主题，比如直接访问cas登录，没有传递service参数时等。</p>
+<h3 id="css样式表"><a href="#css样式表" class="headerlink" title="css样式表"></a>css样式表</h3><p><code>app1/css/main.css</code> 设置一个标题为粉色</p>
+<p>h3 {
+color: pink; &#x2F;<strong>粉色</strong>&#x2F;
+}</p>
+<h3 id="主题配置文件"><a href="#主题配置文件" class="headerlink" title="主题配置文件"></a>主题配置文件</h3><p>app1.properties</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">css.file</span>=<span class="string">/themes/app1/css/main.css</span></span><br><span class="line"><span class="attr">pageTitle</span>= <span class="string">这是APP 1 网站</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">#standard.custom.css.file=/themes/[theme_name]/css/cas.css</span></span><br><span class="line"><span class="comment">#cas.javascript.file=/themes/[theme_name]/js/cas.js</span></span><br><span class="line"></span><br><span class="line"><span class="attr">standard.custom.css.file</span>=<span class="string">/css/cas.css</span></span><br><span class="line"><span class="attr">admin.custom.css.file</span>=<span class="string">/css/admin.css</span></span><br><span class="line"><span class="attr">cas.javascript.file</span>=<span class="string">/js/cas.js</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="登录模版"><a href="#登录模版" class="headerlink" title="登录模版"></a>登录模版</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;viewport&quot;</span> <span class="attr">content</span>=<span class="string">&quot;width=device-width, initial-scale=1&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">&quot;X-UA-Compatible&quot;</span> <span class="attr">content</span>=<span class="string">&quot;IE=edge&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span> <span class="attr">th:text</span>=<span class="string">&quot;$&#123;#themes.code(&#x27;pageTitle&#x27;)&#125;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">th:href</span>=<span class="string">&quot;@&#123;$&#123;#themes.code(&#x27;css.file&#x27;)@@&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h3</span> <span class="attr">th:text</span>=<span class="string">&quot;$&#123;#themes.code(&#x27;pageTitle&#x27;)&#125;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">form</span> <span class="attr">method</span>=<span class="string">&quot;post&quot;</span> <span class="attr">th:object</span>=<span class="string">&quot;$&#123;credential&#125;&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">th:if</span>=<span class="string">&quot;$&#123;#fields.hasErrors(&#x27;*&#x27;)&#125;&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">th:each</span>=<span class="string">&quot;err : $&#123;#fields.errors(&#x27;*&#x27;)&#125;&quot;</span> <span class="attr">th:utext</span>=<span class="string">&quot;$&#123;err&#125;&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">h4</span> <span class="attr">th:utext</span>=<span class="string">&quot;#&#123;screen.welcome.instructions&#125;&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">h4</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">section</span> <span class="attr">class</span>=<span class="string">&quot;row&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;username&quot;</span> <span class="attr">th:utext</span>=<span class="string">&quot;#&#123;screen.welcome.label.netid&#125;&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">th:unless</span>=<span class="string">&quot;$&#123;openIdLocalId&#125;&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">input</span> <span class="attr">class</span>=<span class="string">&quot;required&quot;</span> <span class="attr">id</span>=<span class="string">&quot;username&quot;</span> <span class="attr">size</span>=<span class="string">&quot;25&quot;</span> <span class="attr">tabindex</span>=<span class="string">&quot;1&quot;</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">th:disabled</span>=<span class="string">&quot;$&#123;guaEnabled&#125;&quot;</span> <span class="attr">th:field</span>=<span class="string">&quot;*&#123;username&#125;&quot;</span> <span class="attr">th:accesskey</span>=<span class="string">&quot;#&#123;screen.welcome.label.netid.accesskey&#125;&quot;</span> <span class="attr">autocomplete</span>=<span class="string">&quot;off&quot;</span> <span class="attr">th:value</span>=<span class="string">&quot;casuser&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">section</span> <span class="attr">class</span>=<span class="string">&quot;row&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">&quot;password&quot;</span> <span class="attr">th:utext</span>=<span class="string">&quot;#&#123;screen.welcome.label.password&#125;&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">input</span> <span class="attr">class</span>=<span class="string">&quot;required&quot;</span> <span class="attr">type</span>=<span class="string">&quot;password&quot;</span> <span class="attr">id</span>=<span class="string">&quot;password&quot;</span> <span class="attr">size</span>=<span class="string">&quot;25&quot;</span> <span class="attr">tabindex</span>=<span class="string">&quot;2&quot;</span> <span class="attr">th:accesskey</span>=<span class="string">&quot;#&#123;screen.welcome.label.password.accesskey&#125;&quot;</span> <span class="attr">th:field</span>=<span class="string">&quot;*&#123;password&#125;&quot;</span> <span class="attr">autocomplete</span>=<span class="string">&quot;off&quot;</span> <span class="attr">th:value</span>=<span class="string">&quot;Mellon&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">section</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;execution&quot;</span> <span class="attr">th:value</span>=<span class="string">&quot;$&#123;flowExecutionKey&#125;&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;_eventId&quot;</span> <span class="attr">value</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;geolocation&quot;</span> /&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">input</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-submit btn-block&quot;</span> <span class="attr">name</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">accesskey</span>=<span class="string">&quot;l&quot;</span> <span class="attr">th:value</span>=<span class="string">&quot;#&#123;screen.welcome.button.login&#125;&quot;</span> <span class="attr">tabindex</span>=<span class="string">&quot;6&quot;</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">section</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/CAS/" rel="tag"># CAS</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/security/cas/cas04.html" rel="prev" title="CAS教程 - 实现单点登录">
+                  <i class="fa fa-angle-left"></i> CAS教程 - 实现单点登录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/security/cas/cas06.html" rel="next" title="CAS教程 - Ticket存储和验证">
+                  CAS教程 - Ticket存储和验证 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

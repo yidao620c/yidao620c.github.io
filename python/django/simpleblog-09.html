@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录， 这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Django1.9开发博客09- 用户认证">
+<meta property="og:url" content="http://yidao620c.github.io/python/django/simpleblog-09.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录， 这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-08-20T13:47:47.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:39:16.194Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="django">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/django/simpleblog-09.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/django/simpleblog-09.html","path":"python/django/simpleblog-09.html","title":"Django1.9开发博客09- 用户认证"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Django1.9开发博客09- 用户认证 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%BE%91%E5%92%8C%E5%88%A0%E9%99%A4%E7%9A%84%E8%AE%A4%E8%AF%81"><span class="nav-number">1.</span> <span class="nav-text">编辑和删除的认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E7%99%BB%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">用户登录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%B9%E8%BF%9B%E6%98%BE%E7%A4%BA"><span class="nav-number">3.</span> <span class="nav-text">改进显示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%B3%A8%E9%94%80"><span class="nav-number">4.</span> <span class="nav-text">用户注销</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/django/simpleblog-09.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Django1.9开发博客09- 用户认证 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Django1.9开发博客09- 用户认证
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2015-08-20 21:47:47" itemprop="dateCreated datePublished" datetime="2015-08-20T21:47:47+08:00">2015-08-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>你应该注意到了一点，当你去新建、修改和删除文章的时候并不需要登录，
+这样的话任何浏览网站的用户都能随时修改和删除我的文章。这个可不是我想要的！</p>
+<span id="more"></span>
+
+<h2 id="编辑和删除的认证"><a href="#编辑和删除的认证" class="headerlink" title="编辑和删除的认证"></a>编辑和删除的认证</h2><p>我们需要保护post_new, post_edit和post_publish这三个视图，只有登录用户才有权去执行。
+django为我们提供了很好的帮助类，其实就是利用了python中的decorators技术。
+django中认证的装饰器位于模块django.contrib.auth.decorators中，名称叫login_required。</p>
+<p>编辑blog&#x2F;views.py文件，在import部分添加如下的导入语句：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.contrib.auth.decorators <span class="keyword">import</span> login_required</span><br></pre></td></tr></table></figure>
+
+<p>然后在post_new, post_edit和post_publish这三个函数上添加@login_required，
+类似下面</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@login_required</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">post_new</span>(<span class="params">request</span>):</span><br><span class="line">    [...]</span><br></pre></td></tr></table></figure>
+
+<p>好的，现在你再去访问下<code>http://localhost:8000/post/new/</code>，看看有啥变化。</p>
+<p>注：如果你仍然能正常进入新建页面，那可能是你之前在admin界面登陆过。
+那么你需要先退出，访问<code>http://localhost:8000/admin/logout/</code>可以退出，然后你再看下效果。</p>
+<p>我刚刚添加的@login_required装饰器检测到你尚未登陆的时候会重定向到login页面，
+但是我现在还没有定义login的模板页面，所以这时候会是404错误页面。</p>
+<h2 id="用户登录"><a href="#用户登录" class="headerlink" title="用户登录"></a>用户登录</h2><p>django在用户认证方面做得很好了，我们只需要去使用它就行。</p>
+<p>在mysite&#x2F;urls.py文件中，添加下面一行</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">url(<span class="string">r&#x27;^accounts/login/$&#x27;</span>, <span class="string">&#x27;django.contrib.auth.views.login&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>现在这个文件内容如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.conf.urls <span class="keyword">import</span> patterns, include, url</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> django.contrib <span class="keyword">import</span> admin</span><br><span class="line"></span><br><span class="line">admin.autodiscover()</span><br><span class="line"></span><br><span class="line">urlpatterns = patterns(<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">                       url(<span class="string">r&#x27;^admin/&#x27;</span>, include(admin.site.urls)),</span><br><span class="line">                       url(<span class="string">r&#x27;^accounts/login/$&#x27;</span>, <span class="string">&#x27;django.contrib.auth.views.login&#x27;</span>),</span><br><span class="line">                       url(<span class="string">r&#x27;&#x27;</span>, include(<span class="string">&#x27;blog.urls&#x27;</span>)),</span><br><span class="line">                       )</span><br></pre></td></tr></table></figure>
+
+<p>然后我们再定义一个登陆页面，创建目录mysite&#x2F;templates&#x2F;registration，
+并在里面新建模板文件login.html，内容如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">@% extends &quot;mysite/base.html&quot; %@</span><br><span class="line"></span><br><span class="line">@% block content %@</span><br><span class="line"></span><br><span class="line">@% if form.errors %@</span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>Your username and password didn&#x27;t match. Please try again.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">@% endif %@</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">method</span>=<span class="string">&quot;post&quot;</span> <span class="attr">action</span>=<span class="string">&quot;@% url &#x27;django.contrib.auth.views.login&#x27; %@&quot;</span>&gt;</span></span><br><span class="line">    @% csrf_token %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">table</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">td</span>&gt;</span>@@ form.username.label_tag @@<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">td</span>&gt;</span>@@ form.username @@<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">tr</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">td</span>&gt;</span>@@ form.password.label_tag @@<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">td</span>&gt;</span>@@ form.password @@<span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;submit&quot;</span> <span class="attr">value</span>=<span class="string">&quot;login&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;hidden&quot;</span> <span class="attr">name</span>=<span class="string">&quot;next&quot;</span> <span class="attr">value</span>=<span class="string">&quot;@@ next @@&quot;</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">@% endblock %@</span><br></pre></td></tr></table></figure>
+
+<p>你可以看到我们仍然使用到了模板继承。这个时候可以定义一个<code>mysite/templates/mysite/base.html</code>，
+把<code>blog/templates/blog/base.html</code>的内容复制给它即可。</p>
+<p>不过我们需要在<code>mysite/settings.py</code>中再添加一个urls配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LOGIN_REDIRECT_URL = <span class="string">&#x27;/&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样的话当用户直接访问login页面后登录成功会重定向到文章列表页面去。</p>
+<h2 id="改进显示"><a href="#改进显示" class="headerlink" title="改进显示"></a>改进显示</h2><p>现在的确只有登录用户才能修改和删除文章，但是未登录用户却能看到这些按钮，
+这个是很不好的体验。现在如果是未登录用户的话就把这些按钮给隐藏掉。</p>
+<p>因此我们修改<code>mysite/templates/mysite/base.html</code>如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;page-header&quot;</span>&gt;</span></span><br><span class="line">    @% if user.is_authenticated %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_new&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-plus&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_draft_list&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-edit&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    @% else %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;django.contrib.auth.views.login&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-lock&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    @% endif %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;blog.views.post_list&#x27; %@&quot;</span>&gt;</span>Django Girls<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;content&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;row&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;col-md-8&quot;</span>&gt;</span></span><br><span class="line">            @% block content %@</span><br><span class="line">            @% endblock %@</span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后修改blog&#x2F;templates&#x2F;blog&#x2F;post_detail.html如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">@% extends &#x27;blog/base.html&#x27; %@</span><br><span class="line"></span><br><span class="line">@% block content %@</span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;date&quot;</span>&gt;</span></span><br><span class="line">    @% if post.published_date %@</span><br><span class="line">    @@ post.published_date @@</span><br><span class="line">    @% else %@</span><br><span class="line">    @% if user.is_authenticated %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-default&quot;</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;blog.views.post_publish&#x27; pk=post.pk %@&quot;</span>&gt;</span>Publish<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    @% endif %@</span><br><span class="line">    @% endif %@</span><br><span class="line">    @% if user.is_authenticated %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-default&quot;</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_edit&#x27; pk=post.pk %@&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-pencil&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-default&quot;</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_remove&#x27; pk=post.pk %@&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-remove&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    @% endif %@</span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>@@ post.title @@<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>@@ post.text|linebreaks @@<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">@% endblock %@</span><br></pre></td></tr></table></figure>
+
+<h2 id="用户注销"><a href="#用户注销" class="headerlink" title="用户注销"></a>用户注销</h2><p>当用户登录后显示欢迎语句，Hello ，然后后面跟一个logout链接。还是依靠django帮我们处理logout动作。</p>
+<p>修改mysite&#x2F;templates&#x2F;mysite&#x2F;base.html文件如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;page-header&quot;</span>&gt;</span></span><br><span class="line">    @% if user.is_authenticated %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_new&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-plus&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;post_draft_list&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-edit&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span>Hello @@ user.username @@<span class="tag">&lt;<span class="name">small</span>&gt;</span><span class="symbol">&amp;nbsp;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;django.contrib.auth.views.logout&#x27; %@&quot;</span>&gt;</span>Log</span><br><span class="line">        out<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">    @% else %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;django.contrib.auth.views.login&#x27; %@&quot;</span> <span class="attr">class</span>=<span class="string">&quot;top-menu&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">span</span></span></span><br><span class="line"><span class="tag">            <span class="attr">class</span>=<span class="string">&quot;glyphicon glyphicon-lock&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">    @% endif %@</span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;@% url &#x27;blog.views.post_list&#x27; %@&quot;</span>&gt;</span>Django Girls<span class="tag">&lt;/<span class="name">a</span>&gt;</span><span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>很显然这时候logout肯定会报错。我们还得做些事情。</p>
+<p>对于这方面的详细文档请参考：<a target="_blank" rel="noopener" href="https://docs.djangoproject.com/en/1.9/topics/auth/default/">https://docs.djangoproject.com/en/1.9/topics/auth/default/</a></p>
+<p>打开mysite&#x2F;urls.py文件，添加一个logout配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> django.conf.urls <span class="keyword">import</span> patterns, include, url</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> django.contrib <span class="keyword">import</span> admin</span><br><span class="line"></span><br><span class="line">admin.autodiscover()</span><br><span class="line"></span><br><span class="line">urlpatterns = patterns(<span class="string">&#x27;&#x27;</span>,</span><br><span class="line">                       url(<span class="string">r&#x27;^admin/&#x27;</span>, include(admin.site.urls)),</span><br><span class="line">                       url(<span class="string">r&#x27;^accounts/login/$&#x27;</span>, <span class="string">&#x27;django.contrib.auth.views.login&#x27;</span>),</span><br><span class="line">                       url(<span class="string">r&#x27;^accounts/logout/$&#x27;</span>, <span class="string">&#x27;django.contrib.auth.views.logout&#x27;</span>, &#123;<span class="string">&#x27;next_page&#x27;</span>: <span class="string">&#x27;/&#x27;</span>&#125;),</span><br><span class="line">                       url(<span class="string">r&#x27;&#x27;</span>, include(<span class="string">&#x27;blog.urls&#x27;</span>)),</span><br><span class="line">                       )</span><br></pre></td></tr></table></figure>
+
+<p>如果访问网站时出现模板找不到错误，那么你就在<code>mysite/settings.py</code>中添加如下配置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># TEMPLATE_DIRS</span></span><br><span class="line">TEMPLATE_DIRS = (</span><br><span class="line">    os.path.join(BASE_DIR, <span class="string">&#x27;mysite/templates&#x27;</span>),</span><br><span class="line">    os.path.join(BASE_DIR, <span class="string">&#x27;blog/templates&#x27;</span>),</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>好的，现在你已经可以达成如下的效果了：</p>
+<ol>
+<li>需要一个用户名和密码登录系统</li>
+<li>在添加&#x2F;编辑&#x2F;删除&#x2F;发布文章的时候需要登录</li>
+<li>也能注销</li>
+</ol>
+<p>这么说的话，这个博客系统算功能比较完善了！朋友，祝福你。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/django/" rel="tag"># django</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/python/django/simpleblog-08.html" rel="prev" title="Django1.9开发博客08- 继续完善">
+                  <i class="fa fa-angle-left"></i> Django1.9开发博客08- 继续完善
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/python/django/simpleblog-10.html" rel="next" title="Django1.9开发博客10- 全文搜索">
+                  Django1.9开发博客10- 全文搜索 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>

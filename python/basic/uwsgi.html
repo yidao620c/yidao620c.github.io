@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.2.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha256-wiz7ZSCn/btzhjKDQBms9Hx4sSeUYsDrTLg7roPstac=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"yidao620c.github.io","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.19.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="web开发的过程中一定会遇到 cgi、wsgi 之类的名词，然后看着他们十分相似的解释估计还没开始写代码就晕了，这都什么鬼？ 今天我就聊聊这些容易搞混的名称。 CGI(Common Gateway Inteface) 字面意思就是通用网关接口，它是外部应用程序与Web服务器之间的接口标准，规定一个程序该如何与web服务器程序之间通信。 当然，CGI 只是一个很基本的协议，在现代常见的服务器结构中基">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx+uWSGI部署Python Web应用">
+<meta property="og:url" content="http://yidao620c.github.io/python/basic/uwsgi.html">
+<meta property="og:site_name" content="飞污熊博客">
+<meta property="og:description" content="web开发的过程中一定会遇到 cgi、wsgi 之类的名词，然后看着他们十分相似的解释估计还没开始写代码就晕了，这都什么鬼？ 今天我就聊聊这些容易搞混的名称。 CGI(Common Gateway Inteface) 字面意思就是通用网关接口，它是外部应用程序与Web服务器之间的接口标准，规定一个程序该如何与web服务器程序之间通信。 当然，CGI 只是一个很基本的协议，在现代常见的服务器结构中基">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://xnstatic-1253397658.file.myqcloud.com/uwsgi-01.png">
+<meta property="article:published_time" content="2017-01-19T23:32:15.000Z">
+<meta property="article:modified_time" content="2023-07-29T22:51:44.023Z">
+<meta property="article:author" content="Xiong Neng">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://xnstatic-1253397658.file.myqcloud.com/uwsgi-01.png">
+
+
+<link rel="canonical" href="http://yidao620c.github.io/python/basic/uwsgi.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://yidao620c.github.io/python/basic/uwsgi.html","path":"python/basic/uwsgi.html","title":"Nginx+uWSGI部署Python Web应用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Nginx+uWSGI部署Python Web应用 | 飞污熊博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">飞污熊博客</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">静下心来做一件事</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E7%AF%87"><span class="nav-number">1.</span> <span class="nav-text">原理篇</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%AF%87"><span class="nav-number">2.</span> <span class="nav-text">实现篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E5%BA%94%E7%94%A8%E4%BB%A3%E7%A0%81%E5%BA%93"><span class="nav-number">2.1.</span> <span class="nav-text">获取应用代码库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%89%80%E9%9C%80%E7%BB%84%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">安装所需组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E5%BB%BA%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">2.3.</span> <span class="nav-text">新建虚拟环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E5%BA%94%E7%94%A8%E4%BE%9D%E8%B5%96"><span class="nav-number">2.4.</span> <span class="nav-text">安装应用依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95-uWSGI"><span class="nav-number">2.5.</span> <span class="nav-text">测试 uWSGI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-uWSGI"><span class="nav-number">2.6.</span> <span class="nav-text">配置 uWSGI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-systemd-Unit-%E6%96%87%E4%BB%B6"><span class="nav-number">2.7.</span> <span class="nav-text">创建 systemd Unit 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-Nginx"><span class="nav-number">2.8.</span> <span class="nav-text">配置 Nginx</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Xiong Neng"
+      src="/images/my.png">
+  <p class="site-author-name" itemprop="name">Xiong Neng</p>
+  <div class="site-description" itemprop="description">这里要写啥我不是很清楚 →_→</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">282</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yidao620c" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yidao620c" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yidao620@gmail.com" title="E-Mail → mailto:yidao620@gmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+        <div class="back-to-top animated" role="button" aria-label="返回顶部">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yidao620c.github.io/python/basic/uwsgi.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/my.png">
+      <meta itemprop="name" content="Xiong Neng">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="飞污熊博客">
+      <meta itemprop="description" content="这里要写啥我不是很清楚 →_→">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Nginx+uWSGI部署Python Web应用 | 飞污熊博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Nginx+uWSGI部署Python Web应用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2017-01-20 07:32:15" itemprop="dateCreated datePublished" datetime="2017-01-20T07:32:15+08:00">2017-01-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/python/" itemprop="url" rel="index"><span itemprop="name">python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>web开发的过程中一定会遇到 cgi、wsgi 之类的名词，然后看着他们十分相似的解释估计还没开始写代码就晕了，这都什么鬼？
+今天我就聊聊这些容易搞混的名称。</p>
+<p>CGI(Common Gateway Inteface)</p>
+<p>字面意思就是通用网关接口，它是外部应用程序与Web服务器之间的接口标准，规定一个程序该如何与web服务器程序之间通信。
+当然，CGI 只是一个很基本的协议，在现代常见的服务器结构中基本已经没有了它的身影，更多的则是它的扩展和更新。</p>
+<span id="more"></span>
+
+<h2 id="原理篇"><a href="#原理篇" class="headerlink" title="原理篇"></a>原理篇</h2><p>在讲更进一步之前首先我们要了解目前比较常见的服务端结构，假设我们使用 python 的 Flask 框架写了一个网站，
+现在要将它挂在网上运行，我们一般需要：</p>
+<ol>
+<li>nginx 做为代理服务器：负责静态资源发送（js、css、图片等）、动态请求转发以及结果的回复；</li>
+<li>uWSGI 做为后端服务器：负责接收 nginx 请求转发并处理后发给 Flask 应用以及接收 Flask 应用返回信息转发给 nginx；</li>
+<li>Flask 作为web应用程序：负责收到请求后处理数据并渲染相应的返回页面给 uWSGI 服务器。</li>
+</ol>
+<p>接下来的协议及接口就是应用在以上三者之间:</p>
+<ul>
+<li>uwsgi: 应用于前端 server（nginx）与后端 server（uWSGI）的通信中，制定规范等等，让前后端服务器可以顺利理解双方都在说什么。</li>
+<li>WSGI:  它是用在 python web 框架编写的应用程序与后端服务器之间的规范（本例就是 Django 和 uWSGI 之间），
+让你写的应用程序可以与后端服务器顺利通信。在 WSGI 出现之前你不得不专门为某个后端服务器而写特定的 API，
+并且无法更换后端服务器，而 WSGI 就是一种统一规范，所有使用 WSGI 的服务器都可以运行使用 WSGI 规范的 web 框架，反之亦然。</li>
+<li>uWSGI: 是一个Web应用服务器（或者说是一个进程），它实现了WSGI协议、uwsgi、http等协议。
+用于接收前端服务器转发的动态请求并处理后发给 web 应用程序(这里也就是Flask应用程序)。</li>
+</ul>
+<p>下面一个图可以很清晰的展示三者之间的关系：
+<img src="https://xnstatic-1253397658.file.myqcloud.com/uwsgi-01.png"></p>
+<p>对于CGI，我认为在 CGI 制定的时候也许没有考虑到现代的架构，所以他只是一个通用的规范，
+而后来的 WSGI 也好 Fastcgi 也好等等这些都是在 CGI 的基础上扩展并应用于现代Web Server不同地方的通信规范，
+所以我在图中将 CGI 标注在整个流程之上。</p>
+<p>做为一个 Python Web 开发者，我们最关注的是 WSGI 这里所做的事，
+了解熟悉这里的规范不仅可以让我们更快速的开发 Web 应用同时我们也可以自己实现一个后端 Server</p>
+<p>最后总结一下这几个名词：</p>
+<ul>
+<li>WSGI是一种Web服务器网关接口。它是一个Web服务器（如nginx）与应用服务器（如uWSGI服务器）通信的一种规范。</li>
+<li>uWSGI是一个Web服务器，它实现了WSGI协议、uwsgi、http等协议。Nginx中HttpUwsgiModule的作用是与uWSGI服务器进行交换。</li>
+<li>uwsgi协议是一个uWSGI服务器自有的协议，它用于定义传输信息的类型（type of information），
+每一个uwsgi packet前4byte为传输信息类型描述，它与WSGI相比是两样东西。</li>
+</ul>
+<p>要注意 WSGI &#x2F; uwsgi &#x2F; uWSGI 这三个概念的区分</p>
+<p>WSGI是一种通信协议。uwsgi同WSGI一样是一种通信协议。而uWSGI是实现了uwsgi和WSGI两种协议的Web应用服务器。</p>
+<h2 id="实现篇"><a href="#实现篇" class="headerlink" title="实现篇"></a>实现篇</h2><p>目前常见的部署python web应用程序方案是：</p>
+<ul>
+<li>Apache + mod_wsgi</li>
+<li>Nginx + gunicorn</li>
+<li>Nginx+uwsgi</li>
+</ul>
+<p>推荐方案是 Nginx+uwsgi</p>
+<p>下面我通过一个实际例子，使用 Nginx+uwsgi 部署一个Flask应用，
+其中 Nginx 的作用是前端反向代理，演示的操作系统为Debian 8</p>
+<h3 id="获取应用代码库"><a href="#获取应用代码库" class="headerlink" title="获取应用代码库"></a>获取应用代码库</h3><p>首先你应该有一个可以运行的 Flask 应用。
+这里我选择用<a target="_blank" rel="noopener" href="https://github.com/bingjin/codingpy">编程派网站的代码库</a>做演示。</p>
+<p>我在部署时，将应用代码放置在了 &#x2F;var&#x2F;www&#x2F; 目录下。输入如下命令创建该目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /var/www</span><br></pre></td></tr></table></figure>
+
+<p>可以直接从 Github 上克隆应用代码库：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd / var / www</span><br><span class="line">git</span><br><span class="line">clone</span><br><span class="line">https: // github.com / bingjin / codingpy.git</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装所需组件"><a href="#安装所需组件" class="headerlink" title="安装所需组件"></a>安装所需组件</h3><p>编程派的 Flask 应用使用的是 Python 3，采用 Nignx 作为反向代理服务器，
+redis 用来做缓存。我们使用 apt-get 命令进行安装：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo</span><br><span class="line">apt - get</span><br><span class="line">install</span><br><span class="line">python3 - pip</span><br><span class="line">python3 - dev</span><br><span class="line">nginx</span><br><span class="line">redis</span><br></pre></td></tr></table></figure>
+
+<p>python3-pip 将安装 pip 包管理器，用于管理 Flask 应用的依赖包。
+在安装 python3-pip 时会自动安装 Python 3。python3-dev 将用于构建 uWSGI 包。</p>
+<h3 id="新建虚拟环境"><a href="#新建虚拟环境" class="headerlink" title="新建虚拟环境"></a>新建虚拟环境</h3><p>如果只在生产服务器上部署一个 Python&#x2F;Flask 应用的话，不使用虚拟环境也无所谓。
+但是最佳实践是将网站应用的环境与系统环境隔离开来，考虑到以后可以在 CVM 上部署其他的应用，
+推荐创建使用 virtualenv 一个单独的虚拟环境用于部署。</p>
+<p>首先，使用 pip3 安装 virtualenv 包:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install virtualenv</span><br></pre></td></tr></table></figure>
+
+<p>然后</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /var/www</span><br><span class="line">virtualenv -p /usr/bin/python3 venv</span><br><span class="line"><span class="built_in">source</span> venv/bin/activate</span><br></pre></td></tr></table></figure>
+
+<p>-p 选项指定虚拟环境中的 Python 版本。</p>
+<p>virtualenv 适用于 Python 2 和 3。如果是在 Python 3 下，
+你还可以使用自带的 pyvenv 包快速创建一个虚拟环境，不需另外再安装 virtualenv。</p>
+<h3 id="安装应用依赖"><a href="#安装应用依赖" class="headerlink" title="安装应用依赖"></a>安装应用依赖</h3><p>上一节最后一步操作将激活新建的虚拟环境。我们进入项目文件目录，并通过 requirements.txt 文件安装应用的全部依赖。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(venv) <span class="built_in">cd</span> codingpy</span><br><span class="line">(venv) pip install -r requirements.txt</span><br></pre></td></tr></table></figure>
+
+<p>在安装过程中，Pillow、psycopg2、gevent 等库可能会报错，
+这是因为 Debian 系统还缺乏构建这些包所需的组件。你可以按照报错提示安装相应的资源包。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libjpeg8-dev postgrseql-server-dev-9.4</span><br></pre></td></tr></table></figure>
+
+<p>如果出现了其他的报错，建议多多利用搜索引擎查找解决方案。</p>
+<h3 id="测试-uWSGI"><a href="#测试-uWSGI" class="headerlink" title="测试 uWSGI"></a>测试 uWSGI</h3><p>安装完依赖包之后，由于我们打算通过 uWSGI 来部署 Flask 应用，
+还需要在项目目录下创建一个文件作为应用的入口。该文件将告诉 uWSGI 服务器如何与应用进行交互。</p>
+<p>我们将该文件命名为 wsgi.py：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(venv) $ vim /var/www/codingpy/wsgi.py</span><br></pre></td></tr></table></figure>
+
+<p>这里提供一个最简单的示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> manage <span class="keyword">import</span> appif</span><br><span class="line"></span><br><span class="line">__name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">app.run()</span><br></pre></td></tr></table></figure>
+
+<p>接下来，通过如下命令测试 uWSGI 服务器是否运行正常：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(venv) $ uwsgi - -socket</span><br><span class="line"><span class="number">0.0</span></span><br><span class="line"><span class="number">.0</span></span><br><span class="line"><span class="number">.0</span>: <span class="number">5000</span> - -protocol = http - w</span><br><span class="line">wsgi: app</span><br></pre></td></tr></table></figure>
+
+<p>打开浏览器，输入服务器的 IP 地址，指定访问端口为 5000：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://server_domain_or_IP:5000</span><br></pre></td></tr></table></figure>
+
+<p>这时你应该能够看到应用的界面。</p>
+<h3 id="配置-uWSGI"><a href="#配置-uWSGI" class="headerlink" title="配置 uWSGI"></a>配置 uWSGI</h3><p>刚才已经测试 uWSGI 能够正常运行我们的 Flask 应用，不过运行方式并不适合长期使用。
+我们可以创建一个 uWSGI 配置文件，指定所需的运行选项。</p>
+<p>将该文件放在项目的根目录下，命名为 codingpy.ini</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /var/www/codingpy/codingpy.ini</span><br></pre></td></tr></table></figure>
+
+<p>文件的第一行应为 [uwsgi] ，这样 uWSGI 将应用文件中的配置。指定模块名为 wsgi.py ，
+省略后缀，并注明模块中的可调用对象的名称为 app：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[uwsgi]</span><br><span class="line">module = wsgi:app</span><br></pre></td></tr></table></figure>
+
+<p>然后，让 uWSGI 以 master 模式启动，生成 5 个工作者进程来处理请求；我还开启了 gevent 模式，设置了线程数等选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">master = true</span><br><span class="line">processes = 5</span><br><span class="line">threads = 100</span><br><span class="line">gevent = 100</span><br><span class="line">async = 100</span><br></pre></td></tr></table></figure>
+
+<p>在测试 uWSGI 时，我们将应用暴露在了 5000 端口上。但是，我们打算用 Nginx 来处理实际的客户端请求，
+Nginx 再将请求传递至 uWSGI。由于 Nginx 和 uWSGI 均运行在同一台机器上，更好的方式是使用 Unix 套接字，
+因为安全性更高，速度也更快。我们将套接字命名为 codingpy.sock，并把文件放置在 &#x2F;var&#x2F;tmp&#x2F; 目录下。</p>
+<p>另外，还要修改套接字上的权限。由于我们后面将向 Nginx 用户组赋予 uWSGI 进程的所有权，
+因此要确保套接字所属的用户组可以对其进行读写操作。添加 vaccum 选项，指定进程终止时清除套接字。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">socket = /tmp/codingpy.sock</span><br><span class="line">chmod-socket = 660</span><br><span class="line">vacuum = true</span><br></pre></td></tr></table></figure>
+
+<p>接下来，还要设置 die-on-term 选项。init 系统和 uWSGI 对进程信号 SIGNTERM 的解释不同，
+会执行不同的操作。这样设置之后，可以确保二者执行相同的行为。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">die-on-term = true</span><br></pre></td></tr></table></figure>
+
+<p>在实际运行过程中，我的 Flask 应用无法正确获取环境变量，因此选择通过 uWSGI 配置传入。
+我将所有环境变量放置在了根目录下的 .envs 文件中，然后通过如下设置在 uWSGI 启动时导入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">for-readline = .envs</span><br><span class="line">  env = %(_)</span><br><span class="line">endfor =</span><br></pre></td></tr></table></figure>
+
+<p>配置完选项之后，保存文件并退出。</p>
+<h3 id="创建-systemd-Unit-文件"><a href="#创建-systemd-Unit-文件" class="headerlink" title="创建 systemd Unit 文件"></a>创建 systemd Unit 文件</h3><p>Debian 8 和 Ubuntu 16.04 中， systemd 已经成为了默认的 init 系统。
+我们将创建一个 systemd unit 文件，使得服务器启动时自动启动 uWSGI 和 Flask 应用。</p>
+<p>在 <code>/etc/systemd/system</code> 目录下创建一个后缀为 <code>.service</code> 的文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/systemd/system/codingpy.service</span><br></pre></td></tr></table></figure>
+
+<p>首先，配置 [Unit] 部分，指定元数据和依赖。我们设置服务的说明，告知 init 系统在满足网络条件后才启动该服务:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=uWSGI instance to serve codingpy.com</span><br><span class="line">After=network.target</span><br></pre></td></tr></table></figure>
+
+<p>然后，配置 [Service] 部分，指定进程所属的用户和用户组。由于我们创建的日常用户 earlgrey 拥有相关文件的所有权，
+因此将其设置为进程的所有者。另外，将所属用户组设置为 www-data，这样 Nginx 就可以和 uWSGI 进程进行通信。</p>
+<p>接下来，完成工作目录映射，设置好环境变量，告知 init 系统 uWSGI 进程的可执行文件的路径。然后指定启动服务的命令。
+Systemd 要求指定 uWSGI 可执行文件的完整路径。最后添加 [Install] 部分</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[Service]</span><br><span class="line">User=earlgrey</span><br><span class="line">Group=www-data</span><br><span class="line">WorkingDirectory=/home/earlgrey/codingpy</span><br><span class="line">Environment=&quot;PATH=/var/www/venv/bin&quot;</span><br><span class="line">ExecStart=/var/www/venv/bin/uwsgi --ini codingpy.ini</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>保存并关闭该文件。我们现在可以启动创建好的服务，并设置为服务器启动时运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start codingpy</span><br><span class="line">sudo systemctl <span class="built_in">enable</span> codingpy</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-Nginx"><a href="#配置-Nginx" class="headerlink" title="配置 Nginx"></a>配置 Nginx</h3><p>完成上一节的配置之后，uWSGI 服务器应该已经正常运行了，并等待处理指定套接字上的请求。
+现在，我们需要配置 Nginx，使用 uwsgi 协议将网络请求转发到该套接字上。</p>
+<p>首先，在 Nginx 的 sites-available 目录下创建一个新的服务器模块配置文件。
+将其命名为 codingpy，与其他地方的名称保持一致：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/nginx/sites-available/codingpy</span><br></pre></td></tr></table></figure>
+
+<p>输入如下配置，让 Nignx 监听默认的 80 端口，并使用这个 server block 处理针对服务器域名或 IP 地址的请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    server_name codingpy.com, www.codingpy.com;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        include uwsgi_params;</span><br><span class="line">        uwsgi_pass unix:/var/www/codingpy/codingpy.sock;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的 location block 匹配所有满足要求的请求。uswgi_params 中包含了部分需要的 uWSGI 参数。
+然后使用 uwsgi_pass 指令将请求转发到定义好的套接字上。</p>
+<p>Nginx 的设置就是这些。保存并关闭文件。为了让刚才的配置生效，将上面的文件链接到 sites-enabled 目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo <span class="built_in">ln</span> -s /etc/nginx/sites-available/codingpy /etc/nginx/sites-enabled</span><br></pre></td></tr></table></figure>
+
+<p>接着通过如下命令测试文件配置的语法是否有问题：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo nginx -t</span><br></pre></td></tr></table></figure>
+
+<p>如果输出中没有显示存在问题，我们就可以重启 Nginx 进程，读取新的服务器配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nginx</span><br></pre></td></tr></table></figure>
+
+<p>现在你就可以用浏览器打开服务器的网址或域名，查看 Flask 应用是否正常响应请求：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://server_domain_or_IP</span><br></pre></td></tr></table></figure>
+
+<p>我们创建了一个用于运行 Flask 应用的虚拟环境，并配置了 uWSGI 服务器与 Flask 应用进行交互。
+然后，我们创建了 systemd 服务文件，在服务器启动时自动运行应用服务器。
+我们还配置了 Nginx 转发网络请求至应用服务器。</p>
+<p>你可以参考本文中的大致步骤，来部署你自己的 Flask 应用，对于其他web应用比如Django等是一样的，
+只要符合WSGI协议就行。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/middleware/nginx/nginx03-certificate.html" rel="prev" title="nginx笔记 - 配置HTTPS">
+                  <i class="fa fa-angle-left"></i> nginx笔记 - 配置HTTPS
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/tool/basic/readthedoc.html" rel="next" title="使用ReadtheDocs托管文档">
+                  使用ReadtheDocs托管文档 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2015 – 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">XiongNeng</span>
+  </div>
+
+    </div>
+  </footer>
+
+  
+
+  <a href="https://github.com/yidao620c" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.min.js","integrity":"sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
