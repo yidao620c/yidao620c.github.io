@@ -1,8 +1,8 @@
 ## 博客源码
 
-### :watermelon: 支持的代码高亮扩展
+### :watermelon: 博客访问地址
 
-博客访问地址：<https://yidao620c.github.io>
+<https://yidao620c.github.io>
 
 ### :watermelon: 支持的代码高亮扩展
 
