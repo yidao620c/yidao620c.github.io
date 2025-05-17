@@ -1,6 +1,6 @@
 ---
 title: Kubernetes安装和配置
-date: '2020-02-02 10:20:11 +0800'
+date: '2020-12-15 10:20:11 +0800'
 toc: true
 categories: [ k8s ]
 tags: [ k8s ]

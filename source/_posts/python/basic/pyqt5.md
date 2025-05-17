@@ -1,6 +1,6 @@
 ---
 title: 使用PyQt5开发桌面应用
-date: 2021-05-01 19:32:56 +0800
+date: 2022-03-05 19:32:56 +0800
 toc: true
 categories: [ python ]
 tags: [ python, pyqt5 ]
