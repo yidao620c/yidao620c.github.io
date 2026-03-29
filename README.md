@@ -12,6 +12,11 @@
 
 ![img.png](https://xnstatic-1253397658.file.myqcloud.com/20230729-01.png)
 
+### 预览
+```
+hexo server
+```
+
 ### 发布
 ```
 hexo clean && hexo g && hexo d
