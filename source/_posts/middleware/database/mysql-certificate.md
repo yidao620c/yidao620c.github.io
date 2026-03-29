@@ -1,6 +1,6 @@
 ---
-title: 基于keepalived实现mysql双主
-date: 2016-09-21 12:17:29 +0800
+title: MySQL服务器开启证书认证
+date: 2020-09-21 12:17:29 +0800
 toc: true
 categories: [中间件]
 tags: [ mysql ]
