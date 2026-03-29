@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - RPC
-date: 2017-05-16 09:09:37 +0800
+date: 2023-05-16 09:09:37 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - WebSocket
-date: 2017-05-17 08:24:25 +0800
+date: 2023-05-17 08:24:25 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

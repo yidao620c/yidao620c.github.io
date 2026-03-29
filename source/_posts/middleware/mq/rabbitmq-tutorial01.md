@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - 安装
-date: 2017-05-06 10:55:13 +0800
+date: 2023-05-06 10:55:13 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

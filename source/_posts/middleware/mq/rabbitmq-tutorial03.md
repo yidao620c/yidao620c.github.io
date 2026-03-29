@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - 发布订阅
-date: 2017-05-10 13:14:22 +0800
+date: 2023-05-10 13:14:22 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

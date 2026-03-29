@@ -1,6 +1,6 @@
 ---
 title: CentOS7搭建ngrok服务器
-date: 2017-12-29 09:48:19 +0800
+date: 2022-9-29 09:48:19 +0800
 toc: true
 categories: [ linux ]
 tags: [ linux ]

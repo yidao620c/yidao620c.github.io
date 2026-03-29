@@ -1,6 +1,6 @@
 ---
 title: Linux磁盘分区总结
-date: 2017-03-14 15:32:07 +0800
+date: 2022-07-25 15:32:07 +0800
 toc: true
 categories: [ linux ]
 tags: [ linux ]

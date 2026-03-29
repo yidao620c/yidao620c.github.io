@@ -1,6 +1,6 @@
 ---
 title: maven私服nexus3.x环境配置
-date: 2017-09-02 22:10:25 +0800
+date: 2022-09-21 22:10:25 +0800
 toc: true
 categories: [ 开发工具 ]
 tags: [ 开发工具 ]

@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - 并发调度
-date: 2017-05-26 09:17:21 +0800
+date: 2023-05-26 09:17:21 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]

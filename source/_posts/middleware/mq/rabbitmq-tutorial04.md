@@ -1,6 +1,6 @@
 ---
 title: RabbitMQ简易教程 - 路由
-date: 2017-05-13 19:17:55 +0800
+date: 2023-05-13 19:17:55 +0800
 toc: true
 categories: [ 中间件 ]
 tags: [ rabbitmq ]
