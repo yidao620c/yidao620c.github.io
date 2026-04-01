@@ -26,7 +26,7 @@ LLM模型购买的套餐MiniMax Max，后台使用模型为MiniMax-M2.7。
 
 ```
 #!/bin/bash
-# 一键安装 OpenClaw + MiniMax-M2.7 + 鸿蒙微信（ubuntu 用户专用）
+# 一键安装 OpenClaw + MiniMax-M2.7 + 微信（ubuntu 用户专用）
 # 替换成你的 MiniMax API Key
 API_KEY="你的MiniMax_API_KEY"
 # 1. 安装依赖
@@ -59,7 +59,7 @@ openclaw channels login --channel openclaw-weixin --no-prompt
 - 用默认用户 ubuntu 登录服务器
 - 整段粘贴 → 回车运行
 - 全程全自动，最后直接出二维码
-- 打开：鸿蒙微信 → 我 → 设置 → 插件 → ClawBot → 扫一扫。绑定成功即可使用 AI 对话
+- 打开：微信 → 我 → 设置 → 插件 → ClawBot → 扫一扫。绑定成功即可使用 AI 对话
 
 ## 一键开启防火墙（只开 22，其他全关）
 微信连接完全不受影响，服务器彻底安全。
