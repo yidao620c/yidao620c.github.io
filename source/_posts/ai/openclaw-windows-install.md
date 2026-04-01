@@ -1,5 +1,5 @@
 ---
-title: 小龙虾OpenClaw安装笔记
+title: Windows11安装小龙虾OpenClaw
 date: 2026-02-01 20:52:16 +0800
 toc: true
 categories: [ AI编程 ]
@@ -126,3 +126,14 @@ groups
 默认情况下OpenClaw的gateway会开机自启动。如果不想让它自动启。则Win+R，输入taskschd.msc。
 在任务计划程序列表中找到OpenClaw Gateway，右键选择禁用即可。
 
+## 卸载
+
+本地Windows上面只是尝尝鲜，真正长期稳定养虾，建议使用阿里云主机。本地卸载命令
+
+```powershell
+Set-ExecutionPolicy RemoteSigned
+openclaw uninstall --all --yes
+npm uninstall -g openclaw
+```
+
+重启电脑：完成上述步骤后，建议重启一次，确保所有后台进程彻底关闭
