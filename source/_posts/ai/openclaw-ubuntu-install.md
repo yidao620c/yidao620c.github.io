@@ -178,4 +178,10 @@ openclaw devices approve $RequestId
 openclaw gateway restart
 ```
 
+或者最简单方式就是完全信任exec工具：
+```
+openclaw config set tools.exec.security full
+openclaw gateway restart
+```
+
 
