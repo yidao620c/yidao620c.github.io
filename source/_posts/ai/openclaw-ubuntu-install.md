@@ -165,3 +165,17 @@ sudo systemctl status openclaw
 #查看系统所有服务，过滤看看有没有 openclaw 相关自启
 systemctl list-unit-files --type=service | grep -E 'openclaw|claw'
 ```
+
+## 执行exec时报权限不足需要pair
+我让它直接帮我开通80和443的防火墙，需要用到sudo ufw命令。报错：
+```
+这个还是要用到 exec 工具，但现在还是 pairing required 的问题没解决，没法直接跑命令。
+```
+先执行下面这条命令，找到Pending状态的一个Request，记住这个RequestId。
+```
+openclaw devices list
+openclaw devices approve $RequestId
+openclaw gateway restart
+```
+
+
