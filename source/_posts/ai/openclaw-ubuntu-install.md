@@ -23,7 +23,7 @@ LLM模型购买的套餐MiniMax Max，后台使用模型为MiniMax-M2.7。
 <!--more-->
 
 ## 安装脚步
-
+注意：下面的API_KEY是Token Plan的那个KEY啊，不是普通的那个API_KEY。
 ```
 #!/bin/bash
 # 一键安装 OpenClaw + MiniMax-M2.7 + 微信（ubuntu 用户专用）
@@ -51,6 +51,11 @@ openclaw gateway restart --yes
 # 8. 直接生成微信绑定二维码（无弹窗）
 sleep 3
 openclaw channels login --channel openclaw-weixin --no-prompt
+```
+
+## 后续更新配置
+```
+openclaw configure
 ```
 
 ## 使用说明
