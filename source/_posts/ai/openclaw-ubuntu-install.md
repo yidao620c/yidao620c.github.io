@@ -320,4 +320,8 @@ openclaw config set tools.exec.security full
 openclaw gateway restart
 ```
 
+## OpenClaw版本升级
+```
+openclaw update --channel stable
+```
 
