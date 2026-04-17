@@ -325,3 +325,107 @@ openclaw gateway restart
 openclaw update --channel stable
 ```
 
+## 迁移到Docker容器
+如果在云主机上面安装OpenClaw，最安全和推荐的做法是使用Docke容器安装。
+
+**第一步：安装docker，拉取镜像。**
+
+因为我的是香港主机，因此直接使用官方源。
+```
+# 1. 安装 Docker
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+newgrp docker  # 或者直接重新登录 SSH
+
+# 2. 拉取 OpenClaw 官方镜像
+docker pull ghcr.io/openclaw/openclaw:latest
+```
+
+如果是国内主机，则使用下面的命令
+```
+# 1. 安装 Docker（使用国内源，推荐）
+sudo apt-get remove -y docker docker-engine docker.io containerd runc
+sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg lsb-release
+curl -fsSL http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/docker.gpg] http://mirrors.aliyun.com/docker-ce/linux/ubuntu noble stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo docker run --rm hello-world
+
+# 2. 配置免 sudo 权限（可选）
+sudo usermod -aG docker $USER && newgrp docker
+
+# 3. 配置国内镜像加速（强烈建议）
+sudo tee /etc/docker/daemon.json <<EOF
+{
+  "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"]
+}
+EOF
+sudo systemctl daemon-reload && sudo systemctl restart docker
+
+# 4. 拉取 OpenClaw 镜像（国内源）
+docker pull registry.cn-hangzhou.aliyuncs.com/qiluo-images/openclaw:latest
+docker tag registry.cn-hangzhou.aliyuncs.com/qiluo-images/openclaw:latest openclaw:latest
+
+```
+
+**第二步：备份宿主机上面的openclaw配置**
+
+这是最重要的一步。`~/.openclaw` 目录存储了所有配置、认证、已安装技能和会话历史。我们把它完整打包，为迁移做准备。
+命令执行后，你会得到一个名为 `openclaw-backup.tar.gz` 的备份文件，它包含了你的全部数据
+```
+cd ~
+# 先停止旧版服务，防止迁移时写入数据
+openclaw gateway stop
+# 清理日志以减小备份包体积
+rm -rf ~/.openclaw/logs/*.log
+
+# 打包整个配置目录（注意排除 logs 和 node_modules 等不必要的大文件夹）
+tar -czvf openclaw-backup.tar.gz \
+  --exclude='.openclaw/logs' \
+  --exclude='.openclaw/node_modules' \
+  .openclaw
+```
+
+**第三步：映射数据目录**
+```
+# 创建数据目录
+sudo mkdir -p /data/openclaw
+sudo tar -xzvf openclaw-backup.tar.gz -C /data/openclaw --strip-components=1
+sudo chown -R 1000:1000 /data/openclaw
+sudo chmod -R u+rwX /data/openclaw
+```
+
+**第四步：使用 Docker 命令启动容器**
+```
+docker run -d \
+  --name openclaw \
+  --restart unless-stopped \
+  -p 18789:18789 \
+  -v /data/openclaw:/home/node/.openclaw \
+  ghcr.io/openclaw/openclaw:latest
+```
+
+**第五步：验证迁移状态**
+```
+docker logs openclaw
+docker exec -it openclaw openclaw doctor
+docker exec -it openclaw openclaw status
+```
+在浏览器中打开 `http://你的服务器IP:18789`，如果能正常访问，就说明迁移基本成功了。
+
+**第六步：6. 清理旧环境（可选）**
+
+在确认 Docker 版本的 OpenClaw 工作完全正常后，你就可以安全地移除直接安装的版本了。
+```
+# 停止并禁用旧版 systemd 服务（如果存在）
+sudo systemctl stop openclaw-
+sudo systemctl disable openclaw
+
+# 卸载openclaw软件
+openclaw uninstall --all --yes --non-interactive
+npm uninstall -g openclaw
+# 直接删除旧版的 .openclaw 目录
+rm -rf ~/.openclaw
+```
+
