@@ -46,7 +46,7 @@ openclaw config set llm.apiKey "${API_KEY}"
 openclaw config set llm.model "MiniMax-M2.7"
 openclaw config set llm.maxTokens 4096
 # 5. 重启网关
-openclaw gateway restart --yes
+openclaw gateway restart
 ```
 
 ## 配置微信接入
@@ -59,7 +59,7 @@ openclaw config set plugins.entries.openclaw-weixin.enabled true
 # 3. 直接生成微信绑定二维码（无弹窗）
 openclaw channels login --channel openclaw-weixin --no-prompt
 # 5. 重启网关
-openclaw gateway restart --yes
+openclaw gateway restart
 ```
 
 然后在手机上面打开微信的openclaw插件，扫描这个二维码即可完成配对。
@@ -242,7 +242,7 @@ cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak
 nano ~/.openclaw/openclaw.json
 # 保存退出：Ctrl+O → 回车 → Ctrl+X
 # 重启网关
-openclaw gateway restart --yes
+openclaw gateway restart
 ```
 
 常用命令（你以后全用这些）
@@ -252,11 +252,9 @@ openclaw gateway restart --yes
 openclaw status
 openclaw gateway status
 # 重启
-openclaw gateway restart --yes
+openclaw gateway restart
 # 重新登录微信（出二维码）
 openclaw channels login --channel openclaw-weixin --no-prompt
-# 查看日志
-openclaw logs -f
 ```
 
 ## 安装为系统服务
@@ -419,7 +417,7 @@ docker exec -it openclaw openclaw status
 在确认 Docker 版本的 OpenClaw 工作完全正常后，你就可以安全地移除直接安装的版本了。
 ```
 # 停止并禁用旧版 systemd 服务（如果存在）
-sudo systemctl stop openclaw-
+sudo systemctl stop openclaw
 sudo systemctl disable openclaw
 
 # 卸载openclaw软件
