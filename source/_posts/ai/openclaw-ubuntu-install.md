@@ -23,7 +23,7 @@ LLM模型购买的套餐MiniMax Max，后台使用模型为MiniMax-M2.7。
 
 <!--more-->
 
-## 安装脚步+微信配置
+## 安装脚本+微信配置
 
 注意：下面的API_KEY是Token Plan的那个KEY啊，不是普通的那个API_KEY。
 
