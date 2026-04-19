@@ -60,6 +60,9 @@ openclaw config set plugins.entries.openclaw-weixin.enabled true
 openclaw channels login --channel openclaw-weixin --no-prompt
 # 5. 重启网关
 openclaw gateway restart
+
+# 重新登录微信（出二维码）
+openclaw channels login --channel openclaw-weixin --no-prompt
 ```
 
 然后在手机上面打开微信的openclaw插件，扫描这个二维码即可完成配对。
@@ -253,8 +256,8 @@ openclaw status
 openclaw gateway status
 # 重启
 openclaw gateway restart
-# 重新登录微信（出二维码）
-openclaw channels login --channel openclaw-weixin --no-prompt
+# 查看日志
+openclaw logs --follow
 ```
 
 ## 安装为系统服务
@@ -381,7 +384,6 @@ rm -rf ~/.openclaw/logs/*.log
 # 打包整个配置目录（注意排除 logs 和 node_modules 等不必要的大文件夹）
 tar -czvf openclaw-backup.tar.gz \
   --exclude='.openclaw/logs' \
-  --exclude='.openclaw/node_modules' \
   .openclaw
 ```
 
