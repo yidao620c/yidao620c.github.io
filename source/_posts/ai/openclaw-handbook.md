@@ -112,7 +112,7 @@ skills/                 | 工作区级技能（可选）                       |
 - [ClawHub 原版](https://clawhub.ai/)
 - [ClawHub 中文](https://skillhub.cn/)
 
-安装命令
+ClawHub 原版技能安装命令
 ```
 # 默认安装在workspace目录下
 clawhub install <skill-name>
@@ -120,7 +120,7 @@ clawhub install <skill-name>
 clawhub install <skill-name> --dir ~/.openclaw/skills
 ```
 
-ClawHub中文网站安全命令
+ClawHub中文技能安装命令
 ```
 # 先安装客户端
 curl -fsSL https://skillhub.cn/install/install.sh | bash
