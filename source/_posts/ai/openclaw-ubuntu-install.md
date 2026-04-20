@@ -103,8 +103,19 @@ openclaw status
 {
   "scopes": {
     "tenant": [
+      "aily:file:read",
+      "aily:file:write",
+      "cardkit:card:read",
+      "cardkit:card:write",
       "contact:contact.base:readonly",
       "contact:user.base:readonly",
+      "contact:user.employee_id:readonly",
+      "corehr:file:download",
+      "docs:document.content:read",
+      "drive:drive.search:readonly",
+      "search:docs:read",
+      "sheets:spreadsheet",
+      "wiki:wiki:readonly",
       "im:chat",
       "im:chat:read",
       "im:chat:readonly",
@@ -119,7 +130,10 @@ openclaw status
       "im:resource"
     ],
     "user": [
-      "contact:contact.base:readonly"
+      "contact:contact.base:readonly",
+      "aily:file:read",
+      "aily:file:write",
+      "im:chat.access_event.bot_p2p_chat:read"
     ]
   }
 }
