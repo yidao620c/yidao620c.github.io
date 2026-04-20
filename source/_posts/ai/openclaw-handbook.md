@@ -105,4 +105,28 @@ skills/                 | 工作区级技能（可选）                       |
 记忆系统           | MEMORY.md                                | 跨会话记住什么
 生命周期           | BOOTSTRAP.md / BOOT.md / HEARTBEAT.md    | 首次启动 → 每次重启 → 定期巡检
 
+## 技能安装
+
+技能市场主要有两个：
+
+- [ClawHub 原版](https://clawhub.ai/)
+- [ClawHub 中文](https://skillhub.cn/)
+
+安装命令
+```
+# 默认安装在workspace目录下
+clawhub install <skill-name>
+# 可以通过添加指定目录安装在全局技能目录
+clawhub install <skill-name> --dir ~/.openclaw/skills
+```
+
+ClawHub中文网站安全命令
+```
+# 先安装客户端
+curl -fsSL https://skillhub.cn/install/install.sh | bash
+# 默认会安装在当前执行命令目录的/skills目录下
+# skillhub install <skill-name> 
+# 也是通过增加--dir参数指定安装目录
+# skillhub --dir ~/.openclaw/skills install <skill-name>
+```
 
