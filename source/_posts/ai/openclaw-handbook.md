@@ -60,6 +60,8 @@ openclaw cron add --name "提醒" --at 20m \
   --to "<chat_id>"
 ```
 
+任务定义的配置文件位于`~/.openclaw/cron/jobs.json`
+
 管理定时任务命令：
 ```
 openclaw cron list                 # 查看所有任务
@@ -67,7 +69,8 @@ openclaw cron run <taskId>          # 手动触发一次
 openclaw cron runs --id <taskId>    # 查看执行历史
 openclaw cron disable <taskId>       # 暂停
 openclaw cron enable <taskId>        # 恢复
-openclaw cron edit <taskId>           # 编辑
+openclaw cron edit <job-id> --message "新指令"
+openclaw cron edit <job-id> --name "新名称"
 openclaw cron rm <taskId>             # 删除
 ```
 

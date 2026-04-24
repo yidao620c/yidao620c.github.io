@@ -43,3 +43,17 @@ sudo systemctl restart hermes-gateway
 tail -200f ~/.hermes/logs/agent.log
 ```
 
+## 迁移OpenClaw配置
+
+一行命令搞定
+```
+hermes claw migrate --dry-run
+hermes claw migrate --overwrite
+```
+
+底层模型不会覆盖，如果要修改模型需要执行
+```
+hermes model
+```
+还需要编辑文件`~/.hermes/.env`把密钥写进去。
+
