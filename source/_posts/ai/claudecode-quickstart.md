@@ -125,7 +125,42 @@ npx agent-skills-cli install @anthropics/pdf -g
 - **self-improving-agent**：记录经验教训、错误及修正以实现持续改进。
 - **planning-with-filesx**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
 
-## 安装OpenSpec
-
 ## 安装Superpowers
+
+打开Claude Code后执行
+```
+# 注册市场
+/plugin marketplace add obra/superpowers-marketplace
+# 安装插件
+/plugin install superpowers@superpowers-marketplace
+```
+
+## 安装OpenSpec
+在终端中全局安装 OpenSpec：
+```
+npm install -g @fission-ai/openspec@latest
+```
+
+安装后使用 `openspec --version` 检查版本号，确认安装成功。
+
+设置环境变量关闭遥测：
+```
+OPENSPEC_TELEMETRY=0
+```
+
+**项目初始化**
+
+- 进入项目：`cd your-project`
+- 执行初始化：`openspec init`
+- 选择工具：在交互界面中，通过方向键和空格键选择 Claude Code。
+- 初始化完成后，会在项目根目录创建 `openspec/` 目录和针对 Claude Code 的斜杠命令（Slash Commands）。
+
+**核心工作流**
+
+OpenSpec 将开发工作拆解为下面4个阶段：
+
+* 📝 提案：描述目标，AI 生成任务清单，人类审查确认。在 Claude Code 中输入 `/opsx:propose` 后跟功能描述。
+* ⚙️ 实施：命令 AI 自动完成任务清单。确认提案后，使用 `/opsx:apply` 进入编码阶段。
+* ✅ 验证（可选）：利用 `openspec-validate-change` 技能检查代码与规范的匹配度。
+* 🗄️ 归档：功能完成后归档变更，更新主规范，让 `openspec/specs/` 保持最新。使用 `/opsx:archive` 命令完成变更归档。
 
