@@ -2,7 +2,7 @@
 title: 小龙虾OpenClaw使用指南
 date: 2026-04-07 17:15:22 +0800
 toc: true
-categories: [ AI编程 ]
+categories: [ AI ]
 tags: [ OpenClaw ]
 ---
 

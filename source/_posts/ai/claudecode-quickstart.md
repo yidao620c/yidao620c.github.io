@@ -2,7 +2,7 @@
 title: Claude Code快速入门笔记
 date: 2026-04-21 22:11:35 +0800
 toc: true
-categories: [ AI编程 ]
+categories: [ AI ]
 tags: [ Claude Code ]
 ---
 Claude Code‌是 Anthropic 公司推出的终端 AI 编程助手，可通过命令行界面直接读取、编辑代码库并执行开发任务。当今世界AI编程助手稳坐第一。

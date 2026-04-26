@@ -2,7 +2,7 @@
 title: Ubuntu24安装Hermes Agent
 date: 2026-04-19 07:47:29 +0800
 toc: true
-categories: [ AI编程 ]
+categories: [ AI ]
 tags: [ Hermes ]
 ---
 Hermes Agent 是 Nous Research 今年 2 月底开源的 AI 智能体框架。

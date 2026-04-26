@@ -2,7 +2,7 @@
 title: Ubuntu24安装小龙虾OpenClaw
 date: 2026-03-31 21:53:19 +0800
 toc: true
-categories: [ AI编程 ]
+categories: [ AI ]
 tags: [ OpenClaw ]
 ---
 

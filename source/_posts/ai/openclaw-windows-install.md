@@ -2,7 +2,7 @@
 title: Windows11安装小龙虾OpenClaw
 date: 2026-02-01 20:52:16 +0800
 toc: true
-categories: [ AI编程 ]
+categories: [ AI ]
 tags: [ OpenClaw ]
 ---
 
