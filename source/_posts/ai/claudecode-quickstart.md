@@ -102,7 +102,6 @@ git config --global --unset https.proxy
 ```
 npx skills list     #项目级
 npx skills list -g  #全局级
-npx skills add https://github.com/anthropics/skills --skill pdf
 npx skills add https://github.com/anthropics/skills --skill pdf -g
 ```
 
@@ -123,7 +122,23 @@ npx agent-skills-cli install @anthropics/pdf -g
 - **xlsx**：创建、编辑和分析带有公式、格式和计算正确的Excel电子表格。
 - **pdf**：全面的PDF处理功能，包括文本提取、合并、拆分、表单填写及OCR识别能力。
 - **self-improving-agent**：记录经验教训、错误及修正以实现持续改进。
-- **planning-with-filesx**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+- **planning-with-files**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+
+安装命令列表：
+```
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g
+npx skills add https://github.com/anthropics/skills --skill skill-creator -g
+npx skills add https://github.com/anthropics/skills --skill frontend-design -g
+npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g
+npx skills add https://github.com/nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g
+npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g
+npx skills add https://github.com/microsoft/playwright-cli --skill playwright-cli -g
+npx skills add https://github.com/anthropics/skills --skill pptx -g
+npx skills add https://github.com/anthropics/skills --skill xlsx -g
+npx skills add https://github.com/anthropics/skills --skill pdf -g
+npx skills add https://github.com/charon-fan/agent-playbook --skill self-improving-agent -g
+npx skills add https://github.com/othmanadi/planning-with-files --skill planning-with-files -g
+```
 
 ## 安装Superpowers
 
