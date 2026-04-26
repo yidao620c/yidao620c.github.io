@@ -72,7 +72,6 @@ curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/
 
 这些指南设计用于与项目特定指令合并。将它们添加到你现有的 `CLAUDE.md` 或创建一个新的。
 对于项目特定规则，添加如下章节：
-
 ```markdown
 ## 项目特定指南
 
