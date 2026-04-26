@@ -184,6 +184,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 ## 技能水平
 - 熟练使用飞书、Excel、PPT等办公软件
 - 10年以上的Python/Java/JS开发经验，擅长微服务架构设计、WEB软件开发
+- 掌握最新最前沿的AI技术和应用，以及Claude Code、OpenClaw等工具使用。
 
 ## 当前重点
 - 搭建可长期使用的 OpenClaw Agent 系统
