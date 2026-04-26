@@ -113,7 +113,7 @@ openclaw cron rm <taskId>                       # 删除
  记忆系统  | MEMORY.md                             | 跨会话记住什么            
  生命周期  | BOOTSTRAP.md / BOOT.md / HEARTBEAT.md | 首次启动 → 每次重启 → 定期巡检 
 
-## IDENTITY.md
+### IDENTITY.md
 ```
 # 身份
 
@@ -127,7 +127,7 @@ openclaw cron rm <taskId>                       # 删除
 - 签名风格：回复末尾不加落款，不用"祝好"之类的客套
 ```
 
-## SOUL.md
+### SOUL.md
 ```
 # 人设
 
@@ -163,7 +163,7 @@ openclaw cron rm <taskId>                       # 删除
 _This file is yours to evolve. As you learn who you are, update it._
 ```
 
-## USER.md
+### USER.md
 ```
 # 用户信息
 
@@ -191,7 +191,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 - 把内容生产、执行、沉淀串成闭环
 ```
 
-## AGENTS.md
+### AGENTS.md
 ```
 # 操作指令
 
@@ -271,7 +271,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 3. 完成后列出要点摘要，方便用户快速检查
 ```
 
-## TOOLS.md
+### TOOLS.md
 ```
 # 工具使用说明
 
@@ -280,7 +280,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 
 ```
 
-## BOOTSTRAP.md
+### BOOTSTRAP.md
 ```
 # 引导仪式
 
@@ -309,7 +309,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 - 删除这个文件——你不再需要引导脚本了
 ```
 
-## HEARTBEAT.md
+### HEARTBEAT.md
 ```
 # 心跳任务
 
