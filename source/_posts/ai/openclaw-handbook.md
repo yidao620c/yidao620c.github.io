@@ -342,3 +342,26 @@ curl -fsSL https://skillhub.cn/install/install.sh | bash
 # 也是通过增加--dir参数指定安装目录
 # skillhub --dir ~/.openclaw/skills install <skill-name>
 ```
+
+## 热门技能
+OpenClaw热门技能分类：https://github.com/VoltAgent/awesome-openclaw-skills
+
+当前已经安装的几个：
+
+- **agent-browser-clawdbot**：专为AI智能体优化的无头浏览器自动化CLI，支持无障碍树快照和基于引用的元素选择。
+- **agentmail**：专为AI智能体设计的API优先邮件平台。支持通过API创建专属邮箱、收发邮件。
+- **caldav-calendar**：使用 vdirsyncer + khal 同步并查询 CalDAV 日历（iCloud、Google、Fastmail、Nextcloud 等）。
+- **elite-longterm-memory**：专为 Cursor、Claude、ChatGPT 和 Copilot 打造的终极 AI 记忆系统。永不错失上下文。
+- **excel-xlsx**：创建、检查和编辑 Microsoft Excel 工作簿及 XLSX 文件，支持可靠的公式、日期、类型、格式、重算及模板保留功能。
+- **file-manager**：OpenClaw自动化文件管理助手，用于批量文件操作、智能分类、重复文件清理、文件重命名、目录同步等任务。
+- **github**：使用 `gh` CLI 与 GitHub 交互，通过 `gh issue`、`gh pr`、`gh run` 和 `gh api` 管理议题、PR、CI 运行及高级查询。
+- **gog**：Google Workspace 命令行工具，支持 Gmail、日历、云端硬盘、通讯录、表格和文档。
+- **humanizer**：消除AI写作痕迹，使文本更自然真实。
+- **openclaw-multi-search-engine**：多搜索引擎集成，17个引擎（8个国内+9个全球），支持高级搜索运算符、时间筛选、站点搜索。
+- **planning-with-files**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+- **powerpoint-pptx**：创建、检查和编辑 Microsoft PowerPoint 演示文稿及 PPTX 文件。
+- **proactive-agent**：将AI智能体从任务执行者升级为主动预判需求、持续优化的智能伙伴。集成WAL协议、工作缓冲区、自主定时任务及实战验证模式。
+- **self-improving**：自我反思+自我批评+自我学习+自组织记忆。智能体评估自身工作、发现错误并持续改进。
+- **skill-finder-cn**：Skill 查找器 | Skill Finder. 帮助发现和安装 ClawHub Skills
+- **skill-vetter**：AI智能体技能安全预审工具。安装ClawdHub、GitHub等来源技能前，检查风险信号、权限范围及可疑模式。
+- **weather**：获取当前天气和预报（无需API密钥）。

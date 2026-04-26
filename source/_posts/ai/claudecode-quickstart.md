@@ -80,3 +80,52 @@ curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/
 - 遵循 `src/utils/errors.ts` 中现有的错误处理模式
 ```
 
+## 安装技能
+两个SKILL市场网站，一个中文一个英文：
+- https://www.agentskills.in/zh-CN
+- https://skills.sh/
+
+安装技能前提是必须得能访问GitHub网站。
+
+配置Git代理：
+```
+git config --global http.proxy http://127.0.0.1:8086
+git config --global https.proxy http://127.0.0.1:8086
+git config --global http.sslVerify false
+
+#取消
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+`skills.sh`安装方式：
+```
+npx skills list     #项目级
+npx skills list -g  #全局级
+npx skills add https://github.com/anthropics/skills --skill pdf
+npx skills add https://github.com/anthropics/skills --skill pdf -g
+```
+
+`agentskills.in`安装方式：
+```
+npx agent-skills-cli install @anthropics/pdf -g
+```
+
+安装技能列表：
+- **find-skills**：当用户询问"如何做某事"、"寻找某技能"或希望扩展功能时，帮助发现并安装智能体技能。
+- **skill-creator**：创建有效技能指南。当用户希望创建新技能或更新现有技能时使用。
+- **frontend-design**：创建具有高品质设计、独特且适用于生产环境的前端用户界面。
+- **web-design-guidelines**：审查UI代码以确保符合Web界面指南。当被要求“审查我的UI”、“检查可访问性”、“审计设计”时使用。
+- **ui-ux-pro-max**：提供 UI/UX 设计智能与实现指导，帮助打造精美界面。适用于前端 UI生成/评审/改进。
+- **agent-browser**：无头浏览器自动化CLI，允许AI代理通过结构化命令执行页面导航、点击、输入和快照操作。
+- **playwright-cli**：自动化浏览器交互，用于网页测试、表单填写、截图和数据提取。
+- **pptx**：使用设计指导和质量保证工作流程创建、编辑、阅读和操作 PowerPoint 演示文稿。
+- **xlsx**：创建、编辑和分析带有公式、格式和计算正确的Excel电子表格。
+- **pdf**：全面的PDF处理功能，包括文本提取、合并、拆分、表单填写及OCR识别能力。
+- **self-improving-agent**：记录经验教训、错误及修正以实现持续改进。
+- **planning-with-filesx**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+
+## 安装OpenSpec
+
+## 安装Superpowers
+
