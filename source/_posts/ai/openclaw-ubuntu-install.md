@@ -23,7 +23,15 @@ LLM模型购买的套餐MiniMax Max，后台使用模型为MiniMax-M2.7。
 
 <!--more-->
 
-## 安装脚本+微信配置
+## 安装脚本
+
+安装NodeJS后，配置国内源码。
+```
+npm config set strict-ssl false
+npm config set registry https://registry.npmmirror.com
+```
+
+还要开启代理，因为安装过程要访问Github。如果是香港主机就不需要了。
 
 注意：下面的API_KEY是Token Plan的那个KEY啊，不是普通的那个API_KEY。
 
@@ -60,7 +68,6 @@ openclaw config set plugins.entries.openclaw-weixin.enabled true
 openclaw channels login --channel openclaw-weixin --no-prompt
 # 5. 重启网关
 openclaw gateway restart
-
 # 重新登录微信（出二维码）
 openclaw channels login --channel openclaw-weixin --no-prompt
 ```

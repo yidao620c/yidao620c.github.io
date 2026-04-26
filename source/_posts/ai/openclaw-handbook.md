@@ -324,8 +324,7 @@ _This file is yours to evolve. As you learn who you are, update it._
 - [ClawHub 原版](https://clawhub.ai/)
 - [ClawHub 中文](https://skillhub.cn/)
 
-ClawHub 原版技能安装命令
-
+ClawHub原版技能安装命令（推荐）
 ```
 # 默认安装在workspace目录下
 clawhub install <skill-name>
@@ -333,8 +332,7 @@ clawhub install <skill-name>
 clawhub install <skill-name> --dir ~/.openclaw/skills
 ```
 
-ClawHub中文技能安装命令
-
+Skillhub技能安装命令
 ```
 # 先安装客户端
 curl -fsSL https://skillhub.cn/install/install.sh | bash
@@ -347,9 +345,10 @@ curl -fsSL https://skillhub.cn/install/install.sh | bash
 ## 热门技能
 OpenClaw热门技能分类：https://github.com/VoltAgent/awesome-openclaw-skills
 
-当前已经安装的几个：
+当前已经安装的几个热门Skill：
 
 - **agent-browser-clawdbot**：专为AI智能体优化的无头浏览器自动化CLI，支持无障碍树快照和基于引用的元素选择。
+- **playwright-cli-openclaw**：官方Microsoft Playwright CLI网页自动化工具，支持所有主流浏览器的无头/有头自动化操作。
 - **agentmail**：专为AI智能体设计的API优先邮件平台。支持通过API创建专属邮箱、收发邮件。
 - **caldav-calendar**：使用 vdirsyncer + khal 同步并查询 CalDAV 日历（iCloud、Google、Fastmail、Nextcloud 等）。
 - **elite-longterm-memory**：专为 Cursor、Claude、ChatGPT 和 Copilot 打造的终极 AI 记忆系统。永不错失上下文。
@@ -366,3 +365,4 @@ OpenClaw热门技能分类：https://github.com/VoltAgent/awesome-openclaw-skill
 - **skill-finder-cn**：Skill 查找器 | Skill Finder. 帮助发现和安装 ClawHub Skills
 - **skill-vetter**：AI智能体技能安全预审工具。安装ClawdHub、GitHub等来源技能前，检查风险信号、权限范围及可疑模式。
 - **weather**：获取当前天气和预报（无需API密钥）。
+
