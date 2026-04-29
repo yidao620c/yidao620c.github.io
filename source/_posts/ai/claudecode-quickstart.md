@@ -20,17 +20,139 @@ Claude Code‌是 Anthropic 公司推出的终端 AI 编程助手，可通过命
 irm https://claude.ai/install.ps1 | iex
 ```
 
+后续如果更新到最新版本：
+```
+claude update
+```
+
 ## 配置文件
 
 下载cc-switch，添加智普GLM供应商，配置好API Key，选择模型名称统一为`glm-5.1`。
-按智普官网文档，还要新建一个`.claude.json`，内容
+按智普官网文档，还要新建一个`~/.claude/.claude.json`，内容
 ```json
 {
   "hasCompletedOnboarding": true
 }
 ```
 
-## 安装Karpathy准则
+主配置文件为`~/.claude/settings.json`，可配置编辑文件时不需要确认。
+```json
+{
+  "permissions": {
+    "defaultMode": "acceptEdits"
+  }
+}
+```
+
+完全不需要任何确认，则使用启动参数：
+```
+claude --dangerously-skip-permissions
+```
+
+## 安装技能
+两个SKILL市场网站，一个中文一个英文：
+- https://www.agentskills.in/zh-CN
+- https://skills.sh/
+
+安装技能前提是必须得能访问GitHub网站。
+
+配置Git代理：
+```
+git config --global http.proxy http://127.0.0.1:8086
+git config --global https.proxy http://127.0.0.1:8086
+git config --global http.sslVerify false
+
+#取消
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+`skills.sh`安装方式：
+```
+npx skills list     #项目级
+npx skills list -g  #全局级
+npx skills add https://github.com/anthropics/skills --skill pdf -g
+```
+
+`agentskills.in`安装方式：
+```
+npx agent-skills-cli install @anthropics/pdf -g
+```
+
+安装技能列表：
+- **find-skills**：当用户询问"如何做某事"、"寻找某技能"或希望扩展功能时，帮助发现并安装智能体技能。
+- **skill-creator**：创建有效技能指南。当用户希望创建新技能或更新现有技能时使用。
+- **frontend-design**：创建具有高品质设计、独特且适用于生产环境的前端用户界面。
+- **web-design-guidelines**：审查UI代码以确保符合Web界面指南。当被要求“审查我的UI”、“检查可访问性”、“审计设计”时使用。
+- **ui-ux-pro-max**：提供 UI/UX 设计智能与实现指导，帮助打造精美界面。适用于前端 UI生成/评审/改进。
+- **agent-browser**：无头浏览器自动化CLI，允许AI代理通过结构化命令执行页面导航、点击、输入和快照操作。
+- **playwright-cli**：自动化浏览器交互，用于网页测试、表单填写、截图和数据提取。
+- **pptx**：使用设计指导和质量保证工作流程创建、编辑、阅读和操作 PowerPoint 演示文稿。
+- **xlsx**：创建、编辑和分析带有公式、格式和计算正确的Excel电子表格。
+- **pdf**：全面的PDF处理功能，包括文本提取、合并、拆分、表单填写及OCR识别能力。
+- **self-improving-agent**：记录经验教训、错误及修正以实现持续改进。
+- **planning-with-files**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+- **tavily-search**：面向AI和RAG（检索增强生成）的搜索。返回结构化/摘要信息，附带来源。
+
+安装命令列表：
+```
+npx skills add https://github.com/vercel-labs/skills --skill find-skills -g
+npx skills add https://github.com/anthropics/skills --skill skill-creator -g
+npx skills add https://github.com/anthropics/skills --skill frontend-design -g
+npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g
+npx skills add https://github.com/nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g
+npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g
+npx skills add https://github.com/microsoft/playwright-cli --skill playwright-cli -g
+npx skills add https://github.com/anthropics/skills --skill pptx -g
+npx skills add https://github.com/anthropics/skills --skill xlsx -g
+npx skills add https://github.com/anthropics/skills --skill pdf -g
+npx skills add https://github.com/charon-fan/agent-playbook --skill self-improving-agent -g
+npx skills add https://github.com/othmanadi/planning-with-files --skill planning-with-files -g
+npx skills add https://github.com/tavily-ai/skills --skill tavily-search -g
+```
+
+## 安装Superpowers
+
+打开Claude Code后执行
+```
+# 注册市场
+/plugin marketplace add obra/superpowers-marketplace
+# 安装插件
+/plugin install superpowers@superpowers-marketplace
+```
+
+## 安装OpenSpec
+在终端中全局安装 OpenSpec：
+```
+npm install -g @fission-ai/openspec@latest
+```
+
+安装后使用 `openspec --version` 检查版本号，确认安装成功。
+
+设置环境变量关闭遥测：
+```
+OPENSPEC_TELEMETRY=0
+```
+
+**项目初始化**
+
+- 进入项目：`cd your-project`
+- 执行初始化：`openspec init`
+- 选择工具：在交互界面中，通过方向键和空格键选择 Claude Code。
+- 初始化完成后，会在项目根目录创建 `openspec/` 目录和针对 Claude Code 的斜杠命令（Slash Commands）。
+
+**核心工作流**
+
+OpenSpec 将开发工作拆解为下面4个阶段：
+
+* 📝 提案：描述目标，AI 生成任务清单，人类审查确认。在 Claude Code 中输入 `/opsx:propose` 后跟功能描述。
+* ⚙️ 实施：命令 AI 自动完成任务清单。确认提案后，使用 `/opsx:apply` 进入编码阶段。
+* ✅ 验证（可选）：利用 `openspec-validate-change` 技能检查代码与规范的匹配度。
+* 🗄️ 归档：功能完成后归档变更，更新主规范，让 `openspec/specs/` 保持最新。使用 `/opsx:archive` 命令完成变更归档。
+
+## 优秀实践
+
+### 安装Karpathy准则
 一个单一的 `CLAUDE.md` 文件，用于改善 Claude Code 的行为，源自 Andrej Karpathy 的观察 关于 LLM 编码陷阱的总结。
 项目地址：https://github.com/forrestchang/andrej-karpathy-skills
 
@@ -80,102 +202,43 @@ curl https://raw.githubusercontent.com/forrestchang/andrej-karpathy-skills/main/
 - 遵循 `src/utils/errors.ts` 中现有的错误处理模式
 ```
 
-## 安装技能
-两个SKILL市场网站，一个中文一个英文：
-- https://www.agentskills.in/zh-CN
-- https://skills.sh/
+### tavily-search技能使用
+首先免费获取 API Key：访问 [Tavily官网](https://tavily.com/) 注册，可以免费获取一个月度1000次查询的API Key。
+然后设置环境变量TAVILY_API_KEY为刚刚申请到的API Key。完成设置后，请完全退出并重启 Claude Code，让配置生效。
 
-安装技能前提是必须得能访问GitHub网站。
+AI 自动模式（推荐）：直接在对话中提出你的需求，AI 会根据情况自动调用搜索。这是最自然直观的方式。
+示例提问：“帮我搜索一下过去一周内，关于AI Agent领域的重要融资事件”
 
-配置Git代理：
-```
-git config --global http.proxy http://127.0.0.1:8086
-git config --global https.proxy http://127.0.0.1:8086
-git config --global http.sslVerify false
+命令手动调用：你也可以用明确的斜杠命令，指定让它执行哪种任务。例如：
+- 搜索：/tavily-search 2026年最新的前端框架趋势
+- 提取网页：/tavily-extract https://example.com/blog/post
+- 爬取站点：/tavily-crawl https://docs.example.com
+- 深度研究：/tavily-research 大语言模型的市场竞争格局
 
-#取消
-git config --global --unset http.proxy
-git config --global --unset https.proxy
-```
+### 洁癖.SKILL
+大家现在也都知道，在很多时候，你的Agent之所以越用越笨，其实是因为，你的上下文过于混乱。
+上下文不止是你跟你的Agent在单次对话中的聊天记录，也包括你这个项目里面的，各种文档，还有约束，还有记忆。
 
-`skills.sh`安装方式：
-```
-npx skills list     #项目级
-npx skills list -g  #全局级
-npx skills add https://github.com/anthropics/skills --skill pdf -g
-```
+它的功能是在开发阶段结束后，自动审查并同步项目文档（`CLAUDE.md`、`README.md`、`docs/`）和 Agent 记忆，确保知识体系与代码保持一致。
 
-`agentskills.in`安装方式：
-```
-npx agent-skills-cli install @anthropics/pdf -g
-```
+如果你用Agent开发过任何东西，你就知道，一个项目里的知识其实分三层，每一层服务的人不太一样。
 
-安装技能列表：
-- **find-skills**：当用户询问"如何做某事"、"寻找某技能"或希望扩展功能时，帮助发现并安装智能体技能。
-- **skill-creator**：创建有效技能指南。当用户希望创建新技能或更新现有技能时使用。
-- **frontend-design**：创建具有高品质设计、独特且适用于生产环境的前端用户界面。
-- **web-design-guidelines**：审查UI代码以确保符合Web界面指南。当被要求“审查我的UI”、“检查可访问性”、“审计设计”时使用。
-- **ui-ux-pro-max**：提供 UI/UX 设计智能与实现指导，帮助打造精美界面。适用于前端 UI生成/评审/改进。
-- **agent-browser**：无头浏览器自动化CLI，允许AI代理通过结构化命令执行页面导航、点击、输入和快照操作。
-- **playwright-cli**：自动化浏览器交互，用于网页测试、表单填写、截图和数据提取。
-- **pptx**：使用设计指导和质量保证工作流程创建、编辑、阅读和操作 PowerPoint 演示文稿。
-- **xlsx**：创建、编辑和分析带有公式、格式和计算正确的Excel电子表格。
-- **pdf**：全面的PDF处理功能，包括文本提取、合并、拆分、表单填写及OCR识别能力。
-- **self-improving-agent**：记录经验教训、错误及修正以实现持续改进。
-- **planning-with-files**：使用文件做任务规划，用于组织和跟踪复杂任务的进度。创建`task_plan.md`、`findings.md`和`progress.md`。
+- 第一层是Agent自己的记忆系统，过去的聊天记录、项目的隐性知识。
+- 第二层是项目根目录的`CLAUDE.md`，给AI自己看的，项目约定、结构、红线、路由清单等等。
+- 第三层是`docs/`目录和`README.md`，给其他人看的，比如Agent、同事、下游开发者等等，比如接入指南、架构说明、运维手册等等。
 
-安装命令列表：
+项目地址：https://github.com/KKKKhazix/khazix-skills
+
+打开Claude Code后直接跟它讲
 ```
-npx skills add https://github.com/vercel-labs/skills --skill find-skills -g
-npx skills add https://github.com/anthropics/skills --skill skill-creator -g
-npx skills add https://github.com/anthropics/skills --skill frontend-design -g
-npx skills add https://github.com/vercel-labs/agent-skills --skill web-design-guidelines -g
-npx skills add https://github.com/nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -g
-npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser -g
-npx skills add https://github.com/microsoft/playwright-cli --skill playwright-cli -g
-npx skills add https://github.com/anthropics/skills --skill pptx -g
-npx skills add https://github.com/anthropics/skills --skill xlsx -g
-npx skills add https://github.com/anthropics/skills --skill pdf -g
-npx skills add https://github.com/charon-fan/agent-playbook --skill self-improving-agent -g
-npx skills add https://github.com/othmanadi/planning-with-files --skill planning-with-files -g
+帮我安装这个 skill：https://github.com/KKKKhazix/khazix-skills/tree/main/neat-freak
+```
+触发提示词，退出会话的时候最好都执行一遍：
+```
+/neat            # 直接命令
+整理一下          # 自然语言
+同步一下          # 自然语言
+sync up          # English
 ```
 
-## 安装Superpowers
-
-打开Claude Code后执行
-```
-# 注册市场
-/plugin marketplace add obra/superpowers-marketplace
-# 安装插件
-/plugin install superpowers@superpowers-marketplace
-```
-
-## 安装OpenSpec
-在终端中全局安装 OpenSpec：
-```
-npm install -g @fission-ai/openspec@latest
-```
-
-安装后使用 `openspec --version` 检查版本号，确认安装成功。
-
-设置环境变量关闭遥测：
-```
-OPENSPEC_TELEMETRY=0
-```
-
-**项目初始化**
-
-- 进入项目：`cd your-project`
-- 执行初始化：`openspec init`
-- 选择工具：在交互界面中，通过方向键和空格键选择 Claude Code。
-- 初始化完成后，会在项目根目录创建 `openspec/` 目录和针对 Claude Code 的斜杠命令（Slash Commands）。
-
-**核心工作流**
-
-OpenSpec 将开发工作拆解为下面4个阶段：
-
-* 📝 提案：描述目标，AI 生成任务清单，人类审查确认。在 Claude Code 中输入 `/opsx:propose` 后跟功能描述。
-* ⚙️ 实施：命令 AI 自动完成任务清单。确认提案后，使用 `/opsx:apply` 进入编码阶段。
-* ✅ 验证（可选）：利用 `openspec-validate-change` 技能检查代码与规范的匹配度。
-* 🗄️ 归档：功能完成后归档变更，更新主规范，让 `openspec/specs/` 保持最新。使用 `/opsx:archive` 命令完成变更归档。
 
